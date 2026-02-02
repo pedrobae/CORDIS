@@ -126,7 +126,7 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                         importProvider.isImporting ? null : _pickPdfFile();
                       },
                       text: AppLocalizations.of(context)!.selectPDFFile,
-                      isDarkButton: true,
+                      isDark: true,
                     ),
 
                     const SizedBox(height: 16),
@@ -254,8 +254,9 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                         // Navigate to parsing screen
                         navigationProvider.push(
                           EditCipherScreen(
+                            cipherID: -1,
                             versionType: VersionType.import,
-                            versionId: -1,
+                            versionID: -1,
                           ),
                         );
                       },

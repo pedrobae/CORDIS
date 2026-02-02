@@ -45,6 +45,7 @@ class LocalScheduleRepository {
     for (var map in maps) {
       final scheduleId = map['id'] as int;
       final roles = await getRolesForSchedule(scheduleId);
+
       schedules.add(Schedule.fromSqlite(map, roles));
     }
 
@@ -63,6 +64,7 @@ class LocalScheduleRepository {
 
     final scheduleId = maps.first['id'] as int;
     final roles = await getRolesForSchedule(scheduleId);
+
     return Schedule.fromSqlite(maps.first, roles);
   }
 
@@ -101,5 +103,26 @@ class LocalScheduleRepository {
   }
 
   // ===== UPDATE =====
+  Future<void> updateSchedule(Schedule schedule) async {
+    final db = await _databaseHelper.database;
+    await db.update(
+      'schedule',
+      schedule.toSqlite(),
+      where: 'id = ?',
+      whereArgs: [schedule.id],
+    );
+  }
+
   // ===== DELETE =====
+  Future<void> deleteSchedule(int id) async {
+    final db = await _databaseHelper.database;
+    await db.delete('schedule', where: 'id = ?', whereArgs: [id]);
+  }
+
+  /// Deletes a role and its member associations from the database.
+  Future<void> deleteRole(int roleId) async {
+    final db = await _databaseHelper.database;
+    await db.delete('role', where: 'id = ?', whereArgs: [roleId]);
+    await db.delete('role_member', where: 'role_id = ?', whereArgs: [roleId]);
+  }
 }

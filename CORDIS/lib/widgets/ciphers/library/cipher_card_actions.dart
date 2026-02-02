@@ -2,7 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/cipher_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/widgets/delete_confirmation.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ class CipherCardActionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<NavigationProvider, CipherProvider, VersionProvider>(
+    return Consumer3<NavigationProvider, CipherProvider, LocalVersionProvider>(
       builder:
           (
             context,
@@ -32,7 +32,6 @@ class CipherCardActionsSheet extends StatelessWidget {
             final textTheme = Theme.of(context).textTheme;
             final colorScheme = Theme.of(context).colorScheme;
 
-            // Your widget build logic here
             return Container(
               padding: const EdgeInsets.all(16.0),
               color: colorScheme.surface,
@@ -72,9 +71,9 @@ class CipherCardActionsSheet extends StatelessWidget {
                       navigationProvider.push(
                         EditCipherScreen(
                           versionType: versionType,
-                          cipherId: cipherId,
+                          cipherID: cipherId,
                           isEnabled: versionType == VersionType.local,
-                          versionId: versionProvider
+                          versionID: versionProvider
                               .getIdOfOldestVersionOfCipher(cipherId),
                         ),
                         showAppBar: false,
@@ -111,18 +110,24 @@ class CipherCardActionsSheet extends StatelessWidget {
                   // DELETE CIPHER
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pop(); // Close the bottom sheet
-                      showDialog(
+                      showModalBottomSheet(
                         context: context,
-                        builder: (dialogContext) => DeleteConfirmationDialog(
-                          itemType: AppLocalizations.of(context)!.cipher,
-                          isDangerous: true,
-                          onConfirm: () async {
-                            await cipherProvider.deleteCipher(cipherId);
-                            versionProvider.clearVersionsOfCipher(cipherId);
-                            navigationProvider.pop();
-                          },
-                        ),
+                        isScrollControlled: true,
+                        builder: (context) {
+                          return BottomSheet(
+                            shape: LinearBorder(),
+                            onClosing: () {},
+                            builder: (context) {
+                              return DeleteConfirmationSheet(
+                                itemType: AppLocalizations.of(context)!.cipher,
+                                onConfirm: () {
+                                  cipherProvider.deleteCipher(cipherId);
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            },
+                          );
+                        },
                       );
                     },
                     child: Container(

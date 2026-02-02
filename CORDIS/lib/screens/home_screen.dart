@@ -1,9 +1,15 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/cipher/version.dart';
+import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/schedule_provider.dart';
-import 'package:cordis/screens/playlist/create_playlist.dart';
-import 'package:cordis/widgets/ciphers/library/create_cipher_sheet.dart';
+import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
+import 'package:cordis/providers/schedule/local_schedule_provider.dart';
+import 'package:cordis/providers/selection_provider.dart';
+import 'package:cordis/screens/cipher/edit_cipher.dart';
+import 'package:cordis/screens/playlist/edit_playlist.dart';
+import 'package:cordis/screens/schedule/create_new_schedule.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/schedule/library/cloud_schedule_card.dart';
 import 'package:cordis/widgets/schedule/library/schedule_card.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -27,176 +33,329 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _loadData() async {
-    await context.read<ScheduleProvider>().loadLocalSchedules();
+    await context.read<LocalScheduleProvider>().loadSchedules();
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Consumer3<MyAuthProvider, ScheduleProvider, NavigationProvider>(
-        builder:
-            (
-              context,
-              authProvider,
-              scheduleProvider,
-              navigationProvider,
-              child,
-            ) {
-              final theme = Theme.of(context);
-              final colorScheme = theme.colorScheme;
-              final locale = Localizations.localeOf(context);
+      child:
+          Consumer5<
+            MyAuthProvider,
+            LocalScheduleProvider,
+            CloudScheduleProvider,
+            NavigationProvider,
+            SelectionProvider
+          >(
+            builder:
+                (
+                  context,
+                  authProvider,
+                  localScheduleProvider,
+                  cloudScheduleProvider,
+                  navigationProvider,
+                  selectionProvider,
+                  child,
+                ) {
+                  final textTheme = Theme.of(context).textTheme;
+                  final colorScheme = Theme.of(context).colorScheme;
+                  final locale = Localizations.localeOf(context);
 
-              if (authProvider.isLoading) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text(AppLocalizations.of(context)!.loading),
-                    ],
-                  ),
-                );
-              }
-
-              if (authProvider.error != null) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.errorMessage(
-                          AppLocalizations.of(context)!.authentication,
-                          authProvider.error!,
-                        ),
-                        style: const TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => authProvider.signInAnonymously(),
-                        child: Text(AppLocalizations.of(context)!.tryAgain),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final nextSchedule = scheduleProvider.getNextSchedule();
-              // HOME SCREEN
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 24,
-                children: [
-                  // Current date
-                  Text(
-                    DateFormat(
-                      'EEEE, MMM d',
-                      locale.languageCode,
-                    ).format(DateTime.now()),
-                    style: theme.textTheme.bodyMedium!.copyWith(
-                      color: colorScheme.onSurface,
-                      fontSize: 14,
-                    ),
-                  ),
-
-                  // Welcome message
-                  Text(
-                    authProvider.userName != null
-                        ? AppLocalizations.of(
-                            context,
-                          )!.welcome(authProvider.userName as Object)
-                        : AppLocalizations.of(context)!.anonymousWelcome,
-                    style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 24,
-                    ),
-                  ),
-
-                  // NEXT SCHEDULE
-                  scheduleProvider.isLoading
-                      ? Center(child: CircularProgressIndicator())
-                      : nextSchedule != null
-                      ? Column(
-                          spacing: 16,
-                          children: [
-                            // SCHEDULE LABEL
-                            Text(
-                              AppLocalizations.of(context)!.nextUp,
-                              style: theme.textTheme.titleMedium!.copyWith(
-                                color: colorScheme.onSurface,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            // SCHEDULE CARD
-                            ScheduleCard(scheduleId: nextSchedule.id),
-                          ],
-                        )
-                      : SizedBox.shrink(),
-
-                  // DIRECT CREATION BUTTONS
-                  Expanded(
-                    child: Center(
+                  if (authProvider.isLoading) {
+                    return Center(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 16,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          FilledTextButton(
-                            isDarkButton: true,
-                            text: AppLocalizations.of(context)!
-                                .createPlaceholder(
-                                  AppLocalizations.of(context)!.playlist,
-                                ),
-                            onPressed: () {
-                              navigationProvider.navigateToRoute(
-                                NavigationRoute.playlists,
-                              );
-                              navigationProvider.push(CreatePlaylistScreen());
-                            },
-                          ),
-                          FilledTextButton(
-                            text: AppLocalizations.of(context)!.addPlaceholder(
-                              AppLocalizations.of(context)!.cipher,
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text(AppLocalizations.of(context)!.loading),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (authProvider.error != null) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.errorMessage(
+                              AppLocalizations.of(context)!.authentication,
+                              authProvider.error!,
                             ),
-                            onPressed: () {
-                              navigationProvider.navigateToRoute(
-                                NavigationRoute.library,
-                              );
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (context) {
-                                  return CreateCipherSheet();
-                                },
-                              );
-                            },
+                            style: const TextStyle(color: Colors.red),
+                            textAlign: TextAlign.center,
                           ),
-                          FilledTextButton(
-                            text: AppLocalizations.of(context)!.assignSchedule,
-                            onPressed: () {
-                              // TODO: Implement navigation assign schedule
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  backgroundColor: Colors.amberAccent,
-                                  content: Text(
-                                    'Funcionalidade em desenvolvimento,',
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                ),
-                              );
-                            },
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => authProvider.signInAnonymously(),
+                            child: Text(AppLocalizations.of(context)!.tryAgain),
                           ),
                         ],
                       ),
+                    );
+                  }
+
+                  final nextLocalSchedule = localScheduleProvider
+                      .getNextSchedule();
+                  final nextCloudSchedule = cloudScheduleProvider
+                      .getNextSchedule();
+
+                  dynamic nextSchedule;
+                  if (nextLocalSchedule != null && nextCloudSchedule != null) {
+                    nextSchedule =
+                        nextLocalSchedule.time.isBefore(
+                          TimeOfDay.fromDateTime(
+                            nextCloudSchedule.datetime.toDate(),
+                          ),
+                        )
+                        ? nextLocalSchedule
+                        : nextCloudSchedule;
+                  } else {
+                    nextSchedule = nextLocalSchedule ?? nextCloudSchedule;
+                  }
+                  // HOME SCREEN
+                  return Stack(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: 24,
+                        children: [
+                          // Current date
+                          Text(
+                            DateFormat(
+                              'EEEE, MMM d',
+                              locale.languageCode,
+                            ).format(DateTime.now()),
+                            style: textTheme.bodyMedium!.copyWith(
+                              color: colorScheme.onSurface,
+                              fontSize: 14,
+                            ),
+                          ),
+
+                          _buildWelcomeMessage(
+                            context,
+                            authProvider,
+                            textTheme,
+                          ),
+
+                          _buildNextSchedule(
+                            context,
+                            localScheduleProvider,
+                            nextSchedule,
+                            textTheme,
+                            colorScheme,
+                          ),
+                        ],
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () => _showQuickActionsSheet(
+                            context,
+                            navigationProvider,
+                            selectionProvider,
+                          ),
+                          child: Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colorScheme.onSurface,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colorScheme.surfaceContainerLowest,
+                                  spreadRadius: 2,
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Icon(Icons.add, color: colorScheme.surface),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+          ),
+    );
+  }
+
+  Widget _buildWelcomeMessage(
+    BuildContext context,
+    MyAuthProvider authProvider,
+    TextTheme textTheme,
+  ) {
+    return Text(
+      AppLocalizations.of(context)!.helloUser(
+        authProvider.userName ?? AppLocalizations.of(context)!.guest,
+      ),
+      style: textTheme.headlineLarge!.copyWith(
+        fontWeight: FontWeight.w700,
+        fontSize: 24,
+      ),
+    );
+  }
+
+  Widget _buildNextSchedule(
+    BuildContext context,
+    LocalScheduleProvider scheduleProvider,
+    dynamic nextSchedule,
+    TextTheme textTheme,
+    ColorScheme colorScheme,
+  ) {
+    if (scheduleProvider.isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (nextSchedule == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        spacing: 16,
+        children: [
+          SizedBox(height: 32),
+          Text(
+            AppLocalizations.of(context)!.welcome,
+            style: textTheme.titleMedium!.copyWith(
+              color: colorScheme.onSurface,
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            AppLocalizations.of(context)!.getStartedMessage,
+            style: textTheme.bodyMedium!.copyWith(
+              color: colorScheme.onSurface,
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 16,
+      children: [
+        // SCHEDULE LABEL
+        Text(
+          AppLocalizations.of(context)!.nextUp,
+          style: textTheme.titleMedium!.copyWith(
+            color: colorScheme.onSurface,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        // SCHEDULE CARD
+        (nextSchedule is Schedule)
+            ? ScheduleCard(scheduleId: nextSchedule.id)
+            : CloudScheduleCard(scheduleId: nextSchedule.firebaseId),
+      ],
+    );
+  }
+
+  void _showQuickActionsSheet(
+    BuildContext context,
+    NavigationProvider navigationProvider,
+    SelectionProvider selectionProvider,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(0),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            spacing: 8,
+            children: [
+              // HEADER
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.quickAction,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 18,
                     ),
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
                 ],
-              );
-            },
-      ),
+              ),
+
+              // ACTIONS
+              // DIRECT CREATION BUTTONS
+              FilledTextButton(
+                trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
+                text: AppLocalizations.of(
+                  context,
+                )!.createPlaceholder(AppLocalizations.of(context)!.playlist),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the bottom sheet
+                  navigationProvider.navigateToRoute(NavigationRoute.playlists);
+                  navigationProvider.push(EditPlaylistScreen());
+                },
+              ),
+              FilledTextButton(
+                trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
+                text: AppLocalizations.of(
+                  context,
+                )!.addPlaceholder(AppLocalizations.of(context)!.cipher),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the bottom sheet
+                  navigationProvider.navigateToRoute(NavigationRoute.library);
+                  navigationProvider.push(
+                    EditCipherScreen(
+                      cipherID: -1,
+                      versionID: -1,
+                      versionType: VersionType.brandNew,
+                    ),
+                    showAppBar: false,
+                    showDrawerIcon: false,
+                  );
+                },
+              ),
+              FilledTextButton(
+                trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
+                text: AppLocalizations.of(context)!.assignSchedule,
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the bottom sheet
+                  navigationProvider.navigateToRoute(NavigationRoute.schedule);
+                  selectionProvider.enableSelectionMode();
+                  navigationProvider.push(
+                    CreateScheduleScreen(creationStep: 1),
+                    showAppBar: false,
+                    showDrawerIcon: false,
+                    onPopCallback: () {
+                      selectionProvider.disableSelectionMode();
+                    },
+                  );
+                },
+              ),
+              SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
     );
   }
 }

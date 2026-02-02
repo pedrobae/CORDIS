@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:cordis/services/import/import_service_base.dart';
-// TODO: Implement OCR (Optical Character Recognition)
 // import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 /// Service for extracting text from images using OCR (Optical Character Recognition)

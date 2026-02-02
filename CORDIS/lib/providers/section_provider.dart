@@ -102,7 +102,7 @@ class SectionProvider extends ChangeNotifier {
 
   /// ===== UPDATE =====
   // Modify a section (content_text)
-  void cacheUpdatedSection(
+  void cacheSection(
     dynamic versionKey,
     String contentCode, {
     String? newContentCode,
@@ -111,14 +111,26 @@ class SectionProvider extends ChangeNotifier {
     Color? newColor,
   }) {
     final section = _sections[versionKey]![contentCode];
-    if (section == null) return;
+    if (section == null) {
+      // Create a new section if it doesn't exist
+      final newSection = Section(
+        versionId: versionKey is String ? -1 : versionKey,
+        contentCode: newContentCode ?? contentCode,
+        contentType: newContentType ?? 'default',
+        contentText: newContentText ?? '',
+        contentColor: newColor ?? Colors.grey,
+      );
 
-    section.contentType = newContentType ?? section.contentType;
-    section.contentText = newContentText ?? section.contentText;
-    section.contentCode = newContentCode ?? section.contentCode;
-    section.contentColor = newColor ?? section.contentColor;
+      _sections[newSection.versionId] ??= {};
+      _sections[newSection.versionId]![newSection.contentCode] = newSection;
+    } else {
+      // Update existing section
+      section.contentCode = newContentCode ?? section.contentCode;
+      section.contentType = newContentType ?? section.contentType;
+      section.contentText = newContentText ?? section.contentText;
+      section.contentColor = newColor ?? section.contentColor;
+    }
 
-    // Update the section in the sections map
     notifyListeners();
   }
 
@@ -144,35 +156,35 @@ class SectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// ===== SAVE =====
-  // Persist the data to the database
-  Future<void> saveSections(dynamic versionKey) async {
+  // ===== SAVE =====
+  /// Persist the data of the given version key to the database
+  Future<void> saveSections({dynamic versionID}) async {
     if (_isSaving) return;
 
     _isSaving = true;
     notifyListeners();
 
     try {
-      if (versionKey == null) {
+      if (versionID == null) {
         throw Exception('No version key provided.');
       }
 
-      if (versionKey is String) {
+      if (versionID is String) {
         throw Exception('Cannot save sections for non-local version.');
       }
       // For simplicity, delete all existing content and recreate
       // This could be optimized later to only update changed content
-      await _cipherRepository.deleteAllVersionSections(versionKey);
+      await _cipherRepository.deleteAllVersionSections(versionID);
 
       // Insert new content
       if (kDebugMode) {
         print(
-          'Saving ${_sections[versionKey]!.length} sections for version $versionKey',
+          'Saving ${_sections[versionID]!.length} sections for version $versionID',
         );
       }
-      for (final entry in _sections[versionKey]!.entries) {
+      for (final entry in _sections[versionID]!.entries) {
         final sectionId = await _cipherRepository.insertSection(
-          entry.value.copyWith(versionId: versionKey),
+          entry.value.copyWith(versionId: versionID),
         );
 
         if (kDebugMode) {

@@ -13,25 +13,28 @@ class SelectionProvider extends ChangeNotifier {
   List<dynamic> get selectedItemIds => _selectedItemIds;
   int? get targetId => _targetId;
 
-  void enableSelectionMode() {
+  void enableSelectionMode({dynamic targetId}) {
     _isSelectionMode = true;
+    if (targetId != null) {
+      _targetId = targetId;
+    }
     notifyListeners();
   }
 
   void disableSelectionMode() {
     _isSelectionMode = false;
     _selectedItemIds.clear();
+    _targetId = null;
+    notifyListeners();
   }
 
-  void toggleItemSelection(dynamic item) {
-    if (_selectedItemIds.contains(item)) {
-      _selectedItemIds.remove(item);
-      if (_selectedItemIds.isEmpty) {
-        disableSelectionMode();
-      }
-    } else {
-      _selectedItemIds.add(item);
-    }
+  void select(dynamic item) {
+    _selectedItemIds.add(item);
+    notifyListeners();
+  }
+
+  void deselect(dynamic item) {
+    _selectedItemIds.remove(item);
     notifyListeners();
   }
 
@@ -43,7 +46,7 @@ class SelectionProvider extends ChangeNotifier {
     _targetId = null;
   }
 
-  bool isItemSelected(dynamic item) {
+  bool isSelected(dynamic item) {
     return _selectedItemIds.contains(item);
   }
 

@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/cipher_provider.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
-import 'package:cordis/providers/version_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/widgets/settings/layout_settings.dart';
 import 'package:cordis/widgets/ciphers/viewer/content_view.dart';
@@ -43,7 +44,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
   Future<void> _loadData() async {
     if (!mounted) return;
     final sectionProvider = context.read<SectionProvider>();
-    final versionProvider = context.read<VersionProvider>();
+    final cloudVersionProvider = context.read<CloudVersionProvider>();
 
     switch (widget.versionType) {
       case VersionType.import:
@@ -56,9 +57,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
         break;
       case VersionType.cloud:
         if (widget.versionId != null) {
-          final version = versionProvider.getCloudVersionByFirebaseId(
-            widget.versionId,
-          );
+          final version = cloudVersionProvider.getVersion(widget.versionId);
           sectionProvider.setNewSectionsInCache(
             widget.versionId,
             version!.toDomain().sections!,
@@ -74,8 +73,8 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
   void _editCurrentVersion(NavigationProvider navigationProvider) {
     navigationProvider.push(
       EditCipherScreen(
-        cipherId: widget.cipherId,
-        versionId: widget.versionId,
+        cipherID: widget.cipherId,
+        versionID: widget.versionId,
         versionType: widget.versionType,
       ),
       showAppBar: false,
@@ -110,9 +109,10 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Consumer5<
+    return Consumer6<
       CipherProvider,
-      VersionProvider,
+      LocalVersionProvider,
+      CloudVersionProvider,
       SectionProvider,
       LayoutSettingsProvider,
       NavigationProvider
@@ -122,6 +122,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
             context,
             cipherProvider,
             versionProvider,
+            cloudVersionProvider,
             sectionProvider,
             settings,
             navigationProvider,
@@ -170,16 +171,18 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
               cipher = cipherProvider.getCipherById(widget.cipherId!);
             }
 
-            dynamic version = versionProvider.getVersionById(
-              widget.versionId,
-            ); // Version or VersionDTO
+            dynamic version;
 
             // Set original key for transposer
-            if (!_hasSetOriginalKey) {
-              if (widget.versionType == VersionType.cloud) {
+            if (widget.versionType == VersionType.cloud) {
+              version = cloudVersionProvider.getVersion(widget.versionId);
+              if (!_hasSetOriginalKey) {
                 settings.setOriginalKey(version.originalKey ?? '');
                 _hasSetOriginalKey = true;
-              } else {
+              }
+            } else {
+              version = versionProvider.getVersion(widget.versionId);
+              if (!_hasSetOriginalKey) {
                 settings.setOriginalKey(cipher!.musicKey);
                 _hasSetOriginalKey = true;
               }

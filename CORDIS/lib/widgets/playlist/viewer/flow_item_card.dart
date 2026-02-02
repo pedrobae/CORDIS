@@ -4,7 +4,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/ciphers/editor/custom_reorderable_delayed.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
-import 'package:cordis/widgets/flow_item_editor.dart';
+import 'package:cordis/widgets/playlist/viewer/flow_item_editor.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_card_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -97,7 +97,9 @@ class FlowItemCard extends StatelessWidget {
                         ],
                       ),
                       FilledTextButton(
-                        text: AppLocalizations.of(context)!.view,
+                        text: AppLocalizations.of(context)!.viewPlaceholder(
+                          AppLocalizations.of(context)!.flowItem,
+                        ),
                         isDense: true,
                         onPressed: () {
                           navigationProvider.push(

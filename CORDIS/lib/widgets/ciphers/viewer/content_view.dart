@@ -1,6 +1,7 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/section_provider.dart';
-import 'package:cordis/providers/version_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/ciphers/viewer/structure_list.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,15 +13,13 @@ import 'section_card.dart';
 class ContentView extends StatefulWidget {
   final dynamic versionId;
 
-  ContentView({super.key, required this.versionId});
-
-  final List<GlobalKey> sectionKeys = [];
-
+  const ContentView({super.key, required this.versionId});
   @override
   State<ContentView> createState() => _ContentViewState();
 }
 
 class _ContentViewState extends State<ContentView> {
+  final List<GlobalKey> sectionKeys = [];
   late ScrollController scrollController;
 
   @override
@@ -31,12 +30,35 @@ class _ContentViewState extends State<ContentView> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<VersionProvider, SectionProvider, LayoutSettingsProvider>(
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Consumer4<
+      LocalVersionProvider,
+      CloudVersionProvider,
+      SectionProvider,
+      LayoutSettingsProvider
+    >(
       builder:
-          (context, versionProvider, sectionProvider, layoutSettings, child) {
-            final songStructure = versionProvider.getSongStructure(
-              widget.versionId,
-            );
+          (
+            context,
+            versionProvider,
+            cloudVersionProvider,
+            sectionProvider,
+            layoutSettings,
+            child,
+          ) {
+            final List<String> songStructure;
+
+            if (widget.versionId is String) {
+              songStructure = cloudVersionProvider
+                  .getVersion(widget.versionId)!
+                  .songStructure;
+            } else {
+              songStructure = versionProvider
+                  .getVersion(widget.versionId)!
+                  .songStructure;
+            }
 
             final filteredStructure = songStructure
                 .where(
@@ -48,57 +70,72 @@ class _ContentViewState extends State<ContentView> {
                 )
                 .toList()
                 .asMap();
+
             final sectionCardList = filteredStructure.entries.map((entry) {
               String trimmedCode = entry.value.trim();
+
               final section = sectionProvider.getSection(
                 widget.versionId,
                 trimmedCode,
               );
-              widget.sectionKeys.add(GlobalKey());
+
               if (section == null) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              sectionKeys.add(GlobalKey());
+
+              if (section.contentText.isEmpty) {
                 return const SizedBox.shrink();
               }
+
               return SectionCard(
-                key: widget.sectionKeys[entry.key],
+                key: sectionKeys[entry.key],
                 sectionType: section.contentType,
                 sectionCode: trimmedCode,
-                sectionText: sectionProvider
-                    .getSections(widget.versionId)[trimmedCode]!
-                    .contentText,
-                sectionColor: sectionProvider
-                    .getSections(widget.versionId)[trimmedCode]!
-                    .contentColor,
+                sectionText: section.contentText,
+                sectionColor: section.contentColor,
               );
             }).toList();
 
             // Add space at the end of the list for better scrolling
             sectionCardList.add(SizedBox(height: 200));
 
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                spacing: 16,
-                children: [
-                  Column(
+            return Column(
+              spacing: 16,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         AppLocalizations.of(context)!.songStructure,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
                       StructureList(
                         versionId: widget.versionId,
                         filteredStructure: filteredStructure.values.toList(),
                         scrollController: scrollController,
-                        sectionKeys: widget.sectionKeys,
+                        sectionKeys: sectionKeys,
                       ),
                     ],
                   ),
-                  Expanded(
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: colorScheme.surfaceContainerLowest,
+                          width: 0.5,
+                        ),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: SingleChildScrollView(
                       controller: scrollController,
                       child: Column(
@@ -119,8 +156,8 @@ class _ContentViewState extends State<ContentView> {
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
     );

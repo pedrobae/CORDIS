@@ -30,10 +30,12 @@ class _FlowItemEditorState extends State<FlowItemEditor> {
     durationController = TextEditingController();
     final flowItemProvider = context.read<FlowItemProvider>();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _syncFlowItem();
-      flowItemProvider.loadFlowItemById(widget.flowItemId!);
-    });
+    if (widget.flowItemId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _syncFlowItem();
+        flowItemProvider.loadFlowItem(widget.flowItemId!);
+      });
+    }
   }
 
   void _syncFlowItem() {
@@ -159,7 +161,10 @@ class _FlowItemEditorState extends State<FlowItemEditor> {
                       _buildFormFieldLabel(
                         context,
                         controller: contentController,
-                        label: AppLocalizations.of(context)!.notesOptional,
+                        label: AppLocalizations.of(context)!
+                            .optionalPlaceholder(
+                              AppLocalizations.of(context)!.annotations,
+                            ),
                         isMultiline: true,
                       ),
                     ],

@@ -9,9 +9,9 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
-import 'package:cordis/providers/version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 
-import 'package:cordis/widgets/playlist/viewer/edit_playlist_sheet.dart';
+import 'package:cordis/widgets/playlist/viewer/add_to_playlist_sheet.dart';
 
 import 'package:cordis/widgets/playlist/viewer/version_card.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_card.dart';
@@ -34,16 +34,22 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final playlistProvider = context.read<PlaylistProvider>();
-      final versionProvider = context.read<VersionProvider>();
+      final versionProvider = context.read<LocalVersionProvider>();
       final flowItemProvider = context.read<FlowItemProvider>();
 
       await playlistProvider.loadPlaylist(widget.playlistId);
 
-      await versionProvider.loadVersionsForPlaylist(
-        playlistProvider.getPlaylistById(widget.playlistId)!.items,
-      );
+      // Load versions for the playlist items
+      final items =
+          playlistProvider.getPlaylistById(widget.playlistId)?.items ?? [];
 
-      await flowItemProvider.loadFlowItemByPlaylistId(widget.playlistId);
+      for (var item in items) {
+        if (item.type == PlaylistItemType.version) {
+          await versionProvider.loadVersion(item.contentId!);
+        } else if (item.type == PlaylistItemType.flowItem) {
+          await flowItemProvider.loadFlowItem(item.contentId!);
+        }
+      }
     });
   }
 
@@ -188,7 +194,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
           shape: LinearBorder(),
           onClosing: () {},
           builder: (BuildContext context) {
-            return EditPlaylistSheet(playlistId: widget.playlistId);
+            return AddToPlaylistSheet(playlistId: widget.playlistId);
           },
         );
       },

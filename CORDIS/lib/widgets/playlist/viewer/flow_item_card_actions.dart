@@ -105,17 +105,34 @@ class FlowItemCardActionsSheet extends StatelessWidget {
                   // DELETE FLOW ITEM
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pop(); // Close the bottom sheet
-                      showDialog(
+                      showModalBottomSheet(
                         context: context,
-                        builder: (dialogContext) => DeleteConfirmationDialog(
-                          itemType: AppLocalizations.of(context)!.flowItem,
-                          isDangerous: true,
-                          onConfirm: () async {
-                            await flowItemProvider.deleteFlowItem(flowItemId);
-                            navigationProvider.pop();
-                          },
-                        ),
+                        isScrollControlled: true,
+                        builder: (dialogContext) {
+                          return BottomSheet(
+                            shape: LinearBorder(),
+                            onClosing: () {},
+                            builder: (context) {
+                              return DeleteConfirmationSheet(
+                                itemType: AppLocalizations.of(
+                                  context,
+                                )!.flowItem,
+                                isDangerous: true,
+                                onConfirm: () async {
+                                  await flowItemProvider.deleteFlowItem(
+                                    flowItemId,
+                                  );
+                                  await playlistProvider.loadPlaylist(
+                                    playlistId,
+                                  );
+                                  if (context.mounted) {
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                              );
+                            },
+                          );
+                        },
                       );
                     },
                     child: Container(

@@ -90,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 SizedBox(height: 40),
                 Image.asset(
-                  'assets/logos/logo_new.png',
+                  'assets/logos/app_icon_rounded.png',
                   width: 150,
                   height: 150,
                 ),
@@ -193,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              // TODO - implement password reset
+                              // TODO: ResetPassword
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   backgroundColor: Colors.amberAccent,

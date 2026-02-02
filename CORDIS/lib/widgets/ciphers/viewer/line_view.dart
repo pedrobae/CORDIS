@@ -33,6 +33,32 @@ class LineView extends StatelessWidget {
         double endOfChord = 0.0;
         int lineNumber = 0;
 
+        final chordPositions = <Widget>[];
+
+        for (final chord in chords) {
+          final String chordToShow = settings.transposeAmount != 0
+              ? transposer.transposeChord(chord.name)
+              : chord.name;
+          (xOffset, yOffset, endOfChord, lineNumber) = chord
+              .calculateOffsetForChord(
+                lyricStyle,
+                chordStyle,
+                lineNumber,
+                constraints.maxWidth,
+                endOfChord,
+              );
+
+          chordPositions.add(
+            Positioned(
+              left: xOffset,
+              top: yOffset,
+              child: RepaintBoundary(
+                child: Text(chordToShow, style: chordStyle),
+              ),
+            ),
+          );
+        }
+
         return Stack(
           clipBehavior: Clip.none,
           children: [
@@ -44,24 +70,7 @@ class LineView extends StatelessWidget {
                 applyHeightToLastDescent: false,
               ),
             ),
-            ...chords.map((chord) {
-              final String chordToShow = settings.transposeAmount != 0
-                  ? transposer.transposeChord(chord.name)
-                  : chord.name;
-              (xOffset, yOffset, endOfChord, lineNumber) = chord
-                  .calculateOffsetForChord(
-                    lyricStyle,
-                    chordStyle,
-                    lineNumber,
-                    constraints.maxWidth,
-                    endOfChord,
-                  );
-              return Positioned(
-                left: xOffset,
-                top: yOffset,
-                child: Text(chordToShow, style: chordStyle),
-              );
-            }),
+            ...chordPositions,
           ],
         );
       },

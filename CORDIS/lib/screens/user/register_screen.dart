@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -123,8 +122,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   // Use SVG logo asset instead of music note icon
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: SvgPicture.asset(
-                      'assets/logos/v1_simple_color_black.svg',
+                    child: Image.asset(
+                      'assets/logos/app_icon_rounded_reversed.png',
                       width: 120,
                       height: 120,
                     ),

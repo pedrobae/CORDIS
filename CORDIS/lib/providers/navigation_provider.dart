@@ -40,22 +40,20 @@ class NavigationProvider extends ChangeNotifier {
 
   // Navigation methods following your provider pattern
   void navigateToRoute(NavigationRoute route) {
-    if (_currentRoute != route) {
-      _currentRoute = route;
-      _screenStack.clear();
-      _showAppBarStack.clear();
-      _showDrawerIconStack.clear();
-      _showBottomNavBarStack.clear();
+    _currentRoute = route;
+    _screenStack.clear();
+    _showAppBarStack.clear();
+    _showDrawerIconStack.clear();
+    _showBottomNavBarStack.clear();
 
-      // Clear onPop callbacks
-      while (_onPopCallbacks.isNotEmpty) {
-        _onPopCallbacks.last();
-        _onPopCallbacks.removeLast();
-      }
-
-      _error = null; // Clear any previous errors
-      notifyListeners();
+    // Clear onPop callbacks
+    while (_onPopCallbacks.isNotEmpty) {
+      _onPopCallbacks.last();
+      _onPopCallbacks.removeLast();
     }
+
+    _error = null; // Clear any previous errors
+    notifyListeners();
   }
 
   void push(
@@ -163,9 +161,17 @@ class NavigationProvider extends ChangeNotifier {
       case NavigationRoute.library:
         return Icon(Icons.library_music, color: iconColor, size: iconSize);
       case NavigationRoute.playlists:
-        return Icon(Icons.playlist_play, color: iconColor, size: iconSize);
+        return Icon(
+          Icons.playlist_play_rounded,
+          color: iconColor,
+          size: iconSize,
+        );
       case NavigationRoute.schedule:
-        return Icon(Icons.calendar_today, color: iconColor, size: iconSize);
+        return Icon(
+          Icons.calendar_month_sharp,
+          color: iconColor,
+          size: iconSize,
+        );
     }
   }
 

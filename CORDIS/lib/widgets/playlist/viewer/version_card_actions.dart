@@ -3,7 +3,7 @@ import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
-import 'package:cordis/providers/version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/delete_confirmation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +23,7 @@ class VersionCardActionsSheet extends StatelessWidget {
     return Consumer5<
       NavigationProvider,
       PlaylistProvider,
-      VersionProvider,
+      LocalVersionProvider,
       UserProvider,
       MyAuthProvider
     >(
@@ -112,20 +112,32 @@ class VersionCardActionsSheet extends StatelessWidget {
                   // DELETE FLOW ITEM
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pop(); // Close the bottom sheet
-                      showDialog(
+                      showModalBottomSheet(
                         context: context,
-                        builder: (dialogContext) => DeleteConfirmationDialog(
-                          itemType: AppLocalizations.of(context)!.version,
-                          isDangerous: true,
-                          onConfirm: () async {
-                            playlistProvider.removeVersionFromPlaylist(
-                              versionId,
-                              playlistId,
-                            );
-                            await versionProvider.deleteVersion(versionId);
-                          },
-                        ),
+                        isScrollControlled: true,
+                        builder: (context) {
+                          return BottomSheet(
+                            onClosing: () {},
+                            builder: (context) {
+                              return DeleteConfirmationSheet(
+                                itemType: AppLocalizations.of(context)!.version,
+                                isDangerous: true,
+                                onConfirm: () async {
+                                  playlistProvider.removeVersionFromPlaylist(
+                                    versionId,
+                                    playlistId,
+                                  );
+                                  await versionProvider.deleteVersion(
+                                    versionId,
+                                  );
+                                  if (context.mounted) {
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                              );
+                            },
+                          );
+                        },
                       );
                     },
                     child: Container(

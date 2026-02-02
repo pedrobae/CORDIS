@@ -1,27 +1,22 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cordis/helpers/guard.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
-import 'package:cordis/models/dtos/version_dto.dart';
+import 'package:cordis/services/cache_service.dart';
 import 'package:cordis/services/firestore_service.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
-
-// class PlaylistDto {
-//   final String? firebaseId; // Cloud ID (Firebase)
-//   final String name;
-//   final String description;
-//   final String ownerId; // User that created the playlist
-//   final bool isPublic;
-//   final DateTime updatedAt;
-//   final DateTime createdAt;
-//   final List<String> collaborators; // userIds
-//   final List<PlaylistItemDto> items; // Array whose order matters
 
 class CloudScheduleRepository {
   final FirestoreService _firestoreService = FirestoreService();
   final GuardHelper _guardHelper = GuardHelper();
 
-  CloudScheduleRepository();
+  final CacheService _cacheService = CacheService();
+  final List<ScheduleDto> _repoCache = [];
+  DateTime? _lastCloudLoad;
+
+  CloudScheduleRepository() {
+    _initializeCloudCache();
+  }
   // ===== CREATE =====
 
   /// Publish a new schedule to Firestore
@@ -38,7 +33,7 @@ class CloudScheduleRepository {
 
       await FirebaseAnalytics.instance.logEvent(
         name: 'created_schedule',
-        parameters: {'playlistId': docId},
+        parameters: {'scheduleId': docId},
       );
 
       return docId;
@@ -50,44 +45,50 @@ class CloudScheduleRepository {
   /// Fetch schedules of a specific user ID
   /// Used when fetching schedules for a user
   Future<List<ScheduleDto>> fetchSchedulesByUserId(
-    String firebaseUserId,
-  ) async {
+    String firebaseUserId, {
+    bool forceFetch = false,
+  }) async {
+    final now = DateTime.now();
+    if (!forceFetch &&
+        now.isBefore(
+          (_lastCloudLoad ?? DateTime(2000)).add(
+            Duration(days: 7),
+          ), // CHECK FOR NEW SCHEDULES WEEKLY
+        )) {
+      final cachedSchedules = await _cacheService.loadCloudSchedules();
+      if (cachedSchedules.isNotEmpty) {
+        return cachedSchedules;
+      }
+    }
     return await _withErrorHandling('fetch_schedules_by_user_id', () async {
       final querySnapshot = await _firestoreService
           .fetchDocumentsContainingValue(
             collectionPath: 'schedules',
             field: 'collaborators',
-            orderField: 'updatedAt',
+            orderField: 'createdAt',
             value: firebaseUserId,
           );
 
-      return querySnapshot
+      final schedules = querySnapshot
           .map(
             (doc) => ScheduleDto.fromFirestore(
-              (doc.data() as Map<String, dynamic>)..['firebaseId'] = doc.id,
-            ),
-          )
-          .toList();
-    });
-  }
-
-  /// Fetch a schedule's playlist's versions by its ID
-  Future<List<VersionDto>> fetchScheduleVersions(String scheduleId) async {
-    return await _withErrorHandling('fetch schedule by ID', () async {
-      final docSnapshot = await _firestoreService.fetchSubCollectionDocuments(
-        parentCollectionPath: 'schedules',
-        parentDocumentId: scheduleId,
-        subCollectionPath: 'versions',
-      );
-
-      return docSnapshot
-          .map(
-            (doc) => VersionDto.fromFirestore(
               doc.data() as Map<String, dynamic>,
               doc.id,
             ),
           )
           .toList();
+
+      debugPrint(
+        'Fetched ${schedules.length} schedules for user $firebaseUserId from cloud.',
+      );
+
+      await _cacheService.saveCloudSchedules(schedules);
+      await _cacheService.saveLastScheduleLoad(now);
+      _repoCache.clear();
+      _repoCache.addAll(schedules);
+      _lastCloudLoad = now;
+
+      return schedules;
     });
   }
 
@@ -106,8 +107,8 @@ class CloudScheduleRepository {
       }
 
       return ScheduleDto.fromFirestore(
-        (docSnapshot.data() as Map<String, dynamic>)
-          ..['firebaseId'] = docSnapshot.id,
+        docSnapshot.data() as Map<String, dynamic>,
+        docSnapshot.id,
       );
     });
   }
@@ -115,24 +116,20 @@ class CloudScheduleRepository {
   // ===== UPDATE =====
 
   /// Update an existing schedule in Firestore on the changes map
-  Future<void> updateSchedule(
-    String firebaseId,
-    String ownerId,
-    Map<String, dynamic> changes,
-  ) async {
+  Future<void> updateSchedule(String ownerId, ScheduleDto schedule) async {
     return await _withErrorHandling('update_schedule', () async {
       await _guardHelper.requireAuth();
       await _guardHelper.requireOwnership(ownerId);
 
       await _firestoreService.updateDocument(
         collectionPath: 'schedules',
-        documentId: firebaseId,
-        data: changes,
+        documentId: schedule.firebaseId!,
+        data: schedule.toFirestore(),
       );
 
       await FirebaseAnalytics.instance.logEvent(
-        name: 'updated_playlist',
-        parameters: {'playlistId': firebaseId},
+        name: 'updated_schedule',
+        parameters: {'scheduleId': schedule.firebaseId!},
       );
     });
   }
@@ -160,29 +157,6 @@ class CloudScheduleRepository {
     });
   }
 
-  Future<void> updatePlaylistVersion(
-    String scheduleId,
-    String versionId,
-    Map<String, dynamic> changes,
-  ) async {
-    return await _withErrorHandling('update_schedule_version', () async {
-      await _guardHelper.requireAuth();
-
-      await _firestoreService.updateSubCollectionDocument(
-        parentCollectionPath: 'schedules',
-        parentDocumentId: scheduleId,
-        subCollectionPath: 'versions',
-        documentId: versionId,
-        data: changes,
-      );
-
-      await FirebaseAnalytics.instance.logEvent(
-        name: 'updated_schedule_version',
-        parameters: {'scheduleId': scheduleId, 'versionId': versionId},
-      );
-    });
-  }
-
   // ===== DELETE =====
   /// Delete a schedule from Firestore
   Future<void> deleteSchedule(String firebaseId, String ownerId) async {
@@ -198,28 +172,6 @@ class CloudScheduleRepository {
       await FirebaseAnalytics.instance.logEvent(
         name: 'deleted_schedule',
         parameters: {'scheduleId': firebaseId},
-      );
-    });
-  }
-
-  /// Delete a specific version of a playlist
-  Future<void> deletePlaylistVersion(
-    String scheduleId,
-    String versionId,
-  ) async {
-    return await _withErrorHandling('delete_schedule_version', () async {
-      await _guardHelper.requireAuth();
-
-      await _firestoreService.deleteSubCollectionDocument(
-        parentCollectionPath: 'schedules',
-        parentDocumentId: scheduleId,
-        subCollectionPath: 'versions',
-        documentId: versionId,
-      );
-
-      await FirebaseAnalytics.instance.logEvent(
-        name: 'deleted_schedule_version',
-        parameters: {'scheduleId': scheduleId, 'versionId': versionId},
       );
     });
   }
@@ -244,5 +196,11 @@ class CloudScheduleRepository {
 
       rethrow;
     }
+  }
+
+  // ===== CACHE INITIALIZATION =====
+  Future<void> _initializeCloudCache() async {
+    _repoCache.addAll(await _cacheService.loadCloudSchedules());
+    _lastCloudLoad = await _cacheService.loadLastScheduleLoad();
   }
 }

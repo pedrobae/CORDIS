@@ -10,6 +10,18 @@ class DateTimeUtils {
         date.day == now.day;
   }
 
+  static DateTime? parseDateTime(String? value) {
+    if (value != null && value.isNotEmpty) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /// Formats a Duration into a human-readable string like "HH:MM:SS"
   static String formatDuration(Duration duration) {
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
@@ -18,25 +30,31 @@ class DateTimeUtils {
     StringBuffer buffer = StringBuffer();
 
     if (hours > 0) {
-      buffer.write('${hours}h');
-    }
-    if (buffer.isNotEmpty && minutes > 0) {
-      buffer.write(' ');
+      buffer.write('$hours:');
     }
     if (minutes > 0) {
-      buffer.write('${minutes}m');
-    }
-    if (buffer.isNotEmpty && seconds > 0) {
-      buffer.write(' ');
+      buffer.write('$minutes:');
     }
     if (seconds > 0) {
-      buffer.write('${seconds}s');
+      buffer.write('$seconds');
     }
 
     if (buffer.isEmpty) {
-      buffer.write('0s');
+      buffer.write('00:00');
     }
 
     return buffer.toString();
+  }
+
+  /// Parses a duration string in the format "HH:MM:SS" or "MM:SS" into a Duration object
+  static Duration parseDuration(String durationStr) {
+    final parts = durationStr.split(':').map(int.parse).toList();
+    if (parts.length == 3) {
+      return Duration(hours: parts[0], minutes: parts[1], seconds: parts[2]);
+    } else if (parts.length == 2) {
+      return Duration(minutes: parts[0], seconds: parts[1]);
+    } else {
+      throw FormatException('Invalid duration format');
+    }
   }
 }

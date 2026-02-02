@@ -8,7 +8,7 @@ class FlowItemRepository {
   Future<int> createFlowItem(FlowItem flowItem) async {
     final db = await _databaseHelper.database;
 
-    return await db.insert('playlist_text', flowItem.toSQLite(flowItem));
+    return await db.insert('flow_item', flowItem.toSQLite(flowItem));
   }
 
   // ===== READ =====
@@ -16,7 +16,7 @@ class FlowItemRepository {
     final db = await _databaseHelper.database;
 
     final results = await db.query(
-      'playlist_text',
+      'flow_item',
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -31,7 +31,7 @@ class FlowItemRepository {
     final db = await _databaseHelper.database;
 
     final results = await db.query(
-      'playlist_text',
+      'flow_item',
       where: 'firebase_id = ?',
       whereArgs: [firebaseId],
     );
@@ -48,7 +48,7 @@ class FlowItemRepository {
 
     final placeholders = List.filled(ids.length, '?').join(',');
     final results = await db.query(
-      'playlist_text',
+      'flow_item',
       where: 'id IN ($placeholders)',
       whereArgs: ids,
     );
@@ -64,7 +64,7 @@ class FlowItemRepository {
     final db = await _databaseHelper.database;
 
     final results = await db.query(
-      'playlist_text',
+      'flow_item',
       where: 'playlist_id = ?',
       whereArgs: [playlistId],
       orderBy: 'position ASC',
@@ -93,7 +93,7 @@ class FlowItemRepository {
 
       if (updates.isNotEmpty) {
         final result = await txn.update(
-          'playlist_text',
+          'flow_item',
           updates,
           where: 'id = ?',
           whereArgs: [id],
@@ -115,7 +115,7 @@ class FlowItemRepository {
     await db.transaction((txn) async {
       // First, get the position and playlist_id of the item being deleted
       final result = await txn.query(
-        'playlist_text',
+        'flow_item',
         columns: ['position', 'playlist_id'],
         where: 'id = ?',
         whereArgs: [id],
@@ -126,11 +126,11 @@ class FlowItemRepository {
         final playlistId = result.first['playlist_id'] as int;
 
         // Delete the text section
-        await txn.delete('playlist_text', where: 'id = ?', whereArgs: [id]);
+        await txn.delete('flow_item', where: 'id = ?', whereArgs: [id]);
 
         // Adjust positions of items that come after the deleted item
         await txn.rawUpdate(
-          'UPDATE playlist_text SET position = position - 1 WHERE playlist_id = ? AND position > ?',
+          'UPDATE flow_item SET position = position - 1 WHERE playlist_id = ? AND position > ?',
           [playlistId, deletedPosition],
         );
 

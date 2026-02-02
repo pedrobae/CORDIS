@@ -1,4 +1,4 @@
-import 'package:cordis/models/domain/playlist/playlist.dart';
+import 'package:cordis/helpers/codes.dart';
 import 'package:flutter/material.dart';
 
 class Schedule {
@@ -9,8 +9,11 @@ class Schedule {
   final DateTime date;
   final TimeOfDay time;
   final String location;
-  final Playlist? playlist;
+  final String? roomVenue;
+  final String? annotations;
+  final int? playlistId;
   final List<Role> roles;
+  final String shareCode;
 
   Schedule({
     required this.id,
@@ -20,8 +23,11 @@ class Schedule {
     required this.date,
     required this.time,
     required this.location,
-    required this.playlist,
+    this.roomVenue,
+    required this.playlistId,
     required this.roles,
+    this.annotations,
+    required this.shareCode,
   });
 
   factory Schedule.fromSqlite(Map<String, dynamic> map, List<Role> roles) {
@@ -36,30 +42,64 @@ class Schedule {
         minute: int.parse((map['time'] as String).split(':')[1]),
       ),
       location: map['location'] as String,
-      playlist: map['playlist'] != null
-          ? Playlist.fromJson(map['playlist'] as Map<String, dynamic>)
-          : null,
+      roomVenue: map['room_venue'] as String?,
+      playlistId: map['playlist_id'] as int?,
       roles: roles,
+      annotations: map['annotations'] as String?,
+      shareCode: map['share_code'] as String? ?? generateShareCode(),
     );
   }
 
   Map<String, dynamic> toSqlite() {
     return {
       'firebase_id': firebaseId,
-      'owner_id': ownerFirebaseId,
+      'owner_firebase_id': ownerFirebaseId,
       'name': name,
       'date': date.toIso8601String(),
       'time':
           '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
       'location': location,
-      'playlistId': playlist?.id,
+      'room_venue': roomVenue,
+      'playlist_id': playlistId,
+      'annotations': annotations,
+      'share_code': shareCode,
     };
+  }
+
+  Schedule copyWith({
+    int? id,
+    String? firebaseId,
+    String? ownerFirebaseId,
+    String? name,
+    DateTime? date,
+    TimeOfDay? time,
+    String? location,
+    String? roomVenue,
+    int? playlistId,
+    List<Role>? roles,
+    String? annotations,
+    String? shareCode,
+  }) {
+    return Schedule(
+      id: id ?? this.id,
+      firebaseId: firebaseId ?? this.firebaseId,
+      ownerFirebaseId: ownerFirebaseId ?? this.ownerFirebaseId,
+      name: name ?? this.name,
+      date: date ?? this.date,
+      time: time ?? this.time,
+      location: location ?? this.location,
+      roomVenue: roomVenue ?? this.roomVenue,
+      playlistId: playlistId ?? this.playlistId,
+      roles: roles ?? this.roles,
+      annotations: annotations ?? this.annotations,
+      shareCode: shareCode ?? this.shareCode,
+    );
   }
 }
 
 class Role {
   final int id;
-  final String name;
+  String name;
   final List<int> memberIds;
 
   Role({required this.id, required this.name, required this.memberIds});

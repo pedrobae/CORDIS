@@ -22,6 +22,7 @@ class ImportProvider extends ChangeNotifier {
   String? get selectedFileName => _selectedFileName;
   bool get isImporting => _isImporting;
   String? get error => _error;
+  ImportType? get importType => _importType;
   ParsingStrategy? get parsingStrategy => _parsingStrategy;
   ImportVariation? get importVariation => _importVariation;
 
@@ -39,20 +40,6 @@ class ImportProvider extends ChangeNotifier {
   void setImportVariation(ImportVariation variation) {
     _importVariation = variation;
     notifyListeners();
-  }
-
-  /// Gets a string representation of the import type.
-  String getImportType() {
-    switch (_importType) {
-      case ImportType.text:
-        return 'Text';
-      case ImportType.pdf:
-        return 'PDF';
-      case ImportType.image:
-        return 'Image';
-      default:
-        return 'Error';
-    }
   }
 
   /// Imports text based on the selected import type.
@@ -105,7 +92,6 @@ class ImportProvider extends ChangeNotifier {
           break;
 
         case ImportType.image:
-          // TODO: Implement image import logic
           await _imageService.extractText(selectedFile!);
           break;
 

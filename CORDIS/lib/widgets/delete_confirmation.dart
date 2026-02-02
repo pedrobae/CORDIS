@@ -1,13 +1,14 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 
-class DeleteConfirmationDialog extends StatelessWidget {
+class DeleteConfirmationSheet extends StatelessWidget {
   final String itemType;
   final VoidCallback onConfirm;
   final VoidCallback? onCancel;
   final bool isDangerous;
 
-  const DeleteConfirmationDialog({
+  const DeleteConfirmationSheet({
     super.key,
     required this.itemType,
     required this.onConfirm,
@@ -20,75 +21,79 @@ class DeleteConfirmationDialog extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    // TODO fix design
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      color: colorScheme.surface,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 16,
+        children: [
+          // HEADER
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.deleteConfirmationTitle,
+                style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDangerous ? Colors.red : colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              IconButton(
+                icon: Icon(Icons.close, color: colorScheme.onSurface, size: 32),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+          // MESSAGE
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                AppLocalizations.of(
+                  context,
+                )!.deleteConfirmationMessage(itemType),
+                style: TextStyle(
+                  color: Colors.red.shade700,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                AppLocalizations.of(context)!.deleteWarningMessage,
+                style: TextStyle(
+                  color: Colors.red.shade700,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
 
-    return AlertDialog(
-      backgroundColor: colorScheme.surface,
-      contentPadding: EdgeInsets.zero,
-      shape: ContinuousRectangleBorder(),
-      actionsAlignment: MainAxisAlignment.spaceBetween,
-      title: Text(
-        AppLocalizations.of(context)!.deleteConfirmationTitle,
-        style: textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: isDangerous ? Colors.red : colorScheme.onSurface,
-        ),
-        textAlign: TextAlign.center,
-      ),
-      content: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.red.shade50,
-          borderRadius: BorderRadius.circular(0),
-        ),
-        child: Column(
-          spacing: 8,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              AppLocalizations.of(context)!.deleteConfirmationMessage(itemType),
-              style: TextStyle(color: Colors.red.shade700, fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              AppLocalizations.of(context)!.deleteWarningMessage,
-              style: TextStyle(color: Colors.red.shade700, fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          style: TextButton.styleFrom(
-            fixedSize: Size.fromWidth(120),
-            foregroundColor: colorScheme.surface,
-            backgroundColor: colorScheme.onSurface,
-            shape: ContinuousRectangleBorder(),
+          // ACTIONS
+          // DELETE
+          FilledTextButton(
+            text: AppLocalizations.of(context)!.delete,
+            isDark: true,
+            onPressed: () {
+              onConfirm();
+              Navigator.of(context).pop();
+            },
           ),
-          onPressed: () {
-            onCancel?.call();
-            Navigator.of(context).pop();
-          },
-          child: Text(AppLocalizations.of(context)!.cancel),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            fixedSize: Size.fromWidth(120),
-            backgroundColor: Colors.red,
-            foregroundColor: colorScheme.surface,
-            shape: ContinuousRectangleBorder(),
+          // CANCEL
+          FilledTextButton(
+            text: AppLocalizations.of(context)!.cancel,
+            onPressed: () {
+              onCancel?.call();
+              Navigator.of(context).pop();
+            },
           ),
-          onPressed: () {
-            onConfirm();
-            Navigator.of(context).pop();
-          },
-          child: Text(AppLocalizations.of(context)!.delete),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

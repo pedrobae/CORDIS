@@ -1,13 +1,13 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
-import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/providers/cipher_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
-import 'package:cordis/providers/version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/cipher/view_cipher.dart';
+import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/ciphers/library/cipher_card_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +27,9 @@ class _CipherCardState extends State<CipherCard> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<VersionProvider>().loadVersionsOfCipher(widget.cipherId);
+      context.read<LocalVersionProvider>().loadVersionsOfCipher(
+        widget.cipherId,
+      );
     });
   }
 
@@ -38,7 +40,7 @@ class _CipherCardState extends State<CipherCard> {
 
     return Consumer5<
       CipherProvider,
-      VersionProvider,
+      LocalVersionProvider,
       SelectionProvider,
       PlaylistProvider,
       NavigationProvider
@@ -75,38 +77,38 @@ class _CipherCardState extends State<CipherCard> {
               widget.cipherId,
             );
 
+            if (versionId == null) {
+              return Container();
+            }
+
             // Loading state
-            if (cipherProvider.isLoading ||
-                versionProvider.isLoading ||
-                versionId == null) {
+            if (cipherProvider.isLoading || versionProvider.isLoading) {
               return Center(
                 child: CircularProgressIndicator(color: colorScheme.primary),
               );
             }
 
-            final version = versionProvider.getVersionById(versionId)!;
-            Duration duration;
-            if (version.runtimeType != Version) {
-              duration = Duration(seconds: (version as VersionDto).duration);
-            } else {
-              duration = (version as Version).duration;
-            }
+            final version = versionProvider.getVersion(versionId)!;
 
             // Card content
             return GestureDetector(
               onTap: () {
                 if (selectionProvider.isSelectionMode) {
                   try {
-                    selectionProvider.toggleItemSelection(versionId);
+                    selectionProvider.select(versionId);
                     navigationProvider.push(
                       EditCipherScreen(
-                        cipherId: widget.cipherId,
-                        versionId: versionId,
+                        cipherID: widget.cipherId,
+                        versionID: versionId,
                         versionType: VersionType.playlist,
-                        playlistId: widget.playlistId,
+                        playlistID: widget.playlistId,
                       ),
                       showAppBar: false,
                       showDrawerIcon: false,
+                      onPopCallback: () {
+                        selectionProvider.deselect(versionId);
+                        selectionProvider.enableSelectionMode();
+                      },
                     );
                   } catch (error) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -139,15 +141,15 @@ class _CipherCardState extends State<CipherCard> {
                 if (!selectionProvider.isSelectionMode) {
                   navigationProvider.push(
                     EditCipherScreen(
-                      cipherId: widget.cipherId,
-                      versionId: versionProvider.getIdOfOldestVersionOfCipher(
+                      cipherID: widget.cipherId,
+                      versionID: versionProvider.getIdOfOldestVersionOfCipher(
                         widget.cipherId,
                       ),
                       versionType: VersionType.local,
                     ),
                   );
                 } else {
-                  selectionProvider.toggleItemSelection(
+                  selectionProvider.select(
                     versionProvider.getIdOfOldestVersionOfCipher(
                       widget.cipherId,
                     ),
@@ -181,9 +183,11 @@ class _CipherCardState extends State<CipherCard> {
                                       style: textTheme.bodyMedium,
                                     )
                                   : Text('-'),
-                              duration != Duration.zero
+                              version.duration != Duration.zero
                                   ? Text(
-                                      version.duration,
+                                      DateTimeUtils.formatDuration(
+                                        version.duration,
+                                      ),
                                       style: textTheme.bodyMedium,
                                     )
                                   : Text('-'),

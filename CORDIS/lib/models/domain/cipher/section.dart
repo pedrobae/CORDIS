@@ -29,15 +29,13 @@ class Section {
     );
   }
 
-  factory Section.fromFirestore(Map<String, dynamic> map) {
+  factory Section.fromFirestore(Map<String, String> map) {
     return Section(
       versionId: 0, // Will be set later
-      contentType: map['contentType'] as String? ?? '',
-      contentCode: map['contentCode'] as String? ?? '',
-      contentText: map['contentText'] as String? ?? '',
-      contentColor: c.colorFromHex(
-        map['contentColor'] as String? ?? '#FFFFFFFF',
-      ),
+      contentType: map['contentType'] ?? '',
+      contentCode: map['contentCode'] ?? '',
+      contentText: map['contentText'] ?? '',
+      contentColor: c.colorFromHex(map['contentColor'] ?? '#FFFFFFFF'),
     );
   }
 

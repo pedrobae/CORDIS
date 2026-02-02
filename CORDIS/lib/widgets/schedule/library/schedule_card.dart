@@ -1,8 +1,15 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
-import 'package:cordis/providers/schedule_provider.dart';
+import 'package:cordis/providers/navigation_provider.dart';
+import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
+import 'package:cordis/screens/schedule/view_schedule.dart';
+import 'package:cordis/utils/date_utils.dart';
+import 'package:cordis/widgets/delete_confirmation.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/schedule/library/duplicate_schedule_sheet.dart';
+import 'package:cordis/widgets/schedule/library/share_schedule_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,128 +25,254 @@ class ScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<ScheduleProvider, MyAuthProvider, UserProvider>(
-      builder: (context, scheduleProvider, authProvider, userProvider, child) {
-        final theme = Theme.of(context);
-        final colorScheme = theme.colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-        final schedule = scheduleProvider.getScheduleById(scheduleId)!;
-        return Container(
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            border: Border.all(color: colorScheme.surfaceContainerLowest),
-            borderRadius: BorderRadius.circular(0),
-          ),
-          child: Column(
-            children: [
-              Row(
+    return Consumer5<
+      LocalScheduleProvider,
+      PlaylistProvider,
+      MyAuthProvider,
+      UserProvider,
+      NavigationProvider
+    >(
+      builder:
+          (
+            context,
+            localScheduleProvider,
+            playlistProvider,
+            authProvider,
+            userProvider,
+            navigationProvider,
+            child,
+          ) {
+            // LOADING STATE
+            if (localScheduleProvider.isLoading ||
+                userProvider.isLoading ||
+                scheduleId == -1) {
+              return Center(
+                child: CircularProgressIndicator(color: colorScheme.primary),
+              );
+            }
+
+            final schedule = localScheduleProvider.getSchedule(scheduleId);
+
+            final playlist = playlistProvider.getPlaylistById(
+              schedule!.playlistId!,
+            );
+
+            String userRole = AppLocalizations.of(context)!.generalMember;
+            final roleFound = localScheduleProvider.getUserRoleInSchedule(
+              scheduleId,
+              userProvider.getLocalIdByFirebaseId(authProvider.id!),
+            );
+            if (roleFound != null) {
+              userRole = roleFound;
+            }
+
+            return Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: colorScheme.surfaceContainerLowest,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // SCHEDULE NAME
-                        Text(
-                          schedule.name,
-                          style: theme.textTheme.titleMedium!.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-
-                        // WHEN & WHERE
-                        Wrap(
-                          spacing: 16.0,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // SCHEDULE NAME
                             Text(
-                              '${schedule.date.day}/${schedule.date.month}/${schedule.date.year}',
-                              style: theme.textTheme.bodyMedium!.copyWith(
+                              schedule.name,
+                              style: theme.textTheme.titleMedium!.copyWith(
+                                fontWeight: FontWeight.w600,
                                 color: colorScheme.onSurface,
                               ),
                             ),
-                            Text(
-                              schedule.time.format(context),
-                              style: theme.textTheme.bodyMedium!.copyWith(
-                                color: colorScheme.onSurface,
-                              ),
+
+                            // WHEN & WHERE
+                            Wrap(
+                              spacing: 16.0,
+                              children: [
+                                Text(
+                                  DateTimeUtils.formatDate(schedule.date),
+                                  style: theme.textTheme.bodyMedium!.copyWith(
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                                Text(DateTimeUtils.formatDate(schedule.date)),
+                                Text(
+                                  schedule.location,
+                                  style: theme.textTheme.bodyMedium!.copyWith(
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                              ],
                             ),
+
+                            // PLAYLIST INFO
+                            playlist != null
+                                ? Text(
+                                    '${AppLocalizations.of(context)!.playlist}: ${playlist.name}',
+                                    style: theme.textTheme.bodyMedium,
+                                  )
+                                : SizedBox.shrink(),
+
+                            // YOUR ROLE INFO
                             Text(
-                              schedule.location,
-                              style: theme.textTheme.bodyMedium!.copyWith(
-                                color: colorScheme.onSurface,
-                              ),
+                              '${AppLocalizations.of(context)!.role}: $userRole',
+                              style: theme.textTheme.bodyMedium,
                             ),
                           ],
                         ),
-
-                        // PLAYLIST INFO
-                        schedule.playlist != null
-                            ? Text(
-                                '${AppLocalizations.of(context)!.playlist}: ${schedule.playlist!.name}',
-                                style: theme.textTheme.bodyMedium,
-                              )
-                            : SizedBox.shrink(),
-
-                        // YOUR ROLE INFO
-                        Text(
-                          '${AppLocalizations.of(context)!.role}: ${scheduleProvider.getUserRoleInSchedule(scheduleId, userProvider.getLocalIdByFirebaseId(authProvider.id!)) ?? AppLocalizations.of(context)!.generalMember}',
-                          style: theme.textTheme.bodyMedium,
+                      ),
+                      if (showActions) ...[
+                        IconButton(
+                          onPressed: () => _openScheduleActionsSheet(
+                            context,
+                            scheduleId,
+                            localScheduleProvider,
+                          ),
+                          icon: Icon(Icons.more_vert),
                         ),
                       ],
-                    ),
+                    ],
                   ),
-                  if (showActions) ...[
-                    IconButton(
-                      onPressed: () {
-                        // TODO: Implement schedule actions
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            backgroundColor: Colors.amberAccent,
-                            content: Text(
-                              'Funcionalidade em desenvolvimento,',
-                              style: TextStyle(color: Colors.black),
+                  // BOTTOM BUTTONS
+                  FilledTextButton(
+                    isDark: true,
+                    isDense: true,
+                    onPressed: () {
+                      navigationProvider.push(
+                        ViewScheduleScreen(scheduleId: scheduleId),
+                        showAppBar: false,
+                        showDrawerIcon: false,
+                      );
+                    },
+                    text: AppLocalizations.of(
+                      context,
+                    )!.viewPlaceholder(AppLocalizations.of(context)!.schedule),
+                  ),
+                  FilledTextButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (BuildContext context) {
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
                             ),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.more_vert),
-                    ),
-                  ],
+                            child: ShareScheduleSheet(scheduleId: scheduleId),
+                          );
+                        },
+                      );
+                    },
+                    text: AppLocalizations.of(context)!.share,
+                    isDense: true,
+                  ),
                 ],
               ),
-              // BOTTOM BUTTONS
-              FilledTextButton(
-                isDarkButton: true,
-                onPressed: () {
-                  // TODO: Implement navigation to schedule view
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      backgroundColor: Colors.amberAccent,
-                      content: Text(
-                        'Funcionalidade em desenvolvimento,',
-                        style: TextStyle(color: Colors.black),
-                      ),
+            );
+          },
+    );
+  }
+
+  void _openScheduleActionsSheet(
+    BuildContext context,
+    int scheduleId,
+    LocalScheduleProvider localScheduleProvider,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+          ),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 8,
+            children: [
+              // HEADER
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.scheduleActions,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+
+              // ACTIONS
+              // duplicate
+              FilledTextButton(
+                text: AppLocalizations.of(context)!.duplicatePlaceholder(''),
+                tooltip: AppLocalizations.of(
+                  context,
+                )!.duplicateTooltip(AppLocalizations.of(context)!.setup),
+                onPressed: () =>
+                    _openDuplicateScheduleSheet(context, scheduleId),
+                trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
+              ),
+              // delete
+              FilledTextButton(
+                text: AppLocalizations.of(context)!.delete,
+                tooltip: AppLocalizations.of(context)!.deleteScheduleTooltip,
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return DeleteConfirmationSheet(
+                        itemType: AppLocalizations.of(context)!.schedule,
+                        onConfirm: () {
+                          Navigator.of(context).pop();
+                          localScheduleProvider.deleteSchedule(scheduleId);
+                        },
+                      );
+                    },
                   );
                 },
-                text: AppLocalizations.of(context)!.view,
+                trailingIcon: Icons.chevron_right,
+                isDangerous: true,
+                isDiscrete: true,
               ),
-              FilledTextButton(
-                onPressed: () {
-                  // TODO: Implement share functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      backgroundColor: Colors.amberAccent,
-                      content: Text(
-                        'Funcionalidade em desenvolvimento,',
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    ),
-                  );
-                },
-                text: AppLocalizations.of(context)!.share,
-              ),
+
+              SizedBox(height: 16),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void _openDuplicateScheduleSheet(BuildContext context, int scheduleId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: DuplicateScheduleSheet(scheduleId: scheduleId),
         );
       },
     );

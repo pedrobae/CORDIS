@@ -10,13 +10,7 @@ class UserRepository {
   Future<int> createUser(User user) async {
     final db = await _databaseHelper.database;
 
-    // Convert the user model to a Map for insertion
-    final userData = user.toJson();
-
-    // Remove the id field for auto-increment
-    userData.remove('id');
-
-    return await db.insert('user', userData);
+    return await db.insert('user', user.toSQLite());
   }
 
   // ===== READ =====
@@ -87,7 +81,7 @@ class UserRepository {
 
     return await db.update(
       'user',
-      user.toJson(),
+      user.toSQLite(),
       where: 'id = ?',
       whereArgs: [user.id],
     );

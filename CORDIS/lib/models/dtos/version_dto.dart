@@ -74,6 +74,29 @@ class VersionDto {
     };
   }
 
+  factory VersionDto.fromCache(Map<String, dynamic> map) {
+    return VersionDto(
+      firebaseId: map['firebaseId'] as String?,
+      author: map['author'] as String,
+      title: map['title'] as String,
+      duration: map['duration'] as int? ?? 0,
+      bpm: map['bpm'] as int? ?? 0,
+      language: map['language'] as String,
+      versionName: map['versionName'] as String,
+      originalKey: map['originalKey'] as String,
+      transposedKey: map['transposedKey'] as String?,
+      tags: (map['tags'] as List<dynamic>).map((e) => e.toString()).toList(),
+      songStructure: (map['songStructure'] as List<dynamic>)
+          .map((e) => e.toString())
+          .toList(),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int),
+      sections: (map['sections'] as Map<String, dynamic>).map(
+        (sectionsCode, section) =>
+            MapEntry(sectionsCode, Map<String, String>.from(section)),
+      ),
+    );
+  }
+
   /// To JSON for caching (weekly public versions)
   Map<String, dynamic> toCache() {
     return {
@@ -88,7 +111,7 @@ class VersionDto {
       'transposedKey': transposedKey,
       'tags': tags,
       'songStructure': songStructure,
-      'updatedAt': FirestoreTimestampHelper.fromDateTime(updatedAt),
+      'updatedAt': updatedAt?.millisecondsSinceEpoch,
       'sections': sections,
     };
   }

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 
-import 'package:cordis/widgets/app_drawer.dart';
+import 'package:cordis/widgets/side_menu.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -56,22 +55,22 @@ class MainScreenState extends State<MainScreen> {
           child: Scaffold(
             appBar: navigationProvider.showAppBar
                 ? AppBar(
-                    backgroundColor: colorScheme.surfaceContainer,
+                    backgroundColor: colorScheme.surface,
                     centerTitle: true,
-                    title: SvgPicture.asset(
-                      'assets/logos/v2_simple_color_white.svg',
-                      width: 80,
+                    title: Image.asset(
+                      'assets/logos/app_icon_transparent.png',
+                      height: 40,
                     ),
                   )
                 : null,
-            drawer: navigationProvider.showDrawerIcon ? AppDrawer() : null,
+            drawer: navigationProvider.showDrawerIcon ? SideMenu() : null,
             bottomNavigationBar: navigationProvider.showBottomNavBar
                 ? Container(
                     decoration: BoxDecoration(
                       border: Border(
                         top: BorderSide(
                           color: colorScheme.surfaceContainerLowest,
-                          width: 0.1,
+                          width: 0.5,
                         ),
                       ),
                     ),
@@ -79,11 +78,12 @@ class MainScreenState extends State<MainScreen> {
                       currentIndex: navigationProvider.currentRoute.index,
                       selectedLabelStyle: TextStyle(
                         color: colorScheme.primary,
-                        fontSize: 12,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                       unselectedLabelStyle: TextStyle(
                         color: colorScheme.onSurface,
-                        fontSize: 12,
+                        fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
                       showUnselectedLabels: true,
@@ -99,7 +99,7 @@ class MainScreenState extends State<MainScreen> {
                       items: navigationProvider
                           .getNavigationItems(
                             context,
-                            iconSize: 24,
+                            iconSize: 28,
                             color: colorScheme.onSurface,
                             activeColor: theme.colorScheme.primary,
                           )

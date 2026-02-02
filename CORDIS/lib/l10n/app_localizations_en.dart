@@ -12,6 +12,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'CORDIS';
 
   @override
+  String get newHeart => 'New Heart Music Ministries';
+
+  @override
+  String get setup => 'Setup';
+
+  @override
+  String get hour => 'Hour';
+
+  @override
+  String get minute => 'Minute';
+
+  @override
+  String get second => 'Second';
+
+  @override
+  String get comingSoon => 'Feature under development';
+
+  @override
+  String get current => 'Current';
+
+  @override
   String get authentication => 'Authentication';
 
   @override
@@ -42,6 +63,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotPasswordSuffix => 'Please try again or Request a new one.';
 
   @override
+  String get user => 'User';
+
+  @override
+  String get guest => 'Guest';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get enterNameHint => 'Enter name...';
+
+  @override
+  String get enterEmailHint => 'Enter email...';
+
+  @override
+  String get pleaseEnterNameAndEmail => 'Please enter name and email.';
+
+  @override
+  String get userNotFoundInCloud => 'User not found in cloud.';
+
+  @override
   String get home => 'Home';
 
   @override
@@ -54,7 +96,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schedule => 'Schedule';
 
   @override
-  String get settings => 'Settings';
+  String get settings => 'Configuration';
 
   @override
   String get about => 'About';
@@ -66,22 +108,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get title => 'Title';
 
   @override
-  String get titleHint => 'Enter title ...';
-
-  @override
   String get author => 'Author';
 
   @override
   String get musicKey => 'Key';
 
   @override
-  String get bpm => 'BPM';
+  String get bpm => 'Tempo (BPM)';
 
   @override
   String get duration => 'Duration';
 
   @override
   String get language => 'Language';
+
+  @override
+  String get tag => 'Tag';
 
   @override
   String get version => 'Version';
@@ -96,7 +138,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get estimatedTime => 'Estimated Time';
 
   @override
-  String get notesOptional => 'Notes (Optional)';
+  String get notes => 'Notes';
 
   @override
   String get sections => 'Sections';
@@ -111,8 +153,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectSectionType => 'Select your Section';
 
   @override
-  String get noSectionsInStructurePrompt =>
-      'No sections in structure. Use the button above to add sections.';
+  String get emptyStructure =>
+      'No sections in structure.\nUse the button above to add sections.';
+
+  @override
+  String get noLyrics => 'Please add lyrics & chords to get started.';
 
   @override
   String get lyrics => 'Lyrics';
@@ -121,13 +166,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionCode => 'Section Code';
 
   @override
+  String get sectionCodeHint => 'e.g. V1, C, I, ...';
+
+  @override
+  String get sectionCodeInstruction => 'Max 2 characters allowed';
+
+  @override
   String get sectionType => 'Section Type';
+
+  @override
+  String get sectionTypeHint => 'e.g. Verse, Chorus, Bridge...';
 
   @override
   String get sectionColor => 'Section Color';
 
   @override
-  String get sectionText => 'Section Text...';
+  String get sectionColorHint => 'Select the section color...';
+
+  @override
+  String get sectionText => 'Section Text';
+
+  @override
+  String get sectionTextHint =>
+      'Enter the section text in chordPro format, (lyrics[chord])';
 
   @override
   String get cipherEditorTitle => 'Song Editor';
@@ -171,7 +232,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sort => 'Sort';
 
   @override
-  String get noCiphersFound => 'No Song Map found';
+  String get emptyCipherLibrary =>
+      'No Songs in the Library.\nPlease add songs to get started.';
 
   @override
   String get playlist => 'Playlist';
@@ -196,7 +258,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchPlaylist => 'Search playlists...';
 
   @override
-  String get noPlaylistsFound => 'No playlists found';
+  String get emptyPlaylistLibrary =>
+      'No Playlists found.\nPlease create a playlist to get started.';
 
   @override
   String get addToPlaylist => 'Add to Playlist';
@@ -209,6 +272,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please add Song and Flow items to build your playlist.';
 
   @override
+  String get noPlaylistItems => 'No items in this playlist.';
+
+  @override
   String get deletePlaylistDescription =>
       'When deleting a playlist, all of its items will also be deleted. This action cannot be undone.';
 
@@ -216,7 +282,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get item => 'item';
 
   @override
-  String get items => 'items';
+  String get theme => 'Theme';
+
+  @override
+  String get themeSubtitle => 'Customize the appearance of the app';
+
+  @override
+  String get changeLanguage => 'Change Language';
+
+  @override
+  String get changeLanguageSubtitle => 'Change the application language';
+
+  @override
+  String get developmentTools => 'Development Tools';
+
+  @override
+  String get database => 'Database';
+
+  @override
+  String get resetDatabase => 'Reset Database';
+
+  @override
+  String get resetDatabaseSubtitle => 'Wipes the entire database';
+
+  @override
+  String get databaseInformation => 'Database Information';
+
+  @override
+  String get recordsPerTable => 'Records per Table';
+
+  @override
+  String tableData(Object tableName) {
+    return 'Table: $tableName';
+  }
+
+  @override
+  String get databaseInfoSubtitle => 'View tables and entries in the database';
+
+  @override
+  String get reloadInterface => 'Reload Interface';
+
+  @override
+  String get reloadInterfaceSubtitle =>
+      'Clears cached data and reloads all providers';
 
   @override
   String get role => 'Role';
@@ -225,10 +333,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalMember => 'General Member';
 
   @override
-  String get share => 'Share';
-
-  @override
-  String get view => 'View';
+  String viewPlaceholder(Object object) {
+    return 'View $object';
+  }
 
   @override
   String createPlaceholder(Object object) {
@@ -256,16 +363,156 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String setPlaceholder(Object object) {
+    return 'Set $object';
+  }
+
+  @override
+  String duplicateTooltip(Object object) {
+    return 'Create a copy of this $object';
+  }
+
+  @override
+  String get createLocalCopy => 'Create a Local Copy';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get shareCode => 'Share Code';
+
+  @override
+  String get sendToRoleMembers => 'Send to Role Members';
+
+  @override
+  String get sendInvites => 'Send Invites';
+
+  @override
+  String get inviteSentSuccessfully => 'Invites sent successfully!';
+
+  @override
+  String get emailInviteDescription =>
+      'An email invite has been sent to the teams';
+
+  @override
+  String get scheduleName => 'Schedule Name';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get startTime => 'Start Time';
+
+  @override
+  String get location => 'Location';
+
+  @override
+  String get roomVenue => 'Room/Venue';
+
+  @override
+  String get annotations => 'Annotations';
+
+  @override
+  String get schedulePlaylist => 'Schedule Playlist';
+
+  @override
+  String get changePlaylist => 'Change Playlist';
+
+  @override
+  String get selectPlaylistForScheduleInstruction =>
+      'Please create a schedule by selecting a playlist below.';
+
+  @override
+  String get scheduleDetails => 'Schedule Details';
+
+  @override
+  String get fillScheduleDetailsInstruction =>
+      'Please fill in the schedule details.';
+
+  @override
+  String get createRolesAndAssignUsersInstruction =>
+      'Please create roles and assign Members to the schedule.';
+
+  @override
+  String get pleaseEnterScheduleName => 'Please enter a schedule name.';
+
+  @override
+  String get pleaseEnterDate => 'Please enter a valid date (DD/MM/YYYY).';
+
+  @override
+  String get pleaseEnterStartTime => 'Please enter a valid start time (HH:MM).';
+
+  @override
+  String get pleaseEnterLocation => 'Please enter a location.';
+
+  @override
+  String get noRoles => 'No roles yet.';
+
+  @override
+  String get addRolesInstructions =>
+      'Add your own roles and people, and assign them to this schedule.';
+
+  @override
+  String get roleNameHint => 'e.g., Worship Leader, Vocalist';
+
+  @override
+  String get member => 'Member';
+
+  @override
+  String assignMembersToRole(Object role) {
+    return 'Assign Members to $role';
+  }
+
+  @override
+  String get noMembers => 'No members yet.';
+
+  @override
+  String xMembers(Object count) {
+    return '$count members';
+  }
+
+  @override
   String get nextUp => 'Next Up';
 
   @override
-  String get nextThisMonth => 'Next This Month';
+  String get futureSchedules => 'Next Schedules';
+
+  @override
+  String get pastSchedules => 'Past Schedules';
 
   @override
   String get searchSchedule => 'Search schedule...';
 
   @override
   String get assignSchedule => 'Assign Schedule';
+
+  @override
+  String get scheduleActions => 'Service Actions';
+
+  @override
+  String get noPlaylistAssigned => 'No playlist assigned.';
+
+  @override
+  String get emptyScheduleLibrary =>
+      'Schedule is empty.\nPlease create a service to get started.';
+
+  @override
+  String get scheduleNotFound => 'Schedule Not Found';
+
+  @override
+  String get scheduleNotFoundMessage =>
+      'The requested schedule could not be found.';
+
+  @override
+  String get deleteScheduleTooltip => 'Permanently delete this service';
+
+  @override
+  String get play => 'Play';
+
+  @override
+  String nextPlaceholder(Object title) {
+    return 'Next: $title';
+  }
 
   @override
   String get create => 'Create';
@@ -354,6 +601,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get english => 'English';
 
   @override
+  String get load => 'Load';
+
+  @override
   String get loading => 'Loading...';
 
   @override
@@ -369,10 +619,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirm => 'Confirm';
 
   @override
+  String get keepGoing => 'Continue';
+
+  @override
   String get quickAction => 'Quick Action';
 
   @override
   String get copySuffix => '(Copy)';
+
+  @override
+  String get copyCode => 'Copy Code';
+
+  @override
+  String get codeCopied => 'Code Copied!';
+
+  @override
+  String get assign => 'Assign';
+
+  @override
+  String get clear => 'Clear';
 
   @override
   String get delete => 'Delete';
@@ -389,12 +654,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteWarningMessage => 'This action cannot be undone.';
 
   @override
-  String welcome(Object userName) {
+  String helloUser(Object userName) {
     return 'Hello $userName';
   }
 
   @override
-  String get anonymousWelcome => 'Welcome';
+  String get welcome => 'Welcome';
+
+  @override
+  String get getStartedMessage =>
+      'Get started by creating or importing your first song map.';
 
   @override
   String get by => 'by';
@@ -425,13 +694,54 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get hintPrefixO => 'Enter your ';
+  String get keyHint => 'Select key...';
 
   @override
-  String get hintPrefixA => 'Enter your ';
+  String get titleHint => 'Enter a title';
 
   @override
-  String get hintSuffix => ' here...';
+  String get authorHint => 'Enter an author name';
+
+  @override
+  String get versionNameHint => 'Enter a version name';
+
+  @override
+  String get bpmHint => 'Enter tempo in BPM';
+
+  @override
+  String get durationHint => 'Enter the Estimated Time (MM:SS)';
+
+  @override
+  String get languageHint => 'Enter song language';
+
+  @override
+  String get tagHint => 'Type a tag';
+
+  @override
+  String stepXofY(Object current, Object total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String commonChordsOfKey(Object key) {
+    return 'Common Chords in - $key';
+  }
+
+  @override
+  String get chordExpansionInstruction => 'Hold a chord to show variations.';
+
+  @override
+  String get customChord => 'Custom Chord';
+
+  @override
+  String get customChordInstruction => 'Type to create a custom chord.';
+
+  @override
+  String get draggableChordInstruction =>
+      'Drag chords to the letters to add them to the song.';
+
+  @override
+  String get error => 'Error';
 
   @override
   String errorMessage(Object job, Object errorDetails) {
@@ -443,4 +753,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fieldRequired => 'This field is required.';
+
+  @override
+  String get intValidationError => 'Please enter a valid positive integer.';
+
+  @override
+  String optionalPlaceholder(Object field) {
+    return '$field (Optional)';
+  }
+
+  @override
+  String pluralPlaceholder(Object label) {
+    return '${label}s';
+  }
 }

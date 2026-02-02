@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cordis/models/domain/user.dart';
+import 'package:cordis/models/dtos/user_dto.dart';
 import 'package:cordis/repositories/local_user_repository.dart';
 import 'package:cordis/repositories/cloud_user_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -11,7 +12,6 @@ class UserProvider extends ChangeNotifier {
   UserProvider();
 
   List<User> _knownUsers = [];
-  List<User> _filteredUsers = [];
   String? _error;
   bool _hasInitialized = false;
   bool _isLoading = false;
@@ -19,7 +19,6 @@ class UserProvider extends ChangeNotifier {
 
   // Getters
   List<User> get knownUsers => _knownUsers;
-  List<User> get searchResults => _filteredUsers;
   String? get error => _error;
   bool get hasInitialized => _hasInitialized;
   bool get isLoading => _isLoading;
@@ -74,6 +73,21 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  Future<User> createLocalUnknownUser(String username, String email) async {
+    final newUser = User(
+      id: -1,
+      username: username,
+      mail: email,
+      firebaseId: null,
+    );
+
+    final userId = await _localUserRepository.createUser(newUser);
+    final savedUser = newUser.copyWith(id: userId);
+    _knownUsers.add(savedUser);
+    notifyListeners();
+    return savedUser;
+  }
+
   // ==== READ =====
   /// Load users from local SQLite db
   Future<void> loadUsers() async {
@@ -101,21 +115,28 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  /// Search users
-  void searchUsers(String value) async {
-    String searchValue = value.toLowerCase();
-    if (searchValue.isEmpty) {
-      _filteredUsers = _knownUsers;
-    } else {
-      _filteredUsers = _knownUsers
-          .where(
-            (user) =>
-                user.username.toLowerCase().contains(searchValue) ||
-                user.mail.toLowerCase().contains(searchValue),
-          )
-          .toList();
-    }
+  ///
+  Future<UserDto?> fetchUserDtoByEmail(String email) async {
+    if (_isLoading) return null;
+
+    _isLoading = true;
+    _error = null;
     notifyListeners();
+
+    UserDto? userDto;
+
+    try {
+      userDto = await _cloudUserRepository.fetchUserByEmail(email);
+    } catch (e) {
+      if (kDebugMode) {
+        print('User with Email $email not found on firestore.');
+      }
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return userDto;
   }
 
   int? getLocalIdByFirebaseId(String firebaseId) {
@@ -154,14 +175,8 @@ class UserProvider extends ChangeNotifier {
         .toList();
   }
 
-  // Clears search users
-  void clearSearchResults() async {
-    _filteredUsers = _knownUsers;
-  }
-
   void clearCache() {
     _knownUsers = [];
-    _filteredUsers = [];
     _error = null;
     _hasInitialized = false;
     _isLoading = false;

@@ -3,7 +3,8 @@ import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/providers/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist_provider.dart';
-import 'package:cordis/providers/version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
+import 'package:cordis/screens/playlist/edit_playlist.dart';
 import 'package:cordis/widgets/delete_confirmation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +19,7 @@ class PlaylistCardActionsSheet extends StatelessWidget {
     return Consumer4<
       NavigationProvider,
       PlaylistProvider,
-      VersionProvider,
+      LocalVersionProvider,
       FlowItemProvider
     >(
       builder:
@@ -69,7 +70,10 @@ class PlaylistCardActionsSheet extends StatelessWidget {
                   // RENAME PLAYLIST
                   GestureDetector(
                     onTap: () {
-                      // TODO implement rename playlist
+                      Navigator.of(context).pop(); // Close the bottom sheet
+                      navigationProvider.push(
+                        EditPlaylistScreen(playlistId: playlistId),
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -101,22 +105,34 @@ class PlaylistCardActionsSheet extends StatelessWidget {
                   // DELETE PLAYLIST
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pop(); // Close the bottom sheet
-                      showDialog(
+                      showModalBottomSheet(
+                        isScrollControlled: true,
                         context: context,
-                        builder: (dialogContext) => DeleteConfirmationDialog(
-                          itemType: AppLocalizations.of(context)!.playlist,
-                          isDangerous: true,
-                          onConfirm: () async {
-                            await _deletePlaylist(
-                              context,
-                              playlistProvider,
-                              versionProvider,
-                              navigationProvider,
-                              flowItemProvider,
-                            );
-                          },
-                        ),
+                        builder: (context) {
+                          return BottomSheet(
+                            shape: LinearBorder(),
+                            onClosing: () {},
+                            builder: (context) {
+                              return DeleteConfirmationSheet(
+                                itemType: AppLocalizations.of(
+                                  context,
+                                )!.playlist,
+                                onConfirm: () async {
+                                  await _deletePlaylist(
+                                    context,
+                                    playlistProvider,
+                                    versionProvider,
+                                    navigationProvider,
+                                    flowItemProvider,
+                                  );
+                                  if (context.mounted) {
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                              );
+                            },
+                          );
+                        },
                       );
                     },
                     child: Container(
@@ -170,7 +186,7 @@ class PlaylistCardActionsSheet extends StatelessWidget {
   Future<void> _deletePlaylist(
     BuildContext context,
     PlaylistProvider playlistProvider,
-    VersionProvider versionProvider,
+    LocalVersionProvider versionProvider,
     NavigationProvider navigationProvider,
     FlowItemProvider flowItemProvider,
   ) async {

@@ -297,6 +297,6 @@ class NeutralPalette extends Palette {
   static const Color scrimLight = Color(0x0D000000); // Light scrim (5% opacity)
   static const Color scrimDark = Color(0x1A000000); // Dark scrim (10% opacity)
 
-  static const Color error = Color(0xFFD32F2F); // Standard error red
+  static const Color error = Colors.red; // Standard error red
   static const Color onError = Color(0xFFFFFFFF); // White text for contrast
 }

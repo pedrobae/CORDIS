@@ -1,0 +1,331 @@
+import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
+import 'package:cordis/providers/schedule/local_schedule_provider.dart';
+import 'package:cordis/utils/date_time_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class ScheduleForm extends StatefulWidget {
+  final dynamic scheduleId;
+  final TextEditingController nameController;
+  final TextEditingController dateController;
+  final TextEditingController startTimeController;
+  final TextEditingController locationController;
+  final TextEditingController roomVenueController;
+  final TextEditingController? annotationsController;
+
+  const ScheduleForm({
+    super.key,
+    this.scheduleId,
+    required this.nameController,
+    required this.dateController,
+    required this.startTimeController,
+    required this.locationController,
+    required this.roomVenueController,
+    this.annotationsController,
+  });
+
+  @override
+  State<ScheduleForm> createState() => _ScheduleFormState();
+}
+
+class _ScheduleFormState extends State<ScheduleForm> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // If editing an existing schedule, load its details
+    if (widget.scheduleId != null) {
+      final localScheduleProvider = context.read<LocalScheduleProvider>();
+      final cloudScheduleProvider = context.read<CloudScheduleProvider>();
+
+      if (widget.scheduleId is int) {
+        final schedule = localScheduleProvider.getSchedule(widget.scheduleId)!;
+        widget.nameController.text = schedule.name;
+        widget.dateController.text =
+            '${schedule.date.day}/${schedule.date.month}/${schedule.date.year}';
+        widget.startTimeController.text =
+            '${schedule.time.hour}:${schedule.time.minute.toString().padLeft(2, '0')}';
+        widget.locationController.text = schedule.location;
+        widget.annotationsController?.text = schedule.annotations ?? '';
+      } else {
+        final schedule = cloudScheduleProvider.getSchedule(widget.scheduleId)!;
+        widget.nameController.text = schedule.name;
+        widget.dateController.text =
+            '${schedule.datetime.toDate().day}/${schedule.datetime.toDate().month}/${schedule.datetime.toDate().year}';
+        widget.startTimeController.text =
+            '${schedule.datetime.toDate().hour}:${schedule.datetime.toDate().minute.toString().padLeft(2, '0')}';
+        widget.locationController.text = schedule.location;
+        widget.annotationsController?.text = schedule.annotations ?? '';
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LocalScheduleProvider>(
+      builder: (context, value, child) => Form(
+        autovalidateMode: AutovalidateMode.onUnfocus,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 16,
+            children: [
+              _buildFormField(
+                AppLocalizations.of(context)!.scheduleName,
+                widget.nameController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(
+                      context,
+                    )!.pleaseEnterScheduleName;
+                  }
+                  return null;
+                },
+              ),
+              _buildDatePickerField(
+                AppLocalizations.of(context)!.date,
+                widget.dateController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.pleaseEnterDate;
+                  }
+                  return null;
+                },
+              ),
+              _buildTimePickerField(
+                AppLocalizations.of(context)!.startTime,
+                widget.startTimeController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.pleaseEnterStartTime;
+                  }
+                  return null;
+                },
+              ),
+              _buildFormField(
+                AppLocalizations.of(context)!.location,
+                widget.locationController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.pleaseEnterLocation;
+                  }
+                  return null;
+                },
+              ),
+              _buildFormField(
+                AppLocalizations.of(
+                  context,
+                )!.optionalPlaceholder(AppLocalizations.of(context)!.roomVenue),
+                widget.roomVenueController,
+              ),
+              if (widget.annotationsController != null)
+                _buildFormField(
+                  AppLocalizations.of(context)!.optionalPlaceholder(
+                    AppLocalizations.of(context)!.annotations,
+                  ),
+                  widget.annotationsController!,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFormField(
+    String label,
+    TextEditingController controller, {
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
+      children: [
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+        ),
+        TextFormField(
+          validator: validator,
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: label,
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.surfaceContainerLowest,
+              ),
+              borderRadius: BorderRadius.circular(0),
+            ),
+            visualDensity: VisualDensity.compact,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDatePickerField(
+    String label,
+    TextEditingController controller, {
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
+      children: [
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+        ),
+        TextFormField(
+          validator: validator,
+          controller: controller,
+          readOnly: true,
+          decoration: InputDecoration(
+            hintText: label,
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.surfaceContainerLowest,
+              ),
+              borderRadius: BorderRadius.circular(0),
+            ),
+            visualDensity: VisualDensity.compact,
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.calendar_today),
+              onPressed: () => _selectDate(context, controller),
+            ),
+          ),
+          onTap: () => _selectDate(context, controller),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimePickerField(
+    String label,
+    TextEditingController controller, {
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
+      children: [
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+        ),
+        TextFormField(
+          validator: validator,
+          controller: controller,
+          readOnly: true,
+          decoration: InputDecoration(
+            hintText: label,
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.surfaceContainerLowest,
+              ),
+              borderRadius: BorderRadius.circular(0),
+            ),
+            visualDensity: VisualDensity.compact,
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.access_time),
+              onPressed: () => _selectTime(context, controller),
+            ),
+          ),
+          onTap: () => _selectTime(context, controller),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _selectDate(
+    BuildContext context,
+    TextEditingController controller,
+  ) async {
+    DateTime initialDate = DateTime.now();
+
+    // Parse existing date if available
+    if (controller.text.isNotEmpty) {
+      try {
+        final parts = controller.text.split('/');
+        if (parts.length == 3) {
+          initialDate = DateTime(
+            int.parse(parts[2]),
+            int.parse(parts[1]),
+            int.parse(parts[0]),
+          );
+        }
+      } catch (_) {
+        // If parsing fails, use current date
+      }
+    }
+
+    final selectedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate.isAfter(DateTime(2020))
+          ? initialDate
+          : DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            datePickerTheme: DateTimePickerTheme.datePickerTheme(context),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (selectedDate != null) {
+      controller.text =
+          '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}';
+    }
+  }
+
+  Future<void> _selectTime(
+    BuildContext context,
+    TextEditingController controller,
+  ) async {
+    TimeOfDay initialTime = TimeOfDay.now();
+
+    // Parse existing time if available
+    if (controller.text.isNotEmpty) {
+      try {
+        final parts = controller.text.split(':');
+        if (parts.length == 2) {
+          initialTime = TimeOfDay(
+            hour: int.parse(parts[0]),
+            minute: int.parse(parts[1]),
+          );
+        }
+      } catch (_) {
+        // If parsing fails, use current time
+      }
+    }
+
+    final selectedTime = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            timePickerTheme: DateTimePickerTheme.timePickerTheme(context),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (selectedTime != null) {
+      final hours = selectedTime.hour.toString();
+      final minutes = selectedTime.minute.toString().padLeft(2, '0');
+      controller.text = '$hours:$minutes';
+    }
+  }
+}

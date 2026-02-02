@@ -152,7 +152,7 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
                             ),
                             FilledTextButton(
                               text: AppLocalizations.of(context)!.import,
-                              isDarkButton: true,
+                              isDark: true,
                               onPressed: () async {
                                 final text = _importTextController.text;
                                 if (text.isNotEmpty) {
@@ -166,7 +166,8 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
                                   navigationProvider.push(
                                     EditCipherScreen(
                                       versionType: VersionType.import,
-                                      versionId: -1,
+                                      versionID: -1,
+                                      cipherID: -1,
                                     ),
                                   );
                                 }

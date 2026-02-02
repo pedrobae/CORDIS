@@ -44,44 +44,36 @@ class _PlaylistScrollViewState extends State<PlaylistScrollView> {
               );
             }
 
+            final List<int> playlistIds = playlistProvider.filteredPlaylists;
+
             // Display playlist list
             return RefreshIndicator(
               onRefresh: () async {
                 playlistProvider.loadPlaylists();
               },
               child: playlistProvider.filteredPlaylists.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.music_note_outlined,
-                            size: 64,
-                            color: colorScheme.primary,
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(height: 64),
+                        Text(
+                          AppLocalizations.of(context)!.emptyPlaylistLibrary,
+                          style: theme.textTheme.bodyLarge!.copyWith(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w500,
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            AppLocalizations.of(context)!.noPlaylistsFound,
-                            style: theme.textTheme.bodyLarge!.copyWith(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     )
                   : ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
                       cacheExtent: 500,
                       itemCount: playlistProvider.filteredPlaylists.length,
                       itemBuilder: (context, index) {
-                        final playlistId = playlistProvider
-                            .filteredPlaylists
-                            .keys
-                            .elementAt(index);
                         return Container(
                           margin: const EdgeInsets.only(bottom: 8.0),
-                          child: PlaylistCard(playlistId: playlistId),
+                          child: PlaylistCard(playlistId: playlistIds[index]),
                         );
                       },
                     ),

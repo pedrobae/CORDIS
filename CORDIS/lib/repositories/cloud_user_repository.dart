@@ -29,4 +29,19 @@ class CloudUserRepository {
     }
     return users;
   }
+
+  Future<UserDto?> fetchUserByEmail(String email) async {
+    final querySnapshot = await _firestoreService.fetchDocumentsContainingValue(
+      collectionPath: 'users',
+      field: 'mail',
+      value: email,
+      orderField: '',
+    );
+
+    if (querySnapshot.isNotEmpty) {
+      final doc = querySnapshot.first;
+      return UserDto.fromFirestore(doc.data() as Map<String, dynamic>, doc.id);
+    }
+    return null;
+  }
 }

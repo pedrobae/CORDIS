@@ -22,53 +22,6 @@ class FlowItemProvider extends ChangeNotifier {
   String? get error => _error;
 
   // ===== READ =====
-  // Load single flowItem
-  Future<void> _loadFlowItem(int flowItemId, {bool forceReload = false}) async {
-    if (kDebugMode) {
-      print(
-        '===== Loading Flow Item - $flowItemId - Forced Reload - $forceReload =====',
-      );
-    }
-    // Check if already loaded (unless forcing reload)
-    if (!forceReload && _flowItems.containsKey(flowItemId)) {
-      return;
-    }
-
-    _error = null;
-    notifyListeners();
-
-    try {
-      final flowItem = await _flowItemRepo.getFlowItem(flowItemId);
-      if (flowItem != null) {
-        _flowItems[flowItem.id!] = flowItem;
-      }
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      notifyListeners();
-    }
-  }
-
-  /// Load all Flow Items for a given Playlist
-  Future<void> loadFlowItemByPlaylistId(int playlistId) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      final flowItems = await _flowItemRepo.getFlowItemsByPlaylistId(
-        playlistId,
-      );
-      for (final item in flowItems) {
-        _flowItems[item.id!] = item;
-      }
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
 
   Future<String?> getFirebaseIdByLocalId(int localId) async {
     // Check cache first
@@ -81,6 +34,7 @@ class FlowItemProvider extends ChangeNotifier {
   }
 
   Future<int?> getLocalIdByFirebaseId(String firebaseId) async {
+    if (firebaseId.isEmpty) return null;
     // Check cache first
     for (final entry in _flowItems.entries) {
       if (entry.value.firebaseId == firebaseId) {
@@ -100,12 +54,13 @@ class FlowItemProvider extends ChangeNotifier {
     return null;
   }
 
-  Future<void> loadFlowItemById(int id) async {
+  Future<void> loadFlowItem(int id) async {
     // Not in cache, query repository
     final flowItem = await _flowItemRepo.getFlowItem(id);
     if (flowItem != null) {
       _flowItems[id] = flowItem;
     }
+    notifyListeners();
   }
 
   // ===== CREATE =====
@@ -119,10 +74,9 @@ class FlowItemProvider extends ChangeNotifier {
 
     try {
       int id = await _flowItemRepo.createFlowItem(flowItem);
-      await _loadFlowItem(id, forceReload: true);
+      await loadFlowItem(id);
     } catch (e) {
       _error = e.toString();
-      rethrow;
     } finally {
       _isSaving = false;
       notifyListeners();
@@ -151,7 +105,7 @@ class FlowItemProvider extends ChangeNotifier {
 
       if (!exists) {
         // Create new
-        await _flowItemRepo.createFlowItem(flowItem);
+        localId = await _flowItemRepo.createFlowItem(flowItem);
       } else {
         // Update existing
         await _flowItemRepo.updateFlowItem(
@@ -163,10 +117,9 @@ class FlowItemProvider extends ChangeNotifier {
         );
       }
 
-      await _loadFlowItem(flowItem.id!, forceReload: true);
+      await loadFlowItem(localId);
     } catch (e) {
       _error = e.toString();
-      rethrow;
     } finally {
       _isSaving = false;
       notifyListeners();
@@ -201,10 +154,9 @@ class FlowItemProvider extends ChangeNotifier {
       );
 
       int newId = await _flowItemRepo.createFlowItem(duplicate);
-      await _loadFlowItem(newId, forceReload: true);
+      await loadFlowItem(newId);
     } catch (e) {
       _error = e.toString();
-      rethrow;
     } finally {
       _isSaving = false;
       notifyListeners();
@@ -234,10 +186,9 @@ class FlowItemProvider extends ChangeNotifier {
       );
 
       // Force reload the updated text section to get fresh data
-      await _loadFlowItem(id, forceReload: true);
+      await loadFlowItem(id);
     } catch (e) {
       _error = e.toString();
-      rethrow;
     } finally {
       _isSaving = false;
       notifyListeners();
@@ -258,7 +209,6 @@ class FlowItemProvider extends ChangeNotifier {
       _flowItems.remove(id); // Remove from local cache
     } catch (e) {
       _error = e.toString();
-      rethrow;
     } finally {
       _isDeleting = false;
       notifyListeners();

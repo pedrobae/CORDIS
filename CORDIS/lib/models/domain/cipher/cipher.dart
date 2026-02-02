@@ -1,6 +1,6 @@
 import 'package:cordis/models/domain/cipher/version.dart';
-import 'package:cordis/helpers/datetime.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
+import 'package:cordis/utils/date_utils.dart';
 
 class Cipher {
   final int id;
@@ -37,8 +37,8 @@ class Cipher {
       musicKey: json['music_key'] as String? ?? '',
       language: json['language'] as String? ?? 'por',
       createdAt:
-          DatetimeHelper.parseDateTime(json['created_at']) ?? DateTime.now(),
-      updatedAt: DatetimeHelper.parseDateTime(json['updated_at']),
+          DateTimeUtils.parseDateTime(json['created_at']) ?? DateTime.now(),
+      updatedAt: DateTimeUtils.parseDateTime(json['updated_at']),
       isLocal: json['isLocal'] as bool? ?? true, // Default to true for local DB
       versions: json['maps'] != null
           ? (json['maps'] as List).map((m) => Version.fromSqLite(m)).toList()

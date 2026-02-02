@@ -1,6 +1,8 @@
 import 'package:cordis/providers/navigation_provider.dart';
+import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/screens/playlist/view_playlist.dart';
 import 'package:cordis/utils/date_utils.dart';
+import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/playlist/library/playlist_card_actions.dart';
 import 'package:flutter/material.dart';
 
@@ -19,8 +21,8 @@ class PlaylistCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Consumer2<PlaylistProvider, NavigationProvider>(
-      builder: (context, playlistProvider, navigationProvider, child) {
+    return Consumer3<PlaylistProvider, NavigationProvider, SelectionProvider>(
+      builder: (context, playlistProvider, navigationProvider, selectionProvider, child) {
         final playlist = playlistProvider.getPlaylistById(playlistId)!;
 
         final itemCount = playlist.items.length;
@@ -28,66 +30,114 @@ class PlaylistCard extends StatelessWidget {
         // Card content
         return GestureDetector(
           onTap: () {
-            navigationProvider.push(
-              ViewPlaylistScreen(playlistId: playlistId),
-              showAppBar: false,
-              showDrawerIcon: false,
-            );
+            selectionProvider.isSelectionMode
+                ? null
+                : navigationProvider.push(
+                    ViewPlaylistScreen(playlistId: playlistId),
+                    showAppBar: false,
+                    showDrawerIcon: false,
+                  );
           },
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(color: colorScheme.surfaceContainerLowest),
             ),
             padding: const EdgeInsets.all(8.0),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // INFO
-                Expanded(
-                  child: Column(
-                    spacing: 2.0,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        playlist.name,
-                        style: Theme.of(context).textTheme.titleMedium!
-                            .copyWith(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18,
+                Row(
+                  children: [
+                    // SELECTION CHECKBOX
+                    selectionProvider.isSelectionMode
+                        ? Checkbox(
+                            value: selectionProvider.isSelected(playlistId),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(2),
                             ),
-                      ),
-                      Row(
-                        spacing: 8,
+                            onChanged: (isSelected) {
+                              if (isSelected == null) return;
+
+                              if (isSelected) {
+                                selectionProvider.select(playlistId);
+                              } else {
+                                selectionProvider.deselect(playlistId);
+                              }
+                            },
+                          )
+                        : const SizedBox.shrink(),
+
+                    // INFO
+                    Expanded(
+                      child: Column(
+                        spacing: 2.0,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            itemCount != 1
-                                ? '$itemCount ${AppLocalizations.of(context)!.items}'
-                                : '$itemCount ${AppLocalizations.of(context)!.item}',
-                            style: Theme.of(context).textTheme.bodyMedium!
+                            playlist.name,
+                            style: Theme.of(context).textTheme.titleMedium!
                                 .copyWith(
-                                  color: Theme.of(context).colorScheme.shadow,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18,
                                 ),
                           ),
-                          itemCount > 0
-                              ? Text(
-                                  '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(playlist.getTotalDuration())}',
-                                  style: Theme.of(context).textTheme.bodyMedium!
-                                      .copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.shadow,
-                                      ),
-                                )
-                              : const SizedBox.shrink(),
+                          Row(
+                            spacing: 8,
+                            children: [
+                              Text(
+                                itemCount != 1
+                                    ? '$itemCount ${AppLocalizations.of(context)!.pluralPlaceholder(
+                                        AppLocalizations.of(context)!.item, //
+                                      )}'
+                                    : '$itemCount ${AppLocalizations.of(context)!.item}',
+                                style: Theme.of(context).textTheme.bodyMedium!
+                                    .copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.shadow,
+                                    ),
+                              ),
+                              itemCount > 0
+                                  ? Text(
+                                      '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(playlist.getTotalDuration())}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.shadow,
+                                          ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ],
+                          ),
                         ],
                       ),
-                    ],
+                    ),
+                    // ACTIONS
+                    selectionProvider.isSelectionMode
+                        ? const SizedBox.shrink()
+                        : IconButton(
+                            onPressed: () => _openPlaylistActionsSheet(context),
+                            icon: Icon(Icons.more_vert),
+                          ),
+                  ],
+                ),
+                if (!selectionProvider.isSelectionMode)
+                  FilledTextButton(
+                    text: AppLocalizations.of(
+                      context,
+                    )!.viewPlaceholder(AppLocalizations.of(context)!.playlist),
+                    isDense: true,
+                    onPressed: () {
+                      navigationProvider.push(
+                        ViewPlaylistScreen(playlistId: playlistId),
+                        showAppBar: false,
+                        showDrawerIcon: false,
+                      );
+                    },
                   ),
-                ),
-                // ACTIONS
-                IconButton(
-                  onPressed: () => _openPlaylistActionsSheet(context),
-                  icon: Icon(Icons.more_vert),
-                ),
               ],
             ),
           ),

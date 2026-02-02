@@ -1,32 +1,32 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
+import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/parser_provider.dart';
 import 'package:cordis/providers/playlist_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
-import 'package:cordis/widgets/ciphers/editor/chord_palette.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/cipher_provider.dart';
-import 'package:cordis/providers/version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/metadata_tab.dart';
 import 'package:cordis/widgets/ciphers/editor/sections_tab.dart';
 
 class EditCipherScreen extends StatefulWidget {
-  final int? cipherId; // Null for new cipher
-  final dynamic versionId; // Null for new version // could be int or String
-  final int? playlistId;
+  final int? cipherID; // Null for new cipher
+  final dynamic versionID; // Null for new version // could be int or String
+  final int? playlistID;
   final VersionType versionType;
   final bool isEnabled;
 
   const EditCipherScreen({
     super.key,
-    this.cipherId,
-    this.versionId,
-    this.playlistId,
+    this.cipherID,
+    this.versionID,
+    this.playlistID,
     required this.versionType,
     this.isEnabled = true,
   });
@@ -38,29 +38,20 @@ class EditCipherScreen extends StatefulWidget {
 class _EditCipherScreenState extends State<EditCipherScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool paletteIsOpen = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // Load data and navigate to start tab after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
-      _navigateStartTab();
-    });
-
-    _tabController.addListener(() {
-      // Setting state to trigger rebuild
-      setState(() {
-        paletteIsOpen = false;
-      });
     });
   }
 
   Future<void> _loadData() async {
     final cipherProvider = context.read<CipherProvider>();
-    final versionProvider = context.read<VersionProvider>();
+    final localVersionProvider = context.read<LocalVersionProvider>();
+    final cloudVersionProvider = context.read<CloudVersionProvider>();
     final sectionProvider = context.read<SectionProvider>();
 
     switch (widget.versionType) {
@@ -73,79 +64,103 @@ class _EditCipherScreenState extends State<EditCipherScreen>
         cipherProvider.setNewCipherInCache(cipher);
         // Load imported version data
         final version = cipher.versions.first;
-        versionProvider.setNewVersionInCache(version);
+        localVersionProvider.setNewVersionInCache(version);
         // Load sections
         sectionProvider.setNewSectionsInCache(
           -1,
           version.sections!,
         ); // -1 for new/imported versions
+        break;
       case VersionType.cloud:
-        // Load cloud version
-        await versionProvider.ensureCloudVersionIsLoaded(widget.versionId!);
+        // Ensure cloud version
+        await cloudVersionProvider.ensureVersionIsLoaded(widget.versionID!);
         // Load sections
-        final version = versionProvider
-            .getCloudVersionByFirebaseId(widget.versionId!)!
+        final version = cloudVersionProvider
+            .getVersion(widget.versionID!)!
             .toDomain();
         sectionProvider.setNewSectionsInCache(
-          widget.versionId!,
+          widget.versionID!,
           version.sections!,
         );
         break;
       case VersionType.local:
         // Load the cipher
-        await cipherProvider.loadCipher(widget.cipherId!);
+        await cipherProvider.loadCipher(widget.cipherID!);
         // Load the version
-        await versionProvider.loadVersion(widget.versionId!);
+        await localVersionProvider.loadVersion(widget.versionID!);
         // Load sections
-        await sectionProvider.loadLocalSections(widget.versionId!);
+        await sectionProvider.loadLocalSections(widget.versionID!);
         break;
       case VersionType.brandNew:
-      // Nothing to load for brand new cipher/version
+        cipherProvider.setNewCipherInCache(Cipher.empty());
+        localVersionProvider.setNewVersionInCache(Version.empty());
+        break;
       case VersionType.playlist:
         final playlistProvider = context.read<PlaylistProvider>();
 
         final String playlistName = playlistProvider
-            .getPlaylistById(widget.playlistId!)!
+            .getPlaylistById(widget.playlistID!)!
             .name;
 
         // Create a new copy of the version for editing
         // Load the version
-        final Version originalVersion = versionProvider.getVersionById(
-          widget.versionId!,
-        )!;
-        // Create a copy of the version in cache
-        versionProvider.setNewVersionInCache(
-          originalVersion.copyWith(
-            versionName: AppLocalizations.of(
+        if (widget.versionID is int) {
+          final Version originalVersion = localVersionProvider.getVersion(
+            widget.versionID!,
+          )!;
+          // Create a copy of the version in cache
+          localVersionProvider.setNewVersionInCache(
+            originalVersion.copyWith(
+              versionName: AppLocalizations.of(
+                context,
+              )!.playlistVersionName(playlistName),
+            ),
+          );
+
+          // Load the cipher
+          await cipherProvider.loadCipher(widget.cipherID!);
+
+          // Load the sections in cache
+          await sectionProvider.loadLocalSections(widget.versionID!);
+
+          sectionProvider.setNewSectionsInCache(
+            -1,
+            sectionProvider.getSections(widget.versionID!),
+          );
+        } else {
+          final VersionDto originalVersion = cloudVersionProvider.getVersion(
+            widget.versionID!,
+          )!;
+
+          // Check if there exists a local cipher with the same title / author
+          final localCipherId = cipherProvider.getCipherIdByTitleOrAuthor(
+            originalVersion.title,
+            originalVersion.author,
+          );
+
+          if (localCipherId != -1 && localCipherId != null) {
+            await cipherProvider.loadCipher(localCipherId);
+          } else {
+            cipherProvider.setNewCipherInCache(
+              Cipher.fromVersionDto(originalVersion),
+            );
+          }
+          String? newName;
+          if (mounted) {
+            newName = AppLocalizations.of(
               context,
-            )!.playlistVersionName(playlistName),
-          ),
-        );
+            )!.playlistVersionName(playlistName);
+          }
 
-        // Load the cipher
-        await cipherProvider.loadCipher(widget.cipherId!);
+          final newVersion = originalVersion
+              .toDomain(cipherId: localCipherId)
+              .copyWith(versionName: newName);
 
-        // Load the sections in cache
-        await sectionProvider.loadLocalSections(widget.versionId!);
+          // Create a copy of the version in cache
+          localVersionProvider.setNewVersionInCache(newVersion);
 
-        sectionProvider.setNewSectionsInCache(
-          -1,
-          sectionProvider.getSections(widget.versionId!),
-        );
-        break;
-    }
-  }
-
-  void _navigateStartTab() {
-    switch (widget.versionType) {
-      case VersionType.import:
-      case VersionType.brandNew:
-        _tabController.index = 1; // Sections tab
-        break;
-      case VersionType.playlist:
-      case VersionType.cloud:
-      case VersionType.local:
-        _tabController.index = 0; // Info tab
+          sectionProvider.setNewSectionsInCache(-1, newVersion.sections!);
+        }
         break;
     }
   }
@@ -163,7 +178,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
 
     return Consumer6<
       CipherProvider,
-      VersionProvider,
+      LocalVersionProvider,
       SectionProvider,
       SelectionProvider,
       NavigationProvider,
@@ -182,17 +197,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           ) {
             return Scaffold(
               appBar: AppBar(
-                leading: selectionProvider.isSelectionMode
-                    ? BackButton(
-                        onPressed: () {
-                          navigationProvider.pop();
-                          selectionProvider.toggleItemSelection(
-                            widget.versionId!,
-                          );
-                          selectionProvider.enableSelectionMode();
-                        },
-                      )
-                    : null,
+                leading: BackButton(onPressed: () => navigationProvider.pop()),
                 title: Text(
                   selectionProvider.isSelectionMode
                       ? AppLocalizations.of(
@@ -204,50 +209,17 @@ class _EditCipherScreenState extends State<EditCipherScreen>
                   ),
                 ),
                 actions: [
-                  if (selectionProvider.isSelectionMode)
-                    TextButton(
-                      onPressed: () async {
-                        for (dynamic versionId
-                            in selectionProvider.selectedItemIds) {
-                          if (versionId.runtimeType == int) {
-                            // LOCAL VERSION: Create a copy of the version in the database
-                            versionId = await versionProvider.createVersion(
-                              null,
-                            );
-                          } else {
-                            // CLOUD VERSION: Upsert the version locally and add to playlist
-                            final cipherId = await cipherProvider.upsertCipher(
-                              Cipher.fromVersionDto(
-                                versionProvider.cloudVersions[versionId]!,
-                              ),
-                            );
-
-                            versionId = await versionProvider.upsertVersion(
-                              versionProvider.cloudVersions[versionId]!
-                                  .toDomain(cipherId: cipherId),
-                            );
-                          }
-                          // Create Section entries for the new version
-                          await sectionProvider.createSections(versionId);
-                          await sectionProvider.loadLocalSections(versionId);
-                          playlistProvider.addVersionToPlaylist(
-                            selectionProvider.targetId!,
-                            versionId,
-                          );
-                        }
-                        selectionProvider.clearSelection();
-                        navigationProvider.pop(); // Close editor
-                        navigationProvider.pop(); // Close cipher library
-                      },
-                      child: Text(
-                        AppLocalizations.of(context)!.save,
-                        style: theme.textTheme.bodyMedium!.copyWith(
-                          fontSize: 20,
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
+                  IconButton(
+                    onPressed: () => _save(
+                      selectionProvider,
+                      versionProvider,
+                      cipherProvider,
+                      sectionProvider,
+                      playlistProvider,
+                      navigationProvider,
                     ),
+                    icon: Icon(Icons.save, color: colorScheme.onSurface),
+                  ),
                 ],
               ),
               body: Column(
@@ -322,8 +294,8 @@ class _EditCipherScreenState extends State<EditCipherScreen>
                             children: [
                               // Basic cipher info
                               MetadataTab(
-                                cipherId: widget.cipherId,
-                                versionId: widget.versionId,
+                                cipherID: widget.cipherID,
+                                versionID: widget.versionID,
                                 versionType: widget.versionType,
                                 isEnabled: widget.isEnabled,
                               ),
@@ -331,221 +303,92 @@ class _EditCipherScreenState extends State<EditCipherScreen>
                           ),
                         ),
                         // Content Tab
-                        SingleChildScrollView(
-                          padding: const EdgeInsets.all(16.0),
-                          child: SectionsTab(
-                            versionId:
-                                widget.versionType == VersionType.playlist
-                                ? -1
-                                : widget.versionId,
-                            versionType: widget.versionType,
-                            isEnabled: widget.isEnabled,
-                          ),
+                        SectionsTab(
+                          versionID: widget.versionType == VersionType.playlist
+                              ? -1
+                              : widget.versionID,
+                          versionType: widget.versionType,
+                          isEnabled: widget.isEnabled,
                         ),
                       ],
                     ),
                   ),
-                  // Save and Delete/Cancel Buttons
-                  if (!selectionProvider.isSelectionMode)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 16.0,
-                        right: 16.0,
-                        bottom: 16.0,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        spacing: 16,
-                        children: [
-                          FilledTextButton(
-                            isDarkButton: true,
-                            onPressed: () {
-                              if (widget.versionType == VersionType.import ||
-                                  widget.versionType == VersionType.brandNew) {
-                                _createCipher(
-                                  cipherProvider,
-                                  versionProvider,
-                                  sectionProvider,
-                                  navigationProvider,
-                                );
-                              } else {
-                                _saveCipher(
-                                  cipherProvider,
-                                  versionProvider,
-                                  sectionProvider,
-                                  navigationProvider,
-                                );
-                              }
-                            },
-                            text: AppLocalizations.of(context)!.save,
-                          ),
-                          FilledTextButton(
-                            onPressed: () async {
-                              switch (widget.versionType) {
-                                case VersionType.import:
-                                case VersionType.brandNew:
-                                case VersionType.cloud:
-                                  navigationProvider.pop();
-                                  break;
-                                case VersionType.local:
-                                  // Delete local cipher
-                                  await cipherProvider.deleteCipher(
-                                    widget.cipherId!,
-                                  );
-                                  versionProvider.clearVersionsOfCipher(
-                                    widget.cipherId!,
-                                  );
-                                  break;
-                                case VersionType.playlist:
-                                  // Delete playlist version copy
-                                  await versionProvider.deleteVersion(
-                                    widget.versionId!,
-                                  );
-                                  navigationProvider.pop();
-                                  break;
-                              }
-                            },
-                            text: switch (widget.versionType) {
-                              VersionType.import ||
-                              VersionType.brandNew ||
-                              VersionType.cloud => AppLocalizations.of(
-                                context,
-                              )!.cancel,
-                              VersionType.local || VersionType.playlist =>
-                                AppLocalizations.of(context)!.delete,
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
                 ],
               ),
-              floatingActionButton: selectionProvider.isSelectionMode
-                  ? null
-                  : Column(
-                      spacing: 8,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      verticalDirection: VerticalDirection.up,
-                      children: [
-                        if (paletteIsOpen) ...[
-                          ChordPalette(
-                            cipherId: widget.cipherId ?? -1,
-                            versionId: widget.versionId ?? -1,
-                            onClose: _togglePalette,
-                          ),
-                        ],
-                        // Palette FAB
-                        if (_tabController.index == 1 &&
-                            !_tabController.indexIsChanging) ...[
-                          FloatingActionButton(
-                            onPressed: _togglePalette,
-                            child: Icon(Icons.palette),
-                          ),
-                        ],
-                      ],
-                    ),
             );
           },
     );
   }
 
-  void _createCipher(
+  Future<void> _save(
+    SelectionProvider selectionProvider,
+    LocalVersionProvider versionProvider,
     CipherProvider cipherProvider,
-    VersionProvider versionProvider,
     SectionProvider sectionProvider,
-    NavigationProvider navigation,
-  ) async {
-    try {
-      if (widget.cipherId != null) {
-        throw Exception(
-          AppLocalizations.of(context)!.cannotCreateCipherExistingCipher,
-        );
-      }
-
-      final cipherId = await cipherProvider.createCipher();
-      if (mounted) {
-        if (cipherId == null) {
-          throw Exception(AppLocalizations.of(context)!.failedToCreateCipher);
-        }
-      }
-
-      final versionId = await versionProvider.createVersion(cipherId!);
-      if (mounted) {
-        if (versionId == null) {
-          throw Exception(AppLocalizations.of(context)!.failedToCreateVersion);
-        }
-      }
-
-      await sectionProvider.createSections(versionId!);
-
-      if (mounted) {
-        navigation.pop(); // Close screen
-        if (widget.versionType == VersionType.import) {
-          navigation.pop(); // Close import screen
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.cipherCreatedSuccessfully,
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.errorMessage(
-                AppLocalizations.of(context)!.create,
-                e.toString(),
-              ),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    }
-  }
-
-  void _saveCipher(
-    CipherProvider cipherProvider,
-    VersionProvider versionProvider,
-    SectionProvider sectionProvider,
+    PlaylistProvider playlistProvider,
     NavigationProvider navigationProvider,
   ) async {
-    try {
-      await cipherProvider.saveCipher(widget.cipherId!);
+    if (selectionProvider.isSelectionMode) {
+      for (dynamic versionId in selectionProvider.selectedItemIds) {
+        if (versionId.runtimeType == int) {
+          // LOCAL VERSION: Create a copy of the version in the database
+          versionId = await versionProvider.createVersion(null);
+        } else {
+          // CLOUD VERSION: Upsert the version in the database
+          int? localCipherId = widget.cipherID;
+          if (widget.cipherID == null) {
+            localCipherId = await cipherProvider.createCipher();
+          } else {
+            await cipherProvider.saveCipher(widget.cipherID!);
+          }
 
-      await versionProvider.saveVersion(versionId: widget.versionId);
-
-      await sectionProvider.saveSections(widget.versionId!);
-
-      if (mounted) {
-        navigationProvider.pop(); // Close screen
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.cipherSavedSuccessfully,
-            ),
-          ),
+          versionId = await versionProvider.createVersion(localCipherId);
+        }
+        // Create Section entries for the new version
+        await sectionProvider.createSections(versionId);
+        await sectionProvider.loadLocalSections(versionId);
+        playlistProvider.addVersionToPlaylist(
+          selectionProvider.targetId!,
+          versionId,
         );
       }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar: ${e.toString()}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+      selectionProvider.clearSelection();
+      navigationProvider.pop(); // Close editor
+      navigationProvider.pop(); // Close cipher library
+    } else {
+      switch (widget.versionType) {
+        case VersionType.playlist:
+          versionProvider.saveVersion(widget.versionID);
+          sectionProvider.saveSections(versionID: widget.versionID);
+          break;
+
+        case VersionType.brandNew:
+          final cipherID = await cipherProvider.createCipher();
+          final versionID = await versionProvider.createVersion(cipherID);
+          if (versionID == null) {
+            throw Exception('Failed to create version for imported cipher');
+          }
+          await sectionProvider.createSections(versionID);
+        case VersionType.import:
+          final cipherID = await cipherProvider.createCipher();
+          final versionID = await versionProvider.createVersion(cipherID);
+          if (versionID == null) {
+            throw Exception('Failed to create version for imported cipher');
+          }
+          await sectionProvider.createSections(versionID);
+          navigationProvider.pop();
+          break;
+        case VersionType.cloud:
+          // TODO_CLOUD - Save cloud version edits/upload, decide
+          break;
+
+        case VersionType.local:
+          await cipherProvider.saveCipher(widget.cipherID!);
+          await versionProvider.saveVersion(widget.versionID);
+          await sectionProvider.saveSections(versionID: widget.versionID);
+          break;
       }
+      navigationProvider.pop();
     }
-  }
-
-  void _togglePalette() {
-    setState(() {
-      paletteIsOpen = !paletteIsOpen;
-    });
   }
 }

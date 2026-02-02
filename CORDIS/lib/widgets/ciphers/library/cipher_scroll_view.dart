@@ -1,6 +1,6 @@
 import 'package:cordis/providers/cipher_provider.dart';
 import 'package:cordis/l10n/app_localizations.dart';
-import 'package:cordis/providers/version_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/widgets/ciphers/library/cipher_card.dart';
 import 'package:cordis/widgets/ciphers/library/cloud_cipher_card.dart';
 
@@ -27,16 +27,16 @@ class _CipherScrollViewState extends State<CipherScrollView> {
   }
 
   void _loadData({bool forceReload = false}) {
-    context.read<CipherProvider>().loadLocalCiphers(forceReload: forceReload);
-    context.read<VersionProvider>().loadCloudVersions(forceReload: forceReload);
+    context.read<CipherProvider>().loadCiphers(forceReload: forceReload);
+    context.read<CloudVersionProvider>().loadVersions(forceReload: forceReload);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<CipherProvider, VersionProvider>(
-      builder: (context, cipherProvider, versionProvider, child) {
+    return Consumer2<CipherProvider, CloudVersionProvider>(
+      builder: (context, cipherProvider, cloudVersionProvider, child) {
         // Handle loading state
-        if (cipherProvider.isLoading || versionProvider.isLoadingCloud) {
+        if (cipherProvider.isLoading || cloudVersionProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
         // Handle error state
@@ -60,7 +60,7 @@ class _CipherScrollViewState extends State<CipherScrollView> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () =>
-                      cipherProvider.loadLocalCiphers(forceReload: true),
+                      cipherProvider.loadCiphers(forceReload: true),
                   child: Text(AppLocalizations.of(context)!.tryAgain),
                 ),
               ],
@@ -71,7 +71,7 @@ class _CipherScrollViewState extends State<CipherScrollView> {
         return Stack(
           children: [
             // Display cipher list
-            _buildCiphersList(cipherProvider, versionProvider),
+            _buildCiphersList(cipherProvider, cloudVersionProvider),
           ],
         );
       },
@@ -80,70 +80,56 @@ class _CipherScrollViewState extends State<CipherScrollView> {
 
   Widget _buildCiphersList(
     CipherProvider cipherProvider,
-    VersionProvider versionProvider,
+    CloudVersionProvider cloudVersionProvider,
   ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    final List<int> localIds = cipherProvider.filteredCiphers;
+    final List<String> cloudIds = cloudVersionProvider.filteredCloudVersions;
+
     return RefreshIndicator(
       onRefresh: () async {
         _loadData(forceReload: true);
       },
-      child:
-          (cipherProvider.filteredLocalCipherCount == 0 &&
-              versionProvider.filteredCloudVersionCount == 0)
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.music_note_outlined,
-                    size: 64,
-                    color: colorScheme.primary,
+      child: (localIds.isEmpty && cloudIds.isEmpty)
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: 64),
+                Text(
+                  AppLocalizations.of(context)!.emptyCipherLibrary,
+                  style: theme.textTheme.bodyLarge!.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w500,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context)!.noCiphersFound,
-                    style: theme.textTheme.bodyLarge!.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             )
           : ListView.builder(
               cacheExtent: 500,
               physics: const AlwaysScrollableScrollPhysics(),
-              itemCount:
-                  (cipherProvider.filteredLocalCipherCount +
-                  versionProvider.filteredCloudVersionCount),
+              itemCount: (localIds.length + cloudIds.length),
               itemBuilder: (context, index) {
-                if (index >= cipherProvider.filteredLocalCipherCount) {
-                  final cloudIndex =
-                      index - cipherProvider.filteredLocalCipherCount;
-                  final version = versionProvider.filteredCloudVersions.values
-                      .toList()[cloudIndex];
+                if (index >= localIds.length) {
                   return Padding(
                     padding: const EdgeInsets.only(
                       bottom: 8.0,
                     ), // Spacing between cards
                     child: CloudCipherCard(
-                      version: version,
+                      versionId: cloudIds[index - localIds.length],
                       playlistId: widget.playlistId,
                     ),
                   );
                 }
 
-                final cipherList = cipherProvider.filteredLocalCiphers.values
-                    .toList();
-
-                final cipher = cipherList[index];
                 return Padding(
                   padding: const EdgeInsets.only(
                     bottom: 8.0,
                   ), // Spacing between cards
                   child: CipherCard(
-                    cipherId: cipher.id,
+                    cipherId: localIds[index],
                     playlistId: widget.playlistId,
                   ),
                 );

@@ -6,29 +6,22 @@ import 'playlist_item.dart';
 
 class Playlist {
   final int id;
-  final String? firebaseId;
   final String name;
   final int createdBy;
   final List<PlaylistItem> items; // Unified content items
 
   const Playlist({
     required this.id,
-    this.firebaseId,
     required this.name,
     required this.createdBy,
     this.items = const [],
   });
 
-  factory Playlist.fromJson(Map<String, dynamic> json) {
+  factory Playlist.fromSQLite(Map<String, dynamic> json) {
     return Playlist(
       id: json['id'] as int,
       name: json['name'] as String? ?? '',
       createdBy: json['created_by'] as int? ?? 0,
-      items: json['items'] != null
-          ? (json['items'] as List)
-                .map((item) => PlaylistItem.fromJson(item))
-                .toList()
-          : const [],
     );
   }
 
@@ -36,7 +29,7 @@ class Playlist {
     return items.fold(Duration.zero, (a, b) => a + b.duration);
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toSQLite() {
     return {
       'id': id,
       'name': name,
@@ -47,18 +40,16 @@ class Playlist {
 
   // Database-specific serialization (excludes relational data)
   Map<String, dynamic> toDatabaseJson() {
-    return {'name': name, 'firebase_id': firebaseId, 'author_id': createdBy};
+    return {'name': name, 'author_id': createdBy};
   }
 
   PlaylistDto toDto(
     String ownerFirebaseId,
-    List<VersionDto> versions,
-    List<FlowItem> textSections,
+    Map<String, VersionDto> versions,
+    Map<String, FlowItem> flowItems,
   ) {
     return PlaylistDto(
-      firebaseId: firebaseId,
       name: name,
-      ownerId: ownerFirebaseId,
       itemOrder: items
           .map(
             (item) =>
@@ -66,9 +57,9 @@ class Playlist {
           )
           .toList(),
       versions: versions,
-      textSections: textSections
-          .map((section) => section.toFirestore())
-          .toList(),
+      flowItems: flowItems.map(
+        (key, item) => MapEntry(key, item.toFirestore()),
+      ),
     );
   }
 

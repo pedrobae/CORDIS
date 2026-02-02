@@ -1,3 +1,4 @@
+import 'package:cordis/services/cache_service.dart';
 import 'package:cordis/helpers/guard.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/services/firestore_service.dart';
@@ -8,6 +9,15 @@ class CloudVersionRepository {
   final FirestoreService _firestoreService = FirestoreService();
   final AuthService _authService = AuthService();
   final GuardHelper _guardHelper = GuardHelper();
+
+  final CacheService _cacheService = CacheService();
+  final List<VersionDto> _repoCache = [];
+
+  DateTime? _lastCloudLoad;
+
+  CloudVersionRepository() {
+    _initializeCloudCache();
+  }
 
   // ================== VERSION METHODS ==================
 
@@ -58,12 +68,33 @@ class CloudVersionRepository {
 
   // ===== READ =====
   /// Fetch public versions (requires authentication)
-  Future<List<VersionDto>> getPublicVersions() async {
+  Future<List<VersionDto>> getPublicVersions({bool forceReload = false}) async {
     await _guardHelper.requireAuth();
+
+    final now = DateTime.now();
+    if ((_lastCloudLoad != null &&
+            now.difference(_lastCloudLoad!).inDays < 7) &&
+        !forceReload) {
+      return _repoCache;
+    }
 
     final snapshot = await _firestoreService.fetchDocuments(
       collectionPath: 'publicVersions',
     );
+
+    final cloudVersions = snapshot
+        .map(
+          (version) => VersionDto.fromFirestore(
+            version.data() as Map<String, dynamic>,
+            version.id,
+          ),
+        )
+        .toList();
+
+    await _cacheService.saveCloudVersions(cloudVersions);
+    await _cacheService.saveLastCloudLoad(now);
+
+    _lastCloudLoad = now;
 
     FirebaseAnalytics.instance.logEvent(
       name: 'fetched_public_versions',
@@ -74,14 +105,7 @@ class CloudVersionRepository {
       },
     );
 
-    return snapshot
-        .map(
-          (version) => VersionDto.fromFirestore(
-            version.data() as Map<String, dynamic>,
-            version.id,
-          ),
-        )
-        .toList();
+    return cloudVersions;
   }
 
   /// Fetch personal versions of the current user (requires authentication)
@@ -186,6 +210,11 @@ class CloudVersionRepository {
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       },
     );
+  }
+
+  Future<void> _initializeCloudCache() async {
+    _lastCloudLoad = await _cacheService.loadLastCloudLoad();
+    _repoCache.addAll(await _cacheService.loadCloudVersions());
   }
 
   // ===== DELETE =====

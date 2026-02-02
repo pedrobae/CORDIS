@@ -1,4 +1,4 @@
-import 'package:cordis/providers/version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +18,7 @@ class VersionSelectorBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final version = context.watch<VersionProvider>().getLocalVersionById(
+    final version = context.watch<LocalVersionProvider>().getVersion(
       currentVersionId,
     )!;
 

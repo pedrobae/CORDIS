@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:provider/provider.dart';
-
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
+import 'package:provider/provider.dart';
 import 'package:cordis/providers/admin_provider.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
+import 'package:cordis/providers/email_provider.dart';
 import 'package:cordis/providers/cipher_provider.dart';
 import 'package:cordis/providers/import_provider.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
@@ -16,10 +17,12 @@ import 'package:cordis/providers/playlist_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/settings_provider.dart';
-import 'package:cordis/providers/schedule_provider.dart';
+import 'package:cordis/providers/schedule/local_schedule_provider.dart';
+import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/flow_item_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
-import 'package:cordis/providers/version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
 
 import 'package:cordis/routes/app_routes.dart';
 
@@ -49,6 +52,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AdminProvider()),
         ChangeNotifierProvider(create: (_) => MyAuthProvider()),
+        ChangeNotifierProvider(create: (_) => EmailProvider()),
         ChangeNotifierProvider(create: (_) => CipherProvider()),
         ChangeNotifierProvider(create: (_) => ImportProvider()),
         ChangeNotifierProvider(
@@ -62,10 +66,12 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => SettingsProvider()..loadSettings(),
         ),
-        ChangeNotifierProvider(create: (_) => ScheduleProvider()),
+        ChangeNotifierProvider(create: (_) => CloudScheduleProvider()),
+        ChangeNotifierProvider(create: (_) => LocalScheduleProvider()),
         ChangeNotifierProvider(create: (_) => FlowItemProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()..loadUsers()),
-        ChangeNotifierProvider(create: (_) => VersionProvider()),
+        ChangeNotifierProvider(create: (_) => CloudVersionProvider()),
+        ChangeNotifierProvider(create: (_) => LocalVersionProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {

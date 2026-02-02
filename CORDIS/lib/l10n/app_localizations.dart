@@ -104,6 +104,48 @@ abstract class AppLocalizations {
   /// **'CORDIS'**
   String get appName;
 
+  /// Company name
+  ///
+  /// In pt, this message translates to:
+  /// **'New Heart Music Ministries'**
+  String get newHeart;
+
+  /// Setup related messages
+  ///
+  /// In pt, this message translates to:
+  /// **'Configuração'**
+  String get setup;
+
+  /// Hour field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Hora'**
+  String get hour;
+
+  /// Minute field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Minuto'**
+  String get minute;
+
+  /// Second field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Segundo'**
+  String get second;
+
+  /// Coming soon message
+  ///
+  /// In pt, this message translates to:
+  /// **'Funcionalidade em desenvolvimento'**
+  String get comingSoon;
+
+  /// Label for current selection
+  ///
+  /// In pt, this message translates to:
+  /// **'Atual'**
+  String get current;
+
   /// Authentication related messages
   ///
   /// In pt, this message translates to:
@@ -164,6 +206,48 @@ abstract class AppLocalizations {
   /// **'Por favor, tente novamente ou solicite uma nova.'**
   String get forgotPasswordSuffix;
 
+  /// User related messages
+  ///
+  /// In pt, this message translates to:
+  /// **'Usuário'**
+  String get user;
+
+  /// Guest user label
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidado'**
+  String get guest;
+
+  /// Name field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome'**
+  String get name;
+
+  /// Hint text for name input
+  ///
+  /// In pt, this message translates to:
+  /// **'Insira o nome...'**
+  String get enterNameHint;
+
+  /// Hint text for email input
+  ///
+  /// In pt, this message translates to:
+  /// **'Insira o e-mail...'**
+  String get enterEmailHint;
+
+  /// Validation message for name and email
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, insira o nome e o e-mail.'**
+  String get pleaseEnterNameAndEmail;
+
+  /// Message displayed when a user is not found in the cloud
+  ///
+  /// In pt, this message translates to:
+  /// **'Usuário não encontrado na nuvem.'**
+  String get userNotFoundInCloud;
+
   /// Home navigation tab
   ///
   /// In pt, this message translates to:
@@ -212,12 +296,6 @@ abstract class AppLocalizations {
   /// **'Título'**
   String get title;
 
-  /// Hint text for song title input
-  ///
-  /// In pt, this message translates to:
-  /// **'Insira o título...'**
-  String get titleHint;
-
   /// Song author field label
   ///
   /// In pt, this message translates to:
@@ -233,7 +311,7 @@ abstract class AppLocalizations {
   /// Beats per minute field label
   ///
   /// In pt, this message translates to:
-  /// **'BPM'**
+  /// **'Tempo (BPM)'**
   String get bpm;
 
   /// Song duration field label
@@ -247,6 +325,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Idioma'**
   String get language;
+
+  /// Single tag label
+  ///
+  /// In pt, this message translates to:
+  /// **'Tag'**
+  String get tag;
 
   /// Version label
   ///
@@ -272,11 +356,11 @@ abstract class AppLocalizations {
   /// **'Tempo Estimado'**
   String get estimatedTime;
 
-  /// Notes field label with optional indication
+  /// Notes field label
   ///
   /// In pt, this message translates to:
-  /// **'Anotações (Opcional)'**
-  String get notesOptional;
+  /// **'Anotações'**
+  String get notes;
 
   /// Sections field label
   ///
@@ -305,13 +389,19 @@ abstract class AppLocalizations {
   /// Prompt displayed when there are no sections in the song structure
   ///
   /// In pt, this message translates to:
-  /// **'Nenhuma seção na estrutura. Use o botão acima para adicionar seções.'**
-  String get noSectionsInStructurePrompt;
+  /// **'Nenhuma seção na estrutura.\nUse o botão acima para adicionar seções.'**
+  String get emptyStructure;
+
+  /// Prompt displayed when there are no lyrics in the section
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, adicione Letra e acordes para começar.'**
+  String get noLyrics;
 
   /// Lyrics field label
   ///
   /// In pt, this message translates to:
-  /// **'Letras'**
+  /// **'Letra'**
   String get lyrics;
 
   /// Section code field label
@@ -320,11 +410,29 @@ abstract class AppLocalizations {
   /// **'Código da Seção'**
   String get sectionCode;
 
+  /// Hint text for section code input
+  ///
+  /// In pt, this message translates to:
+  /// **'ex.: V1, C, I, ...'**
+  String get sectionCodeHint;
+
+  /// Instruction for section code character limit
+  ///
+  /// In pt, this message translates to:
+  /// **'Máximo de 2 caracteres'**
+  String get sectionCodeInstruction;
+
   /// Section type field label
   ///
   /// In pt, this message translates to:
   /// **'Tipo da Seção'**
   String get sectionType;
+
+  /// Hint text for section type input
+  ///
+  /// In pt, this message translates to:
+  /// **'ex.: Verso, Refrão, Ponte...'**
+  String get sectionTypeHint;
 
   /// Section color field label
   ///
@@ -332,11 +440,23 @@ abstract class AppLocalizations {
   /// **'Cor da Seção'**
   String get sectionColor;
 
+  /// Hint text for section color input
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione a cor da seção...'**
+  String get sectionColorHint;
+
   /// Hint text for section text input
   ///
   /// In pt, this message translates to:
-  /// **'Texto da Seção...'**
+  /// **'Texto da Seção'**
   String get sectionText;
+
+  /// Hint text for section text input, in chordPro format
+  ///
+  /// In pt, this message translates to:
+  /// **'Insira o texto da seção, em formato chordPro. (letra[acorde])'**
+  String get sectionTextHint;
 
   /// Title for the cipher/song editor screen
   ///
@@ -419,8 +539,8 @@ abstract class AppLocalizations {
   /// Message displayed when no ciphers are found
   ///
   /// In pt, this message translates to:
-  /// **'Nenhuma cifra encontrada'**
-  String get noCiphersFound;
+  /// **'Nenhuma Música na Biblioteca.\nPor favor, adicione músicas para começar.'**
+  String get emptyCipherLibrary;
 
   /// Playlist label
   ///
@@ -467,8 +587,8 @@ abstract class AppLocalizations {
   /// Message displayed when no playlists are found
   ///
   /// In pt, this message translates to:
-  /// **'Nenhuma playlist encontrada'**
-  String get noPlaylistsFound;
+  /// **'Nenhuma Playlist criada.\nPor favor, crie uma playlist para começar.'**
+  String get emptyPlaylistLibrary;
 
   /// Add song to playlist button label
   ///
@@ -488,6 +608,12 @@ abstract class AppLocalizations {
   /// **'Por favor, adicione músicas e itens de Texto para construir sua playlist.'**
   String get emptyPlaylistInstructions;
 
+  /// Message displayed when there are no items in a playlist
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum item nesta playlist.'**
+  String get noPlaylistItems;
+
   /// Description for deleting a playlist warning
   ///
   /// In pt, this message translates to:
@@ -500,11 +626,89 @@ abstract class AppLocalizations {
   /// **'item'**
   String get item;
 
-  /// Plural items label
+  /// Theme field label
   ///
   /// In pt, this message translates to:
-  /// **'itens'**
-  String get items;
+  /// **'Tema'**
+  String get theme;
+
+  /// Subtitle for theme settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Customize a aparência do aplicativo'**
+  String get themeSubtitle;
+
+  /// Change language field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar Idioma'**
+  String get changeLanguage;
+
+  /// Subtitle for change language settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterar o idioma do aplicativo'**
+  String get changeLanguageSubtitle;
+
+  /// Development tools section title
+  ///
+  /// In pt, this message translates to:
+  /// **'Ferramentas de Desenvolvimento'**
+  String get developmentTools;
+
+  /// Database section title
+  ///
+  /// In pt, this message translates to:
+  /// **'Banco de Dados'**
+  String get database;
+
+  /// Reset database dangerous action title
+  ///
+  /// In pt, this message translates to:
+  /// **'Redefinir Banco de Dados'**
+  String get resetDatabase;
+
+  /// Subtitle for reset database dangerous action
+  ///
+  /// In pt, this message translates to:
+  /// **'Apaga todo o banco de dados'**
+  String get resetDatabaseSubtitle;
+
+  /// Database information title
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações do Banco de Dados'**
+  String get databaseInformation;
+
+  /// Label for records per table in database information
+  ///
+  /// In pt, this message translates to:
+  /// **'Registros por tabela:'**
+  String get recordsPerTable;
+
+  /// Title for table data screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados da tabela: {tableName}'**
+  String tableData(Object tableName);
+
+  /// Subtitle for database information section
+  ///
+  /// In pt, this message translates to:
+  /// **'Visualizar tabelas e entradas no banco de dados'**
+  String get databaseInfoSubtitle;
+
+  /// Reload interface dangerous action title
+  ///
+  /// In pt, this message translates to:
+  /// **'Recarregar Interface'**
+  String get reloadInterface;
+
+  /// Subtitle for reload interface dangerous action
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpa os dados em cache e recarrega todos os provedores'**
+  String get reloadInterfaceSubtitle;
 
   /// User role label
   ///
@@ -518,17 +722,11 @@ abstract class AppLocalizations {
   /// **'Membro Geral'**
   String get generalMember;
 
-  /// Share button label
-  ///
-  /// In pt, this message translates to:
-  /// **'Compartilhar'**
-  String get share;
-
   /// View button label
   ///
   /// In pt, this message translates to:
-  /// **'Visualizar'**
-  String get view;
+  /// **'Visualizar {object}'**
+  String viewPlaceholder(Object object);
 
   /// Create object button label
   ///
@@ -560,17 +758,215 @@ abstract class AppLocalizations {
   /// **'Duplicar {object}'**
   String duplicatePlaceholder(Object object);
 
+  /// Set object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Definir {object}'**
+  String setPlaceholder(Object object);
+
+  /// Tooltip for duplicate action
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar uma cópia desta {object}'**
+  String duplicateTooltip(Object object);
+
+  /// Tooltip for creating a local copy of a cloud object
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar uma Cópia Local'**
+  String get createLocalCopy;
+
+  /// Share button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar'**
+  String get share;
+
+  /// Share code field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de Compartilhamento'**
+  String get shareCode;
+
+  /// Send/share to members of selected roles
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar para os Membros da Função'**
+  String get sendToRoleMembers;
+
+  /// Send invites button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar Convites'**
+  String get sendInvites;
+
+  /// Success message when invites are sent
+  ///
+  /// In pt, this message translates to:
+  /// **'Convites enviados com sucesso!'**
+  String get inviteSentSuccessfully;
+
+  /// Description for email invite confirmation
+  ///
+  /// In pt, this message translates to:
+  /// **'Um convite por email foi enviado para as equipes'**
+  String get emailInviteDescription;
+
+  /// Label for schedule name input field
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome da Agenda'**
+  String get scheduleName;
+
+  /// Date field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Data'**
+  String get date;
+
+  /// Start time field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Hora de Início'**
+  String get startTime;
+
+  /// Location field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Localização'**
+  String get location;
+
+  /// Room/Venue field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Sala/Local'**
+  String get roomVenue;
+
+  /// Annotations field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Anotações'**
+  String get annotations;
+
+  /// Create schedule screen title
+  ///
+  /// In pt, this message translates to:
+  /// **'Agendar Playlist'**
+  String get schedulePlaylist;
+
+  /// Change playlist button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterar Playlist'**
+  String get changePlaylist;
+
+  /// Instruction to select a playlist for scheduling
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, crie uma agenda selecionando uma playlist abaixo.'**
+  String get selectPlaylistForScheduleInstruction;
+
+  /// Schedule details section title
+  ///
+  /// In pt, this message translates to:
+  /// **'Detalhes da Agenda'**
+  String get scheduleDetails;
+
+  /// Instruction to fill in schedule details
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, preencha os detalhes da agenda.'**
+  String get fillScheduleDetailsInstruction;
+
+  /// Instruction to create roles and assign users
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, crie funções e atribua Membros à agenda.'**
+  String get createRolesAndAssignUsersInstruction;
+
+  /// Validation message for schedule name
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, insira um nome para a agenda.'**
+  String get pleaseEnterScheduleName;
+
+  /// Validation message for date
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, insira uma data válida (DD/MM/AAAA).'**
+  String get pleaseEnterDate;
+
+  /// Validation message for start time
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, insira uma hora de início válida (HH:MM).'**
+  String get pleaseEnterStartTime;
+
+  /// Validation message for location
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, insira um local.'**
+  String get pleaseEnterLocation;
+
+  /// Message displayed when there are no roles defined
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum Papel Definido'**
+  String get noRoles;
+
+  /// Instructions to add roles and assign users to a schedule
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicione seus próprios papéis e pessoas, e atribua-as a esta agenda.'**
+  String get addRolesInstructions;
+
+  /// Hint text for role name input
+  ///
+  /// In pt, this message translates to:
+  /// **'ex.: Dirigente, Vocalista...'**
+  String get roleNameHint;
+
+  /// Member label
+  ///
+  /// In pt, this message translates to:
+  /// **'Membro'**
+  String get member;
+
+  /// Prompt to assign members to a role
+  ///
+  /// In pt, this message translates to:
+  /// **'Atribuir Membro à {role}'**
+  String assignMembersToRole(Object role);
+
+  /// Message displayed when no members are assigned to a role
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum Membro Atribuído'**
+  String get noMembers;
+
+  /// Label for number of members assigned to a role
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} Membros'**
+  String xMembers(Object count);
+
   /// Next scheduled item label
   ///
   /// In pt, this message translates to:
   /// **'Próxima Agenda'**
   String get nextUp;
 
-  /// Next scheduled item this month label
+  /// Next schedules header
   ///
   /// In pt, this message translates to:
-  /// **'Ainda neste Mês'**
-  String get nextThisMonth;
+  /// **'Próximos Eventos'**
+  String get futureSchedules;
+
+  /// Past schedules header
+  ///
+  /// In pt, this message translates to:
+  /// **'Eventos Passados'**
+  String get pastSchedules;
 
   /// Hint text for searching schedule
   ///
@@ -583,6 +979,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Agendar'**
   String get assignSchedule;
+
+  /// Schedule actions section title
+  ///
+  /// In pt, this message translates to:
+  /// **'Ações da Agenda'**
+  String get scheduleActions;
+
+  /// Message displayed when no playlist is assigned to the schedule
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma playlist atribuída.'**
+  String get noPlaylistAssigned;
+
+  /// Message displayed when no schedules are found
+  ///
+  /// In pt, this message translates to:
+  /// **'Agenda vazia.\nPor favor, crie um evento para começar.'**
+  String get emptyScheduleLibrary;
+
+  /// Title for schedule not found screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Agenda Não Encontrada'**
+  String get scheduleNotFound;
+
+  /// Message displayed when the requested schedule does not exist
+  ///
+  /// In pt, this message translates to:
+  /// **'A agenda solicitada não pôde ser encontrada.'**
+  String get scheduleNotFoundMessage;
+
+  /// Tooltip for delete schedule action
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir permanentemente esta agenda'**
+  String get deleteScheduleTooltip;
+
+  /// Play button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Tocar'**
+  String get play;
+
+  /// Next item placeholder with title
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo: {title}'**
+  String nextPlaceholder(Object title);
 
   /// Create button label
   ///
@@ -746,6 +1190,12 @@ abstract class AppLocalizations {
   /// **'Inglês'**
   String get english;
 
+  /// Load
+  ///
+  /// In pt, this message translates to:
+  /// **'Carregamento'**
+  String get load;
+
   /// Loading indicator text
   ///
   /// In pt, this message translates to:
@@ -776,6 +1226,12 @@ abstract class AppLocalizations {
   /// **'Confirmar'**
   String get confirm;
 
+  /// Continue button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Continuar'**
+  String get keepGoing;
+
   /// Label for quick action button
   ///
   /// In pt, this message translates to:
@@ -787,6 +1243,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'(Cópia)'**
   String get copySuffix;
+
+  /// Copy to clipboard button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar Código'**
+  String get copyCode;
+
+  /// Confirmation message when code is copied to clipboard
+  ///
+  /// In pt, this message translates to:
+  /// **'Código copiado!'**
+  String get codeCopied;
+
+  /// Assign button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Atribuir'**
+  String get assign;
+
+  /// Clear button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpar'**
+  String get clear;
 
   /// Delete button label
   ///
@@ -816,13 +1296,19 @@ abstract class AppLocalizations {
   ///
   /// In pt, this message translates to:
   /// **'Olá {userName}'**
-  String welcome(Object userName);
+  String helloUser(Object userName);
 
   /// Generic welcome message
   ///
   /// In pt, this message translates to:
   /// **'Bem-vindo'**
-  String get anonymousWelcome;
+  String get welcome;
+
+  /// Instructional message to get started with the app
+  ///
+  /// In pt, this message translates to:
+  /// **'Comece criando ou importando sua primeira cifra.'**
+  String get getStartedMessage;
 
   /// By/author preposition
   ///
@@ -860,23 +1346,95 @@ abstract class AppLocalizations {
   /// **'{count} seções'**
   String nSections(Object count);
 
-  /// Prefix to be used on text fields with masculine nouns
+  /// Hint text for selecting musical key
   ///
   /// In pt, this message translates to:
-  /// **'Insira seu '**
-  String get hintPrefixO;
+  /// **'Selecione o Tom...'**
+  String get keyHint;
 
-  /// Prefix to be used on text fields with feminine nouns
+  /// Hint text for song title input
   ///
   /// In pt, this message translates to:
-  /// **'Insira sua '**
-  String get hintPrefixA;
+  /// **'Insira um título'**
+  String get titleHint;
 
-  /// Suffix to be used on text fields
+  /// Hint text for author name input
   ///
   /// In pt, this message translates to:
-  /// **' aqui...'**
-  String get hintSuffix;
+  /// **'Insira o nome do autor'**
+  String get authorHint;
+
+  /// Hint text for version name input
+  ///
+  /// In pt, this message translates to:
+  /// **'Insira um nome para a versão'**
+  String get versionNameHint;
+
+  /// Hint text for BPM input
+  ///
+  /// In pt, this message translates to:
+  /// **'Insira o tempo em BPM'**
+  String get bpmHint;
+
+  /// Hint text for duration input
+  ///
+  /// In pt, this message translates to:
+  /// **'Insira a duração em MM:SS'**
+  String get durationHint;
+
+  /// Hint text for song language input
+  ///
+  /// In pt, this message translates to:
+  /// **'Insira o idioma da música'**
+  String get languageHint;
+
+  /// Hint text for tag input
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite uma tag'**
+  String get tagHint;
+
+  /// Indicates the current step out of total steps
+  ///
+  /// In pt, this message translates to:
+  /// **'Passo {current} de {total}'**
+  String stepXofY(Object current, Object total);
+
+  /// Title for common chords of a given key
+  ///
+  /// In pt, this message translates to:
+  /// **'Acordes Comuns em - {key}'**
+  String commonChordsOfKey(Object key);
+
+  /// Instruction to hold a chord to see variations
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque e segure um acorde para mostrar variações.'**
+  String get chordExpansionInstruction;
+
+  /// Custom chord label
+  ///
+  /// In pt, this message translates to:
+  /// **'Acorde Personalizado'**
+  String get customChord;
+
+  /// Instruction to enter custom chord name
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite para criar um acorde personalizado.'**
+  String get customChordInstruction;
+
+  /// Instruction to drag chords to letters
+  ///
+  /// In pt, this message translates to:
+  /// **'Arraste os acordes para as letras para adicioná-los à música.'**
+  String get draggableChordInstruction;
+
+  /// Generic error label
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro'**
+  String get error;
 
   /// Generic error message with placeholders
   ///
@@ -895,6 +1453,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Este campo é obrigatório.'**
   String get fieldRequired;
+
+  /// Validation message for integer input
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, insira um número inteiro positivo.'**
+  String get intValidationError;
+
+  /// Generic optional field placeholder
+  ///
+  /// In pt, this message translates to:
+  /// **'{field} (Opcional)'**
+  String optionalPlaceholder(Object field);
+
+  /// Generic plural placeholder for labels
+  ///
+  /// In pt, this message translates to:
+  /// **'{label}s'**
+  String pluralPlaceholder(Object label);
 }
 
 class _AppLocalizationsDelegate

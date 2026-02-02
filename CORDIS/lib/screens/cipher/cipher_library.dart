@@ -1,8 +1,10 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/cipher/version.dart';
+import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist_provider.dart';
-import 'package:cordis/providers/version_provider.dart';
-import 'package:cordis/widgets/ciphers/library/create_cipher_sheet.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
+import 'package:cordis/screens/cipher/edit_cipher.dart';
+import 'package:cordis/widgets/ciphers/editor/create_cipher_sheet.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +32,10 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
     // Pre-load data with post-frame callback to avoid setState during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cipherProvider = context.read<CipherProvider>();
-      cipherProvider.loadLocalCiphers();
+      final cloudVersionProvider = context.read<CloudVersionProvider>();
+
+      cipherProvider.loadCiphers();
+      cloudVersionProvider.loadVersions();
     });
   }
 
@@ -44,7 +49,7 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
       UserProvider,
       MyAuthProvider,
       SelectionProvider,
-      VersionProvider,
+      CloudVersionProvider,
       PlaylistProvider
     >(
       builder:
@@ -54,7 +59,7 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
             userProvider,
             authProvider,
             selectionProvider,
-            versionProvider,
+            cloudVersionProvider,
             playlistProvider,
             child,
           ) {
@@ -85,7 +90,7 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
                       controller: _searchController,
                       decoration: InputDecoration(
                         hintText: AppLocalizations.of(context)!.searchCiphers,
-                        border: OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(0),
                           borderSide: BorderSide(
                             color: colorScheme.surfaceContainer,
@@ -100,25 +105,45 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
                         visualDensity: VisualDensity.compact,
                       ),
                       onChanged: (value) {
-                        cipherProvider.searchLocalCiphers(value);
-                        versionProvider.searchCachedCloudVersions(value);
+                        cipherProvider.setSearchTerm(value);
+                        cloudVersionProvider.setSearchTerm(value);
                       },
                     ),
                     Expanded(
                       child: CipherScrollView(playlistId: widget.playlistId),
                     ),
-
-                    // CREATE CIPHER BUTTON
-                    selectionProvider.isSelectionMode
-                        ? const SizedBox.shrink()
-                        : FilledTextButton(
-                            onPressed: () {
-                              _showCreateCipherSheet();
-                            },
-                            text: AppLocalizations.of(context)!.create,
-                            isDarkButton: true,
-                          ),
                   ],
+                ),
+              ),
+              floatingActionButton: GestureDetector(
+                onLongPress: () => _showCreateCipherSheet(secret: true),
+                onTap: () {
+                  context.read<NavigationProvider>().push(
+                    EditCipherScreen(
+                      versionID: -1,
+                      cipherID: -1,
+                      versionType: VersionType.brandNew,
+                    ),
+                    showAppBar: false,
+                    showDrawerIcon: false,
+                  );
+                },
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colorScheme.onSurface,
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.surfaceContainerLowest,
+                        spreadRadius: 2,
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Icon(Icons.add, color: colorScheme.surface),
                 ),
               ),
             );
@@ -126,12 +151,12 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
     );
   }
 
-  void _showCreateCipherSheet() {
+  void _showCreateCipherSheet({bool secret = false}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return CreateCipherSheet();
+        return CreateCipherSheet(secret: secret);
       },
     );
   }

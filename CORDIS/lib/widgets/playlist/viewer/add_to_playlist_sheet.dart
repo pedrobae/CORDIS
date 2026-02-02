@@ -2,14 +2,14 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/screens/cipher/cipher_library.dart';
-import 'package:cordis/widgets/flow_item_editor.dart';
+import 'package:cordis/widgets/playlist/viewer/flow_item_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class EditPlaylistSheet extends StatelessWidget {
+class AddToPlaylistSheet extends StatelessWidget {
   final int playlistId;
 
-  const EditPlaylistSheet({super.key, required this.playlistId});
+  const AddToPlaylistSheet({super.key, required this.playlistId});
 
   @override
   Widget build(BuildContext context) {

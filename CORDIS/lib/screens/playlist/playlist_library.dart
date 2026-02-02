@@ -1,7 +1,7 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/screens/playlist/create_playlist.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/providers/selection_provider.dart';
+import 'package:cordis/screens/playlist/edit_playlist.dart';
 import 'package:cordis/widgets/playlist/library/playlist_scroll_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -32,50 +32,90 @@ class _PlaylistLibraryScreenState extends State<PlaylistLibraryScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Consumer2<PlaylistProvider, NavigationProvider>(
-      builder: (context, playlistProvider, navigationProvider, child) {
-        return Padding(
-          padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 16.0,
-            children: [
-              // Search Bar
-              TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.searchPlaylist,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(0),
-                    borderSide: BorderSide(color: colorScheme.surfaceContainer),
+    return Consumer3<PlaylistProvider, NavigationProvider, SelectionProvider>(
+      builder:
+          (
+            context,
+            playlistProvider,
+            navigationProvider,
+            selectionProvider,
+            child,
+          ) {
+            final isSelecting = selectionProvider.isSelectionMode;
+
+            return Stack(
+              children: [
+                Padding(
+                  padding: isSelecting
+                      ? EdgeInsets.zero
+                      : EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: 16.0,
+                    children: [
+                      // Search Bar
+                      TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.searchPlaylist,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(0),
+                            borderSide: BorderSide(
+                              color: colorScheme.surfaceContainer,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(0),
+                            borderSide: BorderSide(
+                              color: colorScheme.primary,
+                              width: 2,
+                            ),
+                          ),
+                          suffixIcon: const Icon(Icons.search),
+                          fillColor: colorScheme.surfaceContainerHighest,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        onChanged: (value) {
+                          playlistProvider.setSearchTerm(value);
+                        },
+                      ),
+
+                      Expanded(child: PlaylistScrollView()),
+                    ],
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(0),
-                    borderSide: BorderSide(color: colorScheme.primary),
-                  ),
-                  suffixIcon: const Icon(Icons.search),
-                  fillColor: colorScheme.surfaceContainerHighest,
-                  visualDensity: VisualDensity.compact,
                 ),
-                onChanged: (value) {
-                  playlistProvider.setSearchTerm(value);
-                },
-              ),
-
-              Expanded(child: PlaylistScrollView()),
-
-              // Create Playlist Button
-              FilledTextButton(
-                onPressed: () {
-                  navigationProvider.push(CreatePlaylistScreen());
-                },
-                text: AppLocalizations.of(context)!.create,
-                isDarkButton: true,
-              ),
-            ],
-          ),
-        );
-      },
+                if (!isSelecting)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () =>
+                          navigationProvider.push(EditPlaylistScreen()),
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        margin: const EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colorScheme.onSurface,
+                          boxShadow: [
+                            BoxShadow(
+                              color: colorScheme.surfaceContainerLowest,
+                              spreadRadius: 2,
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Icon(Icons.add, color: colorScheme.surface),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
     );
   }
 }

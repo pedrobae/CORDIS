@@ -1,6 +1,5 @@
 import 'package:cordis/models/dtos/user_dto.dart';
-
-import '../../helpers/datetime.dart';
+import 'package:cordis/utils/date_utils.dart';
 
 class User {
   final int? id;
@@ -28,20 +27,19 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as int,
-      firebaseId: json['firebase_id'] as String,
+      firebaseId: json['firebase_id'] as String?,
       username: json['username'] as String,
       mail: json['mail'] as String,
       profilePhoto: json['profile_photo'] as String?,
       googleId: json['google_id'] as String?,
-      createdAt: DatetimeHelper.parseDateTime(json['created_at']),
-      updatedAt: DatetimeHelper.parseDateTime(json['updated_at']),
+      createdAt: DateTimeUtils.parseDateTime(json['created_at']),
+      updatedAt: DateTimeUtils.parseDateTime(json['updated_at']),
       isActive: (json['is_active'] as int? ?? 1) == 1,
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toSQLite() {
     return {
-      'id': id,
       'username': username,
       'mail': mail,
       'profile_photo': profilePhoto,

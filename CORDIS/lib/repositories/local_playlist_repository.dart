@@ -66,13 +66,13 @@ class PlaylistRepository {
     List<Playlist> playlists = [];
 
     for (Map<String, dynamic> playlistData in playlistResults) {
-      playlists.add(Playlist.fromJson(playlistData));
+      playlists.add(Playlist.fromSQLite(playlistData));
     }
 
     return playlists;
   }
 
-  /// Gets a single playlist by ID with all relationships
+  /// Gets a single playlist by ID without relationships
   /// Returns null if not found
   Future<Playlist?> getPlaylistById(int playlistId) async {
     final db = await _databaseHelper.database;
@@ -85,7 +85,7 @@ class PlaylistRepository {
 
     if (playlistResults.isEmpty) return null;
 
-    return Playlist.fromJson(playlistResults.first);
+    return Playlist.fromSQLite(playlistResults.first);
   }
 
   // ===== UPDATE =====
@@ -109,12 +109,12 @@ class PlaylistRepository {
   Future<int> upsertPlaylist(Playlist playlist) async {
     final db = await _databaseHelper.database;
 
-    // First, try to find existing playlist by firebase_id
+    // First, try to find existing playlist by name
     final existingResult = await db.query(
       'playlist',
       columns: ['id'],
-      where: 'firebase_id = ?',
-      whereArgs: [playlist.firebaseId],
+      where: 'name = ?',
+      whereArgs: [playlist.name],
     );
 
     if (existingResult.isNotEmpty) {
@@ -282,7 +282,7 @@ class PlaylistRepository {
           );
         } else if (item.isTextSection) {
           await txn.update(
-            'playlist_text',
+            'flow_item',
             {'position': tempPosition},
             where: 'id = ?',
             whereArgs: [item.contentId],
@@ -300,7 +300,7 @@ class PlaylistRepository {
           );
         } else if (item.isTextSection) {
           await txn.update(
-            'playlist_text',
+            'flow_item',
             {'position': item.position},
             where: 'id = ?',
             whereArgs: [item.contentId],
@@ -328,7 +328,7 @@ class PlaylistRepository {
     final flowItemResults = await db.rawQuery(
       '''
         SELECT id as content_id, position, duration, id
-        FROM playlist_text
+        FROM flow_item
         WHERE playlist_id = ? 
         ORDER BY position ASC
       ''',
@@ -401,7 +401,7 @@ class PlaylistRepository {
 
     // First, try to find existing text item by firebase_id
     final existingResult = await db.query(
-      'playlist_text',
+      'flow_item',
       columns: ['id'],
       where: 'firebase_id = ?',
       whereArgs: [firebaseTextId],
@@ -410,14 +410,14 @@ class PlaylistRepository {
     if (existingResult.isNotEmpty) {
       // Update existing text item
       await db.update(
-        'playlist_text',
+        'flow_item',
         {'title': title, 'content': content, 'position': position},
         where: 'firebase_id = ?',
         whereArgs: [firebaseTextId],
       );
     } else {
       // Insert new text item
-      await db.insert('playlist_text', {
+      await db.insert('flow_item', {
         'added_by': addedBy,
         'firebase_id': firebaseTextId,
         'playlist_id': playlistId,
@@ -455,7 +455,7 @@ class PlaylistRepository {
     if (textItemIds.isNotEmpty) {
       final textPlaceholders = List.filled(textItemIds.length, '?').join(', ');
       await db.delete(
-        'playlist_text',
+        'flow_item',
         where: 'playlist_id = ? AND id IN ($textPlaceholders)',
         whereArgs: [playlistId, ...textItemIds],
       );
@@ -480,8 +480,8 @@ class PlaylistRepository {
       final existingResult = await txn.query(
         'playlist',
         columns: ['id'],
-        where: 'firebase_id = ?',
-        whereArgs: [playlist.firebaseId],
+        where: 'name = ?',
+        whereArgs: [playlist.name],
       );
 
       if (existingResult.isNotEmpty) {
@@ -520,7 +520,7 @@ class PlaylistRepository {
           '?',
         ).join(', ');
         await txn.delete(
-          'playlist_text',
+          'flow_item',
           where: 'playlist_id = ? AND id IN ($textPlaceholders)',
           whereArgs: [playlistId, ...textItemsToPrune],
         );
@@ -529,7 +529,7 @@ class PlaylistRepository {
       // 3. Upsert text items
       for (final item in textSectionItems) {
         final existingTextResult = await txn.query(
-          'playlist_text',
+          'flow_item',
           columns: ['id'],
           where: 'firebase_id = ?',
           whereArgs: [item['firebaseContentId']],
@@ -538,7 +538,7 @@ class PlaylistRepository {
         if (existingTextResult.isNotEmpty) {
           // Update existing text item
           await txn.update(
-            'playlist_text',
+            'flow_item',
             {
               'title': item['title'],
               'content': item['content'],
@@ -549,7 +549,7 @@ class PlaylistRepository {
           );
         } else {
           // Insert new text item
-          await txn.insert('playlist_text', {
+          await txn.insert('flow_item', {
             'added_by': item['addedBy'],
             'firebase_id': item['firebaseContentId'],
             'playlist_id': playlistId,

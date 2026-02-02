@@ -2,7 +2,7 @@ import 'package:cordis/providers/layout_settings_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_token.dart';
-import 'package:cordis/widgets/ciphers/editor/sections/edit_section_dialog.dart';
+import 'package:cordis/widgets/ciphers/editor/sections/edit_section.dart';
 import 'package:flutter/material.dart';
 import 'package:cordis/models/ui/content_token.dart';
 import 'package:cordis/services/tokenization_service.dart';
@@ -156,9 +156,17 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
                       /// Edit Section button
                       _isEnabled(selectionProvider)
                           ? IconButton(
-                              onPressed: () => _openEditSectionDialog(),
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => EditSectionScreen(
+                                      sectionCode: widget.sectionCode,
+                                      versionId: widget.versionId,
+                                    ),
+                                  ),
+                                );
+                              },
                               icon: const Icon(Icons.edit),
-                              tooltip: 'Editar seção',
                             )
                           : SizedBox(height: 48),
                     ],
@@ -774,16 +782,6 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
     return wordOffsetX;
   }
 
-  void _openEditSectionDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => EditSectionDialog(
-        versionId: widget.versionId,
-        sectionCode: widget.sectionCode,
-      ),
-    );
-  }
-
   void _toggleDrag() {
     setState(() {
       _isDragging = !_isDragging;
@@ -798,7 +796,7 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
       tokens, // Exclude the last newline token
     );
 
-    sectionProvider.cacheUpdatedSection(
+    sectionProvider.cacheSection(
       widget.versionId,
       widget.sectionCode,
       newContentText: newContent,
