@@ -295,6 +295,7 @@ class _PlayCloudVersionState extends State<PlayCloudVersion> {
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width - 66,
+              minWidth: MediaQuery.of(context).size.width - 66,
             ),
             child: StructureList(
               versionId: widget.versionDTO.firebaseId,

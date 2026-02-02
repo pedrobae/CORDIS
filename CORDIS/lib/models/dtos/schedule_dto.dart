@@ -29,7 +29,7 @@ class ScheduleDto {
   factory ScheduleDto.fromFirestore(Map<String, dynamic> json) {
     return ScheduleDto(
       firebaseId: json['firebaseId'] as String?,
-      ownerFirebaseId: json['ownerFirebaseId'] as String,
+      ownerFirebaseId: json['ownerId'] as String,
       name: json['name'] as String,
       datetime: json['datetime'] as Timestamp,
       location: json['location'] as String,

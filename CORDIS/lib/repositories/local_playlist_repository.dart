@@ -109,12 +109,12 @@ class PlaylistRepository {
   Future<int> upsertPlaylist(Playlist playlist) async {
     final db = await _databaseHelper.database;
 
-    // First, try to find existing playlist by firebase_id
+    // First, try to find existing playlist by name
     final existingResult = await db.query(
       'playlist',
       columns: ['id'],
-      where: 'firebase_id = ?',
-      whereArgs: [playlist.firebaseId],
+      where: 'name = ?',
+      whereArgs: [playlist.name],
     );
 
     if (existingResult.isNotEmpty) {
@@ -480,8 +480,8 @@ class PlaylistRepository {
       final existingResult = await txn.query(
         'playlist',
         columns: ['id'],
-        where: 'firebase_id = ?',
-        whereArgs: [playlist.firebaseId],
+        where: 'name = ?',
+        whereArgs: [playlist.name],
       );
 
       if (existingResult.isNotEmpty) {

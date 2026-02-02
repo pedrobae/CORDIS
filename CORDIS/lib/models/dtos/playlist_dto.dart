@@ -3,17 +3,13 @@ import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
 
 class PlaylistDto {
-  final String? firebaseId; // ID na nuvem (Firebase)
   final String name;
-  final String ownerId; // Usuário que criou a playlist
   final List<String> itemOrder;
   final Map<String, Map<String, dynamic>> flowItems;
   final Map<String, VersionDto> versions;
 
   const PlaylistDto({
-    this.firebaseId,
     required this.name,
-    required this.ownerId,
     this.itemOrder = const [],
     this.flowItems = const {},
     this.versions = const {},
@@ -32,15 +28,13 @@ class PlaylistDto {
 
   factory PlaylistDto.fromFirestore(Map<String, dynamic> json) {
     return PlaylistDto(
-      firebaseId: json['firebaseId'] as String?,
       name: json['name'] as String,
-      ownerId: json['ownerId'] as String,
-      itemOrder:
-          (json['itemOrder'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
-      flowItems: json['flowItems'] as Map<String, Map<String, String>>,
+      itemOrder: (json['itemOrder'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      flowItems: (json['flowItems'] as Map<String, dynamic>).map(
+        (key, value) => MapEntry(key, (value as Map<String, dynamic>)),
+      ),
       versions:
           (json['versions'] as Map<String, dynamic>?)?.map(
             (key, value) => MapEntry(key, VersionDto.fromFirestore(value, key)),
@@ -67,7 +61,6 @@ class PlaylistDto {
       name: name,
       createdBy: ownerLocalId,
       items: getPlaylistItems(),
-      firebaseId: firebaseId,
     );
   }
 

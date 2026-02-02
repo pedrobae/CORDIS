@@ -47,15 +47,6 @@ class PlaylistProvider extends ChangeNotifier {
 
   String? get error => _error;
 
-  Playlist? getPlaylistByFirebaseId(String firebaseId) {
-    for (var p in _playlists.values) {
-      if (p.firebaseId == firebaseId) {
-        return p;
-      }
-    }
-    return null;
-  }
-
   Playlist? getPlaylistById(int id) {
     return _playlists[id];
   }

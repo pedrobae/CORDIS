@@ -1,4 +1,5 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
@@ -7,6 +8,7 @@ import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/screens/schedule/view_schedule.dart';
+import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/delete_confirmation.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/library/duplicate_schedule_sheet.dart';
@@ -115,13 +117,25 @@ class ScheduleCard extends StatelessWidget {
                               spacing: 16.0,
                               children: [
                                 Text(
-                                  '${schedule.date.day}/${schedule.date.month}/${schedule.date.year}',
+                                  schedule is ScheduleDto
+                                      ? DateTimeUtils.formatDate(
+                                          schedule.datetime.toDate(),
+                                        )
+                                      : DateTimeUtils.formatDate(
+                                          (schedule as Schedule).date,
+                                        ),
                                   style: theme.textTheme.bodyMedium!.copyWith(
                                     color: colorScheme.onSurface,
                                   ),
                                 ),
                                 Text(
-                                  schedule.time.format(context),
+                                  schedule is ScheduleDto
+                                      ? DateTimeUtils.formatDate(
+                                          schedule.datetime.toDate(),
+                                        )
+                                      : DateTimeUtils.formatDate(
+                                          (schedule as Schedule).date,
+                                        ),
                                   style: theme.textTheme.bodyMedium!.copyWith(
                                     color: colorScheme.onSurface,
                                   ),

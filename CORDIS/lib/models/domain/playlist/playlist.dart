@@ -6,14 +6,12 @@ import 'playlist_item.dart';
 
 class Playlist {
   final int id;
-  final String? firebaseId;
   final String name;
   final int createdBy;
   final List<PlaylistItem> items; // Unified content items
 
   const Playlist({
     required this.id,
-    this.firebaseId,
     required this.name,
     required this.createdBy,
     this.items = const [],
@@ -42,7 +40,7 @@ class Playlist {
 
   // Database-specific serialization (excludes relational data)
   Map<String, dynamic> toDatabaseJson() {
-    return {'name': name, 'firebase_id': firebaseId, 'author_id': createdBy};
+    return {'name': name, 'author_id': createdBy};
   }
 
   PlaylistDto toDto(
@@ -51,9 +49,7 @@ class Playlist {
     Map<String, FlowItem> flowItems,
   ) {
     return PlaylistDto(
-      firebaseId: firebaseId,
       name: name,
-      ownerId: ownerFirebaseId,
       itemOrder: items
           .map(
             (item) =>

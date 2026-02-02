@@ -135,9 +135,13 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
               );
             }
 
-            final playlist = playlistProvider.getPlaylistById(
-              schedule.playlistId,
-            );
+            final playlist = schedule is Schedule
+                ? playlistProvider.getPlaylistById(schedule.playlistId!)
+                : (schedule as ScheduleDto).playlist.toDomain(
+                    userProvider.getLocalIdByFirebaseId(
+                      schedule.ownerFirebaseId,
+                    )!,
+                  );
 
             int memberCount = 0;
             for (var role in schedule.roles) {

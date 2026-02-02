@@ -76,8 +76,9 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
       if (schedule == null) {
         throw Exception("Schedule not found");
       }
-
-      items = schedule.playlist.getPlaylistItems();
+      setState(() {
+        items = schedule.playlist.getPlaylistItems();
+      });
     }
   }
 
@@ -125,10 +126,9 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                 if (isCloud) {
                   nextTitle =
                       ((scheduleProvider.schedules[widget.scheduleId]
-                                  as ScheduleDto)
-                              .playlist
-                              .flowItems[nextItem.firebaseContentId]?['title']
-                          as String?) ??
+                              as ScheduleDto)
+                          .playlist
+                          .flowItems[nextItem.firebaseContentId]?['title']) ??
                       '';
                 } else {
                   nextTitle =

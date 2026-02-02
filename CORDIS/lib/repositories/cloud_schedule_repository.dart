@@ -45,7 +45,7 @@ class CloudScheduleRepository {
           .fetchDocumentsContainingValue(
             collectionPath: 'schedules',
             field: 'collaborators',
-            orderField: 'updatedAt',
+            orderField: 'createdAt',
             value: firebaseUserId,
           );
 
