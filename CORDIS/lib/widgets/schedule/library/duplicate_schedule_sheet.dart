@@ -65,6 +65,9 @@ class _DuplicateScheduleSheetState extends State<DuplicateScheduleSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Consumer5<
       LocalScheduleProvider,
       CloudScheduleProvider,
@@ -84,7 +87,7 @@ class _DuplicateScheduleSheetState extends State<DuplicateScheduleSheet> {
           ) {
             return Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
               ),
               padding: const EdgeInsets.all(16.0),
@@ -102,8 +105,9 @@ class _DuplicateScheduleSheetState extends State<DuplicateScheduleSheet> {
                           AppLocalizations.of(context)!.duplicatePlaceholder(
                             AppLocalizations.of(context)!.schedule,
                           ),
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         IconButton(
                           icon: Icon(Icons.close),

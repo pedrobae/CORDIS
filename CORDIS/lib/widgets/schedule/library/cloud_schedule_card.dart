@@ -70,104 +70,123 @@ class CloudScheduleCard extends StatelessWidget {
               }
             }
 
-            return Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: colorScheme.surfaceContainerLowest,
-                  width: 1,
-                ),
-                borderRadius: BorderRadius.circular(0),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
+            return Stack(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: colorScheme.surfaceContainerLowest,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // SCHEDULE NAME
-                            Text(
-                              schedule.name,
-                              style: theme.textTheme.titleMedium!.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.onSurface,
-                              ),
-                            ),
-
-                            // WHEN & WHERE
-                            Wrap(
-                              spacing: 16.0,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // SCHEDULE NAME
                                 Text(
-                                  DateTimeUtils.formatDate(
-                                    schedule.datetime.toDate(),
-                                  ),
-                                  style: theme.textTheme.bodyMedium!.copyWith(
+                                  schedule.name,
+                                  style: theme.textTheme.titleMedium!.copyWith(
+                                    fontWeight: FontWeight.w600,
                                     color: colorScheme.onSurface,
                                   ),
                                 ),
-                                Text(
-                                  DateTimeUtils.formatDate(
-                                    schedule.datetime.toDate(),
-                                  ),
-                                  style: theme.textTheme.bodyMedium!.copyWith(
-                                    color: colorScheme.onSurface,
-                                  ),
+
+                                // WHEN & WHERE
+                                Wrap(
+                                  spacing: 16.0,
+                                  children: [
+                                    Text(
+                                      DateTimeUtils.formatDate(
+                                        schedule.datetime.toDate(),
+                                      ),
+                                      style: theme.textTheme.bodyMedium!
+                                          .copyWith(
+                                            color: colorScheme.onSurface,
+                                          ),
+                                    ),
+                                    Text(
+                                      DateTimeUtils.formatDate(
+                                        schedule.datetime.toDate(),
+                                      ),
+                                      style: theme.textTheme.bodyMedium!
+                                          .copyWith(
+                                            color: colorScheme.onSurface,
+                                          ),
+                                    ),
+                                    Text(
+                                      schedule.location,
+                                      style: theme.textTheme.bodyMedium!
+                                          .copyWith(
+                                            color: colorScheme.onSurface,
+                                          ),
+                                    ),
+                                  ],
                                 ),
+
+                                // PLAYLIST INFO
                                 Text(
-                                  schedule.location,
-                                  style: theme.textTheme.bodyMedium!.copyWith(
-                                    color: colorScheme.onSurface,
-                                  ),
+                                  '${AppLocalizations.of(context)!.playlist}: ${playlist.name}',
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+
+                                // YOUR ROLE INFO
+                                Text(
+                                  '${AppLocalizations.of(context)!.role}: $userRole',
+                                  style: theme.textTheme.bodyMedium,
                                 ),
                               ],
                             ),
-
-                            // PLAYLIST INFO
-                            Text(
-                              '${AppLocalizations.of(context)!.playlist}: ${playlist.name}',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-
-                            // YOUR ROLE INFO
-                            Text(
-                              '${AppLocalizations.of(context)!.role}: $userRole',
-                              style: theme.textTheme.bodyMedium,
+                          ),
+                          if (showActions) ...[
+                            IconButton(
+                              onPressed: () => _openScheduleActionsSheet(
+                                context,
+                                scheduleId,
+                                cloudScheduleProvider,
+                              ),
+                              icon: Icon(Icons.more_vert),
                             ),
                           ],
-                        ),
+                        ],
                       ),
-                      if (showActions) ...[
-                        IconButton(
-                          onPressed: () => _openScheduleActionsSheet(
-                            context,
-                            scheduleId,
-                            cloudScheduleProvider,
-                          ),
-                          icon: Icon(Icons.more_vert),
-                        ),
-                      ],
+                      // BOTTOM BUTTONS
+                      FilledTextButton(
+                        isDark: true,
+                        isDense: true,
+                        onPressed: () {
+                          navigationProvider.push(
+                            PlayScheduleScreen(scheduleId: scheduleId),
+                            showAppBar: false,
+                            showDrawerIcon: false,
+                            showBottomNavBar: false,
+                          );
+                        },
+                        text: AppLocalizations.of(context)!.play,
+                      ),
                     ],
                   ),
-                  // BOTTOM BUTTONS
-                  FilledTextButton(
-                    isDark: true,
-                    isDense: true,
-                    onPressed: () {
-                      navigationProvider.push(
-                        PlayScheduleScreen(scheduleId: scheduleId),
-                        showAppBar: false,
-                        showDrawerIcon: false,
-                        showBottomNavBar: false,
-                      );
-                    },
-                    text: AppLocalizations.of(context)!.play,
+                ), // CLOUD WATERMARK
+                Positioned(
+                  right: -20,
+                  bottom: -40,
+                  child: Opacity(
+                    opacity: 0.08,
+                    child: Icon(
+                      Icons.cloud,
+                      size: 200,
+                      color: colorScheme.primary,
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
     );
