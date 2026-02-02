@@ -26,9 +26,9 @@ class ScheduleDto {
     required this.roles,
   });
 
-  factory ScheduleDto.fromFirestore(Map<String, dynamic> json) {
+  factory ScheduleDto.fromFirestore(Map<String, dynamic> json, String id) {
     return ScheduleDto(
-      firebaseId: json['firebaseId'] as String?,
+      firebaseId: id,
       ownerFirebaseId: json['ownerId'] as String,
       name: json['name'] as String,
       datetime: json['datetime'] as Timestamp,
@@ -46,7 +46,7 @@ class ScheduleDto {
 
   Map<String, dynamic> toFirestore() {
     return {
-      'ownerFirebaseId': ownerFirebaseId,
+      'ownerId': ownerFirebaseId,
       'name': name,
       'datetime': datetime,
       'location': location,
@@ -55,6 +55,38 @@ class ScheduleDto {
       'playlist': playlist.toFirestore(),
       'roles': roles.map((role) => role.toFirestore()).toList(),
     };
+  }
+
+  Map<String, dynamic> toCache() {
+    return {
+      'firebaseId': firebaseId,
+      'ownerId': ownerFirebaseId,
+      'name': name,
+      'datetime': datetime.millisecondsSinceEpoch,
+      'location': location,
+      'roomVenue': roomVenue,
+      'annotations': annotations,
+      'playlist': playlist.toCache(),
+      'roles': roles.map((role) => role.toFirestore()).toList(),
+    };
+  }
+
+  factory ScheduleDto.fromCache(Map<String, dynamic> json) {
+    return ScheduleDto(
+      firebaseId: json['firebaseId'] as String?,
+      ownerFirebaseId: json['ownerId'] as String,
+      name: json['name'] as String,
+      datetime: Timestamp.fromMillisecondsSinceEpoch(json['datetime'] as int),
+      location: json['location'] as String,
+      roomVenue: json['roomVenue'] as String?,
+      annotations: json['annotations'] as String?,
+      playlist: PlaylistDto.fromFirestore(
+        json['playlist'] as Map<String, dynamic>,
+      ),
+      roles: (json['roles'] as List)
+          .map((role) => RoleDto.fromFirestore(role))
+          .toList(),
+    );
   }
 
   Schedule toDomain(

@@ -140,7 +140,10 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
           child: RefreshIndicator(
             onRefresh: () async {
               await localScheduleProvider.loadSchedules();
-              await cloudScheduleProvider.loadSchedules(authProvider.id!);
+              await cloudScheduleProvider.loadSchedules(
+                authProvider.id!,
+                forceFetch: true,
+              );
             },
             child: SingleChildScrollView(
               controller: _scrollController,

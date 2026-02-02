@@ -54,6 +54,32 @@ class PlaylistDto {
     };
   }
 
+  factory PlaylistDto.fromCache(Map<String, dynamic> json) {
+    return PlaylistDto(
+      name: json['name'] as String,
+      itemOrder: (json['itemOrder'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      flowItems: (json['flowItems'] as Map<String, dynamic>).map(
+        (key, value) => MapEntry(key, (value as Map<String, dynamic>)),
+      ),
+      versions:
+          (json['versions'] as Map<String, dynamic>?)?.map(
+            (key, value) => MapEntry(key, VersionDto.fromFirestore(value, key)),
+          ) ??
+          {},
+    );
+  }
+
+  Map<String, dynamic> toCache() {
+    return {
+      'name': name,
+      'itemOrder': itemOrder,
+      'flowItems': flowItems,
+      'versions': versions.map((key, value) => MapEntry(key, value.toCache())),
+    };
+  }
+
   /// Method to convert PlaylistDto to Playlist domain model items must be inserted first
   Playlist toDomain(int ownerLocalId) {
     return Playlist(

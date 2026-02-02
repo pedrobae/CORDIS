@@ -81,7 +81,9 @@ class CloudVersionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final cloudVersions = await _repo.getPublicVersions();
+      final cloudVersions = await _repo.getPublicVersions(
+        forceReload: forceReload,
+      );
 
       for (final version in cloudVersions) {
         _versions[version.firebaseId!] = version;

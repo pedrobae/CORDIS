@@ -205,6 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         context.read<LocalScheduleProvider>().loadSchedules(),
         context.read<CloudScheduleProvider>().loadSchedules(
           context.read<MyAuthProvider>().id!,
+          forceFetch: true,
         ),
       ]);
 

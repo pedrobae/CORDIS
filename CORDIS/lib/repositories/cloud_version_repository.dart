@@ -1,4 +1,4 @@
-import 'package:cordis/helpers/cloud_versions_cache.dart';
+import 'package:cordis/services/cache_service.dart';
 import 'package:cordis/helpers/guard.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/services/firestore_service.dart';
@@ -10,7 +10,7 @@ class CloudVersionRepository {
   final AuthService _authService = AuthService();
   final GuardHelper _guardHelper = GuardHelper();
 
-  final CloudVersionsCache _cloudCache = CloudVersionsCache();
+  final CacheService _cacheService = CacheService();
   final List<VersionDto> _repoCache = [];
 
   DateTime? _lastCloudLoad;
@@ -91,8 +91,8 @@ class CloudVersionRepository {
         )
         .toList();
 
-    await _cloudCache.saveCloudVersions(cloudVersions);
-    await _cloudCache.saveLastCloudLoad(now);
+    await _cacheService.saveCloudVersions(cloudVersions);
+    await _cacheService.saveLastCloudLoad(now);
 
     _lastCloudLoad = now;
 
@@ -213,8 +213,8 @@ class CloudVersionRepository {
   }
 
   Future<void> _initializeCloudCache() async {
-    _lastCloudLoad = await _cloudCache.loadLastCloudLoad();
-    _repoCache.addAll(await _cloudCache.loadCloudVersions());
+    _lastCloudLoad = await _cacheService.loadLastCloudLoad();
+    _repoCache.addAll(await _cacheService.loadCloudVersions());
   }
 
   // ===== DELETE =====
