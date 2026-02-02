@@ -776,6 +776,12 @@ abstract class AppLocalizations {
   /// **'Criar uma cópia desta {object}'**
   String duplicateTooltip(Object object);
 
+  /// Tooltip for creating a local copy of a cloud object
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar uma Cópia Local'**
+  String get createLocalCopy;
+
   /// Label for schedule name input field
   ///
   /// In pt, this message translates to:

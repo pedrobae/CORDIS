@@ -1,22 +1,26 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/screens/schedule/play_schedule.dart';
+
+import 'package:provider/provider.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist_provider.dart';
-import 'package:cordis/providers/schedule/local_schedule_provider.dart';
+import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
-import 'package:cordis/screens/schedule/view_schedule.dart';
+
 import 'package:cordis/utils/date_utils.dart';
+
 import 'package:cordis/widgets/delete_confirmation.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/library/duplicate_schedule_sheet.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-class ScheduleCard extends StatelessWidget {
-  final int scheduleId;
+import 'package:flutter/material.dart';
+
+class CloudScheduleCard extends StatelessWidget {
+  final String scheduleId;
   final bool showActions;
 
-  const ScheduleCard({
+  const CloudScheduleCard({
     super.key,
     required this.scheduleId,
     this.showActions = true,
@@ -28,7 +32,7 @@ class ScheduleCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Consumer5<
-      LocalScheduleProvider,
+      CloudScheduleProvider,
       PlaylistProvider,
       MyAuthProvider,
       UserProvider,
@@ -37,7 +41,7 @@ class ScheduleCard extends StatelessWidget {
       builder:
           (
             context,
-            localScheduleProvider,
+            cloudScheduleProvider,
             playlistProvider,
             authProvider,
             userProvider,
@@ -45,27 +49,25 @@ class ScheduleCard extends StatelessWidget {
             child,
           ) {
             // LOADING STATE
-            if (localScheduleProvider.isLoading ||
+            if (cloudScheduleProvider.isLoading ||
                 userProvider.isLoading ||
-                scheduleId == -1) {
+                scheduleId == '-1') {
               return Center(
                 child: CircularProgressIndicator(color: colorScheme.primary),
               );
             }
 
-            final schedule = localScheduleProvider.getSchedule(scheduleId);
+            final schedule = cloudScheduleProvider.getSchedule(scheduleId)!;
 
-            final playlist = playlistProvider.getPlaylistById(
-              schedule!.playlistId!,
-            );
+            final playlist = schedule.playlist;
 
             String userRole = AppLocalizations.of(context)!.generalMember;
-            final roleFound = localScheduleProvider.getUserRoleInSchedule(
-              scheduleId,
-              userProvider.getLocalIdByFirebaseId(authProvider.id!),
-            );
-            if (roleFound != null) {
-              userRole = roleFound;
+
+            for (var role in schedule.roles) {
+              if (role.memberIds.contains(authProvider.id)) {
+                userRole = role.name;
+                break;
+              }
             }
 
             return Container(
@@ -100,12 +102,21 @@ class ScheduleCard extends StatelessWidget {
                               spacing: 16.0,
                               children: [
                                 Text(
-                                  DateTimeUtils.formatDate(schedule.date),
+                                  DateTimeUtils.formatDate(
+                                    schedule.datetime.toDate(),
+                                  ),
                                   style: theme.textTheme.bodyMedium!.copyWith(
                                     color: colorScheme.onSurface,
                                   ),
                                 ),
-                                Text(DateTimeUtils.formatDate(schedule.date)),
+                                Text(
+                                  DateTimeUtils.formatDate(
+                                    schedule.datetime.toDate(),
+                                  ),
+                                  style: theme.textTheme.bodyMedium!.copyWith(
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
                                 Text(
                                   schedule.location,
                                   style: theme.textTheme.bodyMedium!.copyWith(
@@ -116,12 +127,10 @@ class ScheduleCard extends StatelessWidget {
                             ),
 
                             // PLAYLIST INFO
-                            playlist != null
-                                ? Text(
-                                    '${AppLocalizations.of(context)!.playlist}: ${playlist.name}',
-                                    style: theme.textTheme.bodyMedium,
-                                  )
-                                : SizedBox.shrink(),
+                            Text(
+                              '${AppLocalizations.of(context)!.playlist}: ${playlist.name}',
+                              style: theme.textTheme.bodyMedium,
+                            ),
 
                             // YOUR ROLE INFO
                             Text(
@@ -136,7 +145,7 @@ class ScheduleCard extends StatelessWidget {
                           onPressed: () => _openScheduleActionsSheet(
                             context,
                             scheduleId,
-                            localScheduleProvider,
+                            cloudScheduleProvider,
                           ),
                           icon: Icon(Icons.more_vert),
                         ),
@@ -149,30 +158,13 @@ class ScheduleCard extends StatelessWidget {
                     isDense: true,
                     onPressed: () {
                       navigationProvider.push(
-                        ViewScheduleScreen(scheduleId: scheduleId),
+                        PlayScheduleScreen(scheduleId: scheduleId),
                         showAppBar: false,
                         showDrawerIcon: false,
+                        showBottomNavBar: false,
                       );
                     },
-                    text: AppLocalizations.of(
-                      context,
-                    )!.viewPlaceholder(AppLocalizations.of(context)!.schedule),
-                  ),
-                  FilledTextButton(
-                    onPressed: () {
-                      // TODO: CLOUD - Implement share functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: Colors.amberAccent,
-                          content: Text(
-                            'Funcionalidade em desenvolvimento,',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ),
-                      );
-                    },
-                    text: AppLocalizations.of(context)!.share,
-                    isDense: true,
+                    text: AppLocalizations.of(context)!.play,
                   ),
                 ],
               ),
@@ -183,8 +175,8 @@ class ScheduleCard extends StatelessWidget {
 
   void _openScheduleActionsSheet(
     BuildContext context,
-    int scheduleId,
-    LocalScheduleProvider localScheduleProvider,
+    dynamic scheduleId,
+    CloudScheduleProvider cloudScheduleProvider,
   ) {
     showModalBottomSheet(
       context: context,
@@ -221,9 +213,7 @@ class ScheduleCard extends StatelessWidget {
               // duplicate
               FilledTextButton(
                 text: AppLocalizations.of(context)!.duplicatePlaceholder(''),
-                tooltip: AppLocalizations.of(
-                  context,
-                )!.duplicateTooltip(AppLocalizations.of(context)!.setup),
+                tooltip: AppLocalizations.of(context)!.createLocalCopy,
                 onPressed: () =>
                     _openDuplicateScheduleSheet(context, scheduleId),
                 trailingIcon: Icons.chevron_right,
@@ -241,7 +231,10 @@ class ScheduleCard extends StatelessWidget {
                         itemType: AppLocalizations.of(context)!.schedule,
                         onConfirm: () {
                           Navigator.of(context).pop();
-                          localScheduleProvider.deleteSchedule(scheduleId);
+                          cloudScheduleProvider.deleteSchedule(
+                            context.read<MyAuthProvider>().id!,
+                            scheduleId,
+                          );
                         },
                       );
                     },
@@ -260,7 +253,7 @@ class ScheduleCard extends StatelessWidget {
     );
   }
 
-  void _openDuplicateScheduleSheet(BuildContext context, int scheduleId) {
+  void _openDuplicateScheduleSheet(BuildContext context, dynamic scheduleId) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

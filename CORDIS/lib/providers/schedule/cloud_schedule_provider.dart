@@ -187,16 +187,15 @@ class CloudScheduleProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> saveCloudSchedule(String scheduleId) async {
+  Future<void> updateSchedule(String scheduleId, String ownerId) async {
     if (_isSaving) return;
 
     _isSaving = true;
     notifyListeners();
 
     try {
-      // final schedule = _schedules[scheduleId]!;
-      // TODO: CLOUD - track changes
-      // await _repo.updateSchedule(schedule);
+      final schedule = _schedules[scheduleId]!;
+      await _repo.updateSchedule(ownerId, schedule);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -206,10 +205,24 @@ class CloudScheduleProvider extends ChangeNotifier {
   }
 
   // ===== DELETE =====
-  // TODO: CLOUD - handle deletion
-  // else if (scheduleId is String && schedule is ScheduleDto) {
-  //   await _cloudScheduleRepository.deleteSchedule(scheduleId);
-  // }
+  /// Delete a schedule from the cache and in Firestore
+  void deleteSchedule(String userId, String scheduleId) {
+    if (_isSaving) return;
+
+    _isSaving = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _repo.deleteSchedule(userId, scheduleId);
+      _schedules.remove(scheduleId);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isSaving = false;
+    }
+    notifyListeners();
+  }
 
   // ===== HELPERS =====
   void clearCache() {

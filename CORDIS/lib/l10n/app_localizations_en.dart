@@ -376,6 +376,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get createLocalCopy => 'Create a Local Copy';
+
+  @override
   String get scheduleName => 'Schedule Name';
 
   @override

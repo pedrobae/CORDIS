@@ -255,6 +255,9 @@
   "duplicateTooltip": "Criar uma cópia desta {object}",
   "@duplicateTooltip": {"description": "Tooltip for duplicate action", "placeholders": {"object": {}}},
 
+    "createLocalCopy": "Criar uma Cópia Local",
+  "@createLocalCopy": {"description": "Tooltip for creating a local copy of a cloud object"},
+
   "scheduleName": "Nome da Agenda",
   "@scheduleName": {"description": "Label for schedule name input field"},
   "date": "Data",

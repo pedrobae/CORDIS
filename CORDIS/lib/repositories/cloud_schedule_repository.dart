@@ -116,24 +116,20 @@ class CloudScheduleRepository {
   // ===== UPDATE =====
 
   /// Update an existing schedule in Firestore on the changes map
-  Future<void> updateSchedule(
-    String firebaseId,
-    String ownerId,
-    Map<String, dynamic> changes,
-  ) async {
+  Future<void> updateSchedule(String ownerId, ScheduleDto schedule) async {
     return await _withErrorHandling('update_schedule', () async {
       await _guardHelper.requireAuth();
       await _guardHelper.requireOwnership(ownerId);
 
       await _firestoreService.updateDocument(
         collectionPath: 'schedules',
-        documentId: firebaseId,
-        data: changes,
+        documentId: schedule.firebaseId!,
+        data: schedule.toFirestore(),
       );
 
       await FirebaseAnalytics.instance.logEvent(
         name: 'updated_schedule',
-        parameters: {'scheduleId': firebaseId},
+        parameters: {'scheduleId': schedule.firebaseId!},
       );
     });
   }

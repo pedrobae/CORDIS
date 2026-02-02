@@ -2,6 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
+import 'package:cordis/widgets/schedule/library/cloud_schedule_card.dart';
 import 'package:cordis/widgets/schedule/library/schedule_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -153,6 +154,9 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
                 children: [
                   SizedBox(height: 8.0),
                   ...futureScheduleIDs.map((scheduleId) {
+                    if (scheduleId is String) {
+                      return CloudScheduleCard(scheduleId: scheduleId);
+                    }
                     return ScheduleCard(scheduleId: scheduleId);
                   }),
                   SizedBox(height: 16.0),

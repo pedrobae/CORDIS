@@ -378,6 +378,9 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get createLocalCopy => 'Criar uma Cópia Local';
+
+  @override
   String get scheduleName => 'Nome da Agenda';
 
   @override
