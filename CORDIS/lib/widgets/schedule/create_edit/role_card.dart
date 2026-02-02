@@ -83,8 +83,8 @@ class RoleCard extends StatelessWidget {
                   isDense: true,
                   onPressed: () {
                     if (scheduleId is String) {
-                      return;
-                    } // TODO: CLOUD - handle roleDTOs
+                      return; // Prevent deletion of cloud schedule roles
+                    }
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
