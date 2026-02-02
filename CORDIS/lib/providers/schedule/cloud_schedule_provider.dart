@@ -91,7 +91,7 @@ class CloudScheduleProvider extends ChangeNotifier {
 
   // ===== READ =====
   /// Fetches all schedules from the cloud repository (user has to be a collaborator)
-  Future<void> loadSchedules() async {
+  Future<void> loadSchedules(String userId) async {
     if (_isLoading) return;
 
     _isLoading = true;
@@ -99,7 +99,13 @@ class CloudScheduleProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: CLOUD - Fetch schedules from cloud repository
+      final schedules = await _repo.fetchSchedulesByUserId(userId);
+
+      _schedules.clear();
+
+      for (var schedule in schedules) {
+        _schedules[schedule.firebaseId!] = schedule;
+      }
     } catch (e) {
       _error = e.toString();
     } finally {

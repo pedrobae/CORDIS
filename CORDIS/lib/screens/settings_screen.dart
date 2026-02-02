@@ -203,7 +203,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         context.read<PlaylistProvider>().loadPlaylists(),
         context.read<UserProvider>().loadUsers(),
         context.read<LocalScheduleProvider>().loadSchedules(),
-        context.read<CloudScheduleProvider>().loadSchedules(),
+        context.read<CloudScheduleProvider>().loadSchedules(
+          context.read<MyAuthProvider>().id!,
+        ),
       ]);
 
       if (mounted) {

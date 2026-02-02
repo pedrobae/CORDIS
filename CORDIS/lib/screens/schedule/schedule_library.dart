@@ -1,4 +1,5 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
@@ -25,7 +26,7 @@ class _ScheduleLibraryScreenState extends State<ScheduleLibraryScreen> {
       final localScheduleProvider = context.read<LocalScheduleProvider>();
       final cloudScheduleProvider = context.read<CloudScheduleProvider>();
       localScheduleProvider.loadSchedules();
-      cloudScheduleProvider.loadSchedules();
+      cloudScheduleProvider.loadSchedules(context.read<MyAuthProvider>().id!);
     });
   }
 

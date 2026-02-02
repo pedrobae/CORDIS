@@ -1,6 +1,7 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
+import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
@@ -99,7 +100,9 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                       ElevatedButton(
                         onPressed: () {
                           localScheduleProvider.loadSchedules();
-                          cloudScheduleProvider.loadSchedules();
+                          cloudScheduleProvider.loadSchedules(
+                            context.read<MyAuthProvider>().id!,
+                          );
                         },
                         child: Text(AppLocalizations.of(context)!.tryAgain),
                       ),

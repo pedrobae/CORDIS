@@ -13,13 +13,13 @@ const Map<String, SectionLabel> commonSectionLabels = {
     ],
     officialLabel: 'Verse',
     code: 'V',
-    color: Colors.blue,
+    color: Color(0xFF2196F3),
   ),
   'chorus': SectionLabel(
     labelVariations: ['chorus', 'coro', 'refrao', 'refrão'],
     officialLabel: 'Chorus',
     code: 'C',
-    color: Colors.red,
+    color: Color(0xFFF44336),
   ),
   'bridge': SectionLabel(
     labelVariations: ['bridge', 'ponte'],
@@ -31,7 +31,7 @@ const Map<String, SectionLabel> commonSectionLabels = {
     labelVariations: ['intro'],
     officialLabel: 'Intro',
     code: 'I',
-    color: Colors.purple,
+    color: Color(0xFF9C27B0),
   ),
   'outro': SectionLabel(
     labelVariations: ['outro'],
@@ -61,7 +61,7 @@ const Map<String, SectionLabel> commonSectionLabels = {
     labelVariations: ['finale', 'final'],
     officialLabel: 'Finale',
     code: 'F',
-    color: Colors.indigo,
+    color: Color(0xFF3F51B5),
   ),
   'annotations': SectionLabel(
     labelVariations: ['notes', 'anotacoes', 'anotações'],

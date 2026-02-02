@@ -1,4 +1,5 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/widgets/schedule/library/schedule_card.dart';
@@ -46,49 +47,61 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Consumer2<LocalScheduleProvider, CloudScheduleProvider>(
-      builder: (context, localScheduleProvider, cloudScheduleProvider, child) {
-        // Handle loading state
-        if (localScheduleProvider.isLoading ||
-            cloudScheduleProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return Consumer3<
+      LocalScheduleProvider,
+      CloudScheduleProvider,
+      MyAuthProvider
+    >(
+      builder:
+          (
+            context,
+            localScheduleProvider,
+            cloudScheduleProvider,
+            authProvider,
+            child,
+          ) {
+            // Handle loading state
+            if (localScheduleProvider.isLoading ||
+                cloudScheduleProvider.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-        final localfuture = localScheduleProvider.futureScheduleIDs;
-        final localPast = localScheduleProvider.pastScheduleIDs;
-        final cloudFuture = cloudScheduleProvider.futureScheduleIDs;
-        final cloudPast = cloudScheduleProvider.pastScheduleIDs;
+            final localfuture = localScheduleProvider.futureScheduleIDs;
+            final localPast = localScheduleProvider.pastScheduleIDs;
+            final cloudFuture = cloudScheduleProvider.futureScheduleIDs;
+            final cloudPast = cloudScheduleProvider.pastScheduleIDs;
 
-        final futureScheduleIds = [...localfuture, ...cloudFuture];
+            final futureScheduleIds = [...localfuture, ...cloudFuture];
 
-        final pastScheduleIds = [...localPast, ...cloudPast];
+            final pastScheduleIds = [...localPast, ...cloudPast];
 
-        // Handle empty state
-        if (futureScheduleIds.isEmpty && pastScheduleIds.isEmpty) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(height: 64),
-              Text(
-                AppLocalizations.of(context)!.emptyScheduleLibrary,
-                style: textTheme.bodyLarge!.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          );
-        }
+            // Handle empty state
+            if (futureScheduleIds.isEmpty && pastScheduleIds.isEmpty) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 64),
+                  Text(
+                    AppLocalizations.of(context)!.emptyScheduleLibrary,
+                    style: textTheme.bodyLarge!.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              );
+            }
 
-        return _buildScheduleList(
-          pastScheduleIds,
-          futureScheduleIds,
-          localScheduleProvider,
-          cloudScheduleProvider,
-          textTheme,
-        );
-      },
+            return _buildScheduleList(
+              pastScheduleIds,
+              futureScheduleIds,
+              localScheduleProvider,
+              cloudScheduleProvider,
+              authProvider,
+              textTheme,
+            );
+          },
     );
   }
 
@@ -97,6 +110,7 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
     List<dynamic> futureScheduleIDs,
     LocalScheduleProvider localScheduleProvider,
     CloudScheduleProvider cloudScheduleProvider,
+    MyAuthProvider authProvider,
     TextTheme textTheme,
   ) {
     return Column(
@@ -126,7 +140,7 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
           child: RefreshIndicator(
             onRefresh: () async {
               await localScheduleProvider.loadSchedules();
-              await cloudScheduleProvider.loadSchedules();
+              await cloudScheduleProvider.loadSchedules(authProvider.id!);
             },
             child: SingleChildScrollView(
               controller: _scrollController,
