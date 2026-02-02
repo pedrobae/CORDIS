@@ -61,12 +61,12 @@ class PlaylistDto {
   }
 
   /// Method to convert PlaylistDto to Playlist domain model items must be inserted first
-  Playlist toDomain(List<PlaylistItem> items, int ownerLocalId) {
+  Playlist toDomain(int ownerLocalId) {
     return Playlist(
       id: -1, // ID local será atribuído pelo banco de dados local
       name: name,
       createdBy: ownerLocalId,
-      items: items,
+      items: getPlaylistItems(),
       firebaseId: firebaseId,
     );
   }
@@ -83,7 +83,7 @@ class PlaylistDto {
 
   List<PlaylistItem> getPlaylistItems() {
     List<PlaylistItem> playlistItems = [];
-    int position = 1;
+    int position = 0;
     for (var itemId in itemOrder) {
       final id = itemId.split(':');
       if (id[0] == 'f') {

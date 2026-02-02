@@ -77,7 +77,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
         throw Exception("Schedule not found");
       }
 
-      items = schedule.playlist!.getPlaylistItems();
+      items = schedule.playlist.getPlaylistItems();
     }
   }
 
@@ -114,7 +114,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                       ((scheduleProvider.schedules[widget.scheduleId]
                               as ScheduleDto)
                           .playlist
-                          ?.versions[nextItem.firebaseContentId]
+                          .versions[nextItem.firebaseContentId]
                           ?.title) ??
                       '';
                 } else {
@@ -127,7 +127,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                       ((scheduleProvider.schedules[widget.scheduleId]
                                   as ScheduleDto)
                               .playlist
-                              ?.flowItems[nextItem.firebaseContentId]?['title']
+                              .flowItems[nextItem.firebaseContentId]?['title']
                           as String?) ??
                       '';
                 } else {
@@ -167,7 +167,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                                       (scheduleProvider.schedules[widget
                                                   .scheduleId]
                                               as ScheduleDto)
-                                          .playlist!
+                                          .playlist
                                           .versions[item.firebaseContentId]!,
                                 );
                               } else {
@@ -182,7 +182,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                                     (scheduleProvider.schedules[widget
                                                 .scheduleId]
                                             as ScheduleDto)
-                                        .playlist!
+                                        .playlist
                                         .flowItems[item.firebaseContentId]!;
 
                                 return PlayFlowItem(

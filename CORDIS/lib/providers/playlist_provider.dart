@@ -95,6 +95,29 @@ class PlaylistProvider extends ChangeNotifier {
     }
   }
 
+  // Create a new playlist from the Domain model
+  Future<int> createPlaylistFromDomain(Playlist playlist) async {
+    int playlistId;
+    try {
+      _isSaving = true;
+      _error = null;
+      notifyListeners();
+
+      playlistId = await _playlistRepository.insertPlaylist(playlist);
+
+      // Add the created playlist with new ID to cache
+      _playlists[playlistId] = playlist.copyWith(id: playlistId);
+    } catch (e) {
+      _error = e.toString();
+      playlistId = -1;
+    } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+
+    return playlistId;
+  }
+
   // ===== READ =====
   // Load Playlists from local SQLite database
   Future<void> loadPlaylists() async {

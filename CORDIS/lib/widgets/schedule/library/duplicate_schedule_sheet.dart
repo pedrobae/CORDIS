@@ -1,7 +1,10 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/schedule.dart';
+import 'package:cordis/providers/my_auth_provider.dart';
+import 'package:cordis/providers/playlist_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
+import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/create_edit/details_form.dart';
@@ -62,101 +65,131 @@ class _DuplicateScheduleSheetState extends State<DuplicateScheduleSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<LocalScheduleProvider, CloudScheduleProvider>(
-      builder: (context, localScheduleProvider, cloudScheduleProvider, child) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
-          ),
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              spacing: 16,
-              children: [
-                // HEADER
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer5<
+      LocalScheduleProvider,
+      CloudScheduleProvider,
+      UserProvider,
+      MyAuthProvider,
+      PlaylistProvider
+    >(
+      builder:
+          (
+            context,
+            localScheduleProvider,
+            cloudScheduleProvider,
+            userProvider,
+            authProvider,
+            playlistProvider,
+            child,
+          ) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+              ),
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 16,
                   children: [
-                    Text(
-                      AppLocalizations.of(context)!.duplicatePlaceholder(
-                        AppLocalizations.of(context)!.schedule,
-                      ),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    // HEADER
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.duplicatePlaceholder(
+                            AppLocalizations.of(context)!.schedule,
+                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.close),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
+
+                    // FORM
+                    ScheduleForm(
+                      nameController: nameController,
+                      dateController: dateController,
+                      startTimeController: startTimeController,
+                      locationController: locationController,
+                      roomVenueController: roomVenueController,
                     ),
+
+                    // ACTIONS
+                    // confirm
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.keepGoing,
+                      isDark: true,
+                      onPressed: () async {
+                        if (widget.scheduleId is int) {
+                          localScheduleProvider.duplicateSchedule(
+                            widget.scheduleId,
+                            nameController.text,
+                            dateController.text,
+                            startTimeController.text,
+                            locationController.text,
+                            roomVenueController.text,
+                          );
+                        } else {
+                          final scheduleDto = cloudScheduleProvider
+                              .duplicateSchedule(
+                                widget.scheduleId,
+                                nameController.text,
+                                dateController.text,
+                                startTimeController.text,
+                                locationController.text,
+                                roomVenueController.text,
+                              );
+
+                          final ownerLocalId = userProvider
+                              .getLocalIdByFirebaseId(authProvider.id!)!;
+
+                          final playlistId = await playlistProvider
+                              .createPlaylistFromDomain(
+                                scheduleDto.playlist.toDomain(ownerLocalId),
+                              );
+
+                          localScheduleProvider.createSchedule(
+                            scheduleDto.toDomain(
+                              ownerLocalId,
+                              scheduleDto.roles
+                                  .map(
+                                    (role) => role.memberIds
+                                        .map(
+                                          (id) => userProvider
+                                              .getLocalIdByFirebaseId(id)!,
+                                        )
+                                        .toList(),
+                                  )
+                                  .toList(),
+                              playlistId,
+                            ),
+                          );
+                        }
+                        if (context.mounted) Navigator.of(context).pop();
+                      },
+                    ),
+
+                    // cancel
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.cancel,
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+
+                    SizedBox(height: 16),
                   ],
                 ),
-
-                // FORM
-                ScheduleForm(
-                  nameController: nameController,
-                  dateController: dateController,
-                  startTimeController: startTimeController,
-                  locationController: locationController,
-                  roomVenueController: roomVenueController,
-                ),
-
-                // ACTIONS
-                // confirm
-                FilledTextButton(
-                  text: AppLocalizations.of(context)!.keepGoing,
-                  isDark: true,
-                  onPressed: () {
-                    if (widget.scheduleId is int) {
-                      localScheduleProvider.duplicateSchedule(
-                        widget.scheduleId,
-                        nameController.text,
-                        dateController.text,
-                        startTimeController.text,
-                        locationController.text,
-                        roomVenueController.text,
-                      );
-                    } else {
-                      // final scheduleDto = cloudScheduleProvider
-                      //     .duplicateSchedule(
-                      //       widget.scheduleId,
-                      //       nameController.text,
-                      //       dateController.text,
-                      //       startTimeController.text,
-                      //       locationController.text,
-                      //       roomVenueController.text,
-                      //     );
-
-                      // TODO: CLOUD - implement duplication in cloud schedules
-                      // localScheduleProvider.createNewSchedule(
-                      //   scheduleDto.toDomain(
-                      //     ownerLocalId,
-                      //     roleMemberIds,
-                      //     playlistLocalId,
-                      //   ),
-                      // );
-                    }
-                    Navigator.of(context).pop();
-                  },
-                ),
-
-                // cancel
-                FilledTextButton(
-                  text: AppLocalizations.of(context)!.cancel,
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-
-                SizedBox(height: 16),
-              ],
-            ),
-          ),
-        );
-      },
+              ),
+            );
+          },
     );
   }
 }

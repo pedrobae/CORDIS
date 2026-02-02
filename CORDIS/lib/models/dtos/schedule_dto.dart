@@ -11,7 +11,7 @@ class ScheduleDto {
   final String location;
   final String? roomVenue;
   final String? annotations;
-  final PlaylistDto? playlist;
+  final PlaylistDto playlist;
   final List<RoleDto> roles;
 
   ScheduleDto({
@@ -22,7 +22,7 @@ class ScheduleDto {
     required this.location,
     this.roomVenue,
     this.annotations,
-    this.playlist,
+    required this.playlist,
     required this.roles,
   });
 
@@ -35,9 +35,9 @@ class ScheduleDto {
       location: json['location'] as String,
       roomVenue: json['roomVenue'] as String?,
       annotations: json['annotations'] as String?,
-      playlist: json['playlist'] != null
-          ? PlaylistDto.fromFirestore(json['playlist'] as Map<String, dynamic>)
-          : null,
+      playlist: PlaylistDto.fromFirestore(
+        json['playlist'] as Map<String, dynamic>,
+      ),
       roles: (json['roles'] as List)
           .map((role) => RoleDto.fromFirestore(role))
           .toList(),
@@ -52,7 +52,7 @@ class ScheduleDto {
       'location': location,
       'roomVenue': roomVenue,
       'annotations': annotations,
-      'playlist': playlist?.toFirestore(),
+      'playlist': playlist.toFirestore(),
       'roles': roles.map((role) => role.toFirestore()).toList(),
     };
   }
