@@ -1,6 +1,5 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/section.dart';
-import 'package:cordis/models/ui/song.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
@@ -29,7 +28,6 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
   late TextEditingController contentTypeController;
   late TextEditingController contentTextController;
   late Color contentColor;
-  late Song _song;
   late Section? section;
   Map<String, Color> availableColors = {};
 
@@ -40,10 +38,6 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
       widget.sectionCode,
     );
 
-    section != null
-        ? _song = Song.fromChordPro(section!.contentText)
-        : _song = Song.fromChordPro('');
-
     contentCodeController = TextEditingController(text: widget.sectionCode);
 
     contentTypeController = TextEditingController(
@@ -51,22 +45,18 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     );
 
     contentTextController = TextEditingController(
-      text: _song.generateChordPro(),
+      text: section?.contentText ?? '',
     );
 
     contentColor = section?.contentColor ?? Colors.grey;
 
+    // Prepare available colors from common section labels
     List<Color> presetColors = [];
     for (var value in commonSectionLabels.values) {
       if (!presetColors.contains(value.color)) {
         availableColors[value.officialLabel] = value.color;
         presetColors.add(value.color);
       }
-    }
-
-    // Ensure current color is in available colors
-    if (!availableColors.containsValue(contentColor)) {
-      availableColors['Current'] = contentColor;
     }
 
     super.initState();
@@ -78,11 +68,17 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer<NavigationProvider>(
-      builder: (context, navigationProvider, child) => Padding(
+      builder: (context, navigationProvider, child) => Container(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom: MediaQuery.of(context).viewInsets.bottom == 0
+              ? 16
+              : MediaQuery.of(context).viewInsets.bottom + 16,
+          left: 16,
+          right: 16,
+          top: 16,
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // HEADER
             Row(
@@ -96,7 +92,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                   AppLocalizations.of(
                     context,
                   )!.editPlaceholder(AppLocalizations.of(context)!.section),
-                  style: textTheme.titleLarge,
+                  style: textTheme.titleMedium,
                 ),
                 IconButton(
                   onPressed: () {
@@ -115,8 +111,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+            Expanded(
               child: SingleChildScrollView(
                 clipBehavior: Clip.none,
                 child: Column(
@@ -187,7 +182,6 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                         ),
                       ],
                     ),
-                    //TODO continue here with color and text fields
                     Column(
                       spacing: 4,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,14 +206,37 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                                 color: colorScheme.surfaceContainerLow,
                               ),
                             ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                           ),
                           initialValue: contentColor,
                           items: [
+                            if (!availableColors.values.contains(contentColor))
+                              DropdownMenuItem<Color>(
+                                value: contentColor,
+                                child: Row(
+                                  spacing: 12,
+                                  children: [
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color: contentColor,
+                                        border: Border.all(color: contentColor),
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                    ),
+                                    Text(AppLocalizations.of(context)!.current),
+                                  ],
+                                ),
+                              ),
                             ...availableColors.entries.map(
                               (entry) => DropdownMenuItem<Color>(
                                 value: entry.value,
                                 child: Row(
-                                  spacing: 16,
+                                  spacing: 12,
                                   children: [
                                     Container(
                                       width: 32,
@@ -255,7 +272,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                         ),
                         TextField(
                           controller: contentTextController,
-                          minLines: 4,
+                          minLines: 6,
                           decoration: InputDecoration(
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
@@ -274,30 +291,29 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                         ),
                       ],
                     ),
-
-                    if (widget.versionId != -1)
-                      FilledTextButton(
-                        text: AppLocalizations.of(context)!.delete,
-                        isDangerous: true,
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (context) {
-                              return DeleteConfirmationSheet(
-                                itemType: AppLocalizations.of(context)!.section,
-                                onConfirm: () {
-                                  _deleteSection();
-                                  navigationProvider.pop();
-                                },
-                              );
-                            },
-                          );
-                        },
-                      ),
                   ],
                 ),
               ),
             ),
+            if (widget.versionId != -1)
+              FilledTextButton(
+                text: AppLocalizations.of(context)!.delete,
+                isDangerous: true,
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return DeleteConfirmationSheet(
+                        itemType: AppLocalizations.of(context)!.section,
+                        onConfirm: () {
+                          _deleteSection();
+                          navigationProvider.pop();
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
           ],
         ),
       ),

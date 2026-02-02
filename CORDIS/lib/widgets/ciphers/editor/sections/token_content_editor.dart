@@ -1,8 +1,9 @@
 import 'package:cordis/providers/layout_settings_provider.dart';
+import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_token.dart';
-import 'package:cordis/widgets/ciphers/editor/sections/edit_section_sheet.dart';
+import 'package:cordis/widgets/ciphers/editor/sections/edit_section.dart';
 import 'package:flutter/material.dart';
 import 'package:cordis/models/ui/content_token.dart';
 import 'package:cordis/services/tokenization_service.dart';
@@ -156,9 +157,16 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
                       /// Edit Section button
                       _isEnabled(selectionProvider)
                           ? IconButton(
-                              onPressed: () => _openEditSectionDialog(),
+                              onPressed: () =>
+                                  context.read<NavigationProvider>().push(
+                                    EditSectionScreen(
+                                      sectionCode: widget.sectionCode,
+                                      versionId: widget.versionId,
+                                    ),
+                                    showAppBar: false,
+                                    showDrawerIcon: false,
+                                  ),
                               icon: const Icon(Icons.edit),
-                              tooltip: 'Editar seção',
                             )
                           : SizedBox(height: 48),
                     ],
@@ -772,17 +780,6 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
       }
     });
     return wordOffsetX;
-  }
-
-  void _openEditSectionDialog() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => EditSectionScreen(
-        versionId: widget.versionId,
-        sectionCode: widget.sectionCode,
-      ),
-    );
   }
 
   void _toggleDrag() {

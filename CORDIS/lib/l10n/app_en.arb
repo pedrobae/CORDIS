@@ -18,6 +18,9 @@
 
   "comingSoon": "Feature under development",
   "@comingSoon": {"description": "Coming soon message"},
+
+  "current": "Current",
+  "@current": {"description": "Label for current selection"},
   
   "theme": "Theme",
   "@theme": {"description": "Theme field label"},
@@ -162,7 +165,7 @@
   "@sectionColor": {"description": "Section color field label"},
   "sectionColorHint": "Select the section color...",
   "@sectionColorHint": {"description": "Hint text for section color input"},
-  "sectionText": "Section Text...",
+  "sectionText": "Section Text",
   "@sectionText": {"description": "Hint text for section text input"},
   "sectionTextHint": "Enter the section text in chordPro format, (lyrics[chord])",
   "@sectionTextHint": {"description": "Hint text for section text input, in chordPro format"},

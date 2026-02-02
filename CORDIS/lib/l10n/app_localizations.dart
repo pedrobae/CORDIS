@@ -140,6 +140,12 @@ abstract class AppLocalizations {
   /// **'Funcionalidade em desenvolvimento'**
   String get comingSoon;
 
+  /// Label for current selection
+  ///
+  /// In pt, this message translates to:
+  /// **'Atual'**
+  String get current;
+
   /// Authentication related messages
   ///
   /// In pt, this message translates to:
@@ -443,7 +449,7 @@ abstract class AppLocalizations {
   /// Hint text for section text input
   ///
   /// In pt, this message translates to:
-  /// **'Texto da Seção...'**
+  /// **'Texto da Seção'**
   String get sectionText;
 
   /// Hint text for section text input, in chordPro format

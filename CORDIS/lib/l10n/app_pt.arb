@@ -19,6 +19,9 @@
   "comingSoon": "Funcionalidade em desenvolvimento",
   "@comingSoon": {"description": "Coming soon message"},
 
+  "current": "Atual",
+  "@current": {"description": "Label for current selection"},
+
   "authentication": "Autenticação",
   "@authentication": {"description": "Authentication related messages"},
   "email": "E-mail",
@@ -130,7 +133,7 @@
   "@sectionColor": {"description": "Section color field label"},
   "sectionColorHint": "Selecione a cor da seção...",
   "@sectionColorHint": {"description": "Hint text for section color input"},
-  "sectionText": "Texto da Seção...",
+  "sectionText": "Texto da Seção",
   "@sectionText": {"description": "Hint text for section text input"},
   "sectionTextHint": "Insira o texto da seção, em formato chordPro. (letra[acorde])",
   "@sectionTextHint": {"description": "Hint text for section text input, in chordPro format"},

@@ -30,6 +30,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get comingSoon => 'Funcionalidade em desenvolvimento';
 
   @override
+  String get current => 'Atual';
+
+  @override
   String get authentication => 'Autenticação';
 
   @override
@@ -182,7 +185,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sectionColorHint => 'Selecione a cor da seção...';
 
   @override
-  String get sectionText => 'Texto da Seção...';
+  String get sectionText => 'Texto da Seção';
 
   @override
   String get sectionTextHint =>

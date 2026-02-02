@@ -43,7 +43,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // Load data and navigate to start tab after build
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });
