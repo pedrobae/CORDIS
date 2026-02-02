@@ -9,6 +9,7 @@ import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/delete_confirmation.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/library/duplicate_schedule_sheet.dart';
+import 'package:cordis/widgets/schedule/library/share_schedule_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -160,15 +161,17 @@ class ScheduleCard extends StatelessWidget {
                   ),
                   FilledTextButton(
                     onPressed: () {
-                      // TODO: CLOUD - Implement share functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: Colors.amberAccent,
-                          content: Text(
-                            'Funcionalidade em desenvolvimento,',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ),
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (BuildContext context) {
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                            ),
+                            child: ShareScheduleSheet(scheduleId: scheduleId),
+                          );
+                        },
                       );
                     },
                     text: AppLocalizations.of(context)!.share,

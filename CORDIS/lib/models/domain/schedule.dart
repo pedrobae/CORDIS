@@ -1,3 +1,4 @@
+import 'package:cordis/helpers/codes.dart';
 import 'package:flutter/material.dart';
 
 class Schedule {
@@ -12,6 +13,7 @@ class Schedule {
   final String? annotations;
   final int? playlistId;
   final List<Role> roles;
+  final String shareCode;
 
   Schedule({
     required this.id,
@@ -25,6 +27,7 @@ class Schedule {
     required this.playlistId,
     required this.roles,
     this.annotations,
+    required this.shareCode,
   });
 
   factory Schedule.fromSqlite(Map<String, dynamic> map, List<Role> roles) {
@@ -43,6 +46,7 @@ class Schedule {
       playlistId: map['playlist_id'] as int?,
       roles: roles,
       annotations: map['annotations'] as String?,
+      shareCode: map['share_code'] as String? ?? generateShareCode(),
     );
   }
 
@@ -58,6 +62,7 @@ class Schedule {
       'room_venue': roomVenue,
       'playlist_id': playlistId,
       'annotations': annotations,
+      'share_code': shareCode,
     };
   }
 
@@ -73,6 +78,7 @@ class Schedule {
     int? playlistId,
     List<Role>? roles,
     String? annotations,
+    String? shareCode,
   }) {
     return Schedule(
       id: id ?? this.id,
@@ -86,6 +92,7 @@ class Schedule {
       playlistId: playlistId ?? this.playlistId,
       roles: roles ?? this.roles,
       annotations: annotations ?? this.annotations,
+      shareCode: shareCode ?? this.shareCode,
     );
   }
 }

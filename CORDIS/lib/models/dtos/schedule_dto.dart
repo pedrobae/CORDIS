@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cordis/helpers/codes.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/models/dtos/playlist_dto.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ class ScheduleDto {
   final String? annotations;
   final PlaylistDto playlist;
   final List<RoleDto> roles;
+  final String shareCode;
 
   ScheduleDto({
     this.firebaseId,
@@ -24,6 +26,7 @@ class ScheduleDto {
     this.annotations,
     required this.playlist,
     required this.roles,
+    required this.shareCode,
   });
 
   factory ScheduleDto.fromFirestore(Map<String, dynamic> json, String id) {
@@ -41,6 +44,7 @@ class ScheduleDto {
       roles: (json['roles'] as List)
           .map((role) => RoleDto.fromFirestore(role))
           .toList(),
+      shareCode: json['shareCode'] as String? ?? generateShareCode(),
     );
   }
 
@@ -54,6 +58,7 @@ class ScheduleDto {
       'annotations': annotations,
       'playlist': playlist.toFirestore(),
       'roles': roles.map((role) => role.toFirestore()).toList(),
+      'shareCode': shareCode,
     };
   }
 
@@ -68,6 +73,7 @@ class ScheduleDto {
       'annotations': annotations,
       'playlist': playlist.toCache(),
       'roles': roles.map((role) => role.toFirestore()).toList(),
+      'shareCode': shareCode,
     };
   }
 
@@ -86,6 +92,7 @@ class ScheduleDto {
       roles: (json['roles'] as List)
           .map((role) => RoleDto.fromFirestore(role))
           .toList(),
+      shareCode: json['shareCode'] as String? ?? generateShareCode(),
     );
   }
 
@@ -112,6 +119,7 @@ class ScheduleDto {
           )
           .values
           .toList(),
+      shareCode: shareCode,
     );
 
     // Adiciona os papéis ao agendamento
@@ -131,6 +139,7 @@ class ScheduleDto {
     String? annotations,
     PlaylistDto? playlist,
     List<RoleDto>? roles,
+    String? shareCode,
   }) {
     return ScheduleDto(
       firebaseId: firebaseId,
@@ -142,6 +151,7 @@ class ScheduleDto {
       annotations: annotations ?? this.annotations,
       playlist: playlist ?? this.playlist,
       roles: roles ?? this.roles,
+      shareCode: shareCode ?? this.shareCode,
     );
   }
 }

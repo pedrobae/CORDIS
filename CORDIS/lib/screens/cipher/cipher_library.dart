@@ -32,7 +32,10 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
     // Pre-load data with post-frame callback to avoid setState during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cipherProvider = context.read<CipherProvider>();
+      final cloudVersionProvider = context.read<CloudVersionProvider>();
+
       cipherProvider.loadCiphers();
+      cloudVersionProvider.loadVersions();
     });
   }
 

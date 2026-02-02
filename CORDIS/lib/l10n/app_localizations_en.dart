@@ -333,9 +333,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalMember => 'General Member';
 
   @override
-  String get share => 'Share';
-
-  @override
   String viewPlaceholder(Object object) {
     return 'View $object';
   }
@@ -377,6 +374,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createLocalCopy => 'Create a Local Copy';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get shareCode => 'Share Code';
+
+  @override
+  String get sendToRoleMembers => 'Send to Role Members';
+
+  @override
+  String get sendInvites => 'Send Invites';
+
+  @override
+  String get inviteSentSuccessfully => 'Invites sent successfully!';
+
+  @override
+  String get emailInviteDescription =>
+      'An email invite has been sent to the teams';
 
   @override
   String get scheduleName => 'Schedule Name';
@@ -610,6 +626,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copySuffix => '(Copy)';
+
+  @override
+  String get copyCode => 'Copy Code';
+
+  @override
+  String get codeCopied => 'Code Copied!';
 
   @override
   String get assign => 'Assign';

@@ -1,5 +1,6 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/screens/schedule/play_schedule.dart';
+import 'package:cordis/widgets/schedule/library/share_schedule_sheet.dart';
 
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
@@ -72,6 +73,19 @@ class CloudScheduleCard extends StatelessWidget {
 
             return Stack(
               children: [
+                // CLOUD WATERMARK
+                Positioned(
+                  right: -20,
+                  bottom: -50,
+                  child: Opacity(
+                    opacity: 0.08,
+                    child: Icon(
+                      Icons.cloud,
+                      size: 250,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ),
                 Container(
                   padding: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
@@ -171,19 +185,29 @@ class CloudScheduleCard extends StatelessWidget {
                         },
                         text: AppLocalizations.of(context)!.play,
                       ),
+                      FilledTextButton(
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (BuildContext context) {
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: MediaQuery.of(
+                                    context,
+                                  ).viewInsets.bottom,
+                                ),
+                                child: ShareScheduleSheet(
+                                  scheduleId: scheduleId,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        text: AppLocalizations.of(context)!.share,
+                        isDense: true,
+                      ),
                     ],
-                  ),
-                ), // CLOUD WATERMARK
-                Positioned(
-                  right: -20,
-                  bottom: -40,
-                  child: Opacity(
-                    opacity: 0.08,
-                    child: Icon(
-                      Icons.cloud,
-                      size: 200,
-                      color: colorScheme.primary,
-                    ),
                   ),
                 ),
               ],

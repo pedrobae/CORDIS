@@ -1,3 +1,4 @@
+import 'package:cordis/helpers/codes.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/repositories/local_schedule_repository.dart';
 import 'package:flutter/material.dart';
@@ -101,6 +102,7 @@ class LocalScheduleProvider extends ChangeNotifier {
       location: '',
       playlistId: playlistId,
       roles: [],
+      shareCode: generateShareCode(),
     );
   }
 

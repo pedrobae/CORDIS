@@ -58,6 +58,20 @@ class CloudScheduleProvider extends ChangeNotifier {
     return _schedules[scheduleId];
   }
 
+  ScheduleDto? getNextSchedule() {
+    final now = Timestamp.now();
+    ScheduleDto? nextSchedule;
+    for (var schedule in _schedules.values) {
+      if (schedule.datetime.compareTo(now) >= 0) {
+        if (nextSchedule == null ||
+            schedule.datetime.compareTo(nextSchedule.datetime) < 0) {
+          nextSchedule = schedule;
+        }
+      }
+    }
+    return nextSchedule;
+  }
+
   // ===== CREATE =====
   // Returns a copy of the schedule for local insertion
   ScheduleDto duplicateSchedule(

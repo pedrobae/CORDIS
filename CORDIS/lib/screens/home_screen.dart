@@ -1,12 +1,15 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
+import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/providers/navigation_provider.dart';
+import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/playlist/edit_playlist.dart';
 import 'package:cordis/screens/schedule/create_new_schedule.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/schedule/library/cloud_schedule_card.dart';
 import 'package:cordis/widgets/schedule/library/schedule_card.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -38,9 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child:
-          Consumer4<
+          Consumer5<
             MyAuthProvider,
             LocalScheduleProvider,
+            CloudScheduleProvider,
             NavigationProvider,
             SelectionProvider
           >(
@@ -48,7 +52,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 (
                   context,
                   authProvider,
-                  scheduleProvider,
+                  localScheduleProvider,
+                  cloudScheduleProvider,
                   navigationProvider,
                   selectionProvider,
                   child,
@@ -93,7 +98,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   }
 
-                  final nextSchedule = scheduleProvider.getNextSchedule();
+                  final nextLocalSchedule = localScheduleProvider
+                      .getNextSchedule();
+                  final nextCloudSchedule = cloudScheduleProvider
+                      .getNextSchedule();
+
+                  dynamic nextSchedule;
+                  if (nextLocalSchedule != null && nextCloudSchedule != null) {
+                    nextSchedule =
+                        nextLocalSchedule.time.isBefore(
+                          TimeOfDay.fromDateTime(
+                            nextCloudSchedule.datetime.toDate(),
+                          ),
+                        )
+                        ? nextLocalSchedule
+                        : nextCloudSchedule;
+                  } else {
+                    nextSchedule = nextLocalSchedule ?? nextCloudSchedule;
+                  }
                   // HOME SCREEN
                   return Stack(
                     children: [
@@ -121,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           _buildNextSchedule(
                             context,
-                            scheduleProvider,
+                            localScheduleProvider,
                             nextSchedule,
                             textTheme,
                             colorScheme,
@@ -230,7 +252,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         // SCHEDULE CARD
-        ScheduleCard(scheduleId: nextSchedule.id),
+        (nextSchedule is Schedule)
+            ? ScheduleCard(scheduleId: nextSchedule.id)
+            : CloudScheduleCard(scheduleId: nextSchedule.firebaseId),
       ],
     );
   }

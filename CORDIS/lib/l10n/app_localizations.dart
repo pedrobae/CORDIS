@@ -722,12 +722,6 @@ abstract class AppLocalizations {
   /// **'Membro Geral'**
   String get generalMember;
 
-  /// Share button label
-  ///
-  /// In pt, this message translates to:
-  /// **'Compartilhar'**
-  String get share;
-
   /// View button label
   ///
   /// In pt, this message translates to:
@@ -781,6 +775,42 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Criar uma Cópia Local'**
   String get createLocalCopy;
+
+  /// Share button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar'**
+  String get share;
+
+  /// Share code field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de Compartilhamento'**
+  String get shareCode;
+
+  /// Send/share to members of selected roles
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar para os Membros da Função'**
+  String get sendToRoleMembers;
+
+  /// Send invites button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar Convites'**
+  String get sendInvites;
+
+  /// Success message when invites are sent
+  ///
+  /// In pt, this message translates to:
+  /// **'Convites enviados com sucesso!'**
+  String get inviteSentSuccessfully;
+
+  /// Description for email invite confirmation
+  ///
+  /// In pt, this message translates to:
+  /// **'Um convite por email foi enviado para as equipes'**
+  String get emailInviteDescription;
 
   /// Label for schedule name input field
   ///
@@ -1213,6 +1243,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'(Cópia)'**
   String get copySuffix;
+
+  /// Copy to clipboard button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar Código'**
+  String get copyCode;
+
+  /// Confirmation message when code is copied to clipboard
+  ///
+  /// In pt, this message translates to:
+  /// **'Código copiado!'**
+  String get codeCopied;
 
   /// Assign button label
   ///
