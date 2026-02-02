@@ -1,5 +1,4 @@
 import 'package:cordis/providers/layout_settings_provider.dart';
-import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_token.dart';
@@ -157,15 +156,16 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
                       /// Edit Section button
                       _isEnabled(selectionProvider)
                           ? IconButton(
-                              onPressed: () =>
-                                  context.read<NavigationProvider>().push(
-                                    EditSectionScreen(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => EditSectionScreen(
                                       sectionCode: widget.sectionCode,
                                       versionId: widget.versionId,
                                     ),
-                                    showAppBar: false,
-                                    showDrawerIcon: false,
                                   ),
+                                );
+                              },
                               icon: const Icon(Icons.edit),
                             )
                           : SizedBox(height: 48),
@@ -796,7 +796,7 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
       tokens, // Exclude the last newline token
     );
 
-    sectionProvider.cacheUpdatedSection(
+    sectionProvider.cacheSection(
       widget.versionId,
       widget.sectionCode,
       newContentText: newContent,

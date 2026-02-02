@@ -43,7 +43,6 @@ class _EditCipherScreenState extends State<EditCipherScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });

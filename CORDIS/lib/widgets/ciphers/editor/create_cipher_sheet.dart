@@ -40,21 +40,24 @@ class CreateCipherSheet extends StatelessWidget {
           ),
 
           /// ADD SECTION BUTTON
-          FilledTextButton(
-            text: AppLocalizations.of(
-              context,
-            )!.addPlaceholder(AppLocalizations.of(context)!.section),
-            isDark: true,
-            icon: Icons.add,
-            trailingIcon: Icons.chevron_right,
-            onPressed: () {
-              context.read<NavigationProvider>().push(
-                EditSectionScreen(sectionCode: '', versionId: -1),
-                showAppBar: false,
-                showDrawerIcon: false,
-              );
-            },
-          ),
+          if (!secret)
+            FilledTextButton(
+              text: AppLocalizations.of(
+                context,
+              )!.addPlaceholder(AppLocalizations.of(context)!.section),
+              isDark: true,
+              icon: Icons.add,
+              trailingIcon: Icons.chevron_right,
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        EditSectionScreen(sectionCode: '', versionId: -1),
+                  ),
+                );
+              },
+            ),
 
           /// IMPORT SECTION BUTTONS
           if (secret)

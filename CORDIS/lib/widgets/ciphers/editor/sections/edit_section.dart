@@ -68,50 +68,82 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer<NavigationProvider>(
-      builder: (context, navigationProvider, child) => Container(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom == 0
-              ? 16
-              : MediaQuery.of(context).viewInsets.bottom + 16,
-          left: 16,
-          right: 16,
-          top: 16,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // HEADER
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                BackButton(
-                  color: colorScheme.onSurface,
-                  onPressed: () => navigationProvider.pop(),
-                ),
-                Text(
-                  AppLocalizations.of(
-                    context,
-                  )!.editPlaceholder(AppLocalizations.of(context)!.section),
-                  style: textTheme.titleMedium,
-                ),
-                IconButton(
-                  onPressed: () {
-                    _upsertSection(
-                      contentCodeController.text,
-                      contentTypeController.text,
-                      contentTextController.text,
-                      contentColor,
-                    );
-                  },
-                  icon: Icon(
-                    Icons.save,
-                    size: 24,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-              ],
+      builder: (context, navigationProvider, child) {
+        return Scaffold(
+          appBar: AppBar(
+            leading: BackButton(
+              color: colorScheme.onSurface,
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            Expanded(
+            title: Text(
+              AppLocalizations.of(
+                context,
+              )!.editPlaceholder(AppLocalizations.of(context)!.section),
+              style: textTheme.titleMedium,
+            ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  _upsertSection();
+                  Navigator.of(context).pop();
+                },
+                icon: Icon(Icons.save, size: 24, color: colorScheme.onSurface),
+              ),
+            ],
+          ),
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: colorScheme.surfaceContainerLowest,
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: BottomNavigationBar(
+              currentIndex: navigationProvider.currentRoute.index,
+              selectedLabelStyle: TextStyle(
+                color: colorScheme.primary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              unselectedLabelStyle: TextStyle(
+                color: colorScheme.onSurface,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              showUnselectedLabels: true,
+              type: BottomNavigationBarType.fixed,
+              elevation: 2,
+              onTap: (index) {
+                if (mounted) {
+                  navigationProvider.navigateToRoute(
+                    NavigationRoute.values[index],
+                  );
+                  Navigator.of(context).pop();
+                }
+              },
+              items: navigationProvider
+                  .getNavigationItems(
+                    context,
+                    iconSize: 28,
+                    color: colorScheme.onSurface,
+                    activeColor: colorScheme.primary,
+                  )
+                  .map(
+                    (navItem) => BottomNavigationBarItem(
+                      icon: navItem.icon,
+                      label: navItem.title,
+                      backgroundColor: colorScheme.surface,
+                      activeIcon: navItem.activeIcon,
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          body: Container(
+            padding: EdgeInsets.only(bottom: 16, left: 16, right: 16, top: 24),
+            child: Expanded(
               child: SingleChildScrollView(
                 clipBehavior: Clip.none,
                 child: Column(
@@ -131,8 +163,8 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
 
                         TextField(
                           controller: contentCodeController,
-                          // enabled: widget.versionId == -1,
                           decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(8),
                             hintText: AppLocalizations.of(
                               context,
                             )!.sectionCodeHint,
@@ -173,15 +205,19 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                             hintStyle: textTheme.titleMedium?.copyWith(
                               color: colorScheme.surfaceContainerLow,
                             ),
+                            contentPadding: EdgeInsets.all(8),
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                 color: colorScheme.surfaceContainerLow,
                               ),
+                              borderRadius: BorderRadius.circular(0),
                             ),
                           ),
                         ),
                       ],
                     ),
+
+                    // SECTION COLOR
                     Column(
                       spacing: 4,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,10 +242,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                                 color: colorScheme.surfaceContainerLow,
                               ),
                             ),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
+                            contentPadding: EdgeInsets.all(8),
                           ),
                           initialValue: contentColor,
                           items: [
@@ -225,7 +258,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                                       decoration: BoxDecoration(
                                         color: contentColor,
                                         border: Border.all(color: contentColor),
-                                        borderRadius: BorderRadius.circular(24),
+                                        shape: BoxShape.circle,
                                       ),
                                     ),
                                     Text(AppLocalizations.of(context)!.current),
@@ -244,7 +277,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                                       decoration: BoxDecoration(
                                         color: entry.value,
                                         border: Border.all(color: entry.value),
-                                        borderRadius: BorderRadius.circular(24),
+                                        shape: BoxShape.circle,
                                       ),
                                     ),
                                     Text(entry.key),
@@ -262,6 +295,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                       ],
                     ),
 
+                    // SECTION TEXT
                     Column(
                       spacing: 4,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,10 +308,12 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                           controller: contentTextController,
                           minLines: 6,
                           decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(8),
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                 color: colorScheme.surfaceContainerLow,
                               ),
+                              borderRadius: BorderRadius.circular(0),
                             ),
                             hintText: AppLocalizations.of(
                               context,
@@ -291,57 +327,60 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                         ),
                       ],
                     ),
+
+                    // DELETE BUTTON
+                    if (widget.versionId != -1)
+                      FilledTextButton(
+                        text: AppLocalizations.of(context)!.delete,
+                        isDangerous: true,
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (context) {
+                              return DeleteConfirmationSheet(
+                                itemType: AppLocalizations.of(context)!.section,
+                                onConfirm: () {
+                                  _deleteSection();
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            },
+                          );
+                        },
+                      ),
                   ],
                 ),
               ),
             ),
-            if (widget.versionId != -1)
-              FilledTextButton(
-                text: AppLocalizations.of(context)!.delete,
-                isDangerous: true,
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                      return DeleteConfirmationSheet(
-                        itemType: AppLocalizations.of(context)!.section,
-                        onConfirm: () {
-                          _deleteSection();
-                          navigationProvider.pop();
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  void _upsertSection(String? code, String? type, String? text, Color? color) {
+  void _upsertSection() {
     // Update the section with new values
-    context.read<SectionProvider>().cacheUpdatedSection(
+    context.read<SectionProvider>().cacheSection(
       widget.versionId,
       widget.sectionCode,
-      newContentCode: code,
-      newContentType: type,
-      newContentText: text,
-      newColor: color,
+      newContentCode: contentCodeController.text,
+      newContentType: contentTypeController.text,
+      newContentText: contentTextController.text,
+      newColor: contentColor,
     );
     // If the content code has changed, update the song structure accordingly
-    if (code != null && code != widget.sectionCode) {
+    if (contentCodeController.text.isNotEmpty &&
+        contentCodeController.text != widget.sectionCode) {
       context.read<LocalVersionProvider>().updateSectionCodeInStruct(
         widget.versionId,
         oldCode: widget.sectionCode,
-        newCode: code,
+        newCode: contentCodeController.text,
       );
 
       context.read<SectionProvider>().renameSectionKey(
         widget.versionId,
         oldCode: widget.sectionCode,
-        newCode: code,
+        newCode: contentCodeController.text,
       );
     }
   }

@@ -102,7 +102,7 @@ class SectionProvider extends ChangeNotifier {
 
   /// ===== UPDATE =====
   // Modify a section (content_text)
-  void cacheUpdatedSection(
+  void cacheSection(
     dynamic versionKey,
     String contentCode, {
     String? newContentCode,
@@ -111,14 +111,26 @@ class SectionProvider extends ChangeNotifier {
     Color? newColor,
   }) {
     final section = _sections[versionKey]![contentCode];
-    if (section == null) return;
+    if (section == null) {
+      // Create a new section if it doesn't exist
+      final newSection = Section(
+        versionId: versionKey is String ? -1 : versionKey,
+        contentCode: newContentCode ?? contentCode,
+        contentType: newContentType ?? 'default',
+        contentText: newContentText ?? '',
+        contentColor: newColor ?? Colors.grey,
+      );
 
-    section.contentType = newContentType ?? section.contentType;
-    section.contentText = newContentText ?? section.contentText;
-    section.contentCode = newContentCode ?? section.contentCode;
-    section.contentColor = newColor ?? section.contentColor;
+      _sections[newSection.versionId] ??= {};
+      _sections[newSection.versionId]![newSection.contentCode] = newSection;
+    } else {
+      // Update existing section
+      section.contentCode = newContentCode ?? section.contentCode;
+      section.contentType = newContentType ?? section.contentType;
+      section.contentText = newContentText ?? section.contentText;
+      section.contentColor = newColor ?? section.contentColor;
+    }
 
-    // Update the section in the sections map
     notifyListeners();
   }
 
