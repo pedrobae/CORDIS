@@ -5,7 +5,7 @@ import 'package:cordis/widgets/schedule/library/share_schedule_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 

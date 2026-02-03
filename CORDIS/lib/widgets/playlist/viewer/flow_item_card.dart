@@ -1,5 +1,5 @@
 import 'package:cordis/l10n/app_localizations.dart';
-import 'package:cordis/providers/flow_item_provider.dart';
+import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/ciphers/editor/custom_reorderable_delayed.dart';

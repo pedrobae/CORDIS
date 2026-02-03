@@ -5,7 +5,7 @@ import 'package:cordis/screens/playlist/edit_playlist.dart';
 import 'package:cordis/widgets/playlist/library/playlist_scroll_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 
 class PlaylistLibraryScreen extends StatefulWidget {
   const PlaylistLibraryScreen({super.key});

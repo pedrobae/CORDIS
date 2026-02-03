@@ -12,7 +12,7 @@ import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/playlist/viewer/version_card_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cordis/providers/cipher_provider.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/custom_reorderable_delayed.dart';
 

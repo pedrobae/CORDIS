@@ -2,12 +2,12 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/models/domain/parsing_cipher.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/parser_provider.dart';
+import 'package:cordis/providers/cipher/parser_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:cordis/providers/import_provider.dart';
+import 'package:cordis/providers/cipher/import_provider.dart';
 import 'package:flutter/material.dart';
 
 class ImportPdfScreen extends StatefulWidget {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/helpers/chords/chords.dart';
 import 'package:cordis/models/ui/content_token.dart';
-import 'package:cordis/providers/cipher_provider.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_token.dart';

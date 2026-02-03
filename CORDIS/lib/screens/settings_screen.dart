@@ -7,12 +7,12 @@ import 'package:cordis/utils/app_theme.dart';
 
 import 'package:cordis/l10n/app_localizations.dart';
 
-import 'package:cordis/providers/cipher_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/settings_provider.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
-import 'package:cordis/providers/flow_item_provider.dart';
+import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';

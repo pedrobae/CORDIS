@@ -1,8 +1,8 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
-import 'package:cordis/providers/flow_item_provider.dart';
+import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/playlist/edit_playlist.dart';
 import 'package:cordis/widgets/delete_confirmation.dart';

@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:cordis/l10n/app_localizations.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 
 class PlaylistCard extends StatelessWidget {
   final int playlistId;

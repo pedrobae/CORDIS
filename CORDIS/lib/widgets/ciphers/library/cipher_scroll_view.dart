@@ -1,4 +1,4 @@
-import 'package:cordis/providers/cipher_provider.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/widgets/ciphers/library/cipher_card.dart';
