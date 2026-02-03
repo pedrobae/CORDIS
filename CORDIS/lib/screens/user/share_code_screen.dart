@@ -15,6 +15,15 @@ class ShareCodeScreen extends StatefulWidget {
 
 class ShareCodeScreenState extends State<ShareCodeScreen> {
   TextEditingController shareCodeController = TextEditingController();
+  late MyAuthProvider _authProvider;
+  late CloudScheduleProvider _cloudScheduleProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _authProvider = context.read<MyAuthProvider>();
+    _cloudScheduleProvider = context.read<CloudScheduleProvider>();
+  }
 
   @override
   void dispose() {
@@ -28,7 +37,7 @@ class ShareCodeScreenState extends State<ShareCodeScreen> {
       appBar: AppBar(
         leading: BackButton(
           onPressed: () {
-            context.read<MyAuthProvider>().signOut();
+            _authProvider.signOut();
             Navigator.of(context).pop();
           },
         ),
@@ -92,16 +101,16 @@ class ShareCodeScreenState extends State<ShareCodeScreen> {
 
     if (shareCode.isEmpty) {
       // Show error if share code is empty
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.enterShareCode)),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.enterShareCode)),
+        );
+      }
       return;
     }
 
-    final cloudScheduleProvider = context.read<CloudScheduleProvider>();
-
     try {
-      final success = await cloudScheduleProvider.joinScheduleWithCode(
+      final success = await _cloudScheduleProvider.joinScheduleWithCode(
         shareCode,
       );
 

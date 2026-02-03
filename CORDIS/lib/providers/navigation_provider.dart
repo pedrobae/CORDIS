@@ -73,7 +73,12 @@ class NavigationProvider extends ChangeNotifier {
 
   void pop() {
     if (_screenStack.isNotEmpty) {
-      _onPopCallbacks.last();
+      try {
+        _onPopCallbacks.last();
+      } catch (e) {
+        // Silently catch callback errors during pop to avoid deactivated widget issues
+        debugPrint('Error in onPopCallback: $e');
+      }
       _onPopCallbacks.removeLast();
       _screenStack.removeLast();
       _showAppBarStack.removeLast();
