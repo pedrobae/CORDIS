@@ -1,6 +1,6 @@
 import 'package:cordis/models/domain/user.dart';
-import 'package:cordis/helpers/firestore_timestamp_helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cordis/utils/date_utils.dart';
 
 class UserDto {
   final String? firebaseId;
@@ -30,8 +30,8 @@ class UserDto {
       email: json['mail'] as String,
       profilePhoto: json['profilePhoto'] as String?,
       googleId: json['googleId'] as String?,
-      createdAt: FirestoreTimestampHelper.toDateTime(json['createdAt']),
-      updatedAt: FirestoreTimestampHelper.toDateTime(json['updatedAt']),
+      createdAt: DateTimeUtils.parseDateTime(json['createdAt']),
+      updatedAt: DateTimeUtils.parseDateTime(json['updatedAt']),
       isActive: (json['isActive'] as bool?) ?? true,
     );
   }
@@ -42,7 +42,7 @@ class UserDto {
       'mail': email,
       'profilePhoto': profilePhoto,
       'googleId': googleId,
-      'createdAt': FirestoreTimestampHelper.fromDateTime(createdAt),
+      'createdAt': DateTimeUtils.formatDate(createdAt ?? DateTime.now()),
       'updatedAt':
           FieldValue.serverTimestamp(), // Server timestamp to avoid client clock issues
       'isActive': isActive,

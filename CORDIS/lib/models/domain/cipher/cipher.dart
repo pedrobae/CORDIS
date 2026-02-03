@@ -53,7 +53,7 @@ class Cipher {
       author: version.author,
       musicKey: version.originalKey,
       language: version.language,
-      createdAt: version.updatedAt ?? DateTime.now(),
+      createdAt: version.updatedAt?.toDate() ?? DateTime.now(),
       isLocal: false,
     );
   }

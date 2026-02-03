@@ -14,6 +14,7 @@ class Schedule {
   final int? playlistId;
   final List<Role> roles;
   final String shareCode;
+  bool isPublished;
 
   Schedule({
     required this.id,
@@ -28,6 +29,7 @@ class Schedule {
     required this.roles,
     this.annotations,
     required this.shareCode,
+    this.isPublished = false,
   });
 
   factory Schedule.fromSqlite(Map<String, dynamic> map, List<Role> roles) {
@@ -47,6 +49,7 @@ class Schedule {
       roles: roles,
       annotations: map['annotations'] as String?,
       shareCode: map['share_code'] as String? ?? generateShareCode(),
+      isPublished: (map['is_published'] as int?) == 1,
     );
   }
 
@@ -63,6 +66,7 @@ class Schedule {
       'playlist_id': playlistId,
       'annotations': annotations,
       'share_code': shareCode,
+      'is_published': isPublished ? 1 : 0,
     };
   }
 
@@ -79,6 +83,7 @@ class Schedule {
     List<Role>? roles,
     String? annotations,
     String? shareCode,
+    bool? isPublished,
   }) {
     return Schedule(
       id: id ?? this.id,
@@ -93,6 +98,7 @@ class Schedule {
       roles: roles ?? this.roles,
       annotations: annotations ?? this.annotations,
       shareCode: shareCode ?? this.shareCode,
+      isPublished: isPublished ?? this.isPublished,
     );
   }
 }

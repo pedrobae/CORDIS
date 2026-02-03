@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
-import 'package:cordis/helpers/firestore_timestamp_helper.dart';
 
 /// DTO para metadados de version (camada de separação entre a nuvem e o armazenamento local).
 class VersionDto {
@@ -15,7 +15,7 @@ class VersionDto {
   final String originalKey;
   final String? transposedKey;
   final List<String> songStructure;
-  final DateTime? updatedAt;
+  final Timestamp? updatedAt;
   final Map<String, Map<String, String>> sections;
 
   VersionDto({
@@ -49,7 +49,7 @@ class VersionDto {
       songStructure: (map['songStructure'] as List<dynamic>)
           .map((e) => e.toString())
           .toList(),
-      updatedAt: FirestoreTimestampHelper.toDateTime(map['updatedAt']),
+      updatedAt: map['updatedAt'] as Timestamp?,
       sections: (map['sections'] as Map<String, dynamic>).map(
         (sectionsCode, section) =>
             MapEntry(sectionsCode, Map<String, String>.from(section)),
@@ -69,7 +69,7 @@ class VersionDto {
       'transposedKey': transposedKey,
       'tags': tags,
       'songStructure': songStructure,
-      'updatedAt': FirestoreTimestampHelper.fromDateTime(updatedAt),
+      'updatedAt': updatedAt ?? Timestamp.now(),
       'sections': sections,
     };
   }
@@ -90,8 +90,8 @@ class VersionDto {
           .map((e) => e.toString())
           .toList(),
       updatedAt: map['updatedAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int)
-          : DateTime.now(),
+          ? (Timestamp.fromMillisecondsSinceEpoch(map['updatedAt'] as int))
+          : Timestamp.now(),
       sections: (map['sections'] as Map<String, dynamic>).map(
         (sectionsCode, section) =>
             MapEntry(sectionsCode, Map<String, String>.from(section)),
@@ -126,7 +126,7 @@ class VersionDto {
       songStructure: songStructure,
       duration: Duration(seconds: duration),
       bpm: bpm,
-      createdAt: updatedAt ?? DateTime.now(),
+      createdAt: updatedAt?.toDate() ?? DateTime.now(),
       sections: sections.map(
         (sectionsCode, section) =>
             MapEntry(sectionsCode, Section.fromFirestore(section)),
@@ -147,7 +147,7 @@ class VersionDto {
     String? originalKey,
     String? transposedKey,
     List<String>? songStructure,
-    DateTime? updatedAt,
+    Timestamp? updatedAt,
     Map<String, Map<String, String>>? sections,
   }) {
     return VersionDto(

@@ -57,6 +57,7 @@ class CloudScheduleRepository {
         )) {
       final cachedSchedules = await _cacheService.loadCloudSchedules();
       if (cachedSchedules.isNotEmpty) {
+        debugPrint('LOADING CACHED SCHEDULES FOR USER $firebaseUserId.');
         return cachedSchedules;
       }
     }
@@ -79,7 +80,7 @@ class CloudScheduleRepository {
           .toList();
 
       debugPrint(
-        'Fetched ${schedules.length} schedules for user $firebaseUserId from cloud.',
+        'FETCHED ${schedules.length} SCHEDULES FOR USER $firebaseUserId FROM CLOUD.',
       );
 
       await _cacheService.saveCloudSchedules(schedules);

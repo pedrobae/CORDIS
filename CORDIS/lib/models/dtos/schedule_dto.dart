@@ -86,9 +86,7 @@ class ScheduleDto {
       location: json['location'] as String,
       roomVenue: json['roomVenue'] as String?,
       annotations: json['annotations'] as String?,
-      playlist: PlaylistDto.fromFirestore(
-        json['playlist'] as Map<String, dynamic>,
-      ),
+      playlist: PlaylistDto.fromCache(json['playlist'] as Map<String, dynamic>),
       roles: (json['roles'] as List)
           .map((role) => RoleDto.fromFirestore(role))
           .toList(),
