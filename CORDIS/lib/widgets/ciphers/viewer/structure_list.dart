@@ -99,11 +99,17 @@ class _StructureListState extends State<StructureList> {
                                     widget.versionId,
                                     sectionCode,
                                   )
-                                : Section.fromFirestore(
-                                    cloudVersionProvider
-                                        .getVersion(widget.versionId)!
-                                        .sections[sectionCode]!,
-                                  );
+                                : (cloudVersionProvider.getVersion(
+                                            widget.versionId,
+                                          ) !=
+                                          null
+                                      ? Section.fromFirestore(
+                                          cloudVersionProvider
+                                              .getVersion(widget.versionId)!
+                                              .sections[sectionCode]!,
+                                        )
+                                      : null);
+
                             // Loading state
                             if (section == null || sectionProvider.isLoading) {
                               return const Center(

@@ -23,13 +23,17 @@ class _ScheduleLibraryScreenState extends State<ScheduleLibraryScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final localScheduleProvider = context.read<LocalScheduleProvider>();
       final cloudScheduleProvider = context.read<CloudScheduleProvider>();
       final cloudVersionProvider = context.read<CloudVersionProvider>();
 
-      localScheduleProvider.loadSchedules();
-      cloudScheduleProvider.loadSchedules(context.read<MyAuthProvider>().id!);
+      await localScheduleProvider.loadSchedules();
+      if (mounted) {
+        await cloudScheduleProvider.loadSchedules(
+          context.read<MyAuthProvider>().id!,
+        );
+      }
       for (var schedule in cloudScheduleProvider.schedules.values) {
         for (var versionEntry in schedule.playlist.versions.entries) {
           cloudVersionProvider.setVersion(versionEntry.key, versionEntry.value);
