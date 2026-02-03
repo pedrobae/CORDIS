@@ -5,6 +5,7 @@ import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/cipher/view_cipher.dart';
 import 'package:cordis/utils/date_utils.dart';
+import 'package:cordis/widgets/ciphers/library/download_cloud_version_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
@@ -115,17 +116,14 @@ class CloudCipherCard extends StatelessWidget {
                     ),
                     // ACTIONS
                     IconButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: Colors.amberAccent,
-                            content: Text(
-                              AppLocalizations.of(context)!.comingSoon,
-                              style: TextStyle(color: Colors.black),
-                            ),
-                          ),
-                        );
-                      },
+                      onPressed: () => showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (context) => Padding(
+                          padding: MediaQuery.of(context).viewInsets,
+                          child: DownloadVersionSheet(versionId: versionId),
+                        ),
+                      ),
                       icon: Icon(Icons.cloud_download),
                     ),
                   ],

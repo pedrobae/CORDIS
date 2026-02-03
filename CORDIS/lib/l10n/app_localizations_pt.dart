@@ -370,6 +370,11 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String downloadPlaceholder(Object object) {
+    return 'Baixar $object';
+  }
+
+  @override
   String duplicateTooltip(Object object) {
     return 'Criar uma cópia desta $object';
   }

@@ -249,6 +249,8 @@
   "@duplicatePlaceholder": {"description": "Duplicate object button label", "placeholders": {"object": {}}},
   "setPlaceholder": "Definir {object}",
   "@setPlaceholder": {"description": "Set object button label", "placeholders": {"object": {}}},
+  "downloadPlaceholder": "Baixar {object}",
+  "@downloadPlaceholder": {"description": "Download object button label", "placeholders": {"object": {}}},
 
   "duplicateTooltip": "Criar uma cópia desta {object}",
   "@duplicateTooltip": {"description": "Tooltip for duplicate action", "placeholders": {"object": {}}},

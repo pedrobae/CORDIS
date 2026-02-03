@@ -764,6 +764,12 @@ abstract class AppLocalizations {
   /// **'Definir {object}'**
   String setPlaceholder(Object object);
 
+  /// Download object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Baixar {object}'**
+  String downloadPlaceholder(Object object);
+
   /// Tooltip for duplicate action
   ///
   /// In pt, this message translates to:
