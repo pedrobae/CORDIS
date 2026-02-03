@@ -179,14 +179,22 @@ class _CipherCardState extends State<CipherCard> {
                               ),
                               version.bpm != 0
                                   ? Text(
-                                      version.bpm.toString(),
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.bpmWithPlaceholder(
+                                        version.bpm.toString(),
+                                      ),
                                       style: textTheme.bodyMedium,
                                     )
                                   : Text('-'),
                               version.duration != Duration.zero
                                   ? Text(
-                                      DateTimeUtils.formatDuration(
-                                        version.duration,
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.durationWithPlaceholder(
+                                        DateTimeUtils.formatDuration(
+                                          version.duration,
+                                        ),
                                       ),
                                       style: textTheme.bodyMedium,
                                     )

@@ -57,7 +57,7 @@ class CloudScheduleRepository {
         return cachedSchedules;
       }
     }
-    return await _withErrorHandling('fetch_schedules_by_user_id', () async {
+    return await _withErrorHandling('fetch_user_schedules', () async {
       final querySnapshot = await _firestoreService
           .fetchDocumentsContainingValue(
             collectionPath: 'schedules',
@@ -130,7 +130,7 @@ class CloudScheduleRepository {
 
   /// Enter Schedule via Share Code by adding the user as a collaborator
   Future<bool> joinWithCode(String shareCode) async {
-    return await _withErrorHandling('join_schedule_via_share_code', () async {
+    return await _withErrorHandling('join_via_share_code', () async {
       await _guardHelper.requireAuth();
 
       final functions = FirebaseFunctions.instance;
@@ -177,15 +177,13 @@ class CloudScheduleRepository {
     try {
       return await action();
     } catch (e) {
+      final error = e as FirebaseFunctionsException;
+      debugPrint('Error during $actionDescription: ${error.message}');
       // Log error to analytics
       await FirebaseAnalytics.instance.logEvent(
         name: 'error_during_$actionDescription',
-        parameters: {'error': e.toString()},
+        parameters: {'error': error.message!},
       );
-
-      if (kDebugMode) {
-        print('Error during $actionDescription: $e');
-      }
 
       rethrow;
     }

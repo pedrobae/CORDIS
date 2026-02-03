@@ -1,13 +1,19 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
-import 'package:cordis/routes/app_routes.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ShareCodeScreen extends StatefulWidget {
-  const ShareCodeScreen({super.key});
+  final void Function(BuildContext) onSuccess;
+  final void Function(BuildContext) onBack;
+
+  const ShareCodeScreen({
+    super.key,
+    required this.onSuccess,
+    required this.onBack,
+  });
 
   @override
   State<ShareCodeScreen> createState() => ShareCodeScreenState();
@@ -35,12 +41,7 @@ class ShareCodeScreenState extends State<ShareCodeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(
-          onPressed: () {
-            _authProvider.signOut();
-            Navigator.of(context).pop();
-          },
-        ),
+        leading: BackButton(onPressed: () => widget.onBack(context)),
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 156.0),
@@ -86,7 +87,9 @@ class ShareCodeScreenState extends State<ShareCodeScreen> {
             ),
             const SizedBox(height: 16),
             FilledTextButton(
-              text: AppLocalizations.of(context)!.getStarted,
+              text: _authProvider.isAuthenticated
+                  ? AppLocalizations.of(context)!.keepGoing
+                  : AppLocalizations.of(context)!.getStarted,
               isDark: true,
               onPressed: _joinViaShareCode,
             ),
@@ -116,10 +119,7 @@ class ShareCodeScreenState extends State<ShareCodeScreen> {
 
       if (success) {
         if (mounted) {
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            AppRoutes.main,
-            (route) => false,
-          ); // Close the share code screen on success
+          widget.onSuccess(context);
         }
       } else if (mounted) {
         // Show error if joining fails

@@ -1358,6 +1358,12 @@ abstract class AppLocalizations {
   /// **'BPM: {bpm}'**
   String bpmWithPlaceholder(Object bpm);
 
+  /// Label for the duration with placeholder
+  ///
+  /// In pt, this message translates to:
+  /// **'Duração: {duration}'**
+  String durationWithPlaceholder(Object duration);
+
   /// Label for the music key with placeholder
   ///
   /// In pt, this message translates to:

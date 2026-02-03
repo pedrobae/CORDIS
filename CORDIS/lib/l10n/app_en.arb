@@ -481,6 +481,8 @@
   "@authorWithPlaceholder": {"description": "Label for the author with placeholder", "placeholders": {"author": {}}},
   "bpmWithPlaceholder": "BPM: {bpm}",
   "@bpmWithPlaceholder": {"description": "Label for the BPM with placeholder", "placeholders": {"bpm": {}}},
+  "durationWithPlaceholder": "Duration: {duration}",
+  "@durationWithPlaceholder": {"description": "Label for the duration with placeholder", "placeholders": {"duration": {}}},
   "keyWithPlaceholder": "Key: {key}",
   "@keyWithPlaceholder": {"description": "Label for the music key with placeholder", "placeholders": {"key": {}}},
   "nSections": "{count} sections",

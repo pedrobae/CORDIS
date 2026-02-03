@@ -703,6 +703,11 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String durationWithPlaceholder(Object duration) {
+    return 'Duração: $duration';
+  }
+
+  @override
   String keyWithPlaceholder(Object key) {
     return 'Tom: $key';
   }

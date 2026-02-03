@@ -9,6 +9,7 @@ import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/playlist/edit_playlist.dart';
 import 'package:cordis/screens/schedule/create_new_schedule.dart';
+import 'package:cordis/screens/user/share_code_screen.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/library/cloud_schedule_card.dart';
 import 'package:cordis/widgets/schedule/library/schedule_card.dart';
@@ -361,6 +362,26 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPopCallback: () {
                       selectionProvider.disableSelectionMode();
                     },
+                  );
+                },
+              ),
+              FilledTextButton(
+                text: AppLocalizations.of(context)!.enterShareCode,
+                trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the bottom sheet
+                  navigationProvider.push(
+                    ShareCodeScreen(
+                      onBack: (_) {
+                        navigationProvider.pop(); // Close the share code screen
+                      },
+                      onSuccess: (_) {
+                        navigationProvider.pop(); // Close the share code screen
+                      },
+                    ),
+                    showAppBar: true,
+                    showDrawerIcon: true,
                   );
                 },
               ),

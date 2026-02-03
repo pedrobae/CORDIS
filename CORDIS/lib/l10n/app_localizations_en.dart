@@ -697,6 +697,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String durationWithPlaceholder(Object duration) {
+    return 'Duration: $duration';
+  }
+
+  @override
   String keyWithPlaceholder(Object key) {
     return 'Key: $key';
   }

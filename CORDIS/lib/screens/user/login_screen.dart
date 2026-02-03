@@ -273,7 +273,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (context.mounted) {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => const ShareCodeScreen(),
+                              builder: (context) => ShareCodeScreen(
+                                onBack: (context) {
+                                  authProvider.signOut();
+                                  Navigator.of(context).pop();
+                                },
+                                onSuccess: (context) {
+                                  Navigator.of(context).pushNamedAndRemoveUntil(
+                                    AppRoutes.main,
+                                    (route) => false,
+                                  );
+                                },
+                              ),
                             ),
                           );
                         }

@@ -33,14 +33,19 @@ class DateTimeUtils {
       buffer.write('$hours:');
     }
     if (minutes > 0) {
-      buffer.write('$minutes:');
+      final minuteStr = minutes.toString().padLeft(2, '0');
+      if (buffer.isNotEmpty) {
+        buffer.write('$minuteStr:');
+      } else {
+        buffer.write('$minutes:');
+      }
+    } else if (buffer.isNotEmpty) {
+      buffer.write('00:');
     }
     if (seconds > 0) {
-      buffer.write('$seconds');
-    }
-
-    if (buffer.isEmpty) {
-      buffer.write('00:00');
+      buffer.write('$seconds'.padLeft(2, '0'));
+    } else if (buffer.isNotEmpty) {
+      buffer.write('00');
     }
 
     return buffer.toString();

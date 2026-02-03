@@ -4,6 +4,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/cipher/view_cipher.dart';
+import 'package:cordis/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
@@ -16,8 +17,8 @@ class CloudCipherCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer3<
       SelectionProvider,
@@ -71,43 +72,43 @@ class CloudCipherCard extends StatelessWidget {
                         spacing: 2.0,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            version.title,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
+                          Text(version.title, style: textTheme.titleMedium),
                           Row(
                             spacing: 16.0,
                             children: [
                               Text(
                                 '${AppLocalizations.of(context)!.musicKey}: ${version.transposedKey ?? version.originalKey}',
-                                style: Theme.of(context).textTheme.bodyMedium,
+                                style: textTheme.bodyMedium,
                               ),
                               version.bpm != 0
                                   ? Text(
-                                      version.bpm.toString(),
-                                      style: Theme.of(
+                                      AppLocalizations.of(
                                         context,
-                                      ).textTheme.bodyMedium,
+                                      )!.bpmWithPlaceholder(
+                                        version.bpm.toString(),
+                                      ),
+                                      style: textTheme.bodyMedium,
                                     )
                                   : Text('-'),
-                              version.duration != 0
+                              version.duration > 0
                                   ? Text(
-                                      version.duration.toString(),
-                                      style: Theme.of(
+                                      AppLocalizations.of(
                                         context,
-                                      ).textTheme.bodyMedium,
+                                      )!.durationWithPlaceholder(
+                                        DateTimeUtils.formatDuration(
+                                          Duration(seconds: version.duration),
+                                        ),
+                                      ),
+                                      style: textTheme.bodyMedium,
                                     )
                                   : Text('-'),
                             ],
                           ),
                           Text(
                             AppLocalizations.of(context)!.cloudCipher,
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.surfaceContainerLowest,
-                                ),
+                            style: textTheme.bodyMedium!.copyWith(
+                              color: colorScheme.surfaceContainerLowest,
+                            ),
                           ),
                         ],
                       ),

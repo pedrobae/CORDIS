@@ -6,6 +6,8 @@ import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/screens/schedule/create_new_schedule.dart';
+import 'package:cordis/screens/user/share_code_screen.dart';
+import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/library/schedule_scroll_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -137,18 +139,7 @@ class _ScheduleLibraryScreenState extends State<ScheduleLibraryScreen> {
                   bottom: 0,
                   right: 0,
                   child: GestureDetector(
-                    onTap: () {
-                      selectionProvider
-                          .enableSelectionMode(); // For playlist assignment
-                      navigationProvider.push(
-                        CreateScheduleScreen(creationStep: 1),
-                        showAppBar: false,
-                        showDrawerIcon: false,
-                        onPopCallback: () {
-                          selectionProvider.disableSelectionMode();
-                        },
-                      );
-                    },
+                    onTap: _openCreateScheduleSheet,
                     child: Container(
                       width: 56,
                       height: 56,
@@ -172,6 +163,98 @@ class _ScheduleLibraryScreenState extends State<ScheduleLibraryScreen> {
               ],
             );
           },
+    );
+  }
+
+  void _openCreateScheduleSheet() {
+    final navigationProvider = context.read<NavigationProvider>();
+    final selectionProvider = context.read<SelectionProvider>();
+
+    final colorScheme = Theme.of(context).colorScheme;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(0),
+          ),
+          child: Column(
+            spacing: 16,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // HEADER
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.addPlaceholder(AppLocalizations.of(context)!.schedule),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  CloseButton(onPressed: () => Navigator.of(context).pop()),
+                ],
+              ),
+
+              // ACTIONS
+              Column(
+                spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // CREATE FROM SCRATCH BUTTON
+                  FilledTextButton(
+                    text: AppLocalizations.of(context)!.createPlaceholder(
+                      AppLocalizations.of(context)!.schedule,
+                    ),
+                    isDark: true,
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the bottom sheet
+                      selectionProvider
+                          .enableSelectionMode(); // For playlist assignment
+                      navigationProvider.push(
+                        CreateScheduleScreen(creationStep: 1),
+                        showAppBar: false,
+                        showDrawerIcon: false,
+                        onPopCallback: () {
+                          selectionProvider.disableSelectionMode();
+                        },
+                      );
+                    },
+                  ),
+
+                  // IMPORT FROM SHARE CODE BUTTON
+                  FilledTextButton(
+                    text: AppLocalizations.of(context)!.shareCode,
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the bottom sheet
+                      navigationProvider.push(
+                        ShareCodeScreen(
+                          onBack: (_) {
+                            navigationProvider.pop();
+                          },
+                          onSuccess: (_) {
+                            navigationProvider
+                                .pop(); // Close the share code screen
+                          },
+                        ),
+                        showAppBar: true,
+                        showDrawerIcon: true,
+                      );
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
     );
   }
 }
