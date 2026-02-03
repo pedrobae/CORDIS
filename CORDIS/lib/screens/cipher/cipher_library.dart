@@ -126,6 +126,8 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
                     ),
                     showAppBar: false,
                     showDrawerIcon: false,
+                    onPopCallback: () =>
+                        cipherProvider..clearNewCipherFromCache(),
                   );
                 },
                 child: Container(

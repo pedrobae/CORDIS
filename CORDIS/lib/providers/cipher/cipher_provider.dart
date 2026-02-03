@@ -11,11 +11,14 @@ class CipherProvider extends ChangeNotifier {
   }
 
   Map<int, Cipher> _ciphers = {};
+
+  String _searchTerm = '';
+
   bool _isLoading = false;
   bool _isSaving = false;
+  bool _hasLoaded = false;
+
   String? _error;
-  String _searchTerm = '';
-  bool _hasLoadedCiphers = false;
 
   // Getters
   Map<int, Cipher> get ciphers => _ciphers;
@@ -38,16 +41,8 @@ class CipherProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
-  bool get hasLoadedCiphers => _hasLoadedCiphers;
 
   String? get error => _error;
-
-  int get cipherCount {
-    if (_ciphers[-1] != null) {
-      return _ciphers.length - 1;
-    }
-    return _ciphers.length;
-  }
 
   /// USED WHEN UPSERTING VERSIONS FROM CLOUD (as ciphers are not stored in cloud)
   int? getCipherIdByTitleOrAuthor(String title, String author) {
@@ -59,10 +54,52 @@ class CipherProvider extends ChangeNotifier {
         .id;
   }
 
+  // ===== CREATE =====
+  /// Creates a new cipher in the database from the cached new cipher (-1)
+  Future<int?> createCipher() async {
+    if (_isSaving) return null;
+    if (_ciphers[-1] == null) {
+      if (kDebugMode) {
+        print('No new cipher to create in local cache');
+      }
+      return null;
+    }
+
+    _isSaving = true;
+    _error = null;
+    notifyListeners();
+    int? cipherId;
+
+    try {
+      // Insert basic cipher info and tags
+      cipherId = await _cipherRepository.insertPrunedCipher(_ciphers[-1]!);
+
+      // Load the new ID into the cache
+      _ciphers[cipherId] = _ciphers[-1]!.copyWith(id: cipherId);
+      if (kDebugMode) {
+        print('Created a new cipher with id $cipherId');
+      }
+    } catch (e) {
+      _error = e.toString();
+      if (kDebugMode) {
+        print('Error creating cipher: $e');
+      }
+    } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+    return cipherId;
+  }
+
+  void setNewCipherInCache(Cipher cipher) {
+    _ciphers[-1] = cipher;
+    notifyListeners();
+  }
+
   // ===== READ =====
   /// Load ciphers from local SQLite
   Future<void> loadCiphers({bool forceReload = false}) async {
-    if (_hasLoadedCiphers && !forceReload) return;
+    if (_hasLoaded && !forceReload) return;
     if (_isLoading) return;
     // Debounce rapid calls
     _isLoading = true;
@@ -79,6 +116,7 @@ class CipherProvider extends ChangeNotifier {
       if (kDebugMode) {
         print('Loaded ${_ciphers.length} ciphers from SQLite');
       }
+      _hasLoaded = true;
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {
@@ -86,7 +124,6 @@ class CipherProvider extends ChangeNotifier {
       }
     } finally {
       _isLoading = false;
-      _hasLoadedCiphers = true;
       notifyListeners();
     }
   }
@@ -133,56 +170,6 @@ class CipherProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
-  }
-
-  /// Search functionality
-  Future<void> setSearchTerm(String term) async {
-    _searchTerm = term.toLowerCase();
-    notifyListeners();
-  }
-
-  // ===== CREATE =====
-  /// Creates a new cipher in the database from the cached new cipher (-1)
-  Future<int?> createCipher() async {
-    if (_isSaving) return null;
-    if (_ciphers[-1] == null) {
-      if (kDebugMode) {
-        print('No new cipher to create in local cache');
-      }
-      return null;
-    }
-
-    _isSaving = true;
-    _error = null;
-    notifyListeners();
-    int? cipherId;
-
-    try {
-      // Insert basic cipher info and tags
-      cipherId = await _cipherRepository.insertPrunedCipher(_ciphers[-1]!);
-
-      // Load the new ID into the cache
-      _ciphers[cipherId] = _ciphers[-1]!.copyWith(id: cipherId);
-      if (kDebugMode) {
-        print('Created a new cipher with id $cipherId');
-      }
-    } catch (e) {
-      _error = e.toString();
-      if (kDebugMode) {
-        print('Error creating cipher: $e');
-      }
-    } finally {
-      _isSaving = false;
-      // Reload from database to ensure UI reflects all changes
-      await loadCiphers(forceReload: true);
-      notifyListeners();
-    }
-    return cipherId;
-  }
-
-  void setNewCipherInCache(Cipher cipher) {
-    _ciphers[-1] = cipher;
-    notifyListeners();
   }
 
   // ===== UPSERT =====
@@ -307,6 +294,11 @@ class CipherProvider extends ChangeNotifier {
     }
   }
 
+  void clearNewCipherFromCache() {
+    _ciphers.remove(-1);
+    notifyListeners();
+  }
+
   // ===== UTILS =====
   /// Clear cached data and reset state for debugging
   void clearCache() {
@@ -320,6 +312,12 @@ class CipherProvider extends ChangeNotifier {
 
   void clearSearch() {
     _searchTerm = '';
+  }
+
+  /// Sets the search term for filtering ciphers
+  Future<void> setSearchTerm(String term) async {
+    _searchTerm = term.toLowerCase();
+    notifyListeners();
   }
 
   // ===== CIPHER CACHING =====

@@ -7,26 +7,11 @@ import 'package:cordis/widgets/ciphers/library/cloud_cipher_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CipherScrollView extends StatefulWidget {
+class CipherScrollView extends StatelessWidget {
   final int? playlistId;
   const CipherScrollView({super.key, this.playlistId});
 
-  @override
-  State<CipherScrollView> createState() => _CipherScrollViewState();
-}
-
-class _CipherScrollViewState extends State<CipherScrollView> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _loadData();
-      }
-    });
-  }
-
-  void _loadData({bool forceReload = false}) {
+  void _loadData(BuildContext context, {bool forceReload = false}) {
     context.read<CipherProvider>().loadCiphers(forceReload: forceReload);
     context.read<CloudVersionProvider>().loadVersions(forceReload: forceReload);
   }
@@ -71,7 +56,7 @@ class _CipherScrollViewState extends State<CipherScrollView> {
         return Stack(
           children: [
             // Display cipher list
-            _buildCiphersList(cipherProvider, cloudVersionProvider),
+            _buildCiphersList(context, cipherProvider, cloudVersionProvider),
           ],
         );
       },
@@ -79,6 +64,7 @@ class _CipherScrollViewState extends State<CipherScrollView> {
   }
 
   Widget _buildCiphersList(
+    BuildContext context,
     CipherProvider cipherProvider,
     CloudVersionProvider cloudVersionProvider,
   ) {
@@ -90,7 +76,7 @@ class _CipherScrollViewState extends State<CipherScrollView> {
 
     return RefreshIndicator(
       onRefresh: () async {
-        _loadData(forceReload: true);
+        _loadData(context, forceReload: true);
       },
       child: (localIds.isEmpty && cloudIds.isEmpty)
           ? Column(
@@ -119,7 +105,7 @@ class _CipherScrollViewState extends State<CipherScrollView> {
                     ), // Spacing between cards
                     child: CloudCipherCard(
                       versionId: cloudIds[index - localIds.length],
-                      playlistId: widget.playlistId,
+                      playlistId: playlistId,
                     ),
                   );
                 }
@@ -130,7 +116,7 @@ class _CipherScrollViewState extends State<CipherScrollView> {
                   ), // Spacing between cards
                   child: CipherCard(
                     cipherId: localIds[index],
-                    playlistId: widget.playlistId,
+                    playlistId: playlistId,
                   ),
                 );
               },
