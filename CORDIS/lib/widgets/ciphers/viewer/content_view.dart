@@ -102,28 +102,27 @@ class _ContentViewState extends State<ContentView> {
             sectionCardList.add(SizedBox(height: 200));
 
             return Column(
-              spacing: 16,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+                      child: Text(
                         AppLocalizations.of(context)!.songStructure,
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),
                       ),
-                      StructureList(
-                        versionId: widget.versionId,
-                        filteredStructure: filteredStructure.values.toList(),
-                        scrollController: scrollController,
-                        sectionKeys: sectionKeys,
-                      ),
-                    ],
-                  ),
+                    ),
+                    StructureList(
+                      versionId: widget.versionId,
+                      filteredStructure: filteredStructure.values.toList(),
+                      scrollController: scrollController,
+                      sectionKeys: sectionKeys,
+                    ),
+                  ],
                 ),
                 Expanded(
                   child: Container(
@@ -141,6 +140,7 @@ class _ContentViewState extends State<ContentView> {
                       child: Column(
                         spacing: 16,
                         children: [
+                          SizedBox(),
                           // Your structure list...
                           MasonryGridView.count(
                             crossAxisCount: layoutSettings.columnCount,

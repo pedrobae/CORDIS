@@ -73,8 +73,8 @@ class _StructureListState extends State<StructureList> {
             child,
           ) {
             return Container(
-              padding: EdgeInsets.all(8),
-              height: 64,
+              padding: EdgeInsets.all(8.0),
+              width: double.infinity,
               child: widget.filteredStructure.isEmpty
                   ? Center(
                       child: Text(

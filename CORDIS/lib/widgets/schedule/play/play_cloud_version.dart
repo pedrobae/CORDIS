@@ -297,11 +297,17 @@ class _PlayCloudVersionState extends State<PlayCloudVersion> {
               maxWidth: MediaQuery.of(context).size.width - 66,
               minWidth: MediaQuery.of(context).size.width - 66,
             ),
-            child: StructureList(
-              versionId: widget.versionDTO.firebaseId,
-              filteredStructure: filteredStructure,
-              scrollController: _scrollController,
-              sectionKeys: sectionKeys,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 2.0,
+              ),
+              child: StructureList(
+                versionId: widget.versionDTO.firebaseId,
+                filteredStructure: filteredStructure,
+                scrollController: _scrollController,
+                sectionKeys: sectionKeys,
+              ),
             ),
           ),
         ),
