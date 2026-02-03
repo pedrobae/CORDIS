@@ -11,12 +11,8 @@ class CloudScheduleRepository {
   final GuardHelper _guardHelper = GuardHelper();
 
   final CacheService _cacheService = CacheService();
-  final List<ScheduleDto> _repoCache = [];
-  DateTime? _lastCloudLoad;
 
-  CloudScheduleRepository() {
-    _initializeCloudCache();
-  }
+  CloudScheduleRepository();
   // ===== CREATE =====
 
   /// Publish a new schedule to Firestore
@@ -49,13 +45,13 @@ class CloudScheduleRepository {
     bool forceFetch = false,
   }) async {
     final now = DateTime.now();
+
+    final (lastLoad, cachedSchedules) = await getCache(firebaseUserId);
+
     if (!forceFetch &&
         now.isBefore(
-          (_lastCloudLoad ?? DateTime(2000)).add(
-            Duration(days: 7),
-          ), // CHECK FOR NEW SCHEDULES WEEKLY
+          (lastLoad).add(Duration(days: 7)), // CHECK FOR NEW SCHEDULES WEEKLY
         )) {
-      final cachedSchedules = await _cacheService.loadCloudSchedules();
       if (cachedSchedules.isNotEmpty) {
         debugPrint('LOADING CACHED SCHEDULES FOR USER $firebaseUserId.');
         return cachedSchedules;
@@ -83,11 +79,8 @@ class CloudScheduleRepository {
         'FETCHED ${schedules.length} SCHEDULES FOR USER $firebaseUserId FROM CLOUD.',
       );
 
-      await _cacheService.saveCloudSchedules(schedules);
+      await _cacheService.saveCloudSchedules(schedules, firebaseUserId);
       await _cacheService.saveLastScheduleLoad(now);
-      _repoCache.clear();
-      _repoCache.addAll(schedules);
-      _lastCloudLoad = now;
 
       return schedules;
     });
@@ -199,8 +192,9 @@ class CloudScheduleRepository {
   }
 
   // ===== CACHE INITIALIZATION =====
-  Future<void> _initializeCloudCache() async {
-    _repoCache.addAll(await _cacheService.loadCloudSchedules());
-    _lastCloudLoad = await _cacheService.loadLastScheduleLoad();
+  Future<(DateTime, List<ScheduleDto>)> getCache(String userId) async {
+    final schedules = await _cacheService.loadCloudSchedules(userId);
+    final lastLoad = await _cacheService.loadLastScheduleLoad();
+    return (lastLoad ?? DateTime(2000), schedules);
   }
 }

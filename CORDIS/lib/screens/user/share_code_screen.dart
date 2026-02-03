@@ -1,6 +1,7 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
+import 'package:cordis/routes/app_routes.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,11 +17,18 @@ class ShareCodeScreenState extends State<ShareCodeScreen> {
   TextEditingController shareCodeController = TextEditingController();
 
   @override
+  void dispose() {
+    shareCodeController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
           onPressed: () {
+            context.read<MyAuthProvider>().signOut();
             Navigator.of(context).pop();
           },
         ),
@@ -91,18 +99,18 @@ class ShareCodeScreenState extends State<ShareCodeScreen> {
     }
 
     final cloudScheduleProvider = context.read<CloudScheduleProvider>();
-    final authProvider = context.read<MyAuthProvider>();
 
     try {
-      authProvider.signInAnonymously();
-
       final success = await cloudScheduleProvider.joinScheduleWithCode(
         shareCode,
       );
 
       if (success) {
         if (mounted) {
-          Navigator.of(context).pop(); // Close the share code screen on success
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            AppRoutes.main,
+            (route) => false,
+          ); // Close the share code screen on success
         }
       } else if (mounted) {
         // Show error if joining fails

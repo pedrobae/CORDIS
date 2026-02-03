@@ -15,27 +15,32 @@ class MainScreen extends StatefulWidget {
 
 class MainScreenState extends State<MainScreen> {
   int _previousIndex = 0;
+  late MyAuthProvider _authProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _authProvider = context.read<MyAuthProvider>();
+  }
 
   @override
   void initState() {
     super.initState();
-    final authProvider = context.read<MyAuthProvider>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) authProvider.addListener(_authListener);
+      if (mounted) _authProvider.addListener(_authListener);
     });
   }
 
   void _authListener() {
-    final authProvider = context.read<MyAuthProvider>();
-    if (!authProvider.isAuthenticated) {
+    if (!_authProvider.isAuthenticated) {
       Navigator.of(context).pushNamed('/login');
     }
   }
 
   @override
   void dispose() {
-    context.read<MyAuthProvider>().removeListener(_authListener);
+    _authProvider.removeListener(_authListener);
     super.dispose();
   }
 

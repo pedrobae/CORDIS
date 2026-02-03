@@ -5,6 +5,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/playlist/edit_playlist.dart';
 import 'package:cordis/screens/schedule/create_new_schedule.dart';
@@ -36,9 +37,16 @@ class _HomeScreenState extends State<HomeScreen> {
     final authProvider = context.read<MyAuthProvider>();
     final localScheduleProvider = context.read<LocalScheduleProvider>();
     final cloudScheduleProvider = context.read<CloudScheduleProvider>();
+    final cloudVersionProvider = context.read<CloudVersionProvider>();
 
     await localScheduleProvider.loadSchedules();
     await cloudScheduleProvider.loadSchedules(authProvider.id!);
+
+    for (var schedule in cloudScheduleProvider.schedules.values) {
+      for (var versionEntry in schedule.playlist.versions.entries) {
+        cloudVersionProvider.setVersion(versionEntry.key, versionEntry.value);
+      }
+    }
   }
 
   @override

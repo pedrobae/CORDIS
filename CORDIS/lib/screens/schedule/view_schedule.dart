@@ -8,6 +8,7 @@ import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/screens/schedule/edit_schedule.dart';
 import 'package:cordis/screens/schedule/play_schedule.dart';
 import 'package:cordis/utils/date_utils.dart';
@@ -103,6 +104,16 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                           cloudScheduleProvider.loadSchedules(
                             context.read<MyAuthProvider>().id!,
                           );
+                          for (var schedule
+                              in cloudScheduleProvider.schedules.values) {
+                            for (var versionEntry
+                                in schedule.playlist.versions.entries) {
+                              context.read<CloudVersionProvider>().setVersion(
+                                versionEntry.key,
+                                versionEntry.value,
+                              );
+                            }
+                          }
                         },
                         child: Text(AppLocalizations.of(context)!.tryAgain),
                       ),

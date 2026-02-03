@@ -16,10 +16,13 @@ class CacheService {
     await prefs.setString(_versionKey, json.encode(jsonList));
   }
 
-  Future<void> saveCloudSchedules(List<ScheduleDto> schedules) async {
+  Future<void> saveCloudSchedules(
+    List<ScheduleDto> schedules,
+    String userId,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final jsonList = schedules.map((s) => s.toCache()).toList();
-    await prefs.setString(_scheduleKey, json.encode(jsonList));
+    await prefs.setString('${_scheduleKey}_$userId', json.encode(jsonList));
   }
 
   Future<List<VersionDto>> loadCloudVersions() async {
@@ -34,10 +37,10 @@ class CacheService {
     }
   }
 
-  Future<List<ScheduleDto>> loadCloudSchedules() async {
+  Future<List<ScheduleDto>> loadCloudSchedules(String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final jsonString = prefs.getString(_scheduleKey);
+      final jsonString = prefs.getString('${_scheduleKey}_$userId');
       if (jsonString == null) return [];
       final List<dynamic> jsonList = json.decode(jsonString);
       return jsonList.map((j) => ScheduleDto.fromCache(j)).toList();
