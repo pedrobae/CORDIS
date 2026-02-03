@@ -2,7 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
-import 'package:cordis/widgets/ciphers/editor/custom_reorderable_delayed.dart';
+import 'package:cordis/widgets/custom_reorderable_delayed.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_editor.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_card_actions.dart';

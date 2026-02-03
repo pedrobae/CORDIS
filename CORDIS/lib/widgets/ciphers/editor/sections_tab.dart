@@ -2,14 +2,14 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
-import 'package:cordis/widgets/ciphers/editor/chord_palette.dart';
+import 'package:cordis/widgets/ciphers/editor/sections/chord_palette.dart';
 import 'package:cordis/widgets/ciphers/editor/create_cipher_sheet.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
-import 'package:cordis/widgets/ciphers/editor/reorderable_structure_chips.dart';
+import 'package:cordis/widgets/ciphers/editor/sections/reorderable_structure_chips.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/token_content_editor.dart';
 import 'package:cordis/utils/section_constants.dart';
 
