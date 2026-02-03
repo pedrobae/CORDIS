@@ -265,6 +265,14 @@
   "@share": {"description": "Share button label"},
   "shareCode": "Share Code",
   "@shareCode": {"description": "Share code field label"},
+  "enterShareCode": "Enter Share Code",
+  "@enterShareCode": {"description": "Enter share code button label"},
+  "shareCodeInstructions": "Enter the share code provided by your team leader to access the schedule.",
+  "@shareCodeInstructions": {"description": "Instruction to share the code with others"},
+
+  "joinSchedule": "Join Service",
+  "@joinSchedule": {"description": "Share code screen title"},
+
   "sendToRoleMembers": "Send to Role Members",
   "@sendToRoleMembers": {"description": "Send/share to members of selected roles"},
   "sendInvites": "Send Invites",
@@ -458,6 +466,8 @@
   "@helloUser": {"description": "Welcome message with the user's name", "placeholders": {"userName": {}}},
   "welcome": "Welcome",
   "@welcome": {"description": "Generic welcome message"},
+  "getStarted": "Get Started",
+  "@getStarted": {"description": "Get started button label"},
   "getStartedMessage": "Get started by creating or importing your first song map.",
   "@getStartedMessage": {"description": "Instructional message to get started with the app"},
 

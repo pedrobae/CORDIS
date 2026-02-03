@@ -1,4 +1,6 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/screens/user/share_code_screen.dart';
+import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
@@ -87,6 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               spacing: 24,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(height: 40),
                 Image.asset(
@@ -101,6 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontWeight: FontWeight.w700,
                     color: colorScheme.onSurface,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 Column(
                   spacing: 8,
@@ -246,39 +250,39 @@ class _LoginScreenState extends State<LoginScreen> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.login),
-                    label: Text(
-                      AppLocalizations.of(context)!.login,
-                      style: theme.textTheme.labelLarge!.copyWith(
-                        color: colorScheme.surface,
-                      ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 8,
+                  children: [
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.login,
+                      isDark: true,
+                      isDisabled: authProvider.isLoading,
+                      onPressed: () {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          authProvider.signInWithEmail(
+                            _emailController.text,
+                            _passwordController.text,
+                          );
+                        }
+                      },
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.onSurface,
-                      foregroundColor: colorScheme.surface,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(0),
-                      ),
-                      elevation: 2,
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.enterShareCode,
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const ShareCodeScreen(),
+                          ),
+                        );
+                      },
                     ),
-                    onPressed: authProvider.isLoading
-                        ? null
-                        : () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              authProvider.signInWithEmail(
-                                _emailController.text,
-                                _passwordController.text,
-                              );
-                            }
-                          },
-                  ),
+                  ],
                 ),
+
                 // Sign Up Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
                   children: [
                     Text(
                       AppLocalizations.of(context)!.accountCreationPrefix,

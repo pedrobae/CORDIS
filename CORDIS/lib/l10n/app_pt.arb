@@ -260,6 +260,14 @@
   "@share": {"description": "Share button label"},
   "shareCode": "Código de Compartilhamento",
   "@shareCode": {"description": "Share code field label"},
+  "enterShareCode": "Inserir Código de Compartilhamento",
+  "@enterShareCode": {"description": "Enter share code button label"},
+  "shareCodeInstructions": "Insira o código de compartilhamento fornecido pelo líder da sua equipe para acessar a agenda.",
+  "@shareCodeInstructions": {"description": "Instruction to share the code with others"},
+
+  "joinSchedule": "Participar da Agenda",
+  "@joinSchedule": {"description": "Share code screen title"},
+
   "sendToRoleMembers": "Enviar para os Membros da Função",
   "@sendToRoleMembers": {"description": "Send/share to members of selected roles"},
   "sendInvites": "Enviar Convites",
@@ -449,6 +457,8 @@
   "@helloUser": {"description": "Welcome message with the user's name", "placeholders": {"userName": {}}},
   "welcome": "Bem-vindo",
   "@welcome": {"description": "Generic welcome message"},
+  "getStarted": "Vamos Começar",
+  "@getStarted": {"description": "Get started button label"},
   "getStartedMessage": "Comece criando ou importando sua primeira cifra.",
   "@getStartedMessage": {"description": "Instructional message to get started with the app"},
 

@@ -382,6 +382,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareCode => 'Share Code';
 
   @override
+  String get enterShareCode => 'Enter Share Code';
+
+  @override
+  String get shareCodeInstructions =>
+      'Enter the share code provided by your team leader to access the schedule.';
+
+  @override
+  String get joinSchedule => 'Join Service';
+
+  @override
   String get sendToRoleMembers => 'Send to Role Members';
 
   @override
@@ -660,6 +670,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcome => 'Welcome';
+
+  @override
+  String get getStarted => 'Get Started';
 
   @override
   String get getStartedMessage =>

@@ -788,6 +788,24 @@ abstract class AppLocalizations {
   /// **'Código de Compartilhamento'**
   String get shareCode;
 
+  /// Enter share code button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Inserir Código de Compartilhamento'**
+  String get enterShareCode;
+
+  /// Instruction to share the code with others
+  ///
+  /// In pt, this message translates to:
+  /// **'Insira o código de compartilhamento fornecido pelo líder da sua equipe para acessar a agenda.'**
+  String get shareCodeInstructions;
+
+  /// Share code screen title
+  ///
+  /// In pt, this message translates to:
+  /// **'Participar da Agenda'**
+  String get joinSchedule;
+
   /// Send/share to members of selected roles
   ///
   /// In pt, this message translates to:
@@ -1303,6 +1321,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Bem-vindo'**
   String get welcome;
+
+  /// Get started button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos Começar'**
+  String get getStarted;
 
   /// Instructional message to get started with the app
   ///

@@ -246,6 +246,24 @@ class CloudScheduleProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> joinScheduleWithCode(String shareCode) async {
+    bool result = false;
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      result = await _repo.joinWithCode(shareCode);
+    } catch (e) {
+      _error = e.toString();
+      result = false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return result;
+  }
+
   // ===== SEARCH & FILTER =====
   void setSearchTerm(String searchTerm) {
     _searchTerm = searchTerm.toLowerCase();

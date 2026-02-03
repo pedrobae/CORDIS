@@ -384,6 +384,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get shareCode => 'Código de Compartilhamento';
 
   @override
+  String get enterShareCode => 'Inserir Código de Compartilhamento';
+
+  @override
+  String get shareCodeInstructions =>
+      'Insira o código de compartilhamento fornecido pelo líder da sua equipe para acessar a agenda.';
+
+  @override
+  String get joinSchedule => 'Participar da Agenda';
+
+  @override
   String get sendToRoleMembers => 'Enviar para os Membros da Função';
 
   @override
@@ -666,6 +676,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get welcome => 'Bem-vindo';
+
+  @override
+  String get getStarted => 'Vamos Começar';
 
   @override
   String get getStartedMessage =>

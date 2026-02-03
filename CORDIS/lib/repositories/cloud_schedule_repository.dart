@@ -136,8 +136,8 @@ class CloudScheduleRepository {
   }
 
   /// Enter Schedule via Share Code by adding the user as a collaborator
-  Future<String> enterSchedule(String shareCode) async {
-    return await _withErrorHandling('enter_schedule_via_share_code', () async {
+  Future<bool> joinWithCode(String shareCode) async {
+    return await _withErrorHandling('join_schedule_via_share_code', () async {
       await _guardHelper.requireAuth();
 
       final functions = FirebaseFunctions.instance;
@@ -148,8 +148,7 @@ class CloudScheduleRepository {
 
       // After successfully joining load the schedule
       if (result.data['success'] == true) {
-        final String scheduleId = result.data['scheduleId'];
-        return scheduleId;
+        return true;
       } else {
         throw Exception(
           'Failed to join schedule with the provided share code.',
