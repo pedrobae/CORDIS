@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/navigation_provider.dart';
@@ -125,6 +126,14 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
               return Center(child: CircularProgressIndicator());
             }
 
+            Cipher? cipher = isCloud
+                ? null
+                : cipherProvider.getCipherById(version.cipherId);
+
+            if (!isCloud && cipher == null) {
+              return Center(child: CircularProgressIndicator());
+            }
+
             final List<String> songStructure = version.songStructure;
 
             return Container(
@@ -168,13 +177,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      isCloud
-                                          ? version.title
-                                          : cipherProvider
-                                                .getCipherById(
-                                                  version.cipherId,
-                                                )!
-                                                .title,
+                                      isCloud ? version.title : cipher!.title,
                                       style: theme.textTheme.titleLarge
                                           ?.copyWith(
                                             fontWeight: FontWeight.w600,
@@ -196,11 +199,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                                   ? (version.transposedKey ??
                                                         version.originalKey)
                                                   : (version.transposedKey ??
-                                                        cipherProvider
-                                                            .getCipherById(
-                                                              version.cipherId,
-                                                            )!
-                                                            .musicKey),
+                                                        cipher!.musicKey),
                                               style: theme.textTheme.bodyLarge
                                                   ?.copyWith(
                                                     fontWeight: FontWeight.w500,

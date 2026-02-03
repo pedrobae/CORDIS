@@ -27,73 +27,83 @@ class _DurationPickerState extends State<DurationPicker> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      color: colorScheme.surface,
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 16,
-        children: [
-          // HEADER
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(
-                  context,
-                )!.setPlaceholder(AppLocalizations.of(context)!.duration),
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.of(
+            context,
+          ).pop(Duration(minutes: _minutes, seconds: _seconds));
+        }
+      },
+      child: Container(
+        color: colorScheme.surface,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 16,
+          children: [
+            // HEADER
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(
+                    context,
+                  )!.setPlaceholder(AppLocalizations.of(context)!.duration),
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              CloseButton(
-                onPressed: () => Navigator.pop(
-                  context,
-                  Duration(minutes: _minutes, seconds: _seconds),
+                CloseButton(
+                  onPressed: () => Navigator.pop(
+                    context,
+                    Duration(minutes: _minutes, seconds: _seconds),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                children: [
-                  Text(
-                    AppLocalizations.of(
-                      context,
-                    )!.pluralPlaceholder(AppLocalizations.of(context)!.minute),
-                    style: textTheme.labelMedium,
-                  ),
-                  NumberPicker(
-                    value: _minutes,
-                    minValue: 0,
-                    maxValue: 59,
-                    onChanged: (value) => setState(() => _minutes = value),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Text(
-                    AppLocalizations.of(
-                      context,
-                    )!.pluralPlaceholder(AppLocalizations.of(context)!.second),
-                    style: textTheme.labelMedium,
-                  ),
-                  NumberPicker(
-                    value: _seconds,
-                    minValue: 0,
-                    maxValue: 59,
-                    onChanged: (value) => setState(() => _seconds = value),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.pluralPlaceholder(
+                        AppLocalizations.of(context)!.minute,
+                      ),
+                      style: textTheme.labelMedium,
+                    ),
+                    NumberPicker(
+                      value: _minutes,
+                      minValue: 0,
+                      maxValue: 59,
+                      onChanged: (value) => setState(() => _minutes = value),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.pluralPlaceholder(
+                        AppLocalizations.of(context)!.second,
+                      ),
+                      style: textTheme.labelMedium,
+                    ),
+                    NumberPicker(
+                      value: _seconds,
+                      minValue: 0,
+                      maxValue: 59,
+                      onChanged: (value) => setState(() => _seconds = value),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

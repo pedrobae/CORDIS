@@ -136,7 +136,6 @@ class Version {
     int? id,
     String? firebaseId,
     int? cipherId,
-    String? firebaseCipherId,
     List<String>? songStructure,
     Duration? duration,
     int? bpm,

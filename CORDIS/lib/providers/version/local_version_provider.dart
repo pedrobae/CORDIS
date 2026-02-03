@@ -80,7 +80,7 @@ class LocalVersionProvider extends ChangeNotifier {
   // ===== CREATE =====
   /// Creates a new version from the local cache to an existing cipher
   /// If no cipherId is provided, the version will use the cached cipherID or throw an error
-  Future<int?> createVersion(int? cipherId) async {
+  Future<int?> createVersion({int? cipherID}) async {
     if (_isSaving) return null;
 
     _isSaving = true;
@@ -94,7 +94,7 @@ class LocalVersionProvider extends ChangeNotifier {
       }
       // Create version with the correct cipher ID
       final versionWithCipherId = _versions[-1]!.copyWith(
-        cipherId: cipherId ?? _versions[-1]!.cipherId,
+        cipherId: cipherID ?? _versions[-1]!.cipherId,
       );
 
       if (versionWithCipherId.cipherId == -1) {
@@ -109,7 +109,7 @@ class LocalVersionProvider extends ChangeNotifier {
 
       if (kDebugMode) {
         print(
-          'Created a new version with id $versionId, for cipher ${cipherId ?? versionWithCipherId.cipherId}',
+          'Created a new version with id $versionId, for cipher ${cipherID ?? versionWithCipherId.cipherId}',
         );
       }
     } catch (e) {
@@ -154,7 +154,13 @@ class LocalVersionProvider extends ChangeNotifier {
 
   // Load all versions of a cipher into cache, used for version selector and cipher expansion
   Future<void> loadVersionsOfCipher(int cipherId) async {
+    if (_isLoading) return;
+
     try {
+      _error = null;
+      _isLoading = true;
+      notifyListeners();
+
       final versionList = await _cipherRepository.getVersions(cipherId);
       for (final version in versionList) {
         _versions[version.id!] = version;

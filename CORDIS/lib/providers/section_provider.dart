@@ -67,6 +67,21 @@ class SectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void cacheSectionCopy(dynamic versionId) {
+    final sections = _sections[versionId];
+    if (sections == null) return;
+
+    _sections[-1] ??= {};
+
+    for (final code in sections.keys) {
+      final originalSection = sections[code]!;
+      final newSection = originalSection.copyWith(versionId: -1);
+      _sections[-1]![newSection.contentCode] = newSection;
+    }
+
+    notifyListeners();
+  }
+
   ///Create sections for a new version from -1 cache
   Future<void> createSections(int newVersionId) async {
     final sections = _sections[-1];

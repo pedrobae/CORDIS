@@ -111,6 +111,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           // Create a copy of the version in cache
           localVersionProvider.setNewVersionInCache(
             originalVersion.copyWith(
+              firebaseId: '',
               versionName: AppLocalizations.of(
                 context,
               )!.playlistVersionName(playlistName),
@@ -122,24 +123,20 @@ class _EditCipherScreenState extends State<EditCipherScreen>
 
           // Load the sections in cache
           await sectionProvider.loadLocalSections(widget.versionID!);
-
-          sectionProvider.setNewSectionsInCache(
-            -1,
-            sectionProvider.getSections(widget.versionID!),
-          );
+          sectionProvider.cacheSectionCopy(widget.versionID!);
         } else {
           final VersionDto originalVersion = cloudVersionProvider.getVersion(
             widget.versionID!,
           )!;
 
           // Check if there exists a local cipher with the same title / author
-          final localCipherId = cipherProvider.getCipherIdByTitleOrAuthor(
+          final localCipherID = cipherProvider.getCipherIdByTitleOrAuthor(
             originalVersion.title,
             originalVersion.author,
           );
 
-          if (localCipherId != -1 && localCipherId != null) {
-            await cipherProvider.loadCipher(localCipherId);
+          if (localCipherID != -1 && localCipherID != null) {
+            await cipherProvider.loadCipher(localCipherID);
           } else {
             cipherProvider.setNewCipherInCache(
               Cipher.fromVersionDto(originalVersion),
@@ -153,7 +150,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           }
 
           final newVersion = originalVersion
-              .toDomain(cipherId: localCipherId)
+              .toDomain(cipherId: localCipherID)
               .copyWith(versionName: newName);
 
           // Create a copy of the version in cache
@@ -332,17 +329,19 @@ class _EditCipherScreenState extends State<EditCipherScreen>
       for (dynamic versionId in selectionProvider.selectedItemIds) {
         if (versionId.runtimeType == int) {
           // LOCAL VERSION: Create a copy of the version in the database
-          versionId = await versionProvider.createVersion(null);
+          versionId = await versionProvider.createVersion();
         } else {
           // CLOUD VERSION: Upsert the version in the database
-          int? localCipherId = widget.cipherID;
+          int? localCipherID = widget.cipherID;
           if (widget.cipherID == null) {
-            localCipherId = await cipherProvider.createCipher();
+            localCipherID = await cipherProvider.createCipher();
           } else {
             await cipherProvider.saveCipher(widget.cipherID!);
           }
 
-          versionId = await versionProvider.createVersion(localCipherId);
+          versionId = await versionProvider.createVersion(
+            cipherID: localCipherID,
+          );
         }
         // Create Section entries for the new version
         await sectionProvider.createSections(versionId);
@@ -364,14 +363,18 @@ class _EditCipherScreenState extends State<EditCipherScreen>
 
         case VersionType.brandNew:
           final cipherID = await cipherProvider.createCipher();
-          final versionID = await versionProvider.createVersion(cipherID);
+          final versionID = await versionProvider.createVersion(
+            cipherID: cipherID,
+          );
           if (versionID == null) {
             throw Exception('Failed to create version for imported cipher');
           }
           await sectionProvider.createSections(versionID);
         case VersionType.import:
           final cipherID = await cipherProvider.createCipher();
-          final versionID = await versionProvider.createVersion(cipherID);
+          final versionID = await versionProvider.createVersion(
+            cipherID: cipherID,
+          );
           if (versionID == null) {
             throw Exception('Failed to create version for imported cipher');
           }

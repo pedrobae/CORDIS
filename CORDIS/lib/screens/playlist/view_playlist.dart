@@ -160,7 +160,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
                                     key: ValueKey(
                                       'playlist_version_${playlistItem.id}',
                                     ),
-                                    index: playlistItem.position,
+                                    index: index,
                                     versionId: playlistItem.contentId,
                                     playlistId: widget.playlistId,
                                   );
@@ -169,6 +169,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
                                     key: ValueKey(
                                       'flow_item_${playlistItem.id}',
                                     ),
+                                    index: index,
                                     flowItemId:
                                         playlistItem.contentId ??
                                         playlistItem.id!,

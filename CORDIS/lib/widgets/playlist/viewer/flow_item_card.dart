@@ -12,11 +12,13 @@ import 'package:provider/provider.dart';
 class FlowItemCard extends StatelessWidget {
   final int flowItemId;
   final int playlistId;
+  final int index;
 
   const FlowItemCard({
     super.key,
     required this.flowItemId,
     required this.playlistId,
+    required this.index,
   });
 
   @override
@@ -50,7 +52,7 @@ class FlowItemCard extends StatelessWidget {
               CustomReorderableDelayed(
                 key: key,
                 delay: Duration(milliseconds: 100),
-                index: flowItem.position,
+                index: index,
                 child: Icon(Icons.drag_indicator),
               ),
               Expanded(
