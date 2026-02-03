@@ -166,7 +166,7 @@ class LocalVersionProvider extends ChangeNotifier {
         _versions[version.id!] = version;
       }
       if (kDebugMode) {
-        print('Loaded ${_versions.length} versions of cipher $cipherId');
+        print('Loaded ${versionList.length} versions of cipher $cipherId');
       }
     } catch (e) {
       _error = e.toString();

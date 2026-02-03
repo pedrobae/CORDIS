@@ -212,11 +212,12 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                     icon: const Icon(Icons.remove_red_eye),
                     tooltip: 'Layout Settings',
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    tooltip: 'Edit',
-                    onPressed: () => _editCurrentVersion(navigationProvider),
-                  ),
+                  if (widget.versionType != VersionType.cloud)
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      tooltip: 'Edit',
+                      onPressed: () => _editCurrentVersion(navigationProvider),
+                    ),
                 ],
               ),
               body: ContentView(versionId: widget.versionId),

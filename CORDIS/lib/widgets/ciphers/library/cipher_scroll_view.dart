@@ -1,19 +1,47 @@
 import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/ciphers/library/cipher_card.dart';
 import 'package:cordis/widgets/ciphers/library/cloud_cipher_card.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CipherScrollView extends StatelessWidget {
+class CipherScrollView extends StatefulWidget {
   final int? playlistId;
   const CipherScrollView({super.key, this.playlistId});
 
-  void _loadData(BuildContext context, {bool forceReload = false}) {
-    context.read<CipherProvider>().loadCiphers(forceReload: forceReload);
-    context.read<CloudVersionProvider>().loadVersions(forceReload: forceReload);
+  @override
+  State<CipherScrollView> createState() => _CipherScrollViewState();
+}
+
+class _CipherScrollViewState extends State<CipherScrollView> {
+  List<int> localIds = [];
+  List<String> cloudIds = [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData(context));
+  }
+
+  void _loadData(BuildContext context, {bool forceReload = false}) async {
+    final cipherProvider = context.read<CipherProvider>();
+    final cloudVersionProvider = context.read<CloudVersionProvider>();
+    final localVersionProvider = context.read<LocalVersionProvider>();
+
+    await cipherProvider.loadCiphers(forceReload: forceReload);
+    await cloudVersionProvider.loadVersions(forceReload: forceReload);
+
+    setState(() {
+      localIds = cipherProvider.filteredCiphers;
+      cloudIds = cloudVersionProvider.filteredCloudVersions;
+    });
+
+    for (var cipherId in localIds) {
+      await localVersionProvider.loadVersionsOfCipher(cipherId);
+    }
   }
 
   @override
@@ -71,9 +99,6 @@ class CipherScrollView extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final List<int> localIds = cipherProvider.filteredCiphers;
-    final List<String> cloudIds = cloudVersionProvider.filteredCloudVersions;
-
     return RefreshIndicator(
       onRefresh: () async {
         _loadData(context, forceReload: true);
@@ -105,7 +130,7 @@ class CipherScrollView extends StatelessWidget {
                     ), // Spacing between cards
                     child: CloudCipherCard(
                       versionId: cloudIds[index - localIds.length],
-                      playlistId: playlistId,
+                      playlistId: widget.playlistId,
                     ),
                   );
                 }
@@ -116,7 +141,7 @@ class CipherScrollView extends StatelessWidget {
                   ), // Spacing between cards
                   child: CipherCard(
                     cipherId: localIds[index],
-                    playlistId: playlistId,
+                    playlistId: widget.playlistId,
                   ),
                 );
               },

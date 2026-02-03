@@ -108,7 +108,7 @@ class CloudCipherCard extends StatelessWidget {
                           Text(
                             AppLocalizations.of(context)!.cloudCipher,
                             style: textTheme.bodyMedium!.copyWith(
-                              color: colorScheme.surfaceContainerLowest,
+                              color: colorScheme.shadow,
                             ),
                           ),
                         ],

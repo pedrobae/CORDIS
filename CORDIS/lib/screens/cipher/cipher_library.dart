@@ -27,19 +27,6 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    // Pre-load data with post-frame callback to avoid setState during build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final cipherProvider = context.read<CipherProvider>();
-      final cloudVersionProvider = context.read<CloudVersionProvider>();
-
-      cipherProvider.loadCiphers();
-      cloudVersionProvider.loadVersions();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;

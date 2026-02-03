@@ -24,16 +24,6 @@ class CipherCard extends StatefulWidget {
 
 class _CipherCardState extends State<CipherCard> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<LocalVersionProvider>().loadVersionsOfCipher(
-        widget.cipherId,
-      );
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
@@ -204,7 +194,7 @@ class _CipherCardState extends State<CipherCard> {
                           Text(
                             '$versionCount${AppLocalizations.of(context)!.versions}',
                             style: textTheme.bodyMedium!.copyWith(
-                              color: colorScheme.surfaceContainerLowest,
+                              color: colorScheme.shadow,
                             ),
                           ),
                         ],
