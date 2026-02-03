@@ -15,9 +15,7 @@ class CloudVersionRepository {
 
   DateTime? _lastCloudLoad;
 
-  CloudVersionRepository() {
-    _initializeCloudCache();
-  }
+  CloudVersionRepository();
 
   // ================== VERSION METHODS ==================
 
@@ -75,6 +73,7 @@ class CloudVersionRepository {
     if ((_lastCloudLoad != null &&
             now.difference(_lastCloudLoad!).inDays < 7) &&
         !forceReload) {
+      await loadCache();
       return _repoCache;
     }
 
@@ -212,8 +211,9 @@ class CloudVersionRepository {
     );
   }
 
-  Future<void> _initializeCloudCache() async {
+  Future<void> loadCache() async {
     _lastCloudLoad = await _cacheService.loadLastCloudLoad();
+    _repoCache.clear();
     _repoCache.addAll(await _cacheService.loadCloudVersions());
   }
 

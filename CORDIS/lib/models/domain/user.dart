@@ -5,7 +5,7 @@ class User {
   final int? id;
   final String? firebaseId;
   final String username;
-  final String mail;
+  final String email;
   final String? profilePhoto;
   final String? googleId;
   final DateTime? createdAt;
@@ -16,7 +16,7 @@ class User {
     this.id,
     required this.firebaseId,
     required this.username,
-    required this.mail,
+    required this.email,
     this.profilePhoto,
     this.googleId,
     this.createdAt,
@@ -29,7 +29,7 @@ class User {
       id: json['id'] as int,
       firebaseId: json['firebase_id'] as String?,
       username: json['username'] as String,
-      mail: json['mail'] as String,
+      email: json['mail'] as String,
       profilePhoto: json['profile_photo'] as String?,
       googleId: json['google_id'] as String?,
       createdAt: DateTimeUtils.parseDateTime(json['created_at']),
@@ -41,7 +41,7 @@ class User {
   Map<String, dynamic> toSQLite() {
     return {
       'username': username,
-      'mail': mail,
+      'mail': email,
       'profile_photo': profilePhoto,
       'google_id': googleId,
       'firebase_id': firebaseId,
@@ -55,7 +55,7 @@ class User {
     return UserDto(
       firebaseId: firebaseId,
       username: username,
-      mail: mail,
+      email: email,
       profilePhoto: profilePhoto,
       googleId: googleId,
       createdAt: createdAt,
@@ -68,7 +68,7 @@ class User {
     int? id,
     String? firebaseId,
     String? username,
-    String? mail,
+    String? email,
     String? profilePhoto,
     String? googleId,
     DateTime? createdAt,
@@ -79,7 +79,7 @@ class User {
       id: id ?? this.id,
       firebaseId: firebaseId ?? this.firebaseId,
       username: username ?? this.username,
-      mail: mail ?? this.mail,
+      email: email ?? this.email,
       profilePhoto: profilePhoto ?? this.profilePhoto,
       googleId: googleId ?? this.googleId,
       createdAt: createdAt ?? this.createdAt,

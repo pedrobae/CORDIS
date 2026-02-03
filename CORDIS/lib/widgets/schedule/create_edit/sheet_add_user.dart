@@ -83,8 +83,8 @@ class _AddUserSheetState extends State<AddUserSheet> {
         _emailFilteredUsers = userProvider.knownUsers
             .where(
               (user) =>
-                  user.mail.toLowerCase().contains(query) &&
-                  user.mail.toLowerCase() != query &&
+                  user.email.toLowerCase().contains(query) &&
+                  user.email.toLowerCase() != query &&
                   !members.any((member) => member.id == user.id),
             )
             .toList();
@@ -129,7 +129,7 @@ class _AddUserSheetState extends State<AddUserSheet> {
 
     // Check if user exists in known users
     dynamic user = userProvider.knownUsers.firstWhereOrNull(
-      (user) => user.mail.toLowerCase() == email.toLowerCase(),
+      (user) => user.email.toLowerCase() == email.toLowerCase(),
     );
 
     if (widget.role is Role) {

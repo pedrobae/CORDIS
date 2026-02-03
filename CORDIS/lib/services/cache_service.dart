@@ -30,7 +30,6 @@ class CacheService {
       final List<dynamic> jsonList = json.decode(jsonString);
       return jsonList.map((j) => VersionDto.fromCache(j)).toList();
     } catch (e) {
-      // If there's an error (e.g., corrupted data), return empty list
       return [];
     }
   }

@@ -77,7 +77,7 @@ class UserProvider extends ChangeNotifier {
     final newUser = User(
       id: -1,
       username: username,
-      mail: email,
+      email: email,
       firebaseId: null,
     );
 

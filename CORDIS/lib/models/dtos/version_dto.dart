@@ -89,7 +89,9 @@ class VersionDto {
       songStructure: (map['songStructure'] as List<dynamic>)
           .map((e) => e.toString())
           .toList(),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int),
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int)
+          : DateTime.now(),
       sections: (map['sections'] as Map<String, dynamic>).map(
         (sectionsCode, section) =>
             MapEntry(sectionsCode, Map<String, String>.from(section)),

@@ -203,6 +203,15 @@ class CloudVersionProvider extends ChangeNotifier {
   // ===== DELETE =====
 
   // ===== HELPER METHODS =====
+  void clearCache() {
+    _versions.clear();
+    _error = null;
+    _isLoading = false;
+    _isSaving = false;
+    _searchTerm = '';
+
+    notifyListeners();
+  }
 
   /// Search cached cloud versions
   Future<void> setSearchTerm(String term) async {

@@ -27,13 +27,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadData();
     });
   }
 
-  void _loadData() async {
-    await context.read<LocalScheduleProvider>().loadSchedules();
+  Future<void> _loadData() async {
+    final authProvider = context.read<MyAuthProvider>();
+    final localScheduleProvider = context.read<LocalScheduleProvider>();
+    final cloudScheduleProvider = context.read<CloudScheduleProvider>();
+
+    await localScheduleProvider.loadSchedules();
+    await cloudScheduleProvider.loadSchedules(authProvider.id!);
   }
 
   @override

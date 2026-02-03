@@ -189,6 +189,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context.read<CipherProvider>().clearCache();
       context.read<PlaylistProvider>().clearCache();
       context.read<LocalVersionProvider>().clearCache();
+      context.read<CloudVersionProvider>().clearCache();
       context.read<SectionProvider>().clearCache();
       context.read<UserProvider>().clearCache();
       context.read<FlowItemProvider>().clearCache();
@@ -199,7 +200,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // Force reload all providers from database
       await Future.wait([
         context.read<CipherProvider>().loadCiphers(forceReload: true),
-        context.read<CloudVersionProvider>().loadVersions(),
+        context.read<CloudVersionProvider>().loadVersions(forceReload: true),
         context.read<PlaylistProvider>().loadPlaylists(),
         context.read<UserProvider>().loadUsers(),
         context.read<LocalScheduleProvider>().loadSchedules(),
