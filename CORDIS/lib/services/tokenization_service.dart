@@ -2,6 +2,7 @@ import 'package:cordis/models/ui/content_token.dart';
 
 class TokenizationService {
   List<ContentToken> tokenize(String content) {
+    // TODO: add precedingChord tokens when there are no preceding chords
     if (content.isEmpty) {
       return [];
     }
@@ -41,6 +42,8 @@ class TokenizationService {
         case TokenType.space:
         case TokenType.newline:
           return token.text;
+        case TokenType.precedingChord:
+          return ''; // Preceding chords are not represented in the content string
       }
     }).join();
   }

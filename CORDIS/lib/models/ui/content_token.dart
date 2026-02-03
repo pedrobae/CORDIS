@@ -11,4 +11,5 @@ enum TokenType {
   lyric, // Regular character
   space, // Whitespace
   newline, // Line break
+  precedingChord, // Token that exists when editing
 }
