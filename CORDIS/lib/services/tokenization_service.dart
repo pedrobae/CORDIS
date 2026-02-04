@@ -52,8 +52,12 @@ class TokenizationService {
         lineTokens.add(ContentToken(type: TokenType.lyric, text: char));
       }
     }
-    if (tokens.last.type == TokenType.newline) {
+    if (tokens.isNotEmpty && tokens.last.type == TokenType.newline) {
       tokens.removeLast();
+    }
+
+    if (lineTokens.isNotEmpty) {
+      tokens.addAll(lineTokens);
     }
     return tokens;
   }

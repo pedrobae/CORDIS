@@ -143,213 +143,211 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
           ),
           body: Container(
             padding: EdgeInsets.only(bottom: 16, left: 16, right: 16, top: 24),
-            child: Expanded(
-              child: SingleChildScrollView(
-                clipBehavior: Clip.none,
-                child: Column(
-                  spacing: 16,
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // SECTION CODE
-                    Column(
-                      spacing: 4,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.sectionCode,
-                          style: textTheme.titleMedium,
-                        ),
+            child: SingleChildScrollView(
+              clipBehavior: Clip.none,
+              child: Column(
+                spacing: 16,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // SECTION CODE
+                  Column(
+                    spacing: 4,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.sectionCode,
+                        style: textTheme.titleMedium,
+                      ),
 
-                        TextField(
-                          controller: contentCodeController,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(8),
-                            hintText: AppLocalizations.of(
-                              context,
-                            )!.sectionCodeHint,
-                            hintStyle: textTheme.titleMedium?.copyWith(
+                      TextField(
+                        controller: contentCodeController,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.all(8),
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.sectionCodeHint,
+                          hintStyle: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.surfaceContainerLow,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
                               color: colorScheme.surfaceContainerLow,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: colorScheme.surfaceContainerLow,
-                              ),
                             ),
                           ),
                         ),
-                        Text(
-                          AppLocalizations.of(context)!.sectionCodeInstruction,
-                          style: textTheme.bodySmall?.copyWith(
+                      ),
+                      Text(
+                        AppLocalizations.of(context)!.sectionCodeInstruction,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.surfaceContainerLow,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // SECTION TYPE
+                  Column(
+                    spacing: 4,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.sectionType,
+                        style: textTheme.titleMedium,
+                      ),
+                      TextField(
+                        controller: contentTypeController,
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.sectionTypeHint,
+                          hintStyle: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.surfaceContainerLow,
+                          ),
+                          contentPadding: EdgeInsets.all(8),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: colorScheme.surfaceContainerLow,
+                            ),
+                            borderRadius: BorderRadius.circular(0),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // SECTION COLOR
+                  Column(
+                    spacing: 4,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.sectionColor,
+                        style: textTheme.titleMedium,
+                      ),
+                      // Default section colors picker
+                      DropdownButtonFormField<Color>(
+                        isDense: true,
+                        iconSize: 32,
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.sectionColorHint,
+                          hintStyle: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.surfaceContainerLow,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: colorScheme.surfaceContainerLow,
+                            ),
+                          ),
+                          contentPadding: EdgeInsets.all(8),
+                        ),
+                        initialValue: contentColor,
+                        items: [
+                          if (!availableColors.values.contains(contentColor))
+                            DropdownMenuItem<Color>(
+                              value: contentColor,
+                              child: Row(
+                                spacing: 12,
+                                children: [
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: contentColor,
+                                      border: Border.all(color: contentColor),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  Text(AppLocalizations.of(context)!.current),
+                                ],
+                              ),
+                            ),
+                          ...availableColors.entries.map(
+                            (entry) => DropdownMenuItem<Color>(
+                              value: entry.value,
+                              child: Row(
+                                spacing: 12,
+                                children: [
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: entry.value,
+                                      border: Border.all(color: entry.value),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  Text(entry.key),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                        onChanged: (Color? newColor) {
+                          setState(() {
+                            contentColor = newColor!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+
+                  // SECTION TEXT
+                  Column(
+                    spacing: 4,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.sectionText,
+                        style: textTheme.titleMedium,
+                      ),
+                      TextField(
+                        controller: contentTextController,
+                        minLines: 6,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.all(8),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: colorScheme.surfaceContainerLow,
+                            ),
+                            borderRadius: BorderRadius.circular(0),
+                          ),
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.sectionTextHint,
+                          hintStyle: textTheme.bodyMedium?.copyWith(
                             color: colorScheme.surfaceContainerLow,
                           ),
                         ),
-                      ],
-                    ),
-
-                    // SECTION TYPE
-                    Column(
-                      spacing: 4,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.sectionType,
-                          style: textTheme.titleMedium,
-                        ),
-                        TextField(
-                          controller: contentTypeController,
-                          decoration: InputDecoration(
-                            hintText: AppLocalizations.of(
-                              context,
-                            )!.sectionTypeHint,
-                            hintStyle: textTheme.titleMedium?.copyWith(
-                              color: colorScheme.surfaceContainerLow,
-                            ),
-                            contentPadding: EdgeInsets.all(8),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: colorScheme.surfaceContainerLow,
-                              ),
-                              borderRadius: BorderRadius.circular(0),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // SECTION COLOR
-                    Column(
-                      spacing: 4,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.sectionColor,
-                          style: textTheme.titleMedium,
-                        ),
-                        // Default section colors picker
-                        DropdownButtonFormField<Color>(
-                          isDense: true,
-                          iconSize: 32,
-                          decoration: InputDecoration(
-                            hintText: AppLocalizations.of(
-                              context,
-                            )!.sectionColorHint,
-                            hintStyle: textTheme.titleMedium?.copyWith(
-                              color: colorScheme.surfaceContainerLow,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: colorScheme.surfaceContainerLow,
-                              ),
-                            ),
-                            contentPadding: EdgeInsets.all(8),
-                          ),
-                          initialValue: contentColor,
-                          items: [
-                            if (!availableColors.values.contains(contentColor))
-                              DropdownMenuItem<Color>(
-                                value: contentColor,
-                                child: Row(
-                                  spacing: 12,
-                                  children: [
-                                    Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: contentColor,
-                                        border: Border.all(color: contentColor),
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    Text(AppLocalizations.of(context)!.current),
-                                  ],
-                                ),
-                              ),
-                            ...availableColors.entries.map(
-                              (entry) => DropdownMenuItem<Color>(
-                                value: entry.value,
-                                child: Row(
-                                  spacing: 12,
-                                  children: [
-                                    Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: entry.value,
-                                        border: Border.all(color: entry.value),
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    Text(entry.key),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                          onChanged: (Color? newColor) {
-                            setState(() {
-                              contentColor = newColor!;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-
-                    // SECTION TEXT
-                    Column(
-                      spacing: 4,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.sectionText,
-                          style: textTheme.titleMedium,
-                        ),
-                        TextField(
-                          controller: contentTextController,
-                          minLines: 6,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(8),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: colorScheme.surfaceContainerLow,
-                              ),
-                              borderRadius: BorderRadius.circular(0),
-                            ),
-                            hintText: AppLocalizations.of(
-                              context,
-                            )!.sectionTextHint,
-                            hintStyle: textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.surfaceContainerLow,
-                            ),
-                          ),
-                          maxLines: null,
-                          keyboardType: TextInputType.multiline,
-                        ),
-                      ],
-                    ),
-
-                    // DELETE BUTTON
-                    if (widget.versionId != -1)
-                      FilledTextButton(
-                        text: AppLocalizations.of(context)!.delete,
-                        isDangerous: true,
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (context) {
-                              return DeleteConfirmationSheet(
-                                itemType: AppLocalizations.of(context)!.section,
-                                onConfirm: () {
-                                  _deleteSection();
-                                  Navigator.of(context).pop();
-                                },
-                              );
-                            },
-                          );
-                        },
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
                       ),
-                  ],
-                ),
+                    ],
+                  ),
+
+                  // DELETE BUTTON
+                  if (widget.versionId != -1)
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.delete,
+                      isDangerous: true,
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            return DeleteConfirmationSheet(
+                              itemType: AppLocalizations.of(context)!.section,
+                              onConfirm: () {
+                                _deleteSection();
+                                Navigator.of(context).pop();
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                ],
               ),
             ),
           ),
