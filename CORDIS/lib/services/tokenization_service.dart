@@ -1,20 +1,44 @@
 import 'package:cordis/models/ui/content_token.dart';
 
 class TokenizationService {
+  /// Tokenizes the given content string into a list of ContentTokens.
+  /// Creates preceding chord target tokens in lines where there are no spaces before lyrics.
   List<ContentToken> tokenize(String content) {
-    // TODO: add precedingChord tokens when there are no preceding chords
     if (content.isEmpty) {
       return [];
     }
 
     final List<ContentToken> tokens = [];
-
+    final List<ContentToken> lineTokens = [];
+    bool spaceBeforeLyrics = false;
+    bool foundLyricInLine = false;
     for (int index = 0; index < content.length; index++) {
       final char = content[index];
       if (char == '\n') {
-        tokens.add(ContentToken(type: TokenType.newline, text: char));
+        if (lineTokens.isEmpty) {
+          // Handle empty lines
+          tokens.add(ContentToken(type: TokenType.newline, text: char));
+          continue;
+        }
+        lineTokens.add(ContentToken(type: TokenType.newline, text: char));
+        if (!spaceBeforeLyrics) {
+          // Insert preceding chord target tokens at the starts of lines
+          lineTokens.insert(
+            0,
+            ContentToken(type: TokenType.precedingChordTarget, text: ''),
+          );
+        }
+
+        // Add Line and Reset for the next line
+        spaceBeforeLyrics = false;
+        foundLyricInLine = false;
+        tokens.addAll(lineTokens);
+        lineTokens.clear();
       } else if (char == ' ' || char == '\t') {
-        tokens.add(ContentToken(type: TokenType.space, text: char));
+        if (!foundLyricInLine) {
+          spaceBeforeLyrics = true;
+        }
+        lineTokens.add(ContentToken(type: TokenType.space, text: char));
       } else if (char == '[') {
         index++; // Move past the '['
         String chordText = '';
@@ -22,9 +46,10 @@ class TokenizationService {
           chordText += content[index];
           index++;
         }
-        tokens.add(ContentToken(type: TokenType.chord, text: chordText));
+        lineTokens.add(ContentToken(type: TokenType.chord, text: chordText));
       } else {
-        tokens.add(ContentToken(type: TokenType.lyric, text: char));
+        foundLyricInLine = true;
+        lineTokens.add(ContentToken(type: TokenType.lyric, text: char));
       }
     }
     if (tokens.last.type == TokenType.newline) {
@@ -42,8 +67,8 @@ class TokenizationService {
         case TokenType.space:
         case TokenType.newline:
           return token.text;
-        case TokenType.precedingChord:
-          return ''; // Preceding chords are not represented in the content string
+        case TokenType.precedingChordTarget:
+          return ''; // Preceding chord targets are not represented in the content string
       }
     }).join();
   }

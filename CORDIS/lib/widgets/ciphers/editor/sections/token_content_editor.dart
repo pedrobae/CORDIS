@@ -1,5 +1,4 @@
-// ignore_for_file: unused_local_variable
-// TODO - Remove above line when _positionWidgetsWithSize is implemented
+import 'dart:math';
 
 import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
@@ -28,10 +27,18 @@ class _WidgetWithSize {
 }
 
 class _ContentTokenized {
-  final List<Widget> tokens;
+  final List<Positioned> tokens;
   final double contentHeight;
 
   _ContentTokenized(this.tokens, this.contentHeight);
+}
+
+/// Helper class to track positioned widgets with their associated _WidgetWithSize info
+class _PositionedWithRef {
+  final Positioned positioned;
+  final _WidgetWithSize ref;
+
+  _PositionedWithRef({required this.positioned, required this.ref});
 }
 
 class TokenContentEditor extends StatefulWidget {
@@ -56,23 +63,57 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
   late Section section;
 
   bool _isDragging = false;
+  final Map<String, double> _widthCache = {};
 
   bool _isEnabled(SelectionProvider selectionProvider) {
     if (!widget.isEnabled) return false;
     return !selectionProvider.isSelectionMode;
   }
 
+  /// Measures text width with caching to avoid recalculating TextPainter
+  double _measureTextWidth(String text, String fontFamily) {
+    final key = '$text|$fontFamily';
+    return _widthCache.putIfAbsent(key, () {
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: TextStyle(fontSize: _fontSize, fontFamily: fontFamily),
+        ),
+        maxLines: 1,
+        textDirection: TextDirection.ltr,
+      )..layout();
+      return textPainter.width;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
 
-    setState(() {
-      section = context.read<SectionProvider>().getSection(
-        widget.versionId,
-        widget.sectionCode,
-      )!;
-      tokens = _tokenizer.tokenize(section.contentText);
-    });
+    section = context.read<SectionProvider>().getSection(
+      widget.versionId,
+      widget.sectionCode,
+    )!;
+    tokens = _tokenizer.tokenize(section.contentText);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    final newSection = context.read<SectionProvider>().getSection(
+      widget.versionId,
+      widget.sectionCode,
+    )!;
+    
+    // Only setState if the section actually changed to avoid unnecessary rebuilds
+    if (newSection.contentCode != section.contentCode || 
+        newSection.contentText != section.contentText) {
+      setState(() {
+        section = newSection;
+        tokens = _tokenizer.tokenize(section.contentText);
+      });
+    }
   }
 
   @override
@@ -80,15 +121,13 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Consumer3<
-      SectionProvider,
+    return Consumer2<
       LayoutSettingsProvider,
       SelectionProvider
     >(
       builder:
           (
             context,
-            sectionProvider,
             layoutSettingsProvider,
             selectionProvider,
             child,
@@ -192,7 +231,8 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
                         lineSpacing: 8,
                         letterSpacing: 0,
                       );
-                      final content = _positionWidgetsWithSize(widgetsWithSize);
+                      final content = _positionWidgets(widgetsWithSize);
+
                       return Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: SizedBox(
@@ -224,7 +264,7 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
     int position = 0;
     for (var token in tokens) {
       switch (token.type) {
-        case TokenType.precedingChord:
+        case TokenType.precedingChordTarget:
           widgetsWithSize.add(
             _WidgetWithSize(
               widget: _buildPrecedingChordDragTarget(
@@ -234,20 +274,14 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
                 contentColor,
               ),
               width: 24,
-              type: TokenType.precedingChord,
+              type: TokenType.precedingChordTarget,
             ),
           );
           break;
         case TokenType.chord:
-          final textPainter = TextPainter(
-            text: TextSpan(
-              text: token.text,
-              style: TextStyle(fontSize: _fontSize, fontFamily: fontFamily),
-            ),
-            maxLines: 1,
-            textDirection: TextDirection.ltr,
-          )..layout();
-          final chordWidth = textPainter.width + 20; // Add ChordToken padding
+          final chordWidth =
+              _measureTextWidth(token.text, fontFamily) +
+              20; // Add ChordToken padding
 
           widgetsWithSize.add(
             _WidgetWithSize(
@@ -263,15 +297,7 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
           );
           break;
         case TokenType.lyric:
-          // Measure the size of the token widget
-          final textPainter = TextPainter(
-            text: TextSpan(
-              text: token.text,
-              style: TextStyle(fontSize: _fontSize, fontFamily: fontFamily),
-            ),
-            maxLines: 1,
-            textDirection: TextDirection.ltr,
-          )..layout();
+          final lyricWidth = _measureTextWidth(token.text, fontFamily);
 
           widgetsWithSize.add(
             _WidgetWithSize(
@@ -281,24 +307,14 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
                 contentColor,
                 fontFamily,
               ),
-              width: textPainter.width,
+              width: lyricWidth,
               type: TokenType.lyric,
             ),
           );
           break;
 
         case TokenType.space:
-          // Measure the size of the space token widget
-          final textPainter = TextPainter(
-            text: TextSpan(
-              text: ' ',
-              style: TextStyle(fontSize: _fontSize, fontFamily: fontFamily),
-            ),
-            maxLines: 1,
-            textDirection: TextDirection.ltr,
-          )..layout();
-
-          final tokenWidth = textPainter.width;
+          final tokenWidth = _measureTextWidth(' ', fontFamily);
 
           widgetsWithSize.add(
             _WidgetWithSize(
@@ -332,31 +348,237 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
     return widgetsWithSize;
   }
 
-  _ContentTokenized _positionWidgetsWithSize(
+  _ContentTokenized _positionWidgets(
     List<_WidgetWithSize> widgetsWithSize, {
     double lineSpacing = 8,
     double letterSpacing = 1,
   }) {
-    int currentY = 0; // Line number
-    double currentX = 0; // Current X position in line
+    // Organize widgets by lines and words
+    final wordWidgetsWithSize = <_WidgetWithSize>[];
+    final lineWidgetsWithSize = <List<_WidgetWithSize>>[];
+    final contentWidgetsWithSize = <List<List<_WidgetWithSize>>>[];
+    for (var widgetWithSize in widgetsWithSize) {
+      switch (widgetWithSize.type) {
+        case TokenType.newline:
+          // End of line
+          if (wordWidgetsWithSize.isNotEmpty) {
+            lineWidgetsWithSize.add(
+              List.from(wordWidgetsWithSize),
+            ); // Add word to line
+            wordWidgetsWithSize.clear();
+          }
 
-    double chordX = 0;
-    double chordY = 0;
+          lineWidgetsWithSize.add([
+            widgetWithSize,
+          ]); // Add newline as separate word
 
-    double maxWidth =
-        MediaQuery.of(context).size.width -
-        80; // Account for padding (16, 16, 8 left + 8, 16, 16 right)
+          contentWidgetsWithSize.add(
+            List.from(lineWidgetsWithSize),
+          ); // Add line to content
+          lineWidgetsWithSize.clear();
+          break;
 
-    letterSpacing = letterSpacing;
+        case TokenType.space:
+          // End of word
+          if (wordWidgetsWithSize.isNotEmpty) {
+            lineWidgetsWithSize.add(
+              List.from(wordWidgetsWithSize),
+            ); // Add word to line
+            wordWidgetsWithSize.clear();
+          }
 
-    lineSpacing =
-        lineSpacing + _fontSize; // To accomodate the chords above the lyrics
+          lineWidgetsWithSize.add([
+            widgetWithSize,
+          ]); // Add space as separate word
+          break;
 
-    final tokenWidgets = <Widget>[];
+        case TokenType.lyric:
+        case TokenType.chord:
+        case TokenType.precedingChordTarget:
+          // Part of a word
+          wordWidgetsWithSize.add(widgetWithSize);
+      }
+    }
 
-    // TODO - Iterate through widgets and position them
+    // Check if there is any preceding chord target in the content
+    // Used to offset initial X position
+    double precedingOffset = 0;
+    for (var lineWidgetsWithSize in contentWidgetsWithSize) {
+      double linePrecedingOffset = 0;
+      for (var wordWidgetsWithSize in lineWidgetsWithSize) {
+        if (wordWidgetsWithSize.isNotEmpty &&
+            wordWidgetsWithSize[0].type != TokenType.lyric) {
+          linePrecedingOffset = wordWidgetsWithSize[0].width + letterSpacing;
+          break;
+        }
+      }
+      if (linePrecedingOffset > precedingOffset) {
+        precedingOffset = linePrecedingOffset;
+      }
+    }
 
-    return _ContentTokenized(tokenWidgets, currentY + _fontSize);
+    final double chordHeight = _fontSize;
+    final double lineHeight = chordHeight + lineSpacing + _fontSize;
+
+    // Account for padding (16, 16, 8 left + 8, 16, 16 right)
+    final double maxWidth = MediaQuery.of(context).size.width - 80;
+
+    int viewLineIndex = 0; // Last lyric line number
+
+    final tokenWidgets = <Positioned>[];
+    for (var lineWidgets in contentWidgetsWithSize) {
+      double chordX = 0; // End of the last chord positioned
+      double lyricsX = 0; // End of the last lyric/space positioned
+      bool foundLyricInLine = false;
+
+      for (var wordWidgets in lineWidgets) {
+        bool lineBroke = false;
+        List<_PositionedWithRef> tempWordWidgets = [];
+        for (var widgetWithSize in wordWidgets) {
+          switch (widgetWithSize.type) {
+            case TokenType.chord:
+              // Position chord above max (currentX chordX)
+              final xCoord = max(chordX, lyricsX);
+              tempWordWidgets.add(
+                _PositionedWithRef(
+                  positioned: Positioned(
+                    left: xCoord,
+                    top: viewLineIndex * lineHeight,
+                    child: widgetWithSize.widget,
+                  ),
+                  ref: widgetWithSize,
+                ),
+              );
+
+              chordX = xCoord + widgetWithSize.width + letterSpacing;
+
+              if (chordX > maxWidth) {
+                lineBroke = true;
+              }
+              break;
+
+            case TokenType.lyric:
+              if (!foundLyricInLine) {
+                foundLyricInLine = true;
+                // Set lyricsX to account for preceding chord targets
+                lyricsX = precedingOffset;
+              }
+
+              // Position lyric
+              tempWordWidgets.add(
+                _PositionedWithRef(
+                  positioned: Positioned(
+                    left: lyricsX,
+                    top: (viewLineIndex * lineHeight) + chordHeight,
+                    child: widgetWithSize.widget,
+                  ),
+                  ref: widgetWithSize,
+                ),
+              );
+              lyricsX += widgetWithSize.width + letterSpacing;
+
+              if (lyricsX > maxWidth) {
+                lineBroke = true;
+              }
+              break;
+            case TokenType.space:
+              // Check if adding the space would break the line
+              if (widgetWithSize.width + lyricsX > maxWidth) {
+                // Skip adding the space if it breaks the line
+                lineBroke = true;
+                break;
+              }
+
+              tempWordWidgets.add(
+                _PositionedWithRef(
+                  positioned: Positioned(
+                    left: lyricsX,
+                    top: (viewLineIndex * lineHeight) + chordHeight,
+                    child: widgetWithSize.widget,
+                  ),
+                  ref: widgetWithSize,
+                ),
+              );
+              lyricsX += widgetWithSize.width + letterSpacing;
+              break;
+
+            case TokenType.newline:
+              // DO NOTHING FOR NOW, TODO - populate end of line with targets
+              // NewLine resets on line break processing
+              lineBroke = true;
+              break;
+
+            case TokenType.precedingChordTarget:
+              if (foundLyricInLine) {
+                throw Exception('Preceding chord target found after lyric');
+              }
+              // Position preceding chord target
+              tempWordWidgets.add(
+                _PositionedWithRef(
+                  positioned: Positioned(
+                    left: precedingOffset - widgetWithSize.width,
+                    top: viewLineIndex * lineHeight + chordHeight,
+                    child: widgetWithSize.widget,
+                  ),
+                  ref: widgetWithSize,
+                ),
+              );
+              break;
+          }
+        }
+        // After precessing a word reposition if line broke else add to token widgets
+        if (lineBroke) {
+          viewLineIndex++;
+          chordX = 0;
+          lyricsX = precedingOffset;
+          for (var posWithRef in tempWordWidgets) {
+            final widgetWithSize = posWithRef.ref;
+            switch (widgetWithSize.type) {
+              case TokenType.chord:
+                tokenWidgets.add(
+                  Positioned(
+                    left: max(chordX, lyricsX),
+                    top: viewLineIndex * lineHeight,
+                    child: widgetWithSize.widget,
+                  ),
+                );
+                chordX =
+                    max(chordX, lyricsX) + widgetWithSize.width + letterSpacing;
+                break;
+              case TokenType.lyric:
+                tokenWidgets.add(
+                  Positioned(
+                    left: lyricsX,
+                    top: (viewLineIndex * lineHeight) + chordHeight,
+                    child: widgetWithSize.widget,
+                  ),
+                );
+                lyricsX += widgetWithSize.width + letterSpacing;
+                break;
+              case TokenType.space:
+                throw Exception(
+                  'Space found when repositioning after line break',
+                );
+              case TokenType.newline:
+                throw Exception(
+                  'Newline found when repositioning after line break',
+                );
+              case TokenType.precedingChordTarget:
+                throw Exception('Preceding chord target found after lyric');
+            }
+          }
+        } else {
+          tokenWidgets.addAll(tempWordWidgets.map((e) => e.positioned));
+        }
+      }
+      // Incrementing view line index after processing a line is handled by newLine token
+    }
+
+    return _ContentTokenized(
+      tokenWidgets,
+      (viewLineIndex + 1) * // +1 to account for last line (index starts at 0)
+          lineHeight,
+    );
   }
 
   Widget _buildDraggableChord(
