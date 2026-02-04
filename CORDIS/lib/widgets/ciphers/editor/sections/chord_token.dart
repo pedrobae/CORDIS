@@ -15,20 +15,22 @@ class ChordToken extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      height: 21,
-      decoration: BoxDecoration(
-        color: sectionColor,
-        borderRadius: BorderRadius.circular(10.5),
-      ),
-      child: Center(
-        child: Text(
-          token.text,
-          textAlign: TextAlign.center,
-          style: textStyle.copyWith(
-            fontSize: textStyle.fontSize! * 0.8,
-            fontWeight: FontWeight.w500,
+    return IntrinsicWidth(
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 36),
+        padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 3),
+        decoration: BoxDecoration(
+          color: sectionColor,
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Center(
+          child: Text(
+            token.text,
+            textAlign: TextAlign.center,
+            style: textStyle.copyWith(
+              fontSize: textStyle.fontSize! * 0.8,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),

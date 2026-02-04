@@ -145,6 +145,11 @@ class _ChordPaletteState extends State<ChordPalette> {
                               color: colorScheme.onSurface,
                             ),
                             floatingLabelBehavior: FloatingLabelBehavior.always,
+                            floatingLabelStyle: textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                              fontSize: 18,
+                            ),
                             hintText: AppLocalizations.of(
                               context,
                             )!.customChordInstruction,
@@ -192,8 +197,8 @@ class _ChordPaletteState extends State<ChordPalette> {
                             ),
                             child: Wrap(
                               alignment: WrapAlignment.center,
-                              spacing: 8,
-                              runSpacing: 8,
+                              spacing: 4,
+                              runSpacing: 4,
                               children: [
                                 for (final variation in chordVariations)
                                   _buildDraggableChordToken(variation),
@@ -204,8 +209,8 @@ class _ChordPaletteState extends State<ChordPalette> {
                       ), // Draggable chords
                       Wrap(
                         alignment: WrapAlignment.center,
-                        spacing: 8,
-                        runSpacing: 8,
+                        spacing: 4,
+                        runSpacing: 4,
                         children: [
                           for (int i = 0; i < chords.length; i++)
                             Builder(

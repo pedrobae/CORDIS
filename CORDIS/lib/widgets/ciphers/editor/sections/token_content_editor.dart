@@ -227,13 +227,13 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
                         _addPrecedingChord,
                         _removeChordAt,
                         _isEnabled(selectionProvider),
-                        lineSpacing: 8,
-                        letterSpacing: 0,
                       );
 
                       final content = _tokenizer.positionWidgets(
                         context,
                         widgetsWithSize,
+                        lineSpacing: 15,
+                        letterSpacing: 0,
                       );
 
                       return Padding(

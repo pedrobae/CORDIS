@@ -152,10 +152,8 @@ class TokenizationService {
     Function(List<ContentToken>, ContentToken, int) onAddChord,
     Function(List<ContentToken>, ContentToken, int) onAddPrecedingChord,
     Function(List<ContentToken>, int) onRemoveChord,
-    bool isEnabled, {
-    double lineSpacing = 8,
-    double letterSpacing = 1,
-  }) {
+    bool isEnabled,
+  ) {
     final widthCache = <String, double>{};
 
     /// Build all token widgets, and calculate their sizes for positioning
@@ -356,7 +354,8 @@ class TokenizationService {
       }
     }
 
-    final double chordHeight = _fontSize;
+    // Account for vertical padding (3 + 4 top + bottom from ChordToken)
+    final double chordHeight = _fontSize + 7;
     final double lineHeight = chordHeight + lineSpacing + _fontSize;
 
     // Account for padding (16, 16, 8 left + 8, 16, 16 right)
