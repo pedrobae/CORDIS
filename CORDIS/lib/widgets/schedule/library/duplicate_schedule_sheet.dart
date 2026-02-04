@@ -164,10 +164,12 @@ class _DuplicateScheduleSheetState extends State<DuplicateScheduleSheet> {
                               ownerLocalId,
                               scheduleDto.roles
                                   .map(
-                                    (role) => role.memberIds
+                                    (role) => role.users
                                         .map(
-                                          (id) => userProvider
-                                              .getLocalIdByFirebaseId(id)!,
+                                          (user) => userProvider
+                                              .getLocalIdByFirebaseId(
+                                                user.firebaseId!,
+                                              )!,
                                         )
                                         .toList(),
                                   )

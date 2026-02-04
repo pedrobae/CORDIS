@@ -14,7 +14,6 @@ class CloudScheduleRepository {
 
   CloudScheduleRepository();
   // ===== CREATE =====
-
   /// Publish a new schedule to Firestore
   /// Returns the generated document ID
   Future<String> publishSchedule(ScheduleDto scheduleDto) async {
@@ -66,14 +65,12 @@ class CloudScheduleRepository {
             value: firebaseUserId,
           );
 
-      final schedules = querySnapshot
-          .map(
-            (doc) => ScheduleDto.fromFirestore(
-              doc.data() as Map<String, dynamic>,
-              doc.id,
-            ),
-          )
-          .toList();
+      final schedules = <ScheduleDto>[];
+      for (var doc in querySnapshot) {
+        final data = doc.data() as Map<String, dynamic>;
+        final id = doc.id;
+        schedules.add(ScheduleDto.fromFirestore(data, id));
+      }
 
       debugPrint(
         'FETCHED ${schedules.length} SCHEDULES FOR USER $firebaseUserId FROM CLOUD.',

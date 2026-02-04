@@ -2,6 +2,7 @@ import 'package:cordis/helpers/database.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
+import 'package:cordis/services/cache_service.dart';
 
 import 'package:cordis/utils/app_theme.dart';
 
@@ -183,6 +184,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  void _clearCache() async {
+    final cacheService = CacheService();
+
+    await cacheService.clearAllCaches();
+  }
+
   Future<void> _reloadAllData() async {
     try {
       // Clear all provider caches first
@@ -196,6 +203,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context.read<LocalScheduleProvider>().clearCache();
       context.read<SelectionProvider>().disableSelectionMode();
       context.read<CloudScheduleProvider>().clearCache();
+      _clearCache();
 
       // Force reload all providers from database
       await Future.wait([

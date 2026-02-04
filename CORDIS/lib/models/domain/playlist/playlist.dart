@@ -43,11 +43,10 @@ class Playlist {
     return {'name': name, 'author_id': createdBy};
   }
 
-  PlaylistDto toDto(
-    String ownerFirebaseId,
-    Map<String, VersionDto> versions,
-    Map<String, FlowItem> flowItems,
-  ) {
+  PlaylistDto toDto({
+    required Map<String, VersionDto> versions,
+    required Map<String, FlowItem> flowItems,
+  }) {
     return PlaylistDto(
       name: name,
       itemOrder: items

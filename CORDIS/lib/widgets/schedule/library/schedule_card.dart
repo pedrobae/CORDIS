@@ -1,9 +1,16 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/playlist/flow_item.dart';
+import 'package:cordis/models/domain/playlist/playlist_item.dart';
+import 'package:cordis/models/dtos/version_dto.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
+import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
+import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/schedule/view_schedule.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/delete_confirmation.dart';
@@ -139,6 +146,12 @@ class ScheduleCard extends StatelessWidget {
                             scheduleId,
                             localScheduleProvider,
                           ),
+                          onLongPress: () => _openScheduleActionsSheet(
+                            context,
+                            scheduleId,
+                            localScheduleProvider,
+                            secret: true,
+                          ),
                           icon: Icon(Icons.more_vert),
                         ),
                       ],
@@ -187,8 +200,9 @@ class ScheduleCard extends StatelessWidget {
   void _openScheduleActionsSheet(
     BuildContext context,
     int scheduleId,
-    LocalScheduleProvider localScheduleProvider,
-  ) {
+    LocalScheduleProvider localScheduleProvider, {
+    bool secret = false,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -232,6 +246,65 @@ class ScheduleCard extends StatelessWidget {
                 trailingIcon: Icons.chevron_right,
                 isDiscrete: true,
               ),
+              if (secret)
+                FilledTextButton(
+                  text: 'UPLOAD',
+                  onPressed: () {
+                    final cloudScheduleProvider = context
+                        .read<CloudScheduleProvider>();
+                    final playlistProvider = context.read<PlaylistProvider>();
+                    final localVersionProvider = context
+                        .read<LocalVersionProvider>();
+                    final cipherProvider = context.read<CipherProvider>();
+                    final flowItemProvider = context.read<FlowItemProvider>();
+
+                    final domainSchedule = localScheduleProvider.getSchedule(
+                      scheduleId,
+                    )!;
+
+                    final domainPlaylist = playlistProvider.getPlaylistById(
+                      domainSchedule.playlistId!,
+                    )!;
+
+                    // Build Item DTOs
+                    final flowItems = <String, FlowItem>{};
+                    final versions = <String, VersionDto>{};
+                    for (var item in domainPlaylist.items) {
+                      switch (item.type) {
+                        case PlaylistItemType.version:
+                          final version = localVersionProvider.getVersion(
+                            item.contentId!,
+                          );
+
+                          if (version == null) break;
+                          final cipher = cipherProvider.getCipherById(
+                            version.cipherId,
+                          );
+
+                          if (cipher == null) break;
+                          versions[item.id.toString()] = version.toDto(cipher);
+                          break;
+                        case PlaylistItemType.flowItem:
+                          final flowItem = flowItemProvider.getFlowItem(
+                            item.contentId!,
+                          );
+                          if (flowItem != null) {
+                            flowItems[item.id.toString()] = flowItem;
+                          }
+                          break;
+                      }
+                    }
+
+                    cloudScheduleProvider.publishSchedule(
+                      domainSchedule.toDto(
+                        domainPlaylist.toDto(
+                          flowItems: flowItems,
+                          versions: versions,
+                        ),
+                      ),
+                    );
+                  },
+                ),
               // delete
               FilledTextButton(
                 text: AppLocalizations.of(context)!.delete,

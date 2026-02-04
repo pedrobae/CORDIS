@@ -380,6 +380,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // Load users after successful login
         final userProvider = context.read<UserProvider>();
         await userProvider.loadUsers();
+        await userProvider.ensureUsersExist([authProvider.id!]);
 
         if (mounted) {
           Navigator.of(context).pushReplacementNamed(AppRoutes.main);
@@ -396,6 +397,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Load users after successful login
       final userProvider = context.read<UserProvider>();
       await userProvider.loadUsers();
+      await userProvider.ensureUsersExist([authProvider.id!]);
 
       if (mounted) {
         Navigator.of(context).pushReplacementNamed(AppRoutes.main);

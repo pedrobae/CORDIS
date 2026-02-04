@@ -103,6 +103,24 @@ class CloudScheduleProvider extends ChangeNotifier {
     );
   }
 
+  Future<void> publishSchedule(ScheduleDto schedule) async {
+    if (_isSaving) return;
+
+    _isSaving = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final newScheduleId = await _repo.publishSchedule(schedule);
+      _schedules[newScheduleId] = schedule.copyWith(firebaseId: newScheduleId);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+  }
+
   // ===== READ =====
   /// Fetches all schedules from the cloud repository (user has to be a collaborator)
   Future<void> loadSchedules(String userId, {bool forceFetch = false}) async {
@@ -183,21 +201,6 @@ class CloudScheduleProvider extends ChangeNotifier {
       annotations: annotations,
     );
 
-    notifyListeners();
-  }
-
-  void addMemberToRoleFirebase(
-    String scheduleId,
-    String
-    roleName, // Cloud roles dont have IDs, as they are nested on schedules
-    String existingUserFirebaseId,
-  ) {
-    final schedule = _schedules[scheduleId];
-    if (schedule == null) return;
-
-    final role = schedule.roles.firstWhere((role) => role.name == roleName);
-
-    role.memberIds.add(existingUserFirebaseId);
     notifyListeners();
   }
 

@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cordis/helpers/codes.dart';
+import 'package:cordis/models/domain/user.dart';
+import 'package:cordis/models/dtos/playlist_dto.dart';
+import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:flutter/material.dart';
 
 class Schedule {
@@ -14,7 +18,7 @@ class Schedule {
   final int? playlistId;
   final List<Role> roles;
   final String shareCode;
-  bool isPublished;
+  bool isPublic;
 
   Schedule({
     required this.id,
@@ -29,7 +33,7 @@ class Schedule {
     required this.roles,
     this.annotations,
     required this.shareCode,
-    this.isPublished = false,
+    this.isPublic = false,
   });
 
   factory Schedule.fromSqlite(Map<String, dynamic> map, List<Role> roles) {
@@ -49,7 +53,7 @@ class Schedule {
       roles: roles,
       annotations: map['annotations'] as String?,
       shareCode: map['share_code'] as String? ?? generateShareCode(),
-      isPublished: (map['is_published'] as int?) == 1,
+      isPublic: (map['is_public'] as int?) == 1,
     );
   }
 
@@ -66,7 +70,7 @@ class Schedule {
       'playlist_id': playlistId,
       'annotations': annotations,
       'share_code': shareCode,
-      'is_published': isPublished ? 1 : 0,
+      'is_public': isPublic ? 1 : 0,
     };
   }
 
@@ -83,7 +87,7 @@ class Schedule {
     List<Role>? roles,
     String? annotations,
     String? shareCode,
-    bool? isPublished,
+    bool? isPublic,
   }) {
     return Schedule(
       id: id ?? this.id,
@@ -98,7 +102,29 @@ class Schedule {
       roles: roles ?? this.roles,
       annotations: annotations ?? this.annotations,
       shareCode: shareCode ?? this.shareCode,
-      isPublished: isPublished ?? this.isPublished,
+      isPublic: isPublic ?? this.isPublic,
+    );
+  }
+
+  ScheduleDto toDto(PlaylistDto playlist) {
+    final timestamp = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    return ScheduleDto(
+      firebaseId: firebaseId,
+      ownerFirebaseId: ownerFirebaseId,
+      name: name,
+      datetime: Timestamp.fromDate(timestamp),
+      location: location,
+      roomVenue: roomVenue,
+      annotations: annotations,
+      shareCode: shareCode,
+      playlist: playlist,
+      roles: roles.map((role) => role.toDto()).toList(),
     );
   }
 }
@@ -106,19 +132,26 @@ class Schedule {
 class Role {
   final int id;
   String name;
-  final List<int> memberIds;
+  final List<User> users;
 
-  Role({required this.id, required this.name, required this.memberIds});
+  Role({required this.id, required this.name, required this.users});
 
-  factory Role.fromSqlite(Map<String, dynamic> map, List<int> memberIds) {
+  factory Role.fromSqlite(Map<String, dynamic> map, List<User> users) {
     return Role(
       id: map['id'] as int,
       name: map['name'] as String,
-      memberIds: memberIds,
+      users: users,
     );
   }
 
   Map<String, dynamic> toSqlite(int scheduleId) {
     return {'name': name, 'schedule_id': scheduleId};
+  }
+
+  RoleDto toDto() {
+    return RoleDto(
+      users: users.map((user) => user.toDto()).toList(),
+      name: name,
+    );
   }
 }

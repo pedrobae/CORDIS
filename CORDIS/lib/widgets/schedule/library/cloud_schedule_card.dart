@@ -65,7 +65,9 @@ class CloudScheduleCard extends StatelessWidget {
             String userRole = AppLocalizations.of(context)!.generalMember;
 
             for (var role in schedule.roles) {
-              if (role.memberIds.contains(authProvider.id)) {
+              if (role.users.any(
+                (user) => user.firebaseId == authProvider.id,
+              )) {
                 userRole = role.name;
                 break;
               }

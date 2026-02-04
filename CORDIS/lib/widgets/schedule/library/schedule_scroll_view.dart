@@ -182,6 +182,9 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
                         ),
                   SizedBox(height: 8.0),
                   ...pastScheduleIDs.map((scheduleId) {
+                    if (scheduleId is String) {
+                      return CloudScheduleCard(scheduleId: scheduleId);
+                    }
                     return ScheduleCard(scheduleId: scheduleId);
                   }),
                 ],

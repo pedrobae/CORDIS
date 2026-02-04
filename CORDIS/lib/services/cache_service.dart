@@ -77,4 +77,13 @@ class CacheService {
     }
     return null;
   }
+
+  Future<void> clearAllCaches() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Clear all caches
+    final keys = prefs.getKeys();
+    for (var key in keys) {
+      await prefs.remove(key);
+    }
+  }
 }

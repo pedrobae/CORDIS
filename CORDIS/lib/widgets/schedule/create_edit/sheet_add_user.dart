@@ -135,29 +135,9 @@ class _AddUserSheetState extends State<AddUserSheet> {
     if (widget.role is Role) {
       user ??= await userProvider.createLocalUnknownUser(username, email);
 
-      scheduleProvider.addMemberToRole(
-        widget.scheduleId,
-        widget.role.id,
-        user.id!,
-      );
+      scheduleProvider.addUserToRole(widget.scheduleId, widget.role.id, user);
     } else {
-      user ??= await userProvider.fetchUserDtoByEmail(email);
-
-      if (user == null) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.userNotFoundInCloud),
-            ),
-          );
-        }
-      } else {
-        scheduleProvider.addMemberToRole(
-          widget.scheduleId,
-          widget.role.name,
-          user.firebaseId,
-        );
-      }
+      // CLOUD - SKIP
     }
     if (context.mounted) {
       Navigator.of(context).pop();

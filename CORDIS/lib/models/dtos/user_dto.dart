@@ -27,7 +27,7 @@ class UserDto {
     return UserDto(
       firebaseId: id,
       username: json['username'] as String,
-      email: json['mail'] as String,
+      email: json['email'] as String,
       profilePhoto: json['profilePhoto'] as String?,
       googleId: json['googleId'] as String?,
       createdAt: DateTimeUtils.parseDateTime(json['createdAt']),
@@ -46,6 +46,22 @@ class UserDto {
       'updatedAt':
           FieldValue.serverTimestamp(), // Server timestamp to avoid client clock issues
       'isActive': isActive,
+    };
+  }
+
+  factory UserDto.fromSchedule(Map<String, dynamic> json) {
+    return UserDto(
+      firebaseId: json['id'] as String?,
+      username: json['username'] as String,
+      email: json['email'] as String,
+    );
+  }
+
+  Map<String, String> toSchedule() {
+    return {
+      'firebaseId': firebaseId ?? '',
+      'username': username,
+      'email': email,
     };
   }
 
