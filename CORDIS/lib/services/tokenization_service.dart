@@ -54,7 +54,9 @@ class TokenizationService {
           tokens.add(ContentToken(type: TokenType.newline, text: char));
           continue;
         }
+
         lineTokens.add(ContentToken(type: TokenType.newline, text: char));
+
         if (!spaceBeforeLyrics) {
           // Insert preceding chord target tokens at the starts of lines
           lineTokens.insert(
@@ -86,12 +88,20 @@ class TokenizationService {
         lineTokens.add(ContentToken(type: TokenType.lyric, text: char));
       }
     }
-    if (tokens.isNotEmpty && tokens.last.type == TokenType.newline) {
-      tokens.removeLast();
-    }
 
     if (lineTokens.isNotEmpty) {
+      if (!spaceBeforeLyrics) {
+        // Insert preceding chord target tokens at the starts of lines
+        lineTokens.insert(
+          0,
+          ContentToken(type: TokenType.precedingChordTarget, text: ''),
+        );
+      }
       tokens.addAll(lineTokens);
+    }
+
+    if (tokens.isNotEmpty && tokens.last.type == TokenType.newline) {
+      tokens.removeLast();
     }
     return tokens;
   }
@@ -258,14 +268,10 @@ class TokenizationService {
     return widgetsWithSize;
   }
 
-  /// Positions the given list of WidgetWithSize into a List of Positioned widgets, with content height pre calculated.
-  /// handling line breaks and spacing.
-  ContentTokenized positionWidgets(
-    BuildContext context,
-    List<WidgetWithSize> widgetsWithSize, {
-    double lineSpacing = 8,
-    double letterSpacing = 1,
-  }) {
+  /// Organizes the given list of WidgetWithSize into lines and words based on TokenType.
+  List<List<List<WidgetWithSize>>> _organizeInWordLine(
+    List<WidgetWithSize> widgetsWithSize,
+  ) {
     // Organize widgets by lines and words
     final wordWidgetsWithSize = <WidgetWithSize>[];
     final lineWidgetsWithSize = <List<WidgetWithSize>>[];
@@ -321,7 +327,18 @@ class TokenizationService {
       contentWidgetsWithSize.add(List.from(lineWidgetsWithSize));
       lineWidgetsWithSize.clear();
     }
+    return contentWidgetsWithSize;
+  }
 
+  /// Positions the given list of WidgetWithSize into a List of Positioned widgets, with content height pre calculated.
+  /// handling line breaks and spacing.
+  ContentTokenized positionWidgets(
+    BuildContext context,
+    List<WidgetWithSize> widgetsWithSize, {
+    double lineSpacing = 8,
+    double letterSpacing = 1,
+  }) {
+    final contentWidgetsWithSize = _organizeInWordLine(widgetsWithSize);
     // Check if there is any preceding chord target in the content
     // Used to offset initial X position
     double precedingOffset = 0;
@@ -449,11 +466,12 @@ class TokenizationService {
               break;
           }
         }
-        // After precessing a word reposition if line broke else add to token widgets
+        // If line broke reposition, else add normally
         if (lineBroke) {
           viewLineIndex++;
           chordX = 0;
           lyricsX = precedingOffset;
+          foundLyricInLine = false;
           for (var posWithRef in tempWordWidgets) {
             final widgetWithSize = posWithRef.ref;
             switch (widgetWithSize.type) {
@@ -487,7 +505,17 @@ class TokenizationService {
                   'Newline found when repositioning after line break',
                 );
               case TokenType.precedingChordTarget:
-                throw Exception('Preceding chord target found after lyric');
+                // This is now valid after line breaks with foundLyricInLine reset
+                foundLyricInLine = false;
+                tokenWidgets.add(
+                  Positioned(
+                    left: precedingOffset - widgetWithSize.width,
+                    top: viewLineIndex * lineHeight + chordHeight,
+                    child: widgetWithSize.widget,
+                  ),
+                );
+                lyricsX = precedingOffset;
+                break;
             }
           }
         } else {
