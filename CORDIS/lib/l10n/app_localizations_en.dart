@@ -172,6 +172,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionCodeInstruction => 'Max 2 characters allowed';
 
   @override
+  String get type => 'Type';
+
+  @override
   String get sectionType => 'Section Type';
 
   @override
@@ -189,6 +192,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sectionTextHint =>
       'Enter the section text in chordPro format, (lyrics[chord])';
+
+  @override
+  String get duplicateSectionInstruction =>
+      'Select an existing section to repeat.';
+
+  @override
+  String get selectSectionInstruction =>
+      'Choose a structure for your new section.';
 
   @override
   String get cipherEditorTitle => 'Song Editor';
@@ -370,6 +381,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String downloadPlaceholder(Object object) {
     return 'Download $object';
+  }
+
+  @override
+  String managePlaceholder(Object object) {
+    return 'Manage $object';
+  }
+
+  @override
+  String newPlaceholder(Object object) {
+    return 'New $object';
+  }
+
+  @override
+  String changePlaceholder(Object object) {
+    return 'Change $object';
   }
 
   @override

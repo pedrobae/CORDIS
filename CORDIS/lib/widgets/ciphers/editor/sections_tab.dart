@@ -3,7 +3,7 @@ import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_palette.dart';
-import 'package:cordis/widgets/ciphers/editor/create_cipher_sheet.dart';
+import 'package:cordis/widgets/ciphers/editor/new_section_sheet.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -107,24 +107,36 @@ class _SectionsTabState extends State<SectionsTab> {
                                       ),
                                 ),
 
-                                // ADD SECTION BUTTON
-                                IconButton(
-                                  tooltip: AppLocalizations.of(context)!
-                                      .addPlaceholder(
-                                        AppLocalizations.of(context)!.section,
+                                if ((widget.versionID is int &&
+                                        localVersionProvider
+                                            .getVersion(widget.versionID)!
+                                            .songStructure
+                                            .isNotEmpty) ||
+                                    (widget.versionID is String &&
+                                        cloudVersionProvider
+                                            .getVersion(widget.versionID)!
+                                            .songStructure
+                                            .isNotEmpty))
+                                  // MANAGE SECTION BUTTON
+                                  GestureDetector(
+                                    onTap: () {
+                                      _showRepeatSectionSheet(
+                                        context,
+                                        sectionProvider,
+                                        localVersionProvider,
+                                      );
+                                    },
+                                    child: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.managePlaceholder(''),
+                                      style: TextStyle(
+                                        color: colorScheme.primary,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
                                       ),
-                                  icon: const Icon(Icons.add),
-                                  color: colorScheme.onSurface.withValues(
-                                    alpha: 0.7,
+                                    ),
                                   ),
-                                  onPressed: () {
-                                    _showNewSectionSheet(
-                                      context,
-                                      sectionProvider,
-                                      localVersionProvider,
-                                    );
-                                  },
-                                ),
                               ],
                             ),
 
@@ -248,7 +260,7 @@ class _SectionsTabState extends State<SectionsTab> {
       showModalBottomSheet(
         context: context,
         builder: (context) {
-          return CreateCipherSheet();
+          return NewSectionSheet(versionId: widget.versionID ?? -1);
         },
       );
     };
@@ -278,7 +290,7 @@ class _SectionsTabState extends State<SectionsTab> {
     Navigator.of(context).pop();
   }
 
-  void _showNewSectionSheet(
+  void _showRepeatSectionSheet(
     BuildContext context,
     SectionProvider sectionProvider,
     LocalVersionProvider versionProvider,
@@ -300,21 +312,37 @@ class _SectionsTabState extends State<SectionsTab> {
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Close Icon Button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              // HEADER
+              Column(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.duplicatePlaceholder(
+                          AppLocalizations.of(context)!.section,
+                        ),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 20,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.duplicateSectionInstruction,
+                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 16),
                   ),
                 ],
-              ),
-
+              ), // TODO CONTINUE HERE
               // LABEL
               Text(
                 AppLocalizations.of(

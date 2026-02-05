@@ -173,6 +173,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sectionCodeInstruction => 'Máximo de 2 caracteres';
 
   @override
+  String get type => 'Tipo';
+
+  @override
   String get sectionType => 'Tipo da Seção';
 
   @override
@@ -190,6 +193,14 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get sectionTextHint =>
       'Insira o texto da seção, em formato chordPro. (letra[acorde])';
+
+  @override
+  String get duplicateSectionInstruction =>
+      'Selecione uma seção existente para repetir.';
+
+  @override
+  String get selectSectionInstruction =>
+      'Escolha uma estrutura para sua nova seção.';
 
   @override
   String get cipherEditorTitle => 'Editor de Cifras';
@@ -372,6 +383,21 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String downloadPlaceholder(Object object) {
     return 'Baixar $object';
+  }
+
+  @override
+  String managePlaceholder(Object object) {
+    return 'Gerenciar $object';
+  }
+
+  @override
+  String newPlaceholder(Object object) {
+    return 'Nova $object';
+  }
+
+  @override
+  String changePlaceholder(Object object) {
+    return 'Alterar $object';
   }
 
   @override

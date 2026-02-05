@@ -55,6 +55,10 @@ class MainScreenState extends State<MainScreen> {
           canPop: false,
           onPopInvokedWithResult: (didPop, _) {
             if (didPop) return;
+            if (navigationProvider.screenOnForeground != null) {
+              navigationProvider.popForeground();
+              return;
+            }
             navigationProvider.pop();
           },
           child: Scaffold(
@@ -125,6 +129,10 @@ class MainScreenState extends State<MainScreen> {
                 onHorizontalDragEnd: (details) {
                   // iOS back gesture (swipe from left edge)
                   if (details.velocity.pixelsPerSecond.dx > 300) {
+                    if (navigationProvider.screenOnForeground != null) {
+                      navigationProvider.popForeground();
+                      return;
+                    }
                     navigationProvider.pop();
                   }
                 },

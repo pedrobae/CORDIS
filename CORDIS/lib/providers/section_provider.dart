@@ -52,6 +52,13 @@ class SectionProvider extends ChangeNotifier {
       contentType: sectionType,
       contentText: '',
     );
+    // CHECK IF ALREADY EXISTS
+    if (_sections[newSection.versionId] != null &&
+        _sections[newSection.versionId]!.containsKey(newSection.contentCode)) {
+      throw Exception(
+        'Section with code ${newSection.contentCode} already exists in version ${newSection.versionId}.',
+      );
+    }
 
     _sections[newSection.versionId] ??= {};
     _sections[newSection.versionId]![newSection.contentCode] = newSection;
@@ -117,7 +124,7 @@ class SectionProvider extends ChangeNotifier {
 
   /// ===== UPDATE =====
   // Modify a section (content_text)
-  void cacheSection(
+  void cacheUpdate(
     dynamic versionKey,
     String contentCode, {
     String? newContentCode,

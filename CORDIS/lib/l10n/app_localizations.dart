@@ -422,6 +422,12 @@ abstract class AppLocalizations {
   /// **'Máximo de 2 caracteres'**
   String get sectionCodeInstruction;
 
+  /// Type field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo'**
+  String get type;
+
   /// Section type field label
   ///
   /// In pt, this message translates to:
@@ -457,6 +463,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Insira o texto da seção, em formato chordPro. (letra[acorde])'**
   String get sectionTextHint;
+
+  /// Instruction for duplicating an existing section
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione uma seção existente para repetir.'**
+  String get duplicateSectionInstruction;
+
+  /// Instruction to select a section for editing
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha uma estrutura para sua nova seção.'**
+  String get selectSectionInstruction;
 
   /// Title for the cipher/song editor screen
   ///
@@ -769,6 +787,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Baixar {object}'**
   String downloadPlaceholder(Object object);
+
+  /// Manage object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerenciar {object}'**
+  String managePlaceholder(Object object);
+
+  /// New object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova {object}'**
+  String newPlaceholder(Object object);
+
+  /// Change object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterar {object}'**
+  String changePlaceholder(Object object);
 
   /// Tooltip for duplicate action
   ///

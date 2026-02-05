@@ -370,12 +370,7 @@ class _MetadataTabState extends State<MetadataTab> {
               case VersionType.brandNew:
               case VersionType.import:
               case VersionType.playlist:
-                cacheLocalUpdates(
-                  versionProvider,
-                  cipherProvider,
-                  field,
-                  value,
-                );
+                cacheLocalUpdates(versionProvider, cipherProvider);
                 break;
             }
           },
@@ -607,37 +602,53 @@ class _MetadataTabState extends State<MetadataTab> {
   void cacheLocalUpdates(
     LocalVersionProvider versionProvider,
     CipherProvider cipherProvider,
-    InfoField field,
-    String value,
   ) {
-    switch (field) {
-      case InfoField.title:
-        cipherProvider.cacheCipherUpdates(widget.cipherID!, title: value);
-        break;
-      case InfoField.author:
-        cipherProvider.cacheCipherUpdates(widget.cipherID!, author: value);
-        break;
-      case InfoField.versionName:
-        versionProvider.cacheUpdates(widget.versionID, versionName: value);
-        break;
-      case InfoField.key:
-        versionProvider.cacheUpdates(widget.versionID, transposedKey: value);
-        break;
-      case InfoField.language:
-        cipherProvider.cacheCipherUpdates(widget.cipherID!, language: value);
-        break;
-      case InfoField.bpm:
-        final bpm = int.tryParse(value) ?? 0;
-        versionProvider.cacheUpdates(widget.versionID, bpm: bpm);
-        break;
-      case InfoField.duration:
-        versionProvider.cacheUpdates(
-          widget.versionID,
-          duration: DateTimeUtils.parseDuration(value),
-        );
-      case InfoField.tags:
-        // THIS FIELD IS NOT USED, ADDING TAGS IS HANDLED BY A BOTTOM SHEET
-        throw Exception('Tags are not handled here');
+    for (var field in InfoField.values) {
+      switch (field) {
+        case InfoField.title:
+          cipherProvider.cacheCipherUpdates(
+            widget.cipherID!,
+            title: _getController(field).text,
+          );
+          break;
+        case InfoField.author:
+          cipherProvider.cacheCipherUpdates(
+            widget.cipherID!,
+            author: _getController(field).text,
+          );
+          break;
+        case InfoField.versionName:
+          versionProvider.cacheUpdates(
+            widget.versionID,
+            versionName: _getController(field).text,
+          );
+          break;
+        case InfoField.key:
+          cipherProvider.cacheCipherUpdates(
+            widget.cipherID!,
+            musicKey: _getController(field).text,
+          );
+          break;
+        case InfoField.language:
+          cipherProvider.cacheCipherUpdates(
+            widget.cipherID!,
+            language: _getController(field).text,
+          );
+          break;
+        case InfoField.bpm:
+          final bpm = int.tryParse(_getController(field).text) ?? 0;
+          versionProvider.cacheUpdates(widget.versionID, bpm: bpm);
+          break;
+        case InfoField.duration:
+          versionProvider.cacheUpdates(
+            widget.versionID,
+            duration: DateTimeUtils.parseDuration(_getController(field).text),
+          );
+          break;
+        case InfoField.tags:
+          // THIS FIELD IS NOT USED, ADDING TAGS IS HANDLED BY A BOTTOM SHEET
+          throw Exception('Tags are not handled here');
+      }
     }
   }
 }

@@ -17,15 +17,23 @@ class NavigationProvider extends ChangeNotifier {
 
   static final List<VoidCallback> _onPopCallbacks = [];
 
+  Widget?
+  screenOnForeground; // Screen that can be placed on top of the current stack without affecting it
+
   bool _isLoading = false;
   String? _error;
 
   // Getters
   NavigationRoute get currentRoute => _currentRoute;
 
-  Widget get currentScreen => _screenStack.isNotEmpty
-      ? _screenStack.last
-      : _getScreenForRoute(_currentRoute);
+  Widget get currentScreen => Stack(
+    children: [
+      _screenStack.isNotEmpty
+          ? _screenStack.last
+          : _getScreenForRoute(_currentRoute),
+      if (screenOnForeground != null) screenOnForeground!,
+    ],
+  );
   bool get showAppBar =>
       _showAppBarStack.isNotEmpty ? _showAppBarStack.last : true;
   bool get showDrawerIcon =>
@@ -71,6 +79,34 @@ class NavigationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void pushForeground(Widget screen) {
+    screenOnForeground = screen;
+    notifyListeners();
+  }
+
+  void pushReplacement(
+    Widget screen, {
+    bool showAppBar = true,
+    bool showDrawerIcon = true,
+    bool showBottomNavBar = true,
+    VoidCallback? onPopCallback,
+  }) {
+    if (_screenStack.isNotEmpty) {
+      _screenStack.removeLast();
+      _showAppBarStack.removeLast();
+      _showDrawerIconStack.removeLast();
+      _showBottomNavBarStack.removeLast();
+      _onPopCallbacks.removeLast();
+    }
+    push(
+      screen,
+      showAppBar: showAppBar,
+      showDrawerIcon: showDrawerIcon,
+      showBottomNavBar: showBottomNavBar,
+      onPopCallback: onPopCallback,
+    );
+  }
+
   void pop() {
     if (_screenStack.isNotEmpty) {
       try {
@@ -84,6 +120,13 @@ class NavigationProvider extends ChangeNotifier {
       _showAppBarStack.removeLast();
       _showDrawerIconStack.removeLast();
       _showBottomNavBarStack.removeLast();
+      notifyListeners();
+    }
+  }
+
+  void popForeground() {
+    if (screenOnForeground != null) {
+      screenOnForeground = null;
       notifyListeners();
     }
   }

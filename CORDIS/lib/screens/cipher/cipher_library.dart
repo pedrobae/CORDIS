@@ -4,7 +4,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
-import 'package:cordis/widgets/ciphers/editor/create_cipher_sheet.dart';
+import 'package:cordis/widgets/ciphers/editor/new_section_sheet.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -114,7 +114,7 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
                     showAppBar: false,
                     showDrawerIcon: false,
                     onPopCallback: () =>
-                        cipherProvider..clearNewCipherFromCache(),
+                        cipherProvider.clearNewCipherFromCache(),
                   );
                 },
                 child: Container(
@@ -145,7 +145,7 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return CreateCipherSheet(secret: secret);
+        return NewSectionSheet(secret: secret);
       },
     );
   }

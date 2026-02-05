@@ -157,6 +157,8 @@
   "@sectionCodeHint": {"description": "Hint text for section code input"},
   "sectionCodeInstruction": "Max 2 characters allowed",
   "@sectionCodeInstruction": {"description": "Instruction for section code character limit"},
+  "type": "Type",
+  "@type": {"description": "Type field label"},
   "sectionType": "Section Type",
   "@sectionType": {"description": "Section type field label"},
   "sectionTypeHint": "e.g. Verse, Chorus, Bridge...",
@@ -169,6 +171,10 @@
   "@sectionText": {"description": "Hint text for section text input"},
   "sectionTextHint": "Enter the section text in chordPro format, (lyrics[chord])",
   "@sectionTextHint": {"description": "Hint text for section text input, in chordPro format"},
+  "duplicateSectionInstruction": "Select an existing section to repeat.",
+  "@duplicateSectionInstruction": {"description": "Instruction for duplicating an existing section"},
+  "selectSectionInstruction": "Choose a structure for your new section.",
+  "@selectSectionInstruction": {"description": "Instruction to select a section for editing"},
 
 
 
@@ -256,6 +262,12 @@
   "@setPlaceholder": {"description": "Set object button label", "placeholders": {"object": {}}},
   "downloadPlaceholder": "Download {object}",
   "@downloadPlaceholder": {"description": "Download object button label", "placeholders": {"object": {}}},
+  "managePlaceholder": "Manage {object}",
+  "@managePlaceholder": {"description": "Manage object button label", "placeholders": {"object": {}}},
+  "newPlaceholder": "New {object}",
+  "@newPlaceholder": {"description": "New object button label", "placeholders": {"object": {}}},
+  "changePlaceholder": "Change {object}",
+  "@changePlaceholder": {"description": "Change object button label", "placeholders": {"object": {}}},
 
   "duplicateTooltip": "Create a copy of this {object}",
   "@duplicateTooltip": {"description": "Tooltip for duplicate action", "placeholders": {"object": {}}},
