@@ -121,13 +121,12 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            context.read<NavigationProvider>().push(
+                            _upsertSection();
+                            context.read<NavigationProvider>().pushForeground(
                               SelectType(
                                 versionID: widget.versionId,
                                 sectionCode: widget.sectionCode,
                               ),
-                              showAppBar: false,
-                              showDrawerIcon: false,
                             );
                           },
                           child: Text(

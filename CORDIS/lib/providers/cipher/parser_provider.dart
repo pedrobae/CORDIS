@@ -60,4 +60,11 @@ class ParserProvider extends ChangeNotifier {
       return;
     }
   }
+
+  void clearCache() {
+    _cipher = null;
+    _parsedCipher = null;
+    _isParsing = false;
+    _error = '';
+  }
 }

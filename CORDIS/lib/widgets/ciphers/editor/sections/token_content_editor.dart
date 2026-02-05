@@ -150,8 +150,8 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
 
                       /// Section Code badge
                       Container(
-                        height: 30,
-                        width: 40,
+                        height: 32,
+                        width: 32,
                         decoration: BoxDecoration(
                           color: section.contentColor,
                           borderRadius: BorderRadius.circular(6),
@@ -161,7 +161,8 @@ class _TokenContentEditorState extends State<TokenContentEditor> {
                             section.contentCode,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: colorScheme.onSurface,
+                              color: colorScheme.surface,
+                              fontWeight: FontWeight.w500,
                               fontSize: 16,
                             ),
                           ),

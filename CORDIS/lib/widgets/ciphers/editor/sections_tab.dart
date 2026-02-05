@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
-import 'package:cordis/widgets/ciphers/editor/sections/reorderable_structure_chips.dart';
+import 'package:cordis/widgets/ciphers/editor/sections/reorderable_structure.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/token_content_editor.dart';
 import 'package:cordis/utils/section_constants.dart';
 
@@ -141,9 +141,7 @@ class _SectionsTabState extends State<SectionsTab> {
                             ),
 
                             // DRAGGABLE CHIPS
-                            ReorderableStructureChips(
-                              versionId: widget.versionID,
-                            ),
+                            ReorderableStructure(versionId: widget.versionID),
                           ],
                         ),
                         // CONTENT SECTION

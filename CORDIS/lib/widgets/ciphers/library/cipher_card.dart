@@ -58,7 +58,7 @@ class _CipherCardState extends State<CipherCard> {
               );
             }
 
-            final cipher = cipherProvider.getCipherById(widget.cipherId)!;
+            final cipher = cipherProvider.getCipherById(widget.cipherId);
             final versionCount = versionProvider.getVersionsOfCipherCount(
               widget.cipherId,
             );
@@ -78,7 +78,11 @@ class _CipherCardState extends State<CipherCard> {
               );
             }
 
-            final version = versionProvider.getVersion(versionId)!;
+            final version = versionProvider.getVersion(versionId);
+
+            if (version == null || cipher == null) {
+              return SizedBox();
+            }
 
             // Card content
             return GestureDetector(

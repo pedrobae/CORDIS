@@ -135,4 +135,16 @@ class ImportProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  void clearCache() {
+    _importedCipher = null;
+    _isImporting = false;
+    _selectedFile = null;
+    _selectedFileName = null;
+    _error = null;
+    _importType = null;
+    _parsingStrategy = null;
+    _importVariation = null;
+    notifyListeners();
+  }
 }

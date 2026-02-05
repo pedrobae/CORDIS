@@ -2,6 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
+import 'package:cordis/providers/cipher/import_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/cipher/parser_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
@@ -70,6 +71,10 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           -1,
           version.sections!,
         ); // -1 for new/imported versions
+
+        // CLEAR PARSE AND IMPORT PROVIDERS
+        parserProvider.clearCache();
+        context.read<ImportProvider>().clearCache();
         break;
       case VersionType.cloud:
         // Ensure cloud version

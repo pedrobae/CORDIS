@@ -101,7 +101,14 @@ class SelectType extends StatelessWidget {
                                         isNewSection: true,
                                       ),
                                     )
-                              : context.read<NavigationProvider>().pop();
+                              : context
+                                    .read<NavigationProvider>()
+                                    .pushForeground(
+                                      EditSectionScreen(
+                                        sectionCode: section.code,
+                                        versionId: versionID!,
+                                      ),
+                                    );
                         } catch (e) {
                           // Show error snackbar
                           ScaffoldMessenger.of(context).showSnackBar(
