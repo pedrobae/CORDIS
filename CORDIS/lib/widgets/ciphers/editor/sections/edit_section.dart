@@ -254,7 +254,9 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                               itemType: AppLocalizations.of(context)!.section,
                               onConfirm: () {
                                 _deleteSection();
-                                Navigator.of(context).pop();
+                                context
+                                    .read<NavigationProvider>()
+                                    .popForeground();
                               },
                             );
                           },

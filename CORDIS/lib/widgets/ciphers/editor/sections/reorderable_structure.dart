@@ -19,9 +19,9 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
   void _reorder(
     int oldIndex,
     int newIndex,
-    LocalVersionProvider versionProvider,
+    LocalVersionProvider localVersionProvider,
   ) {
-    versionProvider.reorderSongStructure(
+    localVersionProvider.reorderSongStructure(
       widget.versionId ?? -1,
       oldIndex,
       newIndex,
@@ -30,10 +30,10 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
 
   void _removeSection(
     int index,
-    LocalVersionProvider versionProvider,
+    LocalVersionProvider localVersionProvider,
     SectionProvider sectionProvider,
   ) {
-    final songStructure = versionProvider
+    final songStructure = localVersionProvider
         .getVersion(widget.versionId ?? -1)!
         .songStructure;
 

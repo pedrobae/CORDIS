@@ -134,7 +134,7 @@ class _ContentViewState extends State<ContentView> {
                         ),
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: SingleChildScrollView(
                       controller: scrollController,
                       child: Column(
@@ -144,8 +144,8 @@ class _ContentViewState extends State<ContentView> {
                           // Your structure list...
                           MasonryGridView.count(
                             crossAxisCount: layoutSettings.columnCount,
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 16,
+                            crossAxisSpacing: 16,
                             itemCount: sectionCardList.length,
                             physics: const NeverScrollableScrollPhysics(),
                             shrinkWrap: true,

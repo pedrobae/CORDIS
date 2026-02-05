@@ -47,7 +47,7 @@ class SectionCard extends StatelessWidget {
         }
         return Container(
           decoration: BoxDecoration(
-            border: Border.all(color: colorScheme.surfaceContainerLowest),
+            border: Border.all(color: colorScheme.surfaceContainerHigh),
             borderRadius: BorderRadius.circular(0),
           ),
           padding: const EdgeInsets.all(8),
