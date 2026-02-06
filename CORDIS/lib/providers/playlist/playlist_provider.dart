@@ -249,9 +249,20 @@ class PlaylistProvider extends ChangeNotifier {
 
   // Remove a Cipher Map from a Playlist
   Future<void> removeVersionFromPlaylist(int itemId, int playlistId) async {
-    await _playlistRepository.removeVersionFromPlaylist(itemId, playlistId);
+    await _playlistRepository.removeVersionFromPlaylist(itemId);
 
     await loadPlaylist(playlistId);
+  }
+
+  /// Check if a version is still in the passed playlist (used to determine if it should be deleted entirely or not)
+  bool versionIsInPlaylist(int versionId, int playlistId) {
+    final playlist = _playlists[playlistId];
+    if (playlist != null) {
+      if (playlist.items.any((item) => item.contentId == versionId)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // ===== UTILITY =====

@@ -163,6 +163,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
                                     index: index,
                                     versionId: playlistItem.contentId,
                                     playlistId: widget.playlistId,
+                                    itemId: playlistItem.id!,
                                   );
                                 case PlaylistItemType.flowItem:
                                   return FlowItemCard(

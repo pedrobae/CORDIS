@@ -21,12 +21,14 @@ class PlaylistVersionCard extends StatefulWidget {
   final int playlistId;
   final dynamic versionId;
   final int index;
+  final int itemId;
 
   const PlaylistVersionCard({
     super.key,
     required this.playlistId,
     required this.index,
     required this.versionId,
+    required this.itemId,
   });
 
   @override
@@ -384,6 +386,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
           onClosing: () {},
           builder: (context) {
             return VersionCardActionsSheet(
+              itemId: widget.itemId,
               versionId: widget.versionId,
               playlistId: widget.playlistId,
             );

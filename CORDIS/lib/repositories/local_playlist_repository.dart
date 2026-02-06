@@ -219,7 +219,7 @@ class PlaylistRepository {
   }
 
   /// Removes a version from a playlist by playlist version ID
-  Future<void> removeVersionFromPlaylist(int itemId, int playlistId) async {
+  Future<void> removeVersionFromPlaylist(int itemId) async {
     final db = await _databaseHelper.database;
 
     await db.transaction((txn) async {
@@ -277,8 +277,8 @@ class PlaylistRepository {
           await txn.update(
             'playlist_version',
             {'position': tempPosition},
-            where: 'playlist_id = ? AND version_id = ?',
-            whereArgs: [playlistId, item.contentId],
+            where: 'id = ?',
+            whereArgs: [item.id!],
           );
         } else if (item.isFlowItem) {
           await txn.update(
@@ -295,8 +295,8 @@ class PlaylistRepository {
           await txn.update(
             'playlist_version',
             {'position': item.position},
-            where: 'playlist_id = ? AND version_id = ?',
-            whereArgs: [playlistId, item.contentId],
+            where: 'id = ?',
+            whereArgs: [item.id!],
           );
         } else if (item.isFlowItem) {
           await txn.update(

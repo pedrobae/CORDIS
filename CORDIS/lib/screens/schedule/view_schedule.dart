@@ -217,68 +217,75 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                       // SCHEDULE DETAILS
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        spacing: 4,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                spacing: 8,
-                                children: [
-                                  Text(
-                                    schedule.name,
-                                    style: textTheme.headlineSmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 7,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: schedule.isPublic
-                                          ? Color(0xFF52A94F)
-                                          : Color(0XFFFFA500),
-                                      borderRadius: BorderRadius.circular(100),
-                                    ),
-                                    child: Text(
-                                      schedule.isPublic
-                                          ? AppLocalizations.of(
-                                              context,
-                                            )!.published
-                                          : AppLocalizations.of(context)!.draft,
-                                      style: textTheme.bodyMedium!.copyWith(
-                                        color: schedule.isPublic
-                                            ? colorScheme.surface
-                                            : colorScheme.onSurface,
-                                        fontSize: 13,
-                                        fontStyle: FontStyle.italic,
-                                        fontWeight: FontWeight.w500,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Wrap(
+                                  spacing: 8,
+                                  children: [
+                                    Text(
+                                      schedule.name,
+                                      style: textTheme.headlineSmall?.copyWith(
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                spacing: 16,
-                                children: [
-                                  Text(
-                                    DateTimeUtils.formatDate(
-                                      (schedule is Schedule)
-                                          ? schedule.date
-                                          : (schedule as ScheduleDto).datetime
-                                                .toDate(),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 7,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: schedule.isPublic
+                                            ? Color(0xFF52A94F)
+                                            : Color(0XFFFFA500),
+                                        borderRadius: BorderRadius.circular(
+                                          100,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        schedule.isPublic
+                                            ? AppLocalizations.of(
+                                                context,
+                                              )!.published
+                                            : AppLocalizations.of(
+                                                context,
+                                              )!.draft,
+                                        style: textTheme.bodyMedium!.copyWith(
+                                          color: schedule.isPublic
+                                              ? colorScheme.surface
+                                              : colorScheme.onSurface,
+                                          fontSize: 13,
+                                          fontStyle: FontStyle.italic,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    (schedule is Schedule)
-                                        ? schedule.time.format(context)
-                                        : '${schedule.datetime.toDate().hour.toString().padLeft(2, '0')}:${ //
-                                          schedule.datetime.toDate().minute.toString().padLeft(2, '0')}',
-                                  ),
-                                  Text(schedule.location),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                                Row(
+                                  spacing: 16,
+                                  children: [
+                                    Text(
+                                      DateTimeUtils.formatDate(
+                                        (schedule is Schedule)
+                                            ? schedule.date
+                                            : (schedule as ScheduleDto).datetime
+                                                  .toDate(),
+                                      ),
+                                    ),
+                                    Text(
+                                      (schedule is Schedule)
+                                          ? schedule.time.format(context)
+                                          : '${schedule.datetime.toDate().hour.toString().padLeft(2, '0')}:${ //
+                                            schedule.datetime.toDate().minute.toString().padLeft(2, '0')}',
+                                    ),
+                                    Text(schedule.location),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: 9.0),

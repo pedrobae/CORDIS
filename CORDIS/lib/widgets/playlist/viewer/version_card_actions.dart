@@ -11,11 +11,13 @@ import 'package:provider/provider.dart';
 class VersionCardActionsSheet extends StatelessWidget {
   final int versionId;
   final int playlistId;
+  final int itemId;
 
   const VersionCardActionsSheet({
     super.key,
     required this.versionId,
     required this.playlistId,
+    required this.itemId,
   });
 
   @override
@@ -81,6 +83,9 @@ class VersionCardActionsSheet extends StatelessWidget {
                         versionId,
                         userProvider.getLocalIdByFirebaseId(authProvider.id!)!,
                       );
+                      Navigator.of(
+                        context,
+                      ).pop(); // Close the sheet after action
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -124,12 +129,18 @@ class VersionCardActionsSheet extends StatelessWidget {
                                 isDangerous: true,
                                 onConfirm: () async {
                                   playlistProvider.removeVersionFromPlaylist(
-                                    versionId,
+                                    itemId,
                                     playlistId,
                                   );
-                                  await versionProvider.deleteVersion(
+                                  // Check if version is has a duplicate in this playlist, if not, delete it entirely
+                                  if (!playlistProvider.versionIsInPlaylist(
                                     versionId,
-                                  );
+                                    playlistId,
+                                  )) {
+                                    await versionProvider.deleteVersion(
+                                      versionId,
+                                    );
+                                  }
                                   if (context.mounted) {
                                     Navigator.of(context).pop();
                                   }
