@@ -84,8 +84,8 @@ class PlaylistItem {
       );
 
   // Type checking helpers
-  bool get isCipherVersion => type == PlaylistItemType.version;
-  bool get isTextSection => type == PlaylistItemType.flowItem;
+  bool get isVersion => type == PlaylistItemType.version;
+  bool get isFlowItem => type == PlaylistItemType.flowItem;
 
   PlaylistItem copyWith({
     PlaylistItemType? type,

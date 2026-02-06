@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:cordis/repositories/cloud_schedule_repository.dart';
+import 'package:cordis/services/schedule_sync.dart';
 import 'package:flutter/material.dart';
 
 class CloudScheduleProvider extends ChangeNotifier {
-  final CloudScheduleRepository _repo = CloudScheduleRepository();
+  final _repo = CloudScheduleRepository();
+  final _syncService = ScheduleSyncService();
 
   CloudScheduleProvider();
 
@@ -141,6 +143,11 @@ class CloudScheduleProvider extends ChangeNotifier {
       for (var schedule in schedules) {
         _schedules[schedule.firebaseId!] = schedule;
       }
+      for (var schedule in _schedules.values) {
+        if (schedule.ownerFirebaseId == userId) {
+          await _syncService.syncSchedule(schedule);
+        }
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -223,7 +230,7 @@ class CloudScheduleProvider extends ChangeNotifier {
 
   // ===== DELETE =====
   /// Delete a schedule from the cache and in Firestore
-  void deleteSchedule(String userId, String scheduleId) {
+  Future<void> deleteSchedule(String userId, String scheduleId) async {
     if (_isSaving) return;
 
     _isSaving = true;
@@ -231,7 +238,7 @@ class CloudScheduleProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _repo.deleteSchedule(userId, scheduleId);
+      await _repo.deleteSchedule(userId, scheduleId);
       _schedules.remove(scheduleId);
     } catch (e) {
       _error = e.toString();

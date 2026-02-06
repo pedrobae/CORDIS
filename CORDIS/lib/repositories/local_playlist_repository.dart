@@ -20,7 +20,7 @@ class PlaylistRepository {
 
   // ===== PLAYLIST CRUD =====
   // ===== CREATE =====
-  /// Creates a new playlist, as well as the playlist_cipher, and user_playlist relational objects
+  /// Creates a new playlist, as well as the playlist_version, and user_playlist relational objects
   Future<int> insertPlaylist(Playlist playlist) async {
     final db = await _databaseHelper.database;
 
@@ -158,7 +158,7 @@ class PlaylistRepository {
 
   // ===== VERSION MANAGEMENT =====
   /// Adds a version to the end of the playlist
-  Future<void> addVersionToPlaylist(int playlistId, int cipherMapId) async {
+  Future<void> addVersionToPlaylist(int playlistId, int versionID) async {
     final db = await _databaseHelper.database;
 
     await db.transaction((txn) async {
@@ -176,7 +176,7 @@ class PlaylistRepository {
 
       // Insert version relationship
       await txn.insert('playlist_version', {
-        'version_id': cipherMapId,
+        'version_id': versionID,
         'playlist_id': playlistId,
         'position': nextPosition,
         'included_at': DateTime.now().toIso8601String(),
@@ -187,7 +187,7 @@ class PlaylistRepository {
   /// Adds a version to a specific position in the playlist (used when importing)
   Future<void> addVersionToPlaylistAtPosition(
     int playlistId,
-    int cipherMapId,
+    int versionID,
     int position,
   ) async {
     final db = await _databaseHelper.database;
@@ -195,7 +195,7 @@ class PlaylistRepository {
     await db.transaction((txn) async {
       // Insert version relationship at the desired position
       await txn.insert('playlist_version', {
-        'version_id': cipherMapId,
+        'version_id': versionID,
         'playlist_id': playlistId,
         'position': position,
         'included_at': DateTime.now().toIso8601String(),
@@ -223,7 +223,7 @@ class PlaylistRepository {
     final db = await _databaseHelper.database;
 
     await db.transaction((txn) async {
-      // Remove cipher map relationship
+      // Remove version relationship
       await txn.delete(
         'playlist_version',
         where: 'id = ?',
@@ -273,14 +273,14 @@ class PlaylistRepository {
       for (var i = 0; i < items.length; i++) {
         final item = items[i];
         final tempPosition = -(i + 1000);
-        if (item.isCipherVersion) {
+        if (item.isVersion) {
           await txn.update(
             'playlist_version',
             {'position': tempPosition},
             where: 'playlist_id = ? AND version_id = ?',
             whereArgs: [playlistId, item.contentId],
           );
-        } else if (item.isTextSection) {
+        } else if (item.isFlowItem) {
           await txn.update(
             'flow_item',
             {'position': tempPosition},
@@ -291,14 +291,14 @@ class PlaylistRepository {
       }
 
       for (var item in items) {
-        if (item.isCipherVersion) {
+        if (item.isVersion) {
           await txn.update(
             'playlist_version',
             {'position': item.position},
             where: 'playlist_id = ? AND version_id = ?',
             whereArgs: [playlistId, item.contentId],
           );
-        } else if (item.isTextSection) {
+        } else if (item.isFlowItem) {
           await txn.update(
             'flow_item',
             {'position': item.position},
@@ -385,47 +385,6 @@ class PlaylistRepository {
       return result.first['id'] as int;
     } else {
       return null;
-    }
-  }
-
-  /// Inserts or updates a text item in a playlist
-  Future<void> upsertTextItem(
-    int addedBy,
-    String firebaseTextId,
-    int playlistId,
-    String title,
-    String content,
-    int position,
-  ) async {
-    final db = await _databaseHelper.database;
-
-    // First, try to find existing text item by firebase_id
-    final existingResult = await db.query(
-      'flow_item',
-      columns: ['id'],
-      where: 'firebase_id = ?',
-      whereArgs: [firebaseTextId],
-    );
-
-    if (existingResult.isNotEmpty) {
-      // Update existing text item
-      await db.update(
-        'flow_item',
-        {'title': title, 'content': content, 'position': position},
-        where: 'firebase_id = ?',
-        whereArgs: [firebaseTextId],
-      );
-    } else {
-      // Insert new text item
-      await db.insert('flow_item', {
-        'added_by': addedBy,
-        'firebase_id': firebaseTextId,
-        'playlist_id': playlistId,
-        'title': title,
-        'content': content,
-        'position': position,
-        'added_at': DateTime.now().toIso8601String(),
-      });
     }
   }
 

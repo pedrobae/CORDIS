@@ -127,6 +127,26 @@ class Schedule {
       roles: roles.map((role) => role.toDto()).toList(),
     );
   }
+
+  Schedule mergeWith(Schedule other) {
+    return Schedule(
+      id: id,
+      firebaseId: firebaseId ?? other.firebaseId,
+      ownerFirebaseId: ownerFirebaseId,
+      name: name.isNotEmpty ? name : other.name,
+      date: date != DateTime(1970) ? date : other.date,
+      time: time != TimeOfDay(hour: 0, minute: 0) ? time : other.time,
+      location: location.isNotEmpty ? location : other.location,
+      roomVenue: (roomVenue != null && roomVenue!.isNotEmpty)
+          ? roomVenue
+          : other.roomVenue,
+      playlistId: playlistId ?? other.playlistId,
+      roles: roles.isNotEmpty ? roles : other.roles,
+      annotations: annotations ?? other.annotations,
+      shareCode: shareCode,
+      isPublic: true,
+    );
+  }
 }
 
 class Role {

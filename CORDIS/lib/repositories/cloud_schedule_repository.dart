@@ -21,18 +21,9 @@ class CloudScheduleRepository {
       await _guardHelper.requireAuth();
       await _guardHelper.requireOwnership(scheduleDto.ownerFirebaseId);
 
-      final collaborators = scheduleDto.roles
-          .expand(
-            (role) => role.users.expand((user) => [user.firebaseId ?? '']),
-          )
-          .toSet()
-          .toList();
-
-      collaborators.remove(''); // Remove any empty IDs
-
       final docId = await _firestoreService.createDocument(
         collectionPath: 'schedules',
-        data: scheduleDto.toFirestore()..['collaborators'] = collaborators,
+        data: scheduleDto.toFirestore()..['createdAt'] = DateTime.now(),
       );
 
       await FirebaseAnalytics.instance.logEvent(
@@ -70,7 +61,7 @@ class CloudScheduleRepository {
           .fetchDocumentsContainingValue(
             collectionPath: 'schedules',
             field: 'collaborators',
-            orderField: 'createdAt',
+            orderField: 'datetime',
             value: firebaseUserId,
           );
 

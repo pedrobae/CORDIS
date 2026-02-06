@@ -1,3 +1,4 @@
+import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:cordis/models/domain/cipher/cipher.dart';
@@ -64,6 +65,100 @@ class LocalCipherRepository {
     });
   }
 
+  /// Upserts cipher, version and sections based on VersionDto, returns a the version Id
+  Future<int> upsertVersionDto(VersionDto versionDto) async {
+    final db = await _databaseHelper.database;
+
+    int? cipherId = await getCipherIdByTitleAuthor(
+      title: versionDto.title,
+      author: versionDto.author,
+    );
+
+    if (cipherId == null) {
+      // Cipher doesn't exist locally, insert it
+      return await db.transaction((txn) async {
+        // Insert the cipher
+        final cipherId = await txn.insert(
+          'cipher',
+          Cipher.fromVersionDto(versionDto).toSqLite(isNew: true),
+        );
+
+        // Insert tags if any
+        if (versionDto.tags.isNotEmpty) {
+          for (final tagTitle in versionDto.tags) {
+            await _addTagInTransaction(txn, cipherId, tagTitle);
+          }
+        }
+
+        // Insert versions and their sections
+        final versionId = await _insertVersionInTransaction(
+          txn,
+          cipherId,
+          versionDto.toDomain(cipherId: cipherId),
+        );
+
+        for (final section in versionDto.sections.values) {
+          await _insertSectionInTransaction(
+            txn,
+            versionId,
+            Section.fromFirestore(section),
+          );
+        }
+
+        return versionId;
+      });
+    } else {
+      // Cipher exists, sync it
+      // (this will keep local changes if there are any,
+      // but fill in any missing fields from the cloud version)
+      final existingCipher = await getCipherById(cipherId);
+      final mergedCipher = existingCipher!.mergeWith(
+        Cipher.fromVersionDto(versionDto).copyWith(id: cipherId),
+      );
+      await updateCipher(mergedCipher);
+
+      // Upsert versions and sections
+      final existingVersion = await getVersionWithFirebaseId(
+        versionDto.firebaseId!,
+      );
+
+      if (existingVersion == null) {
+        // Version doesn't exist locally, insert it
+        return await db.transaction((txn) async {
+          final versionId = await _insertVersionInTransaction(
+            txn,
+            cipherId,
+            versionDto.toDomain(cipherId: cipherId),
+          );
+
+          for (final section in versionDto.sections.values) {
+            await _insertSectionInTransaction(
+              txn,
+              versionId,
+              Section.fromFirestore(section),
+            );
+          }
+
+          return versionId;
+        });
+      } else {
+        // Version exists, update it
+        final mergedVersion = existingVersion.mergeWith(
+          versionDto.toDomain(cipherId: cipherId),
+        );
+        await updateVersion(mergedVersion);
+
+        // Sync sections (delete all and re-insert, since there aren't that many)
+        await deleteAllVersionSections(existingVersion.id!);
+        for (final section in (mergedVersion.sections ?? {}).values) {
+          await insertSection(section.copyWith(versionId: existingVersion.id!));
+        }
+
+        return existingVersion.id!;
+      }
+    }
+  }
+
   // ===== READ =====
   /// Retrieves all ciphers without versions and sections
   /// With tags
@@ -93,21 +188,6 @@ class LocalCipherRepository {
     return _buildFullCipher(results.first);
   }
 
-  /// Retrieves a cipher by its Firebase ID
-  /// Returns null if not found
-  Future<Cipher?> getCipherWithFirebaseId(String firebaseId) async {
-    final db = await _databaseHelper.database;
-    final results = await db.query(
-      'cipher',
-      where: 'firebase_id = ?',
-      whereArgs: [firebaseId],
-    );
-
-    if (results.isEmpty) return null;
-
-    return _buildFullCipher(results.first);
-  }
-
   /// Gets cipher that contains the given version ID
   /// Returns null if not found
   Future<Cipher?> getCipherWithVersionId(int versionId) async {
@@ -119,6 +199,24 @@ class LocalCipherRepository {
       columns: ['cipher_id'],
     );
     return getCipherById(result[0]['cipher_id'] as int);
+  }
+
+  /// Gets cipherId by its title and author
+  /// Returns null if not found
+  Future<int?> getCipherIdByTitleAuthor({
+    required String title,
+    required String author,
+  }) async {
+    final db = await _databaseHelper.database;
+    final results = await db.query(
+      'cipher',
+      where: 'title = ? AND author = ? AND is_deleted = 0',
+      whereArgs: [title, author],
+    );
+
+    if (results.isEmpty) return null;
+
+    return results.first['id'] as int;
   }
 
   // ===== UPDATE =====

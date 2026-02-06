@@ -50,13 +50,12 @@ class Section {
     );
   }
 
-  /// Converts to a map suitable for Firestore storage.
   Map<String, String> toFirestore() {
     return {
-      'content_type': contentType,
-      'content_code': contentCode,
-      'content_text': contentText,
-      'content_color': c.colorToHex(contentColor),
+      'contentType': contentType,
+      'contentCode': contentCode,
+      'contentText': contentText,
+      'contentColor': c.colorToHex(contentColor),
     };
   }
 

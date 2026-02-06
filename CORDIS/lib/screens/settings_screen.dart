@@ -184,7 +184,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _clearCache() async {
+  Future<void> _clearCache() async {
     final cacheService = CacheService();
 
     await cacheService.clearAllCaches();
@@ -203,8 +203,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context.read<LocalScheduleProvider>().clearCache();
       context.read<SelectionProvider>().disableSelectionMode();
       context.read<CloudScheduleProvider>().clearCache();
-      _clearCache();
-
+      await _clearCache();
+      if (!mounted) return;
       // Force reload all providers from database
       await Future.wait([
         context.read<CipherProvider>().loadCiphers(forceReload: true),

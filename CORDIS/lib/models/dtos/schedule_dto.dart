@@ -50,6 +50,13 @@ class ScheduleDto {
   }
 
   Map<String, dynamic> toFirestore() {
+    final collaborators = roles
+        .expand((role) => role.users.expand((user) => [user.firebaseId ?? '']))
+        .toSet()
+        .toList();
+
+    collaborators.remove(''); // Remove any empty IDs
+
     return {
       'ownerId': ownerFirebaseId,
       'name': name,
@@ -60,6 +67,7 @@ class ScheduleDto {
       'playlist': playlist.toFirestore(),
       'roles': roles.map((role) => role.toFirestore()).toList(),
       'shareCode': shareCode,
+      'collaborators': collaborators,
     };
   }
 
@@ -95,11 +103,7 @@ class ScheduleDto {
     );
   }
 
-  Schedule toDomain(
-    int ownerLocalId,
-    List<List<int>> roleMemberIds,
-    int playlistLocalId,
-  ) {
+  Schedule toDomain({required int playlistLocalId}) {
     final dateTime = datetime.toDate();
     final schedule = Schedule(
       id: -1, // ID will be set by local database

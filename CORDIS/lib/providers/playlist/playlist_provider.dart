@@ -156,29 +156,6 @@ class PlaylistProvider extends ChangeNotifier {
     return playlistId;
   }
 
-  /// Sync entire playlist with all its items in a single transaction
-  /// This prevents database locking issues during bulk sync operations
-  Future<int> syncPlaylistWithTransaction(
-    Playlist playlist,
-    List<Map<String, dynamic>> versionSectionItems,
-    List<Map<String, dynamic>> textSectionItems,
-    List<int> textItemsToPrune,
-    List<int> versionItemsToPrune,
-  ) async {
-    final playlistId = await _playlistRepository.syncPlaylistWithTransaction(
-      playlist,
-      versionSectionItems,
-      textSectionItems,
-      textItemsToPrune,
-      versionItemsToPrune,
-    );
-
-    // Reload the playlist in the provider's cache
-    await loadPlaylist(playlistId);
-
-    return playlistId;
-  }
-
   // Update a Playlist with a version
   Future<void> addVersionToPlaylist(int playlistId, int versionId) async {
     await _playlistRepository.addVersionToPlaylist(playlistId, versionId);
@@ -250,26 +227,6 @@ class PlaylistProvider extends ChangeNotifier {
     await loadPlaylist(playlistId);
   }
 
-  Future<void> upsertTextItem({
-    required int addedBy,
-    required int playlistId,
-    required String firebaseTextId,
-    required String title,
-    required String content,
-    required int position,
-  }) async {
-    await _playlistRepository.upsertTextItem(
-      addedBy,
-      firebaseTextId,
-      playlistId,
-      title,
-      content,
-      position,
-    );
-
-    await loadPlaylist(playlistId);
-  }
-
   // ===== DELETE =====
   // Delete a playlist
   Future<void> deletePlaylist(int playlistId) async {
@@ -295,60 +252,6 @@ class PlaylistProvider extends ChangeNotifier {
     await _playlistRepository.removeVersionFromPlaylist(itemId, playlistId);
 
     await loadPlaylist(playlistId);
-  }
-
-  /// Calculate which items need to be pruned before syncing
-  /// Returns (textItemsToPrune, versionItemsToPrune)
-  (List<int>, List<int>) calculateItemsToPrune(
-    int playlistId,
-    List<Map<String, dynamic>> versionSectionItems,
-    List<Map<String, dynamic>> textSectionItems,
-  ) {
-    final playlist = _playlists[playlistId]!;
-
-    List<int> textItemsToPrune = [];
-    List<int> versionItemsToPrune = [];
-
-    for (final item in playlist.items) {
-      switch (item.type) {
-        case PlaylistItemType.flowItem:
-          if (!textSectionItems.any(
-            (textItem) =>
-                (textItem['firebaseContentId'] == item.firebaseContentId),
-          )) {
-            textItemsToPrune.add(item.id!);
-          }
-          break;
-        case PlaylistItemType.version:
-          if (!versionSectionItems.any(
-            (versionItem) => (versionItem['contentId'] == item.contentId),
-          )) {
-            versionItemsToPrune.add(item.id!);
-          }
-          break;
-      }
-    }
-
-    return (textItemsToPrune, versionItemsToPrune);
-  }
-
-  /// Prune playlist items to insert the items from the cloud version
-  Future<void> prunePlaylistItems(
-    int playlistId,
-    List<Map<String, dynamic>> versionSectionItems,
-    List<Map<String, dynamic>> textSectionItems,
-  ) async {
-    final (textItemsToPrune, versionItemsToPrune) = calculateItemsToPrune(
-      playlistId,
-      versionSectionItems,
-      textSectionItems,
-    );
-
-    _playlistRepository.prunePlaylistItems(
-      playlistId,
-      textItemsToPrune,
-      versionItemsToPrune,
-    );
   }
 
   // ===== UTILITY =====

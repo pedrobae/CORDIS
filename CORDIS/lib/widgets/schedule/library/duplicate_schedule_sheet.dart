@@ -160,22 +160,7 @@ class _DuplicateScheduleSheetState extends State<DuplicateScheduleSheet> {
                               );
 
                           localScheduleProvider.createSchedule(
-                            scheduleDto.toDomain(
-                              ownerLocalId,
-                              scheduleDto.roles
-                                  .map(
-                                    (role) => role.users
-                                        .map(
-                                          (user) => userProvider
-                                              .getLocalIdByFirebaseId(
-                                                user.firebaseId!,
-                                              )!,
-                                        )
-                                        .toList(),
-                                  )
-                                  .toList(),
-                              playlistId,
-                            ),
+                            scheduleDto.toDomain(playlistLocalId: playlistId),
                           );
                         }
                         if (context.mounted) Navigator.of(context).pop();

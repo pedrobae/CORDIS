@@ -142,4 +142,20 @@ class Cipher {
       versions: versions ?? this.versions,
     );
   }
+
+  Cipher mergeWith(Cipher other) {
+    return Cipher(
+      id: id,
+      title: title.isEmpty ? other.title : title,
+      author: author.isEmpty ? other.author : author,
+      tags: tags.isEmpty ? other.tags : tags,
+      musicKey: musicKey.isEmpty ? other.musicKey : musicKey,
+      language: language.isEmpty ? other.language : language,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? other.updatedAt,
+      isLocal: isLocal,
+      versions:
+          versions, // We don't want to merge versions here, as they are managed separately in the schedule sync process
+    );
+  }
 }

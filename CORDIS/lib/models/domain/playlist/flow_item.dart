@@ -19,37 +19,38 @@ class FlowItem {
     required this.position,
   });
 
-  factory FlowItem.fromSqlite({
-    required int playlistId,
-    required String title,
-    required String contentText,
-    required int position,
-  }) {
+  factory FlowItem.fromSqlite(Map<String, dynamic> row) {
     return FlowItem(
-      firebaseId: generateFirebaseId(),
-      playlistId: playlistId,
-      duration: Duration(),
-      title: title,
-      contentText: contentText,
-      position: position,
+      id: row['id'] as int?,
+      firebaseId: row['firebase_id'] as String? ?? generateFirebaseId(),
+      playlistId: row['playlist_id'],
+      duration: Duration(seconds: row['duration'] ?? 0),
+      title: row['title'],
+      contentText: row['content'],
+      position: row['position'],
     );
   }
 
-  factory FlowItem.fromFirestore(Map<String, dynamic> json) {
+  factory FlowItem.fromFirestore(
+    Map<String, dynamic> json, {
+    int? id,
+    String? firebaseId,
+    required int playlistId,
+  }) {
     return FlowItem(
-      id: json['id'],
-      playlistId: json['playlist_id'],
-      firebaseId: json['firebase_id'] ?? generateFirebaseId(),
+      id: id,
+      playlistId: playlistId,
+      firebaseId: json['firebaseId'] ?? firebaseId ?? generateFirebaseId(),
       duration: json['duration'] != null
           ? Duration(seconds: json['duration'])
           : Duration.zero,
       title: json['title'],
-      contentText: json['content'],
+      contentText: json['contentText'],
       position: json['position'] ?? 0,
     );
   }
 
-  Map<String, dynamic> toSQLite(FlowItem flowItem) {
+  Map<String, dynamic> toSQLite() {
     return {
       'id': id,
       'firebase_id': firebaseId,
@@ -62,6 +63,12 @@ class FlowItem {
   }
 
   Map<String, String> toFirestore() {
-    return {'title': title, 'content': contentText, 'id': firebaseId};
+    return {
+      'title': title,
+      'contentText': contentText,
+      'firebaseId': firebaseId,
+      'position': position.toString(),
+      'duration': duration.inSeconds.toString(),
+    };
   }
 }

@@ -58,11 +58,7 @@ class UserDto {
   }
 
   Map<String, String> toSchedule() {
-    return {
-      'firebaseId': firebaseId ?? '',
-      'username': username,
-      'email': email,
-    };
+    return {'id': firebaseId ?? '', 'username': username, 'email': email};
   }
 
   User toDomain() {

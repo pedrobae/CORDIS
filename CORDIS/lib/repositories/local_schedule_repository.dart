@@ -70,6 +70,22 @@ class LocalScheduleRepository {
     return Schedule.fromSqlite(maps.first, roles);
   }
 
+  Future<Schedule?> getScheduleByFirebaseId(String firebaseId) async {
+    final db = await _databaseHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'schedule',
+      where: 'firebase_id = ?',
+      whereArgs: [firebaseId],
+    );
+
+    if (maps.isEmpty) return null;
+
+    final scheduleId = maps.first['id'] as int;
+    final roles = await getRolesForSchedule(scheduleId);
+
+    return Schedule.fromSqlite(maps.first, roles);
+  }
+
   Future<List<Role>> getRolesForSchedule(int scheduleId) async {
     final db = await _databaseHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -107,7 +123,7 @@ class LocalScheduleRepository {
 
     List<User> users = [];
     for (var map in userMaps) {
-      users.add(User.fromJson(map));
+      users.add(User.fromSqlite(map));
     }
 
     return users;

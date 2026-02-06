@@ -157,6 +157,27 @@ class Version {
     );
   }
 
+  Version mergeWith(Version other) {
+    final mergedSections = {...(other.sections ?? {}), ...(sections ?? {})};
+
+    return Version(
+      id: id ?? other.id,
+      firebaseId: firebaseId ?? other.firebaseId,
+      cipherId: cipherId,
+      songStructure: songStructure.isNotEmpty
+          ? songStructure
+          : other.songStructure,
+      transposedKey: transposedKey ?? other.transposedKey,
+      duration: duration != Duration.zero ? duration : other.duration,
+      bpm: bpm != 0 ? bpm : other.bpm,
+      versionName: versionName.isNotEmpty ? versionName : other.versionName,
+      createdAt: createdAt.isBefore(other.createdAt)
+          ? createdAt
+          : other.createdAt,
+      sections: mergedSections.isNotEmpty ? mergedSections : sections,
+    );
+  }
+
   // Factory for creating empty version
   factory Version.empty({int? cipherId}) {
     return Version(

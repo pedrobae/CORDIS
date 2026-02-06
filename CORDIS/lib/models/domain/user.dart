@@ -24,7 +24,7 @@ class User {
     this.isActive = true,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
+  factory User.fromSqlite(Map<String, dynamic> json) {
     return User(
       id: json['id'] as int,
       firebaseId: json['firebase_id'] as String?,

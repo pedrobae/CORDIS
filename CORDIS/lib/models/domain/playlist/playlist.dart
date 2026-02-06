@@ -99,14 +99,14 @@ class Playlist {
 
   // Convenience getters for filtering items by type
   List<PlaylistItem> get cipherVersionItems =>
-      items.where((item) => item.isCipherVersion).toList();
+      items.where((item) => item.isVersion).toList();
 
   List<PlaylistItem> get textSectionItems =>
-      items.where((item) => item.isTextSection).toList();
+      items.where((item) => item.isFlowItem).toList();
 
   // Helper to get text section IDs from items
   List<int?> get textSectionIdsFromItems => items
-      .where((item) => item.isTextSection)
+      .where((item) => item.isFlowItem)
       .map((item) => item.contentId)
       .toList();
 

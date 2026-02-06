@@ -8,7 +8,31 @@ class FlowItemRepository {
   Future<int> createFlowItem(FlowItem flowItem) async {
     final db = await _databaseHelper.database;
 
-    return await db.insert('flow_item', flowItem.toSQLite(flowItem));
+    return await db.insert('flow_item', flowItem.toSQLite());
+  }
+
+  Future<int> upsertFlowItem(FlowItem flowItem) async {
+    final db = await _databaseHelper.database;
+
+    final existingFlowItem = await getFlowItemByFirebaseId(flowItem.firebaseId);
+
+    if (existingFlowItem == null) {
+      // Insert new flow item
+      final id = await db.insert('flow_item', flowItem.toSQLite());
+      return id;
+    } else {
+      // Update existing flow item - exclude id from update
+      final updateData = flowItem.toSQLite();
+      updateData.remove('id'); // Never update the primary key
+      
+      await db.update(
+        'flow_item',
+        updateData,
+        where: 'id = ?',
+        whereArgs: [existingFlowItem.id],
+      );
+      return existingFlowItem.id!;
+    }
   }
 
   // ===== READ =====
@@ -22,7 +46,7 @@ class FlowItemRepository {
     );
 
     if (results.isNotEmpty) {
-      return FlowItem.fromFirestore(results.first);
+      return FlowItem.fromSqlite(results.first);
     }
     return null;
   }
@@ -37,7 +61,7 @@ class FlowItemRepository {
     );
 
     if (results.isNotEmpty) {
-      return FlowItem.fromFirestore(results.first);
+      return FlowItem.fromSqlite(results.first);
     }
     return null;
   }
@@ -54,7 +78,7 @@ class FlowItemRepository {
     );
 
     for (final row in results) {
-      flowItems[row['id'] as int] = FlowItem.fromFirestore(row);
+      flowItems[row['id'] as int] = FlowItem.fromSqlite(row);
     }
 
     return flowItems;
@@ -70,7 +94,7 @@ class FlowItemRepository {
       orderBy: 'position ASC',
     );
 
-    return results.map((row) => FlowItem.fromFirestore(row)).toList();
+    return results.map((row) => FlowItem.fromSqlite(row)).toList();
   }
 
   // ===== UPDATE =====

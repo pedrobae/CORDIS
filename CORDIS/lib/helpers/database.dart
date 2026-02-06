@@ -160,7 +160,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // Create playlist_text table, for written sections
+    // Create flow_item table, for written playlist Items
     await db.execute('''
       CREATE TABLE flow_item (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

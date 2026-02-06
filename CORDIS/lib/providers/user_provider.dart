@@ -60,13 +60,14 @@ class UserProvider extends ChangeNotifier {
   /// Ensures that all users in the provided list of Firebase IDs exist locally
   /// Downloads any missing users from the cloud
   Future<void> ensureUsersExist(List<String> firebaseUserIds) async {
-    final presentIds = await _localUserRepository.getUsersByFirebaseId(
-      firebaseUserIds,
-    );
+    final missingIds = <String>[];
 
-    final missingIds = firebaseUserIds
-        .where((id) => !presentIds.contains(id))
-        .toList();
+    for (final firebaseId in firebaseUserIds) {
+      final user = await _localUserRepository.getUserByFirebaseId(firebaseId);
+      if (user == null) {
+        missingIds.add(firebaseId);
+      }
+    }
 
     if (missingIds.isNotEmpty) {
       await downloadUsersFromCloud(missingIds);
