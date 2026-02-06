@@ -441,8 +441,6 @@ class TokenizationService {
               break;
 
             case TokenType.newline:
-              // DO NOTHING FOR NOW, TODO: TOKENIZATION populate end of line with targets
-              // NewLine resets on line break processing
               lineBroke = true;
               break;
 
