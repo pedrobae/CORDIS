@@ -55,6 +55,7 @@ class Cipher {
       language: version.language,
       createdAt: version.updatedAt?.toDate() ?? DateTime.now(),
       isLocal: false,
+      tags: version.tags,
     );
   }
 

@@ -1,3 +1,5 @@
+import 'package:cordis/models/domain/cipher/cipher.dart';
+import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/models/domain/playlist/flow_item.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
@@ -33,7 +35,6 @@ class ScheduleSyncService {
     );
 
     // Upsert each playlist Item in the playlist
-    final versionIDs = <int>[];
     for (var item in scheduleDto.playlist.getPlaylistItems()) {
       switch (item.type) {
         case PlaylistItemType.flowItem:
@@ -50,14 +51,60 @@ class ScheduleSyncService {
         case PlaylistItemType.version:
           final versionDto =
               scheduleDto.playlist.versions[item.firebaseContentId]!;
-          final versionID = await _versionRepo.upsertVersionDto(versionDto);
-          versionIDs.add(versionID);
-          break;
-      }
-    }
 
-    for (final versionID in versionIDs) {
-      await _playlistRepo.addVersionToPlaylist(playlistId, versionID);
+          /// Ensure cipher exists and is up to date
+          int? cipherId = await _versionRepo.getCipherIdByTitleAuthor(
+            title: versionDto.title,
+            author: versionDto.author,
+          );
+
+          if (cipherId == null) {
+            // Cipher doesn't exist locally, insert it
+            await _versionRepo.insertPrunedCipher(
+              Cipher.fromVersionDto(versionDto),
+            );
+          } else {
+            // Cipher exists, merge it
+            final existingCipher = await _versionRepo.getCipherById(cipherId);
+            final mergedCipher = existingCipher!.mergeWith(
+              Cipher.fromVersionDto(versionDto).copyWith(id: cipherId),
+            );
+            await _versionRepo.updateCipher(mergedCipher);
+          }
+
+          // Ensure version exists and is up to date
+          final existingVersion = await _versionRepo.getVersionWithFirebaseId(
+            versionDto.firebaseId!,
+          );
+
+          if (existingVersion != null) {
+            // Version exists, merge it
+            final mergedVersion = existingVersion.mergeWith(
+              versionDto.toDomain(cipherId: cipherId),
+            );
+            await _versionRepo.updateVersion(mergedVersion);
+
+            // Sync sections (delete all and re-insert)
+            await _versionRepo.deleteAllVersionSections(existingVersion.id!);
+            for (final section in (mergedVersion.sections ?? {}).values) {
+              await _versionRepo.insertSection(
+                section.copyWith(versionId: existingVersion.id!),
+              );
+            }
+          } else {
+            // Version doesn't exist locally, insert it and add it
+            final versionId = await _versionRepo.insertVersion(
+              versionDto.toDomain(cipherId: cipherId),
+            );
+
+            for (final section in versionDto.sections.values) {
+              await _versionRepo.insertSection(
+                Section.fromFirestore(section).copyWith(versionId: versionId),
+              );
+            }
+            await _playlistRepo.addVersionToPlaylist(playlistId, versionId);
+          }
+      }
     }
 
     final schedule = scheduleDto.toDomain(playlistLocalId: playlistId);

@@ -108,6 +108,7 @@ class ScheduleDto {
     final schedule = Schedule(
       id: -1, // ID will be set by local database
       ownerFirebaseId: ownerFirebaseId,
+      firebaseId: firebaseId,
       name: name,
       date: DateTime(dateTime.year, dateTime.month, dateTime.day),
       time: TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
@@ -143,7 +144,7 @@ class ScheduleDto {
     String? shareCode,
   }) {
     return ScheduleDto(
-      firebaseId: this.firebaseId ?? firebaseId,
+      firebaseId: firebaseId ?? this.firebaseId,
       ownerFirebaseId: ownerFirebaseId,
       name: name ?? this.name,
       datetime: datetime ?? this.datetime,

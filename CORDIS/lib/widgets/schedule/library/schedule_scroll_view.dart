@@ -77,6 +77,10 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
 
             final pastScheduleIds = [...localPast, ...cloudPast];
 
+            // If there are no past schedules, remove the listner
+            if (pastScheduleIds.isEmpty) {
+              _scrollController.removeListener(_listenForEndOfFutureSchedules);
+            }
             // Handle empty state
             if (futureScheduleIds.isEmpty && pastScheduleIds.isEmpty) {
               return Column(
