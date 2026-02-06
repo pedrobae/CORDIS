@@ -95,12 +95,41 @@ class ScheduleCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // SCHEDULE NAME
-                            Text(
-                              schedule.name,
-                              style: theme.textTheme.titleMedium!.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.onSurface,
-                              ),
+                            Row(
+                              spacing: 8,
+                              children: [
+                                Text(
+                                  schedule.name,
+                                  style: theme.textTheme.titleMedium!.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 7),
+                                  decoration: BoxDecoration(
+                                    color: schedule.isPublic
+                                        ? Color(0xFF52A94F)
+                                        : Color(0XFFFFA500),
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  child: Text(
+                                    schedule.isPublic
+                                        ? AppLocalizations.of(
+                                            context,
+                                          )!.published
+                                        : AppLocalizations.of(context)!.draft,
+                                    style: theme.textTheme.bodyMedium!.copyWith(
+                                      color: schedule.isPublic
+                                          ? colorScheme.surface
+                                          : colorScheme.onSurface,
+                                      fontSize: 13,
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
 
                             // WHEN & WHERE

@@ -107,12 +107,39 @@ class CloudScheduleCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // SCHEDULE NAME
-                                Text(
-                                  schedule.name,
-                                  style: theme.textTheme.titleMedium!.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface,
-                                  ),
+                                Row(
+                                  spacing: 8,
+                                  children: [
+                                    Text(
+                                      schedule.name,
+                                      style: theme.textTheme.titleMedium!
+                                          .copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            color: colorScheme.onSurface,
+                                          ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 7,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFF52A94F),
+                                        borderRadius: BorderRadius.circular(
+                                          100,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        AppLocalizations.of(context)!.published,
+                                        style: theme.textTheme.bodyMedium!
+                                            .copyWith(
+                                              fontSize: 13,
+                                              color: colorScheme.surface,
+                                              fontStyle: FontStyle.italic,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
 
                                 // WHEN & WHERE

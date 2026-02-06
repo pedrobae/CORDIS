@@ -734,6 +734,12 @@ abstract class AppLocalizations {
   /// **'Função'**
   String get role;
 
+  /// User roles label
+  ///
+  /// In pt, this message translates to:
+  /// **'Funções'**
+  String get roles;
+
   /// Default user role
   ///
   /// In pt, this message translates to:
@@ -806,6 +812,12 @@ abstract class AppLocalizations {
   /// **'Alterar {object}'**
   String changePlaceholder(Object object);
 
+  /// Publish object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Publicar {object}'**
+  String publishPlaceholder(Object object);
+
   /// Tooltip for duplicate action
   ///
   /// In pt, this message translates to:
@@ -847,6 +859,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Participar da Agenda'**
   String get joinSchedule;
+
+  /// Draft status label
+  ///
+  /// In pt, this message translates to:
+  /// **'Rascunho'**
+  String get draft;
+
+  /// Published status label
+  ///
+  /// In pt, this message translates to:
+  /// **'Publicado'**
+  String get published;
+
+  /// Warning message when publishing a schedule
+  ///
+  /// In pt, this message translates to:
+  /// **'Uma vez publicada, a agenda poderá ser acessada por sua equipe.\nAlterações serão sincronizadas até a data do Serviço.\nEsta ação não pode ser desfeita.'**
+  String get publishScheduleWarning;
 
   /// Send/share to members of selected roles
   ///

@@ -285,7 +285,7 @@ class LocalCipherRepository {
     final db = await _databaseHelper.database;
     return await db.insert(
       'section',
-      section.toMap()..['version_id'] = section.versionId,
+      section.toSqlite()..['version_id'] = section.versionId,
     );
   }
 
@@ -313,7 +313,7 @@ class LocalCipherRepository {
     final db = await _databaseHelper.database;
     await db.update(
       'section',
-      section.toMap(),
+      section.toSqlite(),
       where: 'version_id = ? AND content_code = ?',
       whereArgs: [section.versionId, section.contentCode],
     );

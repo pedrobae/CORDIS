@@ -97,7 +97,7 @@ class SelectType extends StatelessWidget {
                                     .pushForeground(
                                       EditSectionScreen(
                                         sectionCode: section.code,
-                                        versionId: versionID!,
+                                        versionID: versionID!,
                                         isNewSection: true,
                                       ),
                                     )
@@ -106,7 +106,7 @@ class SelectType extends StatelessWidget {
                                     .pushForeground(
                                       EditSectionScreen(
                                         sectionCode: section.code,
-                                        versionId: versionID!,
+                                        versionID: versionID!,
                                       ),
                                     );
                         } catch (e) {

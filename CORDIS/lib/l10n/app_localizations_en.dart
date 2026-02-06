@@ -341,6 +341,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get role => 'Role';
 
   @override
+  String get roles => 'Roles';
+
+  @override
   String get generalMember => 'General Member';
 
   @override
@@ -399,6 +402,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String publishPlaceholder(Object object) {
+    return 'Publish $object';
+  }
+
+  @override
   String duplicateTooltip(Object object) {
     return 'Create a copy of this $object';
   }
@@ -421,6 +429,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get joinSchedule => 'Join Service';
+
+  @override
+  String get draft => 'Draft';
+
+  @override
+  String get published => 'Published';
+
+  @override
+  String get publishScheduleWarning =>
+      'Once published, the schedule will be accessible to your team.\nChanges will be synced until the date of the Service.\nThis action cannot be undone.';
 
   @override
   String get sendToRoleMembers => 'Send to Role Members';

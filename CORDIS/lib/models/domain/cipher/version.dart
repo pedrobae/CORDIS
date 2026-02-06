@@ -107,8 +107,7 @@ class Version {
       transposedKey: transposedKey,
       songStructure: songStructure,
       sections: sections!.map(
-        (sectionCode, section) =>
-            MapEntry(sectionCode, section.toMap() as Map<String, String>),
+        (sectionCode, section) => MapEntry(sectionCode, section.toFirestore()),
       ),
       title: cipher.title,
       author: cipher.author,

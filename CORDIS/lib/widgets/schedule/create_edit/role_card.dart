@@ -44,11 +44,11 @@ class RoleCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      role.memberIds.isEmpty
+                      role.users.isEmpty
                           ? AppLocalizations.of(context)!.noMembers
                           : AppLocalizations.of(
                               context,
-                            )!.xMembers(role.memberIds.length),
+                            )!.xMembers(role.users.length),
                       style: TextStyle(
                         fontSize: 14,
                         color: colorScheme.onSurfaceVariant,

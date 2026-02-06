@@ -29,6 +29,17 @@ class Section {
     );
   }
 
+  /// Converts to a map suitable for SQLite storage.
+  /// Later the version Id (int) gets assigned.
+  Map<String, dynamic> toSqlite() {
+    return {
+      'content_type': contentType,
+      'content_code': contentCode,
+      'content_text': contentText,
+      'content_color': c.colorToHex(contentColor),
+    };
+  }
+
   factory Section.fromFirestore(Map<String, String> map) {
     return Section(
       versionId: 0, // Will be set later
@@ -39,9 +50,8 @@ class Section {
     );
   }
 
-  /// Converts to a map suitable for SQLite storage
-  /// Later the version Id (int) gets assigned
-  Map<String, dynamic> toMap() {
+  /// Converts to a map suitable for Firestore storage.
+  Map<String, String> toFirestore() {
     return {
       'content_type': contentType,
       'content_code': contentCode,

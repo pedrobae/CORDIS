@@ -256,6 +256,15 @@ class LocalScheduleProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void publishSchedule(int scheduleId) {
+    final schedule = _schedules[scheduleId];
+    if (schedule == null) return;
+
+    _schedules[scheduleId] = schedule.copyWith(isPublic: true);
+    saveSchedule(scheduleId);
+    notifyListeners();
+  }
+
   void cacheScheduleDetails(
     int scheduleId, {
     required String name,

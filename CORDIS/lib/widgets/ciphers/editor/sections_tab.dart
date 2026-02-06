@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/reorderable_structure.dart';
-import 'package:cordis/widgets/ciphers/editor/sections/token_content_editor.dart';
+import 'package:cordis/widgets/ciphers/editor/sections/token_content_card.dart';
 
 class SectionsTab extends StatefulWidget {
   final dynamic versionID;
@@ -146,7 +146,7 @@ class _SectionsTabState extends State<SectionsTab> {
                         ),
                         // CONTENT SECTION
                         Column(
-                          spacing: 8,
+                          spacing: 16,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // LABEL
@@ -168,8 +168,8 @@ class _SectionsTabState extends State<SectionsTab> {
                               )
                             else
                               ...uniqueSections.map((sectionCode) {
-                                return TokenContentEditor(
-                                  versionId: widget.versionID,
+                                return TokenContentCard(
+                                  versionID: widget.versionID,
                                   sectionCode: sectionCode,
                                   isEnabled: widget.isEnabled,
                                 );
@@ -288,6 +288,7 @@ class _SectionsTabState extends State<SectionsTab> {
     showModalBottomSheet(
       context: context,
       barrierColor: colorScheme.onSurface.withAlpha(85),
+      isScrollControlled: true,
       builder: (context) {
         return Container(
           decoration: BoxDecoration(

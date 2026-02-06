@@ -21,9 +21,18 @@ class CloudScheduleRepository {
       await _guardHelper.requireAuth();
       await _guardHelper.requireOwnership(scheduleDto.ownerFirebaseId);
 
+      final collaborators = scheduleDto.roles
+          .expand(
+            (role) => role.users.expand((user) => [user.firebaseId ?? '']),
+          )
+          .toSet()
+          .toList();
+
+      collaborators.remove(''); // Remove any empty IDs
+
       final docId = await _firestoreService.createDocument(
         collectionPath: 'schedules',
-        data: scheduleDto.toFirestore(),
+        data: scheduleDto.toFirestore()..['collaborators'] = collaborators,
       );
 
       await FirebaseAnalytics.instance.logEvent(

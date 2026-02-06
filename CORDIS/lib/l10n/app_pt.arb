@@ -239,6 +239,8 @@
 
   "role": "Função",
   "@role": {"description": "User role label"},
+  "roles": "Funções",
+  "@roles": {"description": "User roles label"},
   "generalMember": "Membro Geral",
   "@generalMember": {"description": "Default user role"},
   "viewPlaceholder": "Visualizar {object}",
@@ -257,12 +259,14 @@
   "@setPlaceholder": {"description": "Set object button label", "placeholders": {"object": {}}},
   "downloadPlaceholder": "Baixar {object}",
   "@downloadPlaceholder": {"description": "Download object button label", "placeholders": {"object": {}}},
-    "managePlaceholder": "Gerenciar {object}",
+  "managePlaceholder": "Gerenciar {object}",
   "@managePlaceholder": {"description": "Manage object button label", "placeholders": {"object": {}}},
   "newPlaceholder": "Nova {object}",
   "@newPlaceholder": {"description": "New object button label", "placeholders": {"object": {}}},
   "changePlaceholder": "Alterar {object}",
   "@changePlaceholder": {"description": "Change object button label", "placeholders": {"object": {}}},
+  "publishPlaceholder": "Publicar {object}",
+  "@publishPlaceholder": {"description": "Publish object button label", "placeholders": {"object": {}}},
 
   "duplicateTooltip": "Criar uma cópia desta {object}",
   "@duplicateTooltip": {"description": "Tooltip for duplicate action", "placeholders": {"object": {}}},
@@ -281,6 +285,12 @@
 
   "joinSchedule": "Participar da Agenda",
   "@joinSchedule": {"description": "Share code screen title"},
+  "draft": "Rascunho",
+  "@draft": {"description": "Draft status label"},
+  "published": "Publicado",
+  "@published": {"description": "Published status label"},
+  "publishScheduleWarning": "Uma vez publicada, a agenda poderá ser acessada por sua equipe.\nAlterações serão sincronizadas até a data do Serviço.\nEsta ação não pode ser desfeita.",
+  "@publishScheduleWarning": {"description": "Warning message when publishing a schedule"},
 
   "sendToRoleMembers": "Enviar para os Membros da Função",
   "@sendToRoleMembers": {"description": "Send/share to members of selected roles"},

@@ -343,6 +343,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get role => 'Função';
 
   @override
+  String get roles => 'Funções';
+
+  @override
   String get generalMember => 'Membro Geral';
 
   @override
@@ -401,6 +404,11 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String publishPlaceholder(Object object) {
+    return 'Publicar $object';
+  }
+
+  @override
   String duplicateTooltip(Object object) {
     return 'Criar uma cópia desta $object';
   }
@@ -423,6 +431,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get joinSchedule => 'Participar da Agenda';
+
+  @override
+  String get draft => 'Rascunho';
+
+  @override
+  String get published => 'Publicado';
+
+  @override
+  String get publishScheduleWarning =>
+      'Uma vez publicada, a agenda poderá ser acessada por sua equipe.\nAlterações serão sincronizadas até a data do Serviço.\nEsta ação não pode ser desfeita.';
 
   @override
   String get sendToRoleMembers => 'Enviar para os Membros da Função';
