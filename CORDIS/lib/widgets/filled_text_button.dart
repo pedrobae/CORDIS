@@ -5,6 +5,7 @@ class FilledTextButton extends StatelessWidget {
   final String? tooltip;
   final IconData? icon;
   final VoidCallback onPressed;
+  final VoidCallback? onLongPress;
   final bool isDark;
   final bool isDangerous;
   final bool isDense;
@@ -17,6 +18,7 @@ class FilledTextButton extends StatelessWidget {
     required this.text,
     this.tooltip,
     required this.onPressed,
+    this.onLongPress,
     this.isDark = false,
     this.isDisabled = false,
     this.isDense = false,
@@ -51,6 +53,7 @@ class FilledTextButton extends StatelessWidget {
         visualDensity: isDense ? VisualDensity.compact : VisualDensity.standard,
       ),
       onPressed: isDisabled ? null : onPressed,
+      onLongPress: isDisabled ? null : onLongPress,
       child: Row(
         mainAxisSize: trailingIcon != null
             ? MainAxisSize.max

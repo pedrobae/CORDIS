@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
@@ -9,6 +12,7 @@ import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/cipher/view_cipher.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/ciphers/library/cipher_card_actions.dart';
+import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -59,9 +63,6 @@ class _CipherCardState extends State<CipherCard> {
             }
 
             final cipher = cipherProvider.getCipherById(widget.cipherId);
-            final versionCount = versionProvider.getVersionsOfCipherCount(
-              widget.cipherId,
-            );
 
             final versionId = versionProvider.getIdOfOldestVersionOfCipher(
               widget.cipherId,
@@ -85,130 +86,184 @@ class _CipherCardState extends State<CipherCard> {
             }
 
             // Card content
-            return GestureDetector(
-              onTap: () {
-                if (selectionProvider.isSelectionMode) {
-                  try {
-                    selectionProvider.select(versionId);
-                    navigationProvider.push(
-                      EditCipherScreen(
-                        cipherID: widget.cipherId,
-                        versionID: versionId,
-                        versionType: VersionType.playlist,
-                        playlistID: widget.playlistId,
-                      ),
-                      showAppBar: false,
-                      showDrawerIcon: false,
-                      onPopCallback: () {
-                        selectionProvider.deselect(versionId);
-                        selectionProvider.enableSelectionMode();
-                      },
-                    );
-                  } catch (error) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          AppLocalizations.of(context)!.errorMessage(
-                            AppLocalizations.of(context)!.addToPlaylist,
-                            error.toString(),
-                          ),
-                        ),
-                        backgroundColor: colorScheme.error,
-                      ),
-                    );
-                  }
-                } else {
-                  navigationProvider.push(
-                    ViewCipherScreen(
-                      cipherId: widget.cipherId,
-                      versionId: versionProvider.getIdOfOldestVersionOfCipher(
-                        widget.cipherId,
-                      ),
-                      versionType: VersionType.local,
-                    ),
-                    showAppBar: false,
-                    showDrawerIcon: false,
-                  );
-                }
-              },
-              onLongPress: () async {
-                if (!selectionProvider.isSelectionMode) {
-                  navigationProvider.push(
-                    EditCipherScreen(
-                      cipherID: widget.cipherId,
-                      versionID: versionProvider.getIdOfOldestVersionOfCipher(
-                        widget.cipherId,
-                      ),
-                      versionType: VersionType.local,
-                    ),
-                  );
-                } else {
-                  selectionProvider.select(
-                    versionProvider.getIdOfOldestVersionOfCipher(
-                      widget.cipherId,
-                    ),
-                  );
-                }
-              },
+            return Padding(
+              padding: const EdgeInsets.only(
+                bottom: 8.0,
+              ), // Spacing between cards
               child: Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: colorScheme.surfaceContainerLowest),
                 ),
                 padding: const EdgeInsets.all(8.0),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // INFO
-                    Expanded(
-                      child: Column(
-                        spacing: 2.0,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(cipher.title, style: textTheme.titleMedium),
-                          Row(
-                            spacing: 16.0,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            spacing: 2.0,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // TITLE
                               Text(
-                                '${AppLocalizations.of(context)!.musicKey}: ${cipher.musicKey}',
-                                style: textTheme.bodyMedium,
+                                cipher.title,
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                              version.bpm != 0
-                                  ? Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.bpmWithPlaceholder(
-                                        version.bpm.toString(),
-                                      ),
-                                      style: textTheme.bodyMedium,
-                                    )
-                                  : Text('-'),
-                              version.duration != Duration.zero
-                                  ? Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.durationWithPlaceholder(
-                                        DateTimeUtils.formatDuration(
-                                          version.duration,
+
+                              // INFO
+                              Row(
+                                spacing: 16.0,
+                                children: [
+                                  Text(
+                                    '${AppLocalizations.of(context)!.musicKey}: ${cipher.musicKey}',
+                                    style: textTheme.bodyMedium,
+                                  ),
+                                  version.bpm != 0
+                                      ? Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          )!.bpmWithPlaceholder(
+                                            version.bpm.toString(),
+                                          ),
+                                          style: textTheme.bodyMedium,
+                                        )
+                                      : Text('-'),
+                                  version.duration != Duration.zero
+                                      ? Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          )!.durationWithPlaceholder(
+                                            DateTimeUtils.formatDuration(
+                                              version.duration,
+                                            ),
+                                          ),
+                                          style: textTheme.bodyMedium,
+                                        )
+                                      : Text('-'),
+                                ],
+                              ),
+
+                              // STRUCTURE LIST
+                              ConstrainedBox(
+                                constraints: BoxConstraints(maxHeight: 25),
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: version.songStructure.length,
+                                  itemBuilder: (_, index) {
+                                    final sectionCode =
+                                        version.songStructure[index];
+                                    final Section section =
+                                        version.sections![sectionCode]!;
+
+                                    // Painter for sections with large codes
+                                    final textPainter = TextPainter(
+                                      text: TextSpan(
+                                        text: sectionCode,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      style: textTheme.bodyMedium,
-                                    )
-                                  : Text('-'),
+                                      maxLines: 1,
+                                      textDirection: TextDirection.ltr,
+                                    )..layout();
+
+                                    return Container(
+                                      height: 25,
+                                      width: max(
+                                        25,
+                                        textPainter.size.width + 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(6),
+                                        color: section.contentColor,
+                                      ),
+                                      margin: const EdgeInsets.only(right: 3),
+                                      child: Center(
+                                        child: Text(
+                                          strutStyle: StrutStyle(
+                                            forceStrutHeight: true,
+                                          ),
+                                          sectionCode,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              // SPACER
+                              SizedBox(height: 8),
                             ],
                           ),
-                          Text(
-                            '$versionCount${AppLocalizations.of(context)!.versions}',
-                            style: textTheme.bodyMedium!.copyWith(
-                              color: colorScheme.shadow,
-                            ),
+                        ),
+
+                        // ACTIONS SHEET
+                        IconButton(
+                          onPressed: () => _openCipherActionsSheet(
+                            context,
+                            selectionProvider,
                           ),
-                        ],
-                      ),
+                          icon: Icon(Icons.more_vert),
+                        ),
+                      ],
                     ),
-                    // ACTIONS
-                    IconButton(
-                      onPressed: () =>
-                          _openCipherActionsSheet(context, selectionProvider),
-                      icon: Icon(Icons.more_vert),
+
+                    // VIEW / ADD TO PLAYLIST
+                    FilledTextButton(
+                      text: (selectionProvider.isSelectionMode)
+                          ? AppLocalizations.of(context)!.addToPlaylist
+                          : AppLocalizations.of(context)!.viewPlaceholder(''),
+                      isDense: true,
+                      onPressed: () {
+                        if (selectionProvider.isSelectionMode) {
+                          selectionProvider.select(versionId);
+                          navigationProvider.push(
+                            EditCipherScreen(
+                              cipherID: widget.cipherId,
+                              versionID: versionId,
+                              versionType: VersionType.playlist,
+                              playlistID: widget.playlistId,
+                            ),
+                            showAppBar: false,
+                            showDrawerIcon: false,
+                            onPopCallback: () {
+                              selectionProvider.deselect(versionId);
+                              selectionProvider.enableSelectionMode();
+                            },
+                          );
+                        } else {
+                          navigationProvider.push(
+                            ViewCipherScreen(
+                              cipherId: widget.cipherId,
+                              versionId: versionId,
+                              versionType: VersionType.local,
+                            ),
+                            showAppBar: false,
+                            showDrawerIcon: false,
+                          );
+                        }
+                      },
+                      onLongPress: () async {
+                        if (selectionProvider.isSelectionMode) {
+                          selectionProvider.select(versionId);
+                        } else {
+                          navigationProvider.push(
+                            EditCipherScreen(
+                              cipherID: widget.cipherId,
+                              versionID: versionId,
+                              versionType: VersionType.local,
+                            ),
+                          );
+                        }
+                      },
                     ),
                   ],
                 ),

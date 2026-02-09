@@ -136,14 +136,9 @@ class _CipherScrollViewState extends State<CipherScrollView> {
                   );
                 }
 
-                return Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 8.0,
-                  ), // Spacing between cards
-                  child: CipherCard(
-                    cipherId: localIds[index],
-                    playlistId: widget.playlistId,
-                  ),
+                return CipherCard(
+                  cipherId: localIds[index],
+                  playlistId: widget.playlistId,
                 );
               },
             ),
