@@ -31,6 +31,7 @@ class _CipherScrollViewState extends State<CipherScrollView> {
     final cloudVersionProvider = context.read<CloudVersionProvider>();
     final localVersionProvider = context.read<LocalVersionProvider>();
 
+    localVersionProvider.clearCache();
     await cipherProvider.loadCiphers(forceReload: forceReload);
     await cloudVersionProvider.loadVersions(forceReload: forceReload);
 

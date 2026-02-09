@@ -50,11 +50,14 @@ class ScheduleDto {
   }
 
   Map<String, dynamic> toFirestore() {
-    final collaborators = roles
+    List<String> collaborators = roles
         .expand((role) => role.users.expand((user) => [user.firebaseId ?? '']))
-        .toSet()
         .toList();
 
+    collaborators.add(
+      ownerFirebaseId,
+    ); // Ensure owner is included as a collaborator
+    collaborators = collaborators.toSet().toList(); // Remove duplicates
     collaborators.remove(''); // Remove any empty IDs
 
     return {
