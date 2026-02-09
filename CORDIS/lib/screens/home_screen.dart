@@ -40,8 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final cloudScheduleProvider = context.read<CloudScheduleProvider>();
     final cloudVersionProvider = context.read<CloudVersionProvider>();
 
-    await localScheduleProvider.loadSchedules();
     await cloudScheduleProvider.loadSchedules(authProvider.id!);
+    await localScheduleProvider.loadSchedules();
 
     for (var schedule in cloudScheduleProvider.schedules.values) {
       for (var versionEntry in schedule.playlist.versions.entries) {

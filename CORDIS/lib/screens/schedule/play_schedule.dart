@@ -120,7 +120,14 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                       '';
                 } else {
                   nextTitle =
-                      cipherProvider.getCipherById(nextItem.id!)?.title ?? '';
+                      cipherProvider
+                          .getCipherById(
+                            versionProvider
+                                .getVersion(nextItem.contentId!)!
+                                .cipherId,
+                          )
+                          ?.title ??
+                      '';
                 }
               } else if (nextItem.type == PlaylistItemType.flowItem) {
                 if (isCloud) {
@@ -244,6 +251,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                     width: MediaQuery.of(context).size.width,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
                       children: [
                         // PREVIOUS ITEM BUTTON
                         GestureDetector(
@@ -266,15 +274,20 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                         ),
 
                         // NEXT ITEM TITLE
-                        Text(
-                          nextTitle.isEmpty
-                              ? '-'
-                              : AppLocalizations.of(
-                                  context,
-                                )!.nextPlaceholder(nextTitle),
-                          style: textTheme.titleLarge?.copyWith(
-                            color: colorScheme.shadow,
-                            fontWeight: FontWeight.w500,
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 2,
+                          child: Text(
+                            nextTitle.isEmpty
+                                ? '-'
+                                : AppLocalizations.of(
+                                    context,
+                                  )!.nextPlaceholder(nextTitle),
+                            style: textTheme.titleLarge?.copyWith(
+                              color: colorScheme.shadow,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            softWrap: true,
+                            textAlign: TextAlign.center,
                           ),
                         ),
 

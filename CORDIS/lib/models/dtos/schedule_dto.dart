@@ -124,6 +124,8 @@ class ScheduleDto {
           .values
           .toList(),
       shareCode: shareCode,
+      isPublic:
+          true, // All schedules on firestore are considered published, access is controlled by share code and collaborators list
     );
 
     // Adiciona os papéis ao agendamento

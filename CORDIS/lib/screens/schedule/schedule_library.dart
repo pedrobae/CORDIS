@@ -30,11 +30,11 @@ class _ScheduleLibraryScreenState extends State<ScheduleLibraryScreen> {
       final cloudScheduleProvider = context.read<CloudScheduleProvider>();
       final cloudVersionProvider = context.read<CloudVersionProvider>();
 
-      await localScheduleProvider.loadSchedules();
       if (mounted) {
         await cloudScheduleProvider.loadSchedules(
           context.read<MyAuthProvider>().id!,
         );
+        await localScheduleProvider.loadSchedules();
       }
       for (var schedule in cloudScheduleProvider.schedules.values) {
         for (var versionEntry in schedule.playlist.versions.entries) {
