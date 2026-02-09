@@ -110,8 +110,8 @@ class PlaylistDto {
           PlaylistItem(
             id: -1,
             firebaseContentId: id[1],
-            type: PlaylistItemType.flowItem,
             position: position++,
+            type: PlaylistItemType.flowItem,
             duration: Duration(
               seconds: flowItems[id[1]]?['duration'] as int? ?? 0,
             ),

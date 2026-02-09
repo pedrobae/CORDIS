@@ -26,7 +26,7 @@ extension PlaylistItemTypeExtension on PlaylistItemType {
 class PlaylistItem {
   final PlaylistItemType type;
   final int? id;
-  final int? contentId;
+  final int? contentId; // when contentID is null - firebaseContentId is not
   Duration duration;
   String? firebaseContentId;
   int position;
@@ -74,9 +74,8 @@ class PlaylistItem {
         duration: duration,
       );
 
-  PlaylistItem.flowItem(int flowItemId, int position, int id, Duration duration)
+  PlaylistItem.flowItem(int flowItemId, int position, Duration duration)
     : this(
-        id: id,
         type: PlaylistItemType.flowItem,
         contentId: flowItemId,
         position: position,
@@ -84,7 +83,6 @@ class PlaylistItem {
       );
 
   // Type checking helpers
-  bool get isVersion => type == PlaylistItemType.version;
   bool get isFlowItem => type == PlaylistItemType.flowItem;
 
   PlaylistItem copyWith({

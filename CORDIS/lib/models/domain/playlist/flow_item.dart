@@ -71,4 +71,22 @@ class FlowItem {
       'duration': duration.inSeconds.toString(),
     };
   }
+
+  FlowItem copyWith({
+    String? firebaseId,
+    int? playlistId,
+    String? title,
+    String? contentText,
+    Duration? duration,
+    int? position,
+  }) {
+    return FlowItem(
+      firebaseId: firebaseId ?? this.firebaseId,
+      playlistId: playlistId ?? this.playlistId,
+      title: title ?? this.title,
+      contentText: contentText ?? this.title,
+      duration: duration ?? this.duration,
+      position: position ?? this.position,
+    );
+  }
 }

@@ -267,6 +267,10 @@
   "@changePlaceholder": {"description": "Change object button label", "placeholders": {"object": {}}},
   "publishPlaceholder": "Publicar {object}",
   "@publishPlaceholder": {"description": "Publish object button label", "placeholders": {"object": {}}},
+  "renamePlaceholder": "Renomear {object}",
+  "@renamePlaceholder": {"description": "Rename object button label", "placeholders": {"object": {}}},
+  "optionsPlaceholder": "Opções de {object}",
+  "@optionsPlaceholder": {"description": "Object Options sheet title", "placeholders": {"object": {}}},
 
   "duplicateTooltip": "Criar uma cópia desta {object}",
   "@duplicateTooltip": {"description": "Tooltip for duplicate action", "placeholders": {"object": {}}},

@@ -407,6 +407,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String renamePlaceholder(Object object) {
+    return 'Rename $object';
+  }
+
+  @override
+  String optionsPlaceholder(Object object) {
+    return '$object Options';
+  }
+
+  @override
   String duplicateTooltip(Object object) {
     return 'Create a copy of this $object';
   }

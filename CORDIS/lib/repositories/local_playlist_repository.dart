@@ -273,38 +273,45 @@ class PlaylistRepository {
       for (var i = 0; i < items.length; i++) {
         final item = items[i];
         final tempPosition = -(i + 1000);
-        if (item.isVersion) {
-          await txn.update(
-            'playlist_version',
-            {'position': tempPosition},
-            where: 'id = ?',
-            whereArgs: [item.id!],
-          );
-        } else if (item.isFlowItem) {
-          await txn.update(
-            'flow_item',
-            {'position': tempPosition},
-            where: 'id = ?',
-            whereArgs: [item.contentId],
-          );
+
+        switch (item.type) {
+          case PlaylistItemType.version:
+            await txn.update(
+              'playlist_version',
+              {'position': tempPosition},
+              where: 'id = ?',
+              whereArgs: [item.id!],
+            );
+            break;
+
+          case PlaylistItemType.flowItem:
+            await txn.update(
+              'flow_item',
+              {'position': tempPosition},
+              where: 'id = ?',
+              whereArgs: [item.contentId],
+            );
+            break;
         }
       }
 
       for (var item in items) {
-        if (item.isVersion) {
-          await txn.update(
-            'playlist_version',
-            {'position': item.position},
-            where: 'id = ?',
-            whereArgs: [item.id!],
-          );
-        } else if (item.isFlowItem) {
-          await txn.update(
-            'flow_item',
-            {'position': item.position},
-            where: 'id = ?',
-            whereArgs: [item.contentId],
-          );
+        switch (item.type) {
+          case PlaylistItemType.version:
+            await txn.update(
+              'playlist_version',
+              {'position': item.position},
+              where: 'id = ?',
+              whereArgs: [item.id!],
+            );
+            break;
+          case PlaylistItemType.flowItem:
+            await txn.update(
+              'flow_item',
+              {'position': item.position},
+              where: 'id = ?',
+              whereArgs: [item.contentId],
+            );
         }
       }
     });
@@ -327,7 +334,7 @@ class PlaylistRepository {
 
     final flowItemResults = await db.rawQuery(
       '''
-        SELECT id as content_id, position, duration, id
+        SELECT id as content_id, position, duration
         FROM flow_item
         WHERE playlist_id = ? 
         ORDER BY position ASC
@@ -336,12 +343,11 @@ class PlaylistRepository {
     );
 
     return flowItemResults.map((row) {
-      final id = row['id'] as int;
       final contentId = row['content_id'] as int;
       final position = row['position'] as int;
       final duration = Duration(seconds: row['duration'] as int);
 
-      return PlaylistItem.flowItem(contentId, position, id, duration);
+      return PlaylistItem.flowItem(contentId, position, duration);
     }).toList();
   }
 

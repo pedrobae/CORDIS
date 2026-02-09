@@ -86,6 +86,15 @@ class Version {
 
   // To JSON for database (without content - sections handled separately)
   Map<String, dynamic> toSqLite() {
+    if (firebaseId == null || firebaseId!.isEmpty == false) {
+      return {
+        'cipher_id': cipherId,
+        'song_structure': songStructure.join(','),
+        'transposed_key': transposedKey,
+        'version_name': versionName,
+        'created_at': createdAt.toIso8601String(),
+      };
+    }
     return {
       'firebase_id': firebaseId,
       'cipher_id': cipherId,

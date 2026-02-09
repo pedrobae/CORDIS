@@ -143,9 +143,11 @@ class FilledTextButton extends StatelessWidget {
                 fontWeight: FontWeight.w400,
                 color: isDisabled
                     ? Colors.black54
-                    : (isDark
-                          ? colorScheme.surfaceContainerHighest
-                          : colorScheme.shadow),
+                    : (isDangerous
+                          ? colorScheme.error
+                          : (isDark
+                                ? colorScheme.surfaceContainerHighest
+                                : colorScheme.shadow)),
               ),
             ),
           ),

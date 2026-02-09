@@ -78,7 +78,7 @@ class LocalVersionProvider extends ChangeNotifier {
   }
 
   // ===== CREATE =====
-  /// Creates a new version from the local cache to an existing cipher
+  /// Creates a new version from the local cache (-1) to an existing cipher
   /// If no cipherId is provided, the version will use the cached cipherID or throw an error
   Future<int?> createVersion({int? cipherID}) async {
     if (_isSaving) return null;
@@ -152,7 +152,8 @@ class LocalVersionProvider extends ChangeNotifier {
     return versionId;
   }
 
-  // Load all versions of a cipher into cache, used for version selector and cipher expansion
+  // ===== READ =====
+  /// Load all versions of a cipher into cache, used for version selector and cipher expansion
   Future<void> loadVersionsOfCipher(int cipherId) async {
     if (_isLoading) return;
 
@@ -209,6 +210,28 @@ class LocalVersionProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Fetches a version directly from SQLite
+  Future<Version?> fetchVersion(int versionID) async {
+    if (_isLoading) return null;
+
+    Version? version;
+
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      version = await _cipherRepository.getVersionWithId(versionID);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+
+    return version;
   }
 
   // ===== UPSERT =====

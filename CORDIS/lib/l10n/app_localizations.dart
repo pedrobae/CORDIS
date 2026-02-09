@@ -818,6 +818,18 @@ abstract class AppLocalizations {
   /// **'Publicar {object}'**
   String publishPlaceholder(Object object);
 
+  /// Rename object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Renomear {object}'**
+  String renamePlaceholder(Object object);
+
+  /// Object Options sheet title
+  ///
+  /// In pt, this message translates to:
+  /// **'Opções de {object}'**
+  String optionsPlaceholder(Object object);
+
   /// Tooltip for duplicate action
   ///
   /// In pt, this message translates to:
