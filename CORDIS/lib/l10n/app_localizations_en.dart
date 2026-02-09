@@ -431,6 +431,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get joinSchedule => 'Join Service';
 
   @override
+  String get completed => 'Completed';
+
+  @override
   String get draft => 'Draft';
 
   @override

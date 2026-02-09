@@ -196,29 +196,30 @@ class _SectionsTabState extends State<SectionsTab> {
                           ),
                         ],
                         // Palette FAB
-                        GestureDetector(
-                          onTap: _togglePalette,
-                          child: Container(
-                            margin: const EdgeInsets.all(8),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: colorScheme.onSurface,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colorScheme.surfaceContainerLowest,
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              paletteIsOpen ? Icons.close : Icons.palette,
-                              size: 28,
-                              color: colorScheme.surface,
+                        if (widget.isEnabled)
+                          GestureDetector(
+                            onTap: _togglePalette,
+                            child: Container(
+                              margin: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: colorScheme.onSurface,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: colorScheme.surfaceContainerLowest,
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                paletteIsOpen ? Icons.close : Icons.palette,
+                                size: 28,
+                                color: colorScheme.surface,
+                              ),
                             ),
                           ),
-                        ),
 
                         // Open add sheet
                         GestureDetector(

@@ -352,7 +352,6 @@ class _TokenContentCardState extends State<TokenContentCard> {
                                 widget.versionID!,
                                 widget.sectionCode,
                               );
-                          Navigator.pop(context); // Close confirmation sheet
                           Navigator.pop(context); // Close quick actions sheet
                         },
                       );

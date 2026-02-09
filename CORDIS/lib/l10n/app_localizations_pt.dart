@@ -433,6 +433,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get joinSchedule => 'Participar da Agenda';
 
   @override
+  String get completed => 'Completo';
+
+  @override
   String get draft => 'Rascunho';
 
   @override

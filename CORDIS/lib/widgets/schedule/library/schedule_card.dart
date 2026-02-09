@@ -1,4 +1,5 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
@@ -101,21 +102,34 @@ class ScheduleCard extends StatelessWidget {
                                 Container(
                                   padding: EdgeInsets.symmetric(horizontal: 7),
                                   decoration: BoxDecoration(
-                                    color: schedule.isPublic
-                                        ? Color(0xFF52A94F)
-                                        : Color(0XFFFFA500),
+                                    color: switch (schedule.scheduleState) {
+                                      ScheduleState.completed =>
+                                        colorScheme.onSurface,
+                                      ScheduleState.draft => Color(0XFFFFA500),
+                                      ScheduleState.published => Color(
+                                        0xFF52A94F,
+                                      ),
+                                    },
                                     borderRadius: BorderRadius.circular(100),
                                   ),
                                   child: Text(
-                                    schedule.isPublic
-                                        ? AppLocalizations.of(
-                                            context,
-                                          )!.published
-                                        : AppLocalizations.of(context)!.draft,
+                                    switch (schedule.scheduleState) {
+                                      ScheduleState.completed =>
+                                        AppLocalizations.of(context)!.completed,
+                                      ScheduleState.draft =>
+                                        AppLocalizations.of(context)!.draft,
+                                      ScheduleState.published =>
+                                        AppLocalizations.of(context)!.published,
+                                    },
                                     style: theme.textTheme.bodyMedium!.copyWith(
-                                      color: schedule.isPublic
-                                          ? colorScheme.surface
-                                          : colorScheme.onSurface,
+                                      color: switch (schedule.scheduleState) {
+                                        ScheduleState.completed =>
+                                          colorScheme.surface,
+                                        ScheduleState.draft =>
+                                          colorScheme.onSurface,
+                                        ScheduleState.published =>
+                                          colorScheme.surface,
+                                      },
                                       fontSize: 13,
                                       fontStyle: FontStyle.italic,
                                       fontWeight: FontWeight.w500,

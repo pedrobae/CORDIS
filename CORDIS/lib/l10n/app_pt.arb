@@ -285,6 +285,8 @@
 
   "joinSchedule": "Participar da Agenda",
   "@joinSchedule": {"description": "Share code screen title"},
+  "completed": "Completo",
+  "@completed": {"description": "Completed status label"},
   "draft": "Rascunho",
   "@draft": {"description": "Draft status label"},
   "published": "Publicado",

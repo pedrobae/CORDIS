@@ -72,6 +72,10 @@ class LocalScheduleProvider extends ChangeNotifier {
     return null;
   }
 
+  bool isPublished(int scheduleID) {
+    return _schedules[scheduleID]!.isPublic;
+  }
+
   // ===== CREATE =====
   /// Creates a brand new schedule, used when duplicating a cloud schedule.
   Future<int?> createSchedule(Schedule schedule) async {

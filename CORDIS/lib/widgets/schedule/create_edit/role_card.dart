@@ -49,10 +49,7 @@ class RoleCard extends StatelessWidget {
                           : AppLocalizations.of(
                               context,
                             )!.xMembers(role.users.length),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                      style: TextStyle(fontSize: 14, color: colorScheme.shadow),
                       softWrap: false,
                     ),
                   ],

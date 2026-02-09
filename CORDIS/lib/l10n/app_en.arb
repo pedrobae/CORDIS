@@ -290,6 +290,8 @@
 
   "joinSchedule": "Join Service",
   "@joinSchedule": {"description": "Share code screen title"},
+  "completed": "Completed",
+  "@completed": {"description": "Completed status label"},
   "draft": "Draft",
   "@draft": {"description": "Draft status label"},
   "published": "Published",

@@ -38,8 +38,8 @@ class SectionProvider extends ChangeNotifier {
   }
 
   /// ===== CREATE =====
-  // Add a new section
-  void cacheAddSection(
+  // Add a new section, returns the new section code (with suffix if there was a conflict)
+  String cacheAddSection(
     dynamic versionKey,
     String contentCode,
     Color color,
@@ -53,16 +53,35 @@ class SectionProvider extends ChangeNotifier {
       contentText: '',
     );
     // CHECK IF ALREADY EXISTS
-    if (_sections[newSection.versionId] != null &&
-        _sections[newSection.versionId]!.containsKey(newSection.contentCode)) {
-      throw Exception(
+    bool exists = false;
+    for (String key in _sections[newSection.versionId]?.keys ?? []) {
+      // Strip numbering suffixes for comparison, remove numbers
+      final strippedKey = key.toString().replaceAll(RegExp(r'\d+$'), '');
+      if (strippedKey == contentCode) {
+        exists = true;
+        break;
+      }
+    }
+    if (exists) {
+      debugPrint(
         'Section with code ${newSection.contentCode} already exists in version ${newSection.versionId}.',
       );
+      int suffix = 1;
+      String newCode;
+      do {
+        newCode = '${newSection.contentCode}$suffix';
+        suffix++;
+      } while (_sections[newSection.versionId] != null &&
+          _sections[newSection.versionId]!.containsKey(newCode));
+
+      debugPrint('Renaming new section to $newCode to avoid conflict.');
+      newSection.contentCode = newCode;
     }
 
     _sections[newSection.versionId] ??= {};
     _sections[newSection.versionId]![newSection.contentCode] = newSection;
     notifyListeners();
+    return newSection.contentCode;
   }
 
   // Set new sections in cache (used when importing or on cloud load)

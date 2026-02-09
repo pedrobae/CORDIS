@@ -5,6 +5,8 @@ import 'package:cordis/models/dtos/playlist_dto.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:flutter/material.dart';
 
+enum ScheduleState { draft, published, completed }
+
 class Schedule {
   final int id;
   final String? firebaseId;
@@ -35,6 +37,18 @@ class Schedule {
     required this.shareCode,
     this.isPublic = false,
   });
+
+  ScheduleState get scheduleState {
+    if (!isPublic) {
+      return ScheduleState.draft;
+    } else {
+      if (DateTime.now().isAfter(date)) {
+        return ScheduleState.completed;
+      } else {
+        return ScheduleState.published;
+      }
+    }
+  }
 
   factory Schedule.fromSqlite(Map<String, dynamic> map, List<Role> roles) {
     return Schedule(

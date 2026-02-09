@@ -18,7 +18,7 @@ class NavigationProvider extends ChangeNotifier {
   static final List<VoidCallback> _onPopCallbacks = [];
 
   Widget?
-  screenOnForeground; // Screen that can be placed on top of the current stack without affecting it
+  _screenOnForeground; // Screen that can be placed on top of the current stack without affecting it
 
   bool _isLoading = false;
   String? _error;
@@ -31,9 +31,10 @@ class NavigationProvider extends ChangeNotifier {
       _screenStack.isNotEmpty
           ? _screenStack.last
           : _getScreenForRoute(_currentRoute),
-      if (screenOnForeground != null) screenOnForeground!,
+      if (_screenOnForeground != null) _screenOnForeground!,
     ],
   );
+  Widget? get screenOnForeground => _screenOnForeground;
   bool get showAppBar =>
       _showAppBarStack.isNotEmpty ? _showAppBarStack.last : true;
   bool get showDrawerIcon =>
@@ -49,6 +50,8 @@ class NavigationProvider extends ChangeNotifier {
   // Navigation methods following your provider pattern
   void navigateToRoute(NavigationRoute route) {
     _currentRoute = route;
+    _screenOnForeground =
+        null; // Clear any foreground screen when navigating to a new route
     _screenStack.clear();
     _showAppBarStack.clear();
     _showDrawerIconStack.clear();
@@ -80,7 +83,7 @@ class NavigationProvider extends ChangeNotifier {
   }
 
   void pushForeground(Widget screen) {
-    screenOnForeground = screen;
+    _screenOnForeground = screen;
     notifyListeners();
   }
 
@@ -125,8 +128,8 @@ class NavigationProvider extends ChangeNotifier {
   }
 
   void popForeground() {
-    if (screenOnForeground != null) {
-      screenOnForeground = null;
+    if (_screenOnForeground != null) {
+      _screenOnForeground = null;
       notifyListeners();
     }
   }

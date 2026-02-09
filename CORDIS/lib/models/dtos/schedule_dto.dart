@@ -118,11 +118,7 @@ class ScheduleDto {
       location: location,
       roomVenue: roomVenue,
       playlistId: playlistLocalId,
-      roles: roles
-          .asMap()
-          .map((index, role) => MapEntry(index, role.toDomain()))
-          .values
-          .toList(),
+      roles: [],
       shareCode: shareCode,
       isPublic:
           true, // All schedules on firestore are considered published, access is controlled by share code and collaborators list

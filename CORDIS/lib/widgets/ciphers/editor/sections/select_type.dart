@@ -90,13 +90,13 @@ class SelectType extends StatelessWidget {
                     GestureDetector(
                       onTap: () {
                         try {
-                          _upsertSection(context, section);
+                          final newCode = _upsertSection(context, section);
                           isNewSection
                               ? context
                                     .read<NavigationProvider>()
                                     .pushForeground(
                                       EditSectionScreen(
-                                        sectionCode: section.code,
+                                        sectionCode: newCode,
                                         versionID: versionID!,
                                         isNewSection: true,
                                       ),
@@ -105,7 +105,7 @@ class SelectType extends StatelessWidget {
                                     .read<NavigationProvider>()
                                     .pushForeground(
                                       EditSectionScreen(
-                                        sectionCode: section.code,
+                                        sectionCode: newCode,
                                         versionID: versionID!,
                                       ),
                                     );
@@ -169,15 +169,16 @@ class SelectType extends StatelessWidget {
     );
   }
 
-  void _upsertSection(BuildContext context, SectionLabel section) {
+  String _upsertSection(BuildContext context, SectionLabel section) {
     final sectionProvider = context.read<SectionProvider>();
     if (isNewSection) {
-      sectionProvider.cacheAddSection(
+      final newCode = sectionProvider.cacheAddSection(
         versionID!,
         section.code,
         section.color,
         section.officialLabel,
       );
+      return newCode;
     } else {
       sectionProvider.cacheUpdate(
         versionID!,
@@ -201,6 +202,7 @@ class SelectType extends StatelessWidget {
           newCode: section.code,
         );
       }
+      return section.code;
     }
   }
 }

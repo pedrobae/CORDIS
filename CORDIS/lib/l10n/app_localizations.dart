@@ -860,6 +860,12 @@ abstract class AppLocalizations {
   /// **'Participar da Agenda'**
   String get joinSchedule;
 
+  /// Completed status label
+  ///
+  /// In pt, this message translates to:
+  /// **'Completo'**
+  String get completed;
+
   /// Draft status label
   ///
   /// In pt, this message translates to:
