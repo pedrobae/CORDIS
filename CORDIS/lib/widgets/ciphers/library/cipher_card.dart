@@ -232,8 +232,8 @@ class _CipherCardState extends State<CipherCard> {
                               versionType: VersionType.playlist,
                               playlistID: widget.playlistId,
                             ),
-                            showAppBar: false,
-                            showDrawerIcon: false,
+                            showBottomNavBar: true,
+
                             onPopCallback: () {
                               selectionProvider.deselect(versionId);
                               selectionProvider.enableSelectionMode();
@@ -246,8 +246,7 @@ class _CipherCardState extends State<CipherCard> {
                               versionID: versionId,
                               versionType: VersionType.local,
                             ),
-                            showAppBar: false,
-                            showDrawerIcon: false,
+                            showBottomNavBar: true,
                           );
                         }
                       },
@@ -261,6 +260,7 @@ class _CipherCardState extends State<CipherCard> {
                               versionID: versionId,
                               versionType: VersionType.local,
                             ),
+                            showBottomNavBar: true,
                           );
                         }
                       },

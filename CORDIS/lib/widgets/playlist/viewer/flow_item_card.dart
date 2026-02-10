@@ -109,8 +109,7 @@ class FlowItemCard extends StatelessWidget {
                               playlistId: playlistId,
                               flowItemId: flowItemId,
                             ),
-                            showAppBar: false,
-                            showDrawerIcon: false,
+                            showBottomNavBar: true,
                           );
                         },
                       ),

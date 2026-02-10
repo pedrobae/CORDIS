@@ -169,6 +169,7 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
                                       versionID: -1,
                                       cipherID: -1,
                                     ),
+                                    showBottomNavBar: true,
                                   );
                                 }
                               },

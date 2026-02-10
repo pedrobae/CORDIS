@@ -72,9 +72,6 @@ class NewSectionSheet extends StatelessWidget {
                 Navigator.of(context).pop();
                 context.read<NavigationProvider>().push(
                   const ImportTextScreen(),
-                  showAppBar: false,
-                  showDrawerIcon: false,
-                  showBottomNavBar: false,
                 );
               },
             ),
@@ -85,12 +82,7 @@ class NewSectionSheet extends StatelessWidget {
             isDiscrete: true,
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<NavigationProvider>().push(
-                const ImportPdfScreen(),
-                showAppBar: false,
-                showDrawerIcon: false,
-                showBottomNavBar: false,
-              );
+              context.read<NavigationProvider>().push(const ImportPdfScreen());
             },
           ),
           if (secret)

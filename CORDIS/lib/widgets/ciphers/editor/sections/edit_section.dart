@@ -69,8 +69,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
             children: [
               BackButton(
                 color: colorScheme.onSurface,
-                onPressed: () =>
-                    context.read<NavigationProvider>().popForeground(),
+                onPressed: () => context.read<NavigationProvider>().pop(),
               ),
               Text(
                 AppLocalizations.of(
@@ -81,7 +80,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
               IconButton(
                 onPressed: () {
                   _upsertSection();
-                  context.read<NavigationProvider>().popForeground();
+                  context.read<NavigationProvider>().pop();
                 },
                 icon: Icon(Icons.save, size: 24, color: colorScheme.onSurface),
               ),
@@ -254,9 +253,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                               itemType: AppLocalizations.of(context)!.section,
                               onConfirm: () {
                                 _deleteSection();
-                                context
-                                    .read<NavigationProvider>()
-                                    .popForeground();
+                                context.read<NavigationProvider>().pop();
                               },
                             );
                           },

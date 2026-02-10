@@ -83,6 +83,7 @@ class PlaylistCardActionsSheet extends StatelessWidget {
                       Navigator.of(context).pop(); // Close the bottom sheet
                       navigationProvider.push(
                         EditPlaylistScreen(playlistId: playlistId),
+                        showBottomNavBar: true,
                       );
                     },
                   ),

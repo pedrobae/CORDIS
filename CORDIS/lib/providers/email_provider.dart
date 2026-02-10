@@ -11,7 +11,7 @@ class EmailProvider extends ChangeNotifier {
   Future<bool> sendInvites(dynamic schedule, List<String> selectedRoles) async {
     try {
       throw UnimplementedError();
-      // TODO - EMAIL SENDING LOGIC HERE
+      // TODO:cloud - EMAIL SHARING LOGIC HERE
     } catch (e) {
       _error = e.toString();
       notifyListeners();

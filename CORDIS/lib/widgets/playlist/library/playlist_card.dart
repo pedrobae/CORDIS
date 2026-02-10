@@ -53,8 +53,7 @@ class PlaylistCard extends StatelessWidget {
                     ? null
                     : navigationProvider.push(
                         ViewPlaylistScreen(playlistId: playlistId),
-                        showAppBar: false,
-                        showDrawerIcon: false,
+                        showBottomNavBar: true,
                       );
               },
               child: Container(
@@ -155,8 +154,7 @@ class PlaylistCard extends StatelessWidget {
                         onPressed: () {
                           navigationProvider.push(
                             ViewPlaylistScreen(playlistId: playlistId),
-                            showAppBar: false,
-                            showDrawerIcon: false,
+                            showBottomNavBar: true,
                             onPopCallback: () async {
                               // CHECK IF THE PLAYLIST IS ASSOSSIATED WITH A PUBLISHED SCHEDULE
                               final schedule = await localScheduleProvider

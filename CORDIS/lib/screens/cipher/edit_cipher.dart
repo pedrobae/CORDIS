@@ -393,7 +393,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           navigationProvider.pop();
           break;
         case VersionType.cloud:
-          // TODO: CLOUD - Save cloud version edits/upload, decide
+          // TODO:cloud - Save cloud version edits/upload, decide
           break;
 
         case VersionType.local:

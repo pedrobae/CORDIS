@@ -213,8 +213,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                               versionID: widget.versionID,
                               versionType: widget.versionType,
                             ),
-                            showAppBar: false,
-                            showDrawerIcon: false,
+                            showBottomNavBar: true,
                           );
                         },
                       ),

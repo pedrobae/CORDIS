@@ -290,8 +290,7 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                                   versionType: VersionType.import,
                                   versionID: -1,
                                 ),
-                                showAppBar: false,
-                                showDrawerIcon: false,
+                                showBottomNavBar: true,
                               );
                             },
                             text: AppLocalizations.of(context)!.processPDF,

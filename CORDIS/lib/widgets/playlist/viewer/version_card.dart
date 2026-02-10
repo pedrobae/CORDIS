@@ -359,8 +359,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                   versionID: widget.versionId,
                                   cipherID: isCloud ? null : version.cipherId,
                                 ),
-                                showAppBar: false,
-                                showDrawerIcon: false,
+                                showBottomNavBar: true,
                               );
                             },
                           ),

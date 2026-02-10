@@ -180,8 +180,7 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
                             // Proceed to step 2
                             navigationProvider.push(
                               CreateScheduleScreen(creationStep: 2),
-                              showAppBar: false,
-                              showDrawerIcon: false,
+                              showBottomNavBar: true,
                             );
                           case 2:
                             // Cache Schedule Details
@@ -198,8 +197,7 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
                             // Proceed to step 3
                             navigationProvider.push(
                               CreateScheduleScreen(creationStep: 3),
-                              showAppBar: false,
-                              showDrawerIcon: false,
+                              showBottomNavBar: true,
                             );
                             break;
                           case 3:

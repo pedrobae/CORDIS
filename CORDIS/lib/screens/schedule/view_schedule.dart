@@ -188,9 +188,6 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                     onPressed: () {
                       navigationProvider.push(
                         PlayScheduleScreen(scheduleId: widget.scheduleId),
-                        showAppBar: false,
-                        showDrawerIcon: false,
-                        showBottomNavBar: false,
                       );
                     },
                   ),
@@ -301,8 +298,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                       mode: EditScheduleMode.details,
                                       scheduleId: widget.scheduleId,
                                     ),
-                                    showAppBar: false,
-                                    showDrawerIcon: false,
+                                    showBottomNavBar: true,
                                   );
                                 },
                                 isDark: true,
@@ -393,8 +389,8 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                       mode: EditScheduleMode.playlist,
                                       scheduleId: widget.scheduleId,
                                     ),
-                                    showAppBar: false,
-                                    showDrawerIcon: false,
+                                    showBottomNavBar: true,
+
                                     onPopCallback: () => selectionProvider
                                         .disableSelectionMode(),
                                   );
@@ -465,8 +461,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                       mode: EditScheduleMode.roleMember,
                                       scheduleId: widget.scheduleId,
                                     ),
-                                    showAppBar: false,
-                                    showDrawerIcon: false,
+                                    showBottomNavBar: true,
                                   );
                                 },
                                 isDark: true,

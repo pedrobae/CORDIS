@@ -14,6 +14,7 @@ class NavigationProvider extends ChangeNotifier {
   static final List<bool> _showAppBarStack = [];
   static final List<bool> _showDrawerIconStack = [];
   static final List<bool> _showBottomNavBarStack = [];
+  static final List<bool> _showFABStack = [];
 
   static final List<VoidCallback> _onPopCallbacks = [];
 
@@ -41,7 +42,7 @@ class NavigationProvider extends ChangeNotifier {
       _showDrawerIconStack.isNotEmpty ? _showDrawerIconStack.last : true;
   bool get showBottomNavBar =>
       _showBottomNavBarStack.isNotEmpty ? _showBottomNavBarStack.last : true;
-
+  bool get showFAB => _showFABStack.isNotEmpty ? _showFABStack.last : true;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -56,6 +57,7 @@ class NavigationProvider extends ChangeNotifier {
     _showAppBarStack.clear();
     _showDrawerIconStack.clear();
     _showBottomNavBarStack.clear();
+    _showFABStack.clear();
 
     // Clear onPop callbacks
     while (_onPopCallbacks.isNotEmpty) {
@@ -69,15 +71,17 @@ class NavigationProvider extends ChangeNotifier {
 
   void push(
     Widget screen, {
-    bool showAppBar = true,
-    bool showDrawerIcon = true,
-    bool showBottomNavBar = true,
+    bool showAppBar = false,
+    bool showDrawerIcon = false,
+    bool showBottomNavBar = false,
+    bool showFAB = false,
     VoidCallback? onPopCallback,
   }) {
     _screenStack.add(screen);
     _showAppBarStack.add(showAppBar);
     _showDrawerIconStack.add(showDrawerIcon);
     _showBottomNavBarStack.add(showBottomNavBar);
+    _showFABStack.add(showFAB);
     _onPopCallbacks.add(onPopCallback ?? () {});
     notifyListeners();
   }
@@ -89,9 +93,10 @@ class NavigationProvider extends ChangeNotifier {
 
   void pushReplacement(
     Widget screen, {
-    bool showAppBar = true,
-    bool showDrawerIcon = true,
-    bool showBottomNavBar = true,
+    bool showAppBar = false,
+    bool showDrawerIcon = false,
+    bool showBottomNavBar = false,
+    bool showFAB = false,
     VoidCallback? onPopCallback,
   }) {
     if (_screenStack.isNotEmpty) {
@@ -99,6 +104,7 @@ class NavigationProvider extends ChangeNotifier {
       _showAppBarStack.removeLast();
       _showDrawerIconStack.removeLast();
       _showBottomNavBarStack.removeLast();
+      _showFABStack.removeLast();
       _onPopCallbacks.removeLast();
     }
     push(
@@ -111,6 +117,11 @@ class NavigationProvider extends ChangeNotifier {
   }
 
   void pop() {
+    if (_screenOnForeground != null) {
+      _screenOnForeground = null;
+      notifyListeners();
+      return;
+    }
     if (_screenStack.isNotEmpty) {
       try {
         _onPopCallbacks.last();
@@ -123,13 +134,7 @@ class NavigationProvider extends ChangeNotifier {
       _showAppBarStack.removeLast();
       _showDrawerIconStack.removeLast();
       _showBottomNavBarStack.removeLast();
-      notifyListeners();
-    }
-  }
-
-  void popForeground() {
-    if (_screenOnForeground != null) {
-      _screenOnForeground = null;
+      _showFABStack.removeLast();
       notifyListeners();
     }
   }
@@ -208,18 +213,22 @@ class NavigationProvider extends ChangeNotifier {
   }) {
     switch (route) {
       case NavigationRoute.home:
-        return Icon(Icons.home, color: iconColor, size: iconSize);
+        return Icon(Icons.home_outlined, color: iconColor, size: iconSize);
       case NavigationRoute.library:
-        return Icon(Icons.library_music, color: iconColor, size: iconSize);
+        return Icon(
+          Icons.library_music_outlined,
+          color: iconColor,
+          size: iconSize,
+        );
       case NavigationRoute.playlists:
         return Icon(
-          Icons.playlist_play_rounded,
+          Icons.playlist_play_outlined,
           color: iconColor,
           size: iconSize,
         );
       case NavigationRoute.schedule:
         return Icon(
-          Icons.calendar_month_sharp,
+          Icons.calendar_month_outlined,
           color: iconColor,
           size: iconSize,
         );
@@ -278,7 +287,11 @@ extension NavigationProviderAdmin on NavigationProvider {
     return [
       AdminNavigationItem(
         title: 'Gerenciamento de Usuários',
-        icon: Icon(Icons.manage_accounts, color: iconColor, size: iconSize),
+        icon: Icon(
+          Icons.manage_accounts_outlined,
+          color: iconColor,
+          size: iconSize,
+        ),
       ),
       // Add more admin items here as needed
     ];

@@ -42,7 +42,7 @@ class SelectType extends StatelessWidget {
                 left: 0,
                 child: BackButton(
                   onPressed: () {
-                    context.read<NavigationProvider>().popForeground();
+                    context.read<NavigationProvider>().pop();
                   },
                 ),
               ),

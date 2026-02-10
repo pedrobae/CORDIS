@@ -23,8 +23,8 @@ class SideMenu extends StatelessWidget {
             borderRadius: BorderRadius.horizontal(),
           ),
           width: math.min(
-            math.max(MediaQuery.of(context).size.width * (4 / 5), 224),
-            320,
+            math.max(MediaQuery.of(context).size.width * (5 / 6), 300),
+            400,
           ),
           backgroundColor: colorScheme.surface,
           child: Column(
@@ -62,43 +62,6 @@ class SideMenu extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     UserCard(),
-                    ...navigationProvider
-                        .getNavigationItems(context, iconSize: 24)
-                        .map((navItem) {
-                          if (navItem.route == NavigationRoute.home) {
-                            return SizedBox.shrink();
-                          } else {
-                            return Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: colorScheme.surfaceContainerHighest,
-                                    width: 1.2,
-                                  ),
-                                ),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4.0,
-                              ),
-                              child: ListTile(
-                                title: Text(navItem.title),
-                                selected:
-                                    navigationProvider.currentRoute ==
-                                    navItem.route,
-                                onTap: () {
-                                  navigationProvider.navigateToRoute(
-                                    navItem.route,
-                                  );
-                                  Navigator.of(context).pop();
-                                },
-                                trailing: Icon(
-                                  Icons.arrow_forward_ios_rounded,
-                                  size: 16,
-                                ),
-                              ),
-                            );
-                          }
-                        }),
                     Container(
                       decoration: BoxDecoration(
                         border: Border(
@@ -112,7 +75,7 @@ class SideMenu extends StatelessWidget {
                       child: ListTile(
                         title: Text(AppLocalizations.of(context)!.about),
                         onTap: () {
-                          // TODO: About screen
+                          // TODO:SideMenu About Screen
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               backgroundColor: Colors.amberAccent,
@@ -143,7 +106,12 @@ class SideMenu extends StatelessWidget {
                         title: Text(AppLocalizations.of(context)!.settings),
                         onTap: () {
                           Navigator.of(context).pop();
-                          navigationProvider.push(const SettingsScreen());
+                          navigationProvider.push(
+                            const SettingsScreen(),
+                            showBottomNavBar: true,
+                            showAppBar: true,
+                            showDrawerIcon: true,
+                          );
                         },
                         trailing: Icon(
                           Icons.arrow_forward_ios_rounded,

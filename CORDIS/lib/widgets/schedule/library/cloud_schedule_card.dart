@@ -206,9 +206,6 @@ class CloudScheduleCard extends StatelessWidget {
                         onPressed: () {
                           navigationProvider.push(
                             PlayScheduleScreen(scheduleId: scheduleId),
-                            showAppBar: false,
-                            showDrawerIcon: false,
-                            showBottomNavBar: false,
                           );
                         },
                         text: AppLocalizations.of(context)!.play,

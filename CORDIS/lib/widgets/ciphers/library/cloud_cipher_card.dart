@@ -130,6 +130,7 @@ class CloudCipherCard extends StatelessWidget {
                             isEnabled: false,
                             versionID: versionId,
                           ),
+                          showBottomNavBar: true,
                         );
                       } else {
                         navigationProvider.push(
@@ -138,8 +139,7 @@ class CloudCipherCard extends StatelessWidget {
                             versionID: versionId,
                             versionType: VersionType.cloud,
                           ),
-                          showAppBar: false,
-                          showDrawerIcon: false,
+                          showBottomNavBar: true,
                         );
                       }
                     },
