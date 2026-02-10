@@ -60,8 +60,11 @@ class _EditCipherScreenState extends State<EditCipherScreen>
         final parserProvider = context.read<ParserProvider>();
 
         // Load imported cipher data
-        final cipher = parserProvider.parsedCipher!;
+        final cipher = parserProvider.parsedCipher;
 
+        if (cipher == null) {
+          break;
+        }
         cipherProvider.setNewCipherInCache(cipher);
         // Load imported version data
         final version = cipher.versions.first;

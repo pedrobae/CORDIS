@@ -140,12 +140,12 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                                   shape: BoxShape.circle,
                                   color: colorScheme.shadow,
                                 ),
-                                width: 24,
-                                height: 24,
+                                width: 20,
+                                height: 20,
                                 child: Icon(
-                                  Icons.close,
+                                  Icons.close_rounded,
                                   color: colorScheme.surfaceContainerHighest,
-                                  size: 16,
+                                  size: 18,
                                 ),
                               ),
                               onTap: () {
@@ -264,32 +264,39 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                       spacing: 8,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        FilledTextButton(
-                          isDark: true,
-                          isDisabled:
-                              (importProvider.selectedFile == null ||
-                              importProvider.isImporting ||
-                              importProvider.importVariation == null),
-                          onPressed: () async {
-                            await importProvider.importText();
+                        if (parserProvider.isParsing) ...[
+                          CircularProgressIndicator(
+                            color: colorScheme.primary,
+                            backgroundColor: colorScheme.surfaceContainer,
+                          ),
+                        ] else ...[
+                          FilledTextButton(
+                            isDark: true,
+                            isDisabled:
+                                (importProvider.selectedFile == null ||
+                                importProvider.isImporting ||
+                                importProvider.importVariation == null),
+                            onPressed: () async {
+                              await importProvider.importText();
 
-                            parserProvider.parseCipher(
-                              importProvider.importedCipher!,
-                            );
+                              await parserProvider.parseCipher(
+                                importProvider.importedCipher!,
+                              );
 
-                            // Navigate to parsing screen
-                            navigationProvider.push(
-                              EditCipherScreen(
-                                cipherID: -1,
-                                versionType: VersionType.import,
-                                versionID: -1,
-                              ),
-                              showAppBar: false,
-                              showDrawerIcon: false,
-                            );
-                          },
-                          text: AppLocalizations.of(context)!.processPDF,
-                        ),
+                              // Navigate to parsing screen
+                              navigationProvider.push(
+                                EditCipherScreen(
+                                  cipherID: -1,
+                                  versionType: VersionType.import,
+                                  versionID: -1,
+                                ),
+                                showAppBar: false,
+                                showDrawerIcon: false,
+                              );
+                            },
+                            text: AppLocalizations.of(context)!.processPDF,
+                          ),
+                        ],
 
                         // Cancel button
                         FilledTextButton(
