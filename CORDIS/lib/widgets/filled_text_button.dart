@@ -41,11 +41,13 @@ class FilledTextButton extends StatelessWidget {
                   ? colorScheme.surface.withValues(alpha: 0.68)
                   : colorScheme.surface),
         side: BorderSide(
-          color: isDangerous
-              ? colorScheme.error
-              : (isDiscrete
-                    ? colorScheme.surfaceContainerHigh
-                    : colorScheme.onSurface),
+          color: isDisabled
+              ? colorScheme.shadow
+              : (isDangerous
+                    ? colorScheme.error
+                    : (isDiscrete
+                          ? colorScheme.surfaceContainerHigh
+                          : colorScheme.onSurface)),
           width: 1.3,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
@@ -64,6 +66,7 @@ class FilledTextButton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         spacing: 12,
         children: [
+          // Leading icon
           if (icon != null) ...[
             Icon(
               icon,
@@ -74,17 +77,11 @@ class FilledTextButton extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ],
-          _buildTextContent(
-            colorScheme: colorScheme,
-            isDense: isDense,
-            isDangerous: isDangerous,
-            isDark: isDark,
-            isDisabled: isDisabled,
-            isDiscrete: isDiscrete,
-            tooltip: tooltip,
-            text: text,
-            trailingIcon: trailingIcon,
-          ),
+
+          // Text content
+          _buildTextContent(colorScheme),
+
+          // Trailing icon
           if (trailingIcon != null)
             Icon(
               trailingIcon,
@@ -105,17 +102,7 @@ class FilledTextButton extends StatelessWidget {
     );
   }
 
-  Widget _buildTextContent({
-    required ColorScheme colorScheme,
-    required bool isDense,
-    required bool isDangerous,
-    required bool isDark,
-    required bool isDisabled,
-    required bool isDiscrete,
-    required String? tooltip,
-    required String text,
-    required IconData? trailingIcon,
-  }) {
+  Widget _buildTextContent(ColorScheme colorScheme) {
     final textWidget = Column(
       crossAxisAlignment: trailingIcon == null
           ? CrossAxisAlignment.center
@@ -127,7 +114,7 @@ class FilledTextButton extends StatelessWidget {
             fontSize: isDense ? 14 : 18,
             fontWeight: isDiscrete ? FontWeight.w400 : FontWeight.w500,
             color: isDisabled
-                ? Colors.black
+                ? colorScheme.shadow
                 : (isDangerous
                       ? colorScheme.error
                       : (isDark ? colorScheme.surface : colorScheme.onSurface)),
@@ -142,7 +129,7 @@ class FilledTextButton extends StatelessWidget {
                 fontSize: isDense ? 10 : 12,
                 fontWeight: FontWeight.w400,
                 color: isDisabled
-                    ? Colors.black54
+                    ? colorScheme.shadow
                     : (isDangerous
                           ? colorScheme.error
                           : (isDark

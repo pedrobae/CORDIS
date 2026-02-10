@@ -617,7 +617,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get importInstructions =>
-      '• Selecione um PDF com cifra\n• Fonte mono é recomendada se possível\n• Separe estrofes com linhas vazias\n• Acordes acima das letras';
+      '• Selecione um PDF com uma cifra\n• Escolha se o PDF tem colunas ou não\n• Processe o PDF e faça os ajustes necessários\n• Salve a cifra importada na sua biblioteca';
 
   @override
   String get importFromImage => 'Importar de Imagem';

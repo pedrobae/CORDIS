@@ -612,7 +612,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importInstructions =>
-      '• Select a PDF with the song map\n• Separate verses with empty lines or Labels\n• Chords above the lyrics at the correct positions';
+      '• Select a PDF with the song map\n• Choose whether the PDF has columns or not\n• Process the PDF and make the adjustments as needed\n• Save the imported song map to your library';
 
   @override
   String get importFromImage => 'Import from Image';

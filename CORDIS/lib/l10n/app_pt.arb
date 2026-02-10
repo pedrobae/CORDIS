@@ -402,7 +402,7 @@
   "@processPDF": {"description": "Process PDF button label"},
   "howToImport": "Como Importar",
   "@howToImport": {"description": "How to import instructions title"},
-  "importInstructions": "• Selecione um PDF com cifra\n• Fonte mono é recomendada se possível\n• Separe estrofes com linhas vazias\n• Acordes acima das letras",
+  "importInstructions": "• Selecione um PDF com uma cifra\n• Escolha se o PDF tem colunas ou não\n• Processe o PDF e faça os ajustes necessários\n• Salve a cifra importada na sua biblioteca",
   "@importInstructions": {"description": "Instructions for importing a song map from a PDF file"},
   "importFromImage": "Importar de Imagem",
   "@importFromImage": {"description": "Import from image option"},

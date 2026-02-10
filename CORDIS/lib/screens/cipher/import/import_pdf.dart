@@ -38,9 +38,10 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
         final path = result.files.first.path;
 
         if (mounted) {
-          context.read<ImportProvider>().setSelectedFile(path!);
-          context.read<ImportProvider>().setSelectedFileName(
-            result.files.first.name,
+          context.read<ImportProvider>().setSelectedFile(
+            path!,
+            fileName: result.files.first.name,
+            fileSize: result.files.first.size,
           );
         }
       }
@@ -66,12 +67,17 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
     return Consumer3<ImportProvider, ParserProvider, NavigationProvider>(
       builder:
           (context, importProvider, parserProvider, navigationProvider, child) {
-            final theme = Theme.of(context);
-            final colorScheme = theme.colorScheme;
+            final textTheme = Theme.of(context).textTheme;
+            final colorScheme = Theme.of(context).colorScheme;
 
             return Scaffold(
               appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.importFromPDF),
+                title: Text(
+                  AppLocalizations.of(context)!.importFromPDF,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 leading: BackButton(
                   onPressed: () {
                     navigationProvider.pop();
@@ -84,95 +90,65 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                   spacing: 16,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(0),
-                        border: Border.all(
-                          color: colorScheme.onSurface,
-                          width: 1,
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        spacing: 8,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            spacing: 8,
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                color: colorScheme.primary,
-                              ),
-                              Text(
-                                AppLocalizations.of(context)!.howToImport,
-                                style: theme.textTheme.titleMedium!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            AppLocalizations.of(context)!.importInstructions,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // File selection button
-                    FilledTextButton(
-                      onPressed: () {
-                        importProvider.isImporting ? null : _pickPdfFile();
-                      },
-                      text: AppLocalizations.of(context)!.selectPDFFile,
-                      isDark: true,
-                    ),
-
-                    const SizedBox(height: 16),
-
                     // Selected file display
-                    if (importProvider.selectedFile != null)
+                    if (importProvider.selectedFile != null) ...[
                       Container(
                         decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer,
+                          color: colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(0),
                           border: Border.all(
                             color: colorScheme.onSurface,
                             width: 1,
                           ),
                         ),
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
                         child: Row(
-                          spacing: 16,
+                          spacing: 8,
                           children: [
                             Icon(
-                              Icons.picture_as_pdf,
-                              color: colorScheme.onPrimaryContainer,
+                              Icons.picture_as_pdf_rounded,
+                              size: 24,
+                              color: colorScheme.shadow,
                             ),
                             Expanded(
                               child: Column(
+                                spacing: 4,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    AppLocalizations.of(context)!.selectedFile,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodySmall,
-                                  ),
-                                  Text(
                                     importProvider.selectedFileName!,
-                                    style: Theme.of(context).textTheme.bodyLarge
-                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                    style: textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    importProvider.fileSize ?? '',
+                                    style: textTheme.bodySmall,
+                                    maxLines: 1,
                                   ),
                                 ],
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () {
+                            GestureDetector(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: colorScheme.shadow,
+                                ),
+                                width: 24,
+                                height: 24,
+                                child: Icon(
+                                  Icons.close,
+                                  color: colorScheme.surfaceContainerHighest,
+                                  size: 16,
+                                ),
+                              ),
+                              onTap: () {
                                 // Clear selected file
                                 importProvider.clearSelectedFile();
                                 importProvider.clearSelectedFileName();
@@ -182,32 +158,18 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                           ],
                         ),
                       ),
-
-                    // Error display
-                    if (importProvider.error != null)
-                      Card(
-                        color: colorScheme.errorContainer,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: colorScheme.onErrorContainer,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  importProvider.error!,
-                                  style: TextStyle(
-                                    color: colorScheme.onErrorContainer,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                    ] else ...[
+                      // File selection button
+                      FilledTextButton(
+                        onPressed: () {
+                          importProvider.isImporting ? null : _pickPdfFile();
+                        },
+                        text: AppLocalizations.of(context)!.selectPDFFile,
+                        isDark: true,
                       ),
+                    ],
+
+                    const SizedBox(height: 16),
 
                     // Import Variation Dropdown
                     Row(
@@ -215,7 +177,7 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                       children: [
                         Text(
                           AppLocalizations.of(context)!.importVariation,
-                          style: theme.textTheme.titleMedium,
+                          style: textTheme.titleMedium,
                         ),
                         DropdownButton<ImportVariation>(
                           value: importProvider.importVariation,
@@ -236,31 +198,109 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                       ],
                     ),
 
+                    // Error display
+                    if (importProvider.error != null)
+                      Card(
+                        color: colorScheme.errorContainer,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: colorScheme.onErrorContainer,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  importProvider.error!,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onErrorContainer,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
                     const Spacer(),
 
-                    // Process button
-                    FilledTextButton(
-                      isDisabled:
-                          (importProvider.selectedFile == null ||
-                          importProvider.isImporting ||
-                          importProvider.importVariation == null),
-                      onPressed: () async {
-                        await importProvider.importText();
-
-                        parserProvider.parseCipher(
-                          importProvider.importedCipher!,
-                        );
-
-                        // Navigate to parsing screen
-                        navigationProvider.push(
-                          EditCipherScreen(
-                            cipherID: -1,
-                            versionType: VersionType.import,
-                            versionID: -1,
+                    // Import instructions and tips
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(0),
+                        color: colorScheme.surfaceContainerHighest,
+                      ),
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        spacing: 8,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            spacing: 8,
+                            children: [
+                              Icon(Icons.info, color: colorScheme.shadow),
+                              Text(
+                                AppLocalizations.of(context)!.howToImport,
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                      text: AppLocalizations.of(context)!.processPDF,
+                          Text(
+                            AppLocalizations.of(context)!.importInstructions,
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Process button
+                    Column(
+                      spacing: 8,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        FilledTextButton(
+                          isDark: true,
+                          isDisabled:
+                              (importProvider.selectedFile == null ||
+                              importProvider.isImporting ||
+                              importProvider.importVariation == null),
+                          onPressed: () async {
+                            await importProvider.importText();
+
+                            parserProvider.parseCipher(
+                              importProvider.importedCipher!,
+                            );
+
+                            // Navigate to parsing screen
+                            navigationProvider.push(
+                              EditCipherScreen(
+                                cipherID: -1,
+                                versionType: VersionType.import,
+                                versionID: -1,
+                              ),
+                              showAppBar: false,
+                              showDrawerIcon: false,
+                            );
+                          },
+                          text: AppLocalizations.of(context)!.processPDF,
+                        ),
+
+                        // Cancel button
+                        FilledTextButton(
+                          isDark: false,
+                          text: AppLocalizations.of(context)!.cancel,
+                          onPressed: () {
+                            importProvider.clearCache();
+                            navigationProvider.pop();
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),

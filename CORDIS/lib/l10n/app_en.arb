@@ -409,7 +409,7 @@
   "@processPDF": {"description": "Process PDF button label"},
   "howToImport": "How to Import",
   "@howToImport": {"description": "How to import instructions title"},
-  "importInstructions": "• Select a PDF with the song map\n• Separate verses with empty lines or Labels\n• Chords above the lyrics at the correct positions",
+  "importInstructions": "• Select a PDF with the song map\n• Choose whether the PDF has columns or not\n• Process the PDF and make the adjustments as needed\n• Save the imported song map to your library",
   "@importInstructions": {"description": "Instructions for importing a song map from a PDF file"},
   "importFromImage": "Import from Image",
   "@importFromImage": {"description": "Import from image option"},

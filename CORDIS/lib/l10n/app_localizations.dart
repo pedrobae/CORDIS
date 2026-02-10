@@ -1187,7 +1187,7 @@ abstract class AppLocalizations {
   /// Instructions for importing a song map from a PDF file
   ///
   /// In pt, this message translates to:
-  /// **'• Selecione um PDF com cifra\n• Fonte mono é recomendada se possível\n• Separe estrofes com linhas vazias\n• Acordes acima das letras'**
+  /// **'• Selecione um PDF com uma cifra\n• Escolha se o PDF tem colunas ou não\n• Processe o PDF e faça os ajustes necessários\n• Salve a cifra importada na sua biblioteca'**
   String get importInstructions;
 
   /// Import from image option
