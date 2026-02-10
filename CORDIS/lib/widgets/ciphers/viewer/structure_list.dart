@@ -72,8 +72,7 @@ class _StructureListState extends State<StructureList> {
             sectionProvider,
             child,
           ) {
-            return Container(
-              padding: EdgeInsets.all(8.0),
+            return SizedBox(
               width: double.infinity,
               child: widget.filteredStructure.isEmpty
                   ? Center(
@@ -89,6 +88,7 @@ class _StructureListState extends State<StructureList> {
                       child: Row(
                         spacing: 8,
                         children: [
+                          const SizedBox(),
                           ...widget.filteredStructure.asMap().entries.map((
                             entry,
                           ) {
@@ -126,18 +126,14 @@ class _StructureListState extends State<StructureList> {
                                   height: 44,
                                   width: 44,
                                   decoration: BoxDecoration(
-                                    color: color.withValues(alpha: .8),
-                                    borderRadius: BorderRadius.circular(0),
-                                    border: Border.all(
-                                      color: colorScheme.shadow,
-                                      width: 1,
-                                    ),
+                                    color: color.withValues(alpha: .90),
+                                    borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Center(
                                     child: Text(
                                       sectionCode,
                                       style: TextStyle(
-                                        color: colorScheme.onSurface,
+                                        color: colorScheme.surface,
                                         fontWeight: FontWeight.w500,
                                         fontSize: 14,
                                       ),
@@ -148,6 +144,7 @@ class _StructureListState extends State<StructureList> {
                               ),
                             );
                           }),
+                          const SizedBox(),
                         ],
                       ),
                     ),

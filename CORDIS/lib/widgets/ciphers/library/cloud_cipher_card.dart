@@ -134,8 +134,8 @@ class CloudCipherCard extends StatelessWidget {
                       } else {
                         navigationProvider.push(
                           ViewCipherScreen(
-                            cipherId: null,
-                            versionId: versionId,
+                            cipherID: null,
+                            versionID: versionId,
                             versionType: VersionType.cloud,
                           ),
                           showAppBar: false,

@@ -35,14 +35,14 @@ class FilledTextButton extends StatelessWidget {
       style: FilledButton.styleFrom(
         backgroundColor: isDark
             ? (isDisabled
-                  ? colorScheme.onSurface.withValues(alpha: 0.68)
+                  ? colorScheme.surfaceContainerLow
                   : colorScheme.onSurface)
             : (isDisabled
-                  ? colorScheme.surface.withValues(alpha: 0.68)
+                  ? colorScheme.surfaceContainerLow
                   : colorScheme.surface),
         side: BorderSide(
           color: isDisabled
-              ? colorScheme.shadow
+              ? colorScheme.surfaceContainer
               : (isDangerous
                     ? colorScheme.error
                     : (isDiscrete

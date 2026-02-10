@@ -200,7 +200,7 @@ class PlaylistCardActionsSheet extends StatelessWidget {
           ))!;
 
           if (!context.mounted) {
-            throw Exception(); // TODO: Write Exception
+            throw Exception(); // TODO: write Exception
           }
 
           localVersionProvider.setNewVersionInCache(

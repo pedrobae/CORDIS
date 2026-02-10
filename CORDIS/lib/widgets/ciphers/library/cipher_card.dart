@@ -242,8 +242,8 @@ class _CipherCardState extends State<CipherCard> {
                         } else {
                           navigationProvider.push(
                             ViewCipherScreen(
-                              cipherId: widget.cipherId,
-                              versionId: versionId,
+                              cipherID: widget.cipherId,
+                              versionID: versionId,
                               versionType: VersionType.local,
                             ),
                             showAppBar: false,

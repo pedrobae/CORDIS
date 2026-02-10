@@ -7,7 +7,7 @@ import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
-import 'package:cordis/screens/cipher/edit_cipher.dart';
+import 'package:cordis/screens/cipher/view_cipher.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/custom_reorderable_delayed.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
@@ -342,7 +342,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                 iconSize: 30,
                                 icon: Icon(Icons.more_vert_rounded),
                                 onPressed: () {
-                                  _openVersionActions(context);
+                                  _openVersionActions(context, version);
                                 },
                               ),
                             ],
@@ -354,13 +354,13 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                             isDense: true,
                             onPressed: () {
                               navigationProvider.push(
-                                EditCipherScreen(
+                                ViewCipherScreen(
                                   versionType: VersionType.playlist,
                                   versionID: widget.versionId,
                                   cipherID: isCloud ? null : version.cipherId,
-                                  playlistID: widget.playlistId,
-                                  isEnabled: false,
                                 ),
+                                showAppBar: false,
+                                showDrawerIcon: false,
                               );
                             },
                           ),
@@ -375,7 +375,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
     );
   }
 
-  void _openVersionActions(BuildContext context) {
+  void _openVersionActions(BuildContext context, final version) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -385,9 +385,10 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
           onClosing: () {},
           builder: (context) {
             return VersionCardActionsSheet(
-              itemId: widget.itemId,
-              versionId: widget.versionId,
-              playlistId: widget.playlistId,
+              itemID: widget.itemId,
+              versionID: widget.versionId,
+              cipherID: version.cipherId,
+              playlistID: widget.playlistId,
             );
           },
         );

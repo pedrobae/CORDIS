@@ -93,3 +93,16 @@ class SectionLabel {
     );
   }
 }
+
+/// Checks if the code trimmed of a numeric suffix matches any of transition codes
+bool isTransition(String sectionCode) {
+  final trimmedCode = sectionCode.replaceAll(RegExp(r'\d+$'), '');
+  final transitionCodes = ['I', 'B', 'PC', 'S', 'O', 'F'];
+  return (transitionCodes.contains(trimmedCode));
+}
+
+/// Checks if the code trimmed of a numeric suffix matches the annotation code
+bool isAnnotation(String sectionCode) {
+  final trimmedCode = sectionCode.replaceAll(RegExp(r'\d+$'), '');
+  return (trimmedCode == 'N');
+}

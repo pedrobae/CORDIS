@@ -23,8 +23,8 @@ class SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<LayoutSettingsProvider>(
       builder: (context, layoutSettingsProvider, child) {
-        final theme = Theme.of(context);
-        final colorScheme = theme.colorScheme;
+        final textTheme = Theme.of(context).textTheme;
+        final colorScheme = Theme.of(context).colorScheme;
 
         // Measure section code width on the correct style
         final textPainter = TextPainter(
@@ -60,19 +60,19 @@ class SectionCard extends StatelessWidget {
                 spacing: 8,
                 children: [
                   Container(
-                    width: max(42, sectionCodeWidth),
-                    height: 28,
+                    width: max(28, sectionCodeWidth),
+                    height: 24,
                     decoration: BoxDecoration(
                       color: sectionColor,
-                      borderRadius: BorderRadius.circular(0),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       sectionCode,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                         color: colorScheme.surface,
-                        fontSize: layoutSettingsProvider.fontSize,
+                        fontSize: layoutSettingsProvider.fontSize - 4,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -82,10 +82,10 @@ class SectionCard extends StatelessWidget {
                         ? sectionType[0].toUpperCase() +
                               sectionType.substring(1)
                         : sectionType,
-                    style: TextStyle(
+                    style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.w500,
-                      fontSize: layoutSettingsProvider.fontSize,
+                      fontSize: layoutSettingsProvider.fontSize - 2,
                     ),
                   ),
                 ],
