@@ -378,7 +378,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
             cipherID: cipherID,
           );
           if (versionID == null) {
-            throw Exception('Failed to create version for imported cipher');
+            throw Exception('Failed to create version for new song');
           }
           await sectionProvider.createSections(versionID);
         case VersionType.import:
@@ -387,7 +387,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
             cipherID: cipherID,
           );
           if (versionID == null) {
-            throw Exception('Failed to create version for imported cipher');
+            throw Exception('Failed to create version for imported song');
           }
           await sectionProvider.createSections(versionID);
           navigationProvider.pop();

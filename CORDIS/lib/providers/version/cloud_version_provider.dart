@@ -1,5 +1,5 @@
 import 'package:cordis/models/dtos/version_dto.dart';
-import 'package:cordis/repositories/cloud_version_repository.dart';
+import 'package:cordis/repositories/cloud/version_repository.dart';
 import 'package:flutter/foundation.dart';
 
 class CloudVersionProvider extends ChangeNotifier {

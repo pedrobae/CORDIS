@@ -1,5 +1,5 @@
-import '../helpers/database.dart';
-import '../models/domain/playlist/flow_item.dart';
+import '../../helpers/database.dart';
+import '../../models/domain/playlist/flow_item.dart';
 
 class FlowItemRepository {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
@@ -24,7 +24,7 @@ class FlowItemRepository {
       // Update existing flow item - exclude id from update
       final updateData = flowItem.toSQLite();
       updateData.remove('id'); // Never update the primary key
-      
+
       await db.update(
         'flow_item',
         updateData,

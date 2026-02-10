@@ -1,5 +1,5 @@
 import 'package:cordis/models/domain/cipher/version.dart';
-import 'package:cordis/repositories/local_cipher_repository.dart';
+import 'package:cordis/repositories/local/cipher_repository.dart';
 import 'package:flutter/foundation.dart';
 
 class LocalVersionProvider extends ChangeNotifier {

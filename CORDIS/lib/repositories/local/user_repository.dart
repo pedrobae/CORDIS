@@ -1,5 +1,5 @@
-import '../helpers/database.dart';
-import '../models/domain/user.dart';
+import '../../helpers/database.dart';
+import '../../models/domain/user.dart';
 
 class UserRepository {
   final DatabaseHelper _databaseHelper = DatabaseHelper();

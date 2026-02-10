@@ -292,6 +292,15 @@ class LocalCipherRepository {
     );
   }
 
+  Future<int> upsertSection(Section section) async {
+    final db = await _databaseHelper.database;
+    return await db.insert(
+      'section',
+      section.toSqlite()..['version_id'] = section.versionId,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   // ===== READ =====
   /// Gets all sections of a version
   Future<Map<String, Section>> getSections(int versionId) async {
@@ -311,7 +320,7 @@ class LocalCipherRepository {
   }
 
   // ===== UPDATE =====
-  /// Updates entire section
+  /// Replaces entire section
   Future<void> updateSection(Section section) async {
     final db = await _databaseHelper.database;
     await db.update(

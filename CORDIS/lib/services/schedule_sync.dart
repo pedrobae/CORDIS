@@ -5,12 +5,12 @@ import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
-import 'package:cordis/repositories/cloud_schedule_repository.dart';
-import 'package:cordis/repositories/flow_item_repository.dart';
-import 'package:cordis/repositories/local_cipher_repository.dart';
-import 'package:cordis/repositories/local_playlist_repository.dart';
-import 'package:cordis/repositories/local_schedule_repository.dart';
-import 'package:cordis/repositories/local_user_repository.dart';
+import 'package:cordis/repositories/cloud/schedule_repository.dart';
+import 'package:cordis/repositories/local/flow_item_repository.dart';
+import 'package:cordis/repositories/local/cipher_repository.dart';
+import 'package:cordis/repositories/local/playlist_repository.dart';
+import 'package:cordis/repositories/local/schedule_repository.dart';
+import 'package:cordis/repositories/local/user_repository.dart';
 import 'package:flutter/material.dart';
 
 class ScheduleSyncService {

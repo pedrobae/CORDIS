@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:cordis/models/domain/playlist/playlist.dart';
-import 'package:cordis/repositories/local_playlist_repository.dart';
+import 'package:cordis/repositories/local/playlist_repository.dart';
 
 class PlaylistProvider extends ChangeNotifier {
   final PlaylistRepository _playlistRepository = PlaylistRepository();

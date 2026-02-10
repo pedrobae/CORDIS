@@ -1,5 +1,5 @@
 import 'package:cordis/models/domain/playlist/flow_item.dart';
-import 'package:cordis/repositories/flow_item_repository.dart';
+import 'package:cordis/repositories/local/flow_item_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:async';
 

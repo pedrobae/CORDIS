@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cordis/models/domain/cipher/section.dart';
-import 'package:cordis/repositories/local_cipher_repository.dart';
+import 'package:cordis/repositories/local/cipher_repository.dart';
 
 class SectionProvider extends ChangeNotifier {
   final LocalCipherRepository _cipherRepository = LocalCipherRepository();
@@ -211,25 +211,11 @@ class SectionProvider extends ChangeNotifier {
       if (versionID is String) {
         throw Exception('Cannot save sections for non-local version.');
       }
-      // TODO:sectionUpdate
-      // For now, delete all existing content and recreate
-      // This could be optimized later to only update changed content
-      await _cipherRepository.deleteAllVersionSections(versionID);
 
-      // Insert new content
-      if (kDebugMode) {
-        print(
-          'Saving ${_sections[versionID]!.length} sections for version $versionID',
-        );
-      }
       for (final entry in _sections[versionID]!.entries) {
-        final sectionId = await _cipherRepository.insertSection(
+        final sectionId = await _cipherRepository.upsertSection(
           entry.value.copyWith(versionId: versionID),
         );
-
-        if (kDebugMode) {
-          print('Inserted section with code ${entry.key} and id $sectionId');
-        }
       }
     } catch (e) {
       _error = e.toString();

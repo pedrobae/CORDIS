@@ -1,4 +1,4 @@
-import 'package:cordis/repositories/local_playlist_repository.dart';
+import 'package:cordis/repositories/local/playlist_repository.dart';
 import 'package:flutter/foundation.dart';
 
 class SelectionProvider extends ChangeNotifier {

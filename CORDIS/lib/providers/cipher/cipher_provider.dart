@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:cordis/models/domain/cipher/cipher.dart';
-import 'package:cordis/repositories/local_cipher_repository.dart';
+import 'package:cordis/repositories/local/cipher_repository.dart';
 
 class CipherProvider extends ChangeNotifier {
   final LocalCipherRepository _cipherRepository = LocalCipherRepository();

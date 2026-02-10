@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:cordis/models/domain/user.dart';
 import 'package:cordis/models/dtos/user_dto.dart';
-import 'package:cordis/repositories/local_user_repository.dart';
-import 'package:cordis/repositories/cloud_user_repository.dart';
+import 'package:cordis/repositories/local/user_repository.dart';
+import 'package:cordis/repositories/cloud/user_repository.dart';
 import 'package:flutter/foundation.dart';
 
 class UserProvider extends ChangeNotifier {
