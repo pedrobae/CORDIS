@@ -1,13 +1,26 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/cipher/version.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 
 class SelectKeySheet extends StatelessWidget {
   final TextEditingController controller;
+  final int? cipherID;
+  final dynamic versionID;
+  final VersionType versionType;
 
-  const SelectKeySheet({super.key, required this.controller});
+  const SelectKeySheet({
+    super.key,
+    required this.controller,
+    this.cipherID,
+    this.versionID,
+    required this.versionType,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +79,29 @@ class SelectKeySheet extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     controller.text = key;
+
+                    switch (versionType) {
+                      case VersionType.import:
+                      case VersionType.brandNew:
+                        context.read<CipherProvider>().cacheUpdates(
+                          cipherID!,
+                          musicKey: key,
+                        );
+                        break;
+                      case VersionType.cloud:
+                        context.read<CloudVersionProvider>().cacheUpdates(
+                          versionID!,
+                          transposedKey: key,
+                        );
+                        break;
+                      case VersionType.local:
+                      case VersionType.playlist:
+                        context.read<LocalVersionProvider>().cacheUpdates(
+                          versionID!,
+                          transposedKey: key,
+                        );
+                        break;
+                    }
                     Navigator.of(context).pop();
                   },
                   child: Container(

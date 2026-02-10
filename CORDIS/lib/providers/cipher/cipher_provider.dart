@@ -243,7 +243,7 @@ class CipherProvider extends ChangeNotifier {
   }
 
   /// Update cache with non tag changes
-  void cacheCipherUpdates(
+  void cacheUpdates(
     int cipherId, {
     String? title,
     String? author,
