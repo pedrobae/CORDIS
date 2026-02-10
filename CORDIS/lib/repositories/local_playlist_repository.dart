@@ -378,7 +378,7 @@ class PlaylistRepository {
       final id = row['id'] as int;
       final contentId = row['content_id'] as int;
       final position = row['position'] as int;
-      final duration = Duration(milliseconds: row['duration'] as int);
+      final duration = Duration(seconds: row['duration'] as int);
 
       return PlaylistItem.version(contentId, position, id, duration);
     }).toList();

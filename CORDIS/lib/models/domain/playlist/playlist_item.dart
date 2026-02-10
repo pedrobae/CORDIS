@@ -39,27 +39,6 @@ class PlaylistItem {
     required this.duration,
     this.firebaseContentId,
   });
-
-  factory PlaylistItem.fromJson(Map<String, dynamic> json) {
-    return PlaylistItem(
-      id: json['id'] as int,
-      type: PlaylistItemTypeExtension.getTypeByName(json['content_type']),
-      contentId: json['content_id'] as int,
-      position: json['order_index'] as int,
-      duration: Duration(seconds: json['duration'] as int),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'content_type': type,
-      'content_id': contentId,
-      'duration': duration.inSeconds,
-      'order_index': position,
-      'firebase_id': firebaseContentId,
-    };
-  }
-
   // Helper constructors
   PlaylistItem.version(
     int cipherVersionId,
@@ -111,9 +90,4 @@ class PlaylistItem {
 
   @override
   int get hashCode => type.hashCode ^ contentId.hashCode ^ position.hashCode;
-
-  @override
-  String toString() {
-    return 'PlaylistItem(type: $type, contentId: $contentId, order: $position)';
-  }
 }

@@ -29,15 +29,6 @@ class Playlist {
     return items.fold(Duration.zero, (a, b) => a + b.duration);
   }
 
-  Map<String, dynamic> toSQLite() {
-    return {
-      'id': id,
-      'name': name,
-      'created_by': createdBy,
-      'items': items.map((item) => item.toJson()).toList(),
-    };
-  }
-
   // Database-specific serialization (excludes relational data)
   Map<String, dynamic> toDatabaseJson() {
     return {'name': name, 'author_id': createdBy};
