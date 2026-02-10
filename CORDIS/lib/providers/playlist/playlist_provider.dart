@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:cordis/models/domain/playlist/playlist.dart';
-import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/repositories/local_playlist_repository.dart';
 
 class PlaylistProvider extends ChangeNotifier {
@@ -105,8 +104,7 @@ class PlaylistProvider extends ChangeNotifier {
     try {
       final playlist = await _playlistRepository.getAllPlaylists();
       for (var p in playlist) {
-        final items = await _playlistRepository.getItemsOfPlaylist(p.id);
-        _playlists[p.id] = p.copyWith(items: items);
+        _playlists[p.id] = p;
       }
     } catch (e) {
       _error = e.toString();
@@ -129,10 +127,7 @@ class PlaylistProvider extends ChangeNotifier {
         id,
       ))!;
 
-      final List<PlaylistItem> items = await _playlistRepository
-          .getItemsOfPlaylist(playlist.id);
-
-      _playlists[playlist.id] = playlist.copyWith(items: items);
+      _playlists[playlist.id] = playlist;
     } catch (e) {
       _error = e.toString();
     } finally {

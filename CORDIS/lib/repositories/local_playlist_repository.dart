@@ -66,7 +66,17 @@ class PlaylistRepository {
     List<Playlist> playlists = [];
 
     for (Map<String, dynamic> playlistData in playlistResults) {
-      playlists.add(Playlist.fromSQLite(playlistData));
+      final playlist = Playlist.fromSQLite(playlistData);
+
+      /// Gets all items of a playlist in order
+      final versionItems = await _getVersionItemsOfPlaylist(playlist.id);
+      final textItems = await _getTextItemsOfPlaylist(playlist.id);
+
+      // Combine and sort all items by position
+      final allItemResults = [...versionItems, ...textItems]
+        ..sort((a, b) => (a.position).compareTo(b.position));
+
+      playlists.add(playlist.copyWith(items: allItemResults));
     }
 
     return playlists;
@@ -85,7 +95,17 @@ class PlaylistRepository {
 
     if (playlistResults.isEmpty) return null;
 
-    return Playlist.fromSQLite(playlistResults.first);
+    /// Gets all items of a playlist in order
+    final versionItems = await _getVersionItemsOfPlaylist(playlistId);
+    final textItems = await _getTextItemsOfPlaylist(playlistId);
+
+    // Combine and sort all items by position
+    final allItemResults = [...versionItems, ...textItems]
+      ..sort((a, b) => (a.position).compareTo(b.position));
+
+    return Playlist.fromSQLite(
+      playlistResults.first,
+    ).copyWith(items: allItemResults);
   }
 
   // ===== UPDATE =====
@@ -317,19 +337,8 @@ class PlaylistRepository {
     });
   }
 
-  /// Gets all items of a playlist in order
-  Future<List<PlaylistItem>> getItemsOfPlaylist(int playlistId) async {
-    final versionItems = await getVersionItemsOfPlaylist(playlistId);
-    final textItems = await getTextItemsOfPlaylist(playlistId);
-
-    // Combine and sort all items by position
-    final allItemResults = [...versionItems, ...textItems]
-      ..sort((a, b) => (a.position).compareTo(b.position));
-    return allItemResults;
-  }
-
   /// Gets text items of a playlist
-  Future<List<PlaylistItem>> getTextItemsOfPlaylist(int playlistId) async {
+  Future<List<PlaylistItem>> _getTextItemsOfPlaylist(int playlistId) async {
     final db = await _databaseHelper.database;
 
     final flowItemResults = await db.rawQuery(
@@ -352,7 +361,7 @@ class PlaylistRepository {
   }
 
   /// Gets version items of a playlist
-  Future<List<PlaylistItem>> getVersionItemsOfPlaylist(int playlistId) async {
+  Future<List<PlaylistItem>> _getVersionItemsOfPlaylist(int playlistId) async {
     final db = await _databaseHelper.database;
 
     final versionResults = await db.rawQuery(

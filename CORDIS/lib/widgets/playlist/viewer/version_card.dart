@@ -355,11 +355,10 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                             onPressed: () {
                               navigationProvider.push(
                                 EditCipherScreen(
-                                  versionType: isCloud
-                                      ? VersionType.cloud
-                                      : VersionType.local,
+                                  versionType: VersionType.playlist,
                                   versionID: widget.versionId,
                                   cipherID: isCloud ? null : version.cipherId,
+                                  playlistID: widget.playlistId,
                                   isEnabled: false,
                                 ),
                               );

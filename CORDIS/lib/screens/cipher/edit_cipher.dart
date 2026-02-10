@@ -1,16 +1,12 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
-import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/providers/cipher/import_provider.dart';
-import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/cipher/parser_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
-import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
-import 'package:cordis/services/schedule_sync.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
@@ -216,14 +212,17 @@ class _EditCipherScreenState extends State<EditCipherScreen>
                 ),
                 actions: [
                   IconButton(
-                    onPressed: () => _save(
-                      selectionProvider,
-                      versionProvider,
-                      cipherProvider,
-                      sectionProvider,
-                      playlistProvider,
-                      navigationProvider,
-                    ),
+                    onPressed: () async {
+                      await _save(
+                        selectionProvider,
+                        versionProvider,
+                        cipherProvider,
+                        sectionProvider,
+                        playlistProvider,
+                        navigationProvider,
+                      );
+                      navigationProvider.pop();
+                    },
                     icon: Icon(Icons.save, color: colorScheme.onSurface),
                   ),
                 ],
@@ -366,23 +365,8 @@ class _EditCipherScreenState extends State<EditCipherScreen>
     } else {
       switch (widget.versionType) {
         case VersionType.playlist:
-          versionProvider.saveVersion(widget.versionID);
-          sectionProvider.saveSections(versionID: widget.versionID);
-
-          // CHECK IF THE PLAYLIST IS ASSOSSIATED WITH A PUBLISHED SCHEDULE
-          final schedule = await context
-              .read<LocalScheduleProvider>()
-              .getScheduleWithPlaylistId(widget.playlistID!);
-
-          if (schedule != null &&
-              schedule.scheduleState == ScheduleState.published &&
-              mounted) {
-            // If so, update the schedule's updatedAt to trigger listeners and update the published version
-            ScheduleSyncService().syncToCloud(
-              schedule,
-              context.read<MyAuthProvider>().id!,
-            );
-          }
+          await versionProvider.saveVersion(widget.versionID);
+          await sectionProvider.saveSections(versionID: widget.versionID);
           break;
 
         case VersionType.brandNew:
@@ -415,7 +399,6 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           await sectionProvider.saveSections(versionID: widget.versionID);
           break;
       }
-      navigationProvider.pop();
     }
   }
 }
