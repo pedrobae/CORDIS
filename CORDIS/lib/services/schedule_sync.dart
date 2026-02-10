@@ -11,6 +11,7 @@ import 'package:cordis/repositories/local_cipher_repository.dart';
 import 'package:cordis/repositories/local_playlist_repository.dart';
 import 'package:cordis/repositories/local_schedule_repository.dart';
 import 'package:cordis/repositories/local_user_repository.dart';
+import 'package:flutter/material.dart';
 
 class ScheduleSyncService {
   final _localRepo = LocalScheduleRepository();
@@ -128,6 +129,10 @@ class ScheduleSyncService {
 
   /// Syncs changes to a published playlist into firestore
   Future<void> syncToCloud(Schedule schedule, String ownerFirebaseID) async {
+    debugPrint(
+      'Syncing schedule ${schedule.id} to cloud for owner $ownerFirebaseID',
+    );
+
     final domainPlaylist = (await _playlistRepo.getPlaylistById(
       schedule.playlistId!,
     ))!;

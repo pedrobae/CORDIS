@@ -275,27 +275,30 @@ class ScheduleCard extends StatelessWidget {
                 trailingIcon: Icons.chevron_right,
                 isDiscrete: true,
               ),
+
               // delete
               FilledTextButton(
                 text: AppLocalizations.of(context)!.delete,
                 tooltip: AppLocalizations.of(context)!.deleteScheduleTooltip,
+                trailingIcon: Icons.chevron_right,
+                isDangerous: true,
+                isDiscrete: true,
                 onPressed: () {
                   showModalBottomSheet(
                     context: context,
                     builder: (context) {
                       return DeleteConfirmationSheet(
                         itemType: AppLocalizations.of(context)!.schedule,
-                        onConfirm: () {
+                        onConfirm: () async {
                           Navigator.of(context).pop();
-                          localScheduleProvider.deleteSchedule(scheduleId);
+                          await localScheduleProvider.deleteSchedule(
+                            scheduleId,
+                          );
                         },
                       );
                     },
                   );
                 },
-                trailingIcon: Icons.chevron_right,
-                isDangerous: true,
-                isDiscrete: true,
               ),
 
               SizedBox(height: 16),

@@ -76,6 +76,18 @@ class LocalScheduleProvider extends ChangeNotifier {
     return _schedules[scheduleID]!.isPublic;
   }
 
+  Future<Schedule?> getScheduleWithPlaylistId(int playlistId) async {
+    try {
+      await loadSchedules();
+
+      return _schedules.values.firstWhere(
+        (schedule) => schedule.playlistId == playlistId,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
   // ===== CREATE =====
   /// Creates a brand new schedule, used when duplicating a cloud schedule.
   Future<int?> createSchedule(Schedule schedule) async {

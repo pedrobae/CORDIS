@@ -160,7 +160,7 @@ class CloudVersionProvider extends ChangeNotifier {
   }
 
   // ===== UPDATE =====
-  void cacheVersionUpdates(
+  void cacheUpdates(
     String versionId, {
     String? versionName,
     String? transposedKey,

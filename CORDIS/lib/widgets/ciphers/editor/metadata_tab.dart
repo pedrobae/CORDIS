@@ -198,6 +198,21 @@ class _MetadataTabState extends State<MetadataTab> {
 
   @override
   void dispose() {
+    switch (widget.versionType) {
+      case VersionType.cloud:
+        final cloudVersionProvider = context.read<CloudVersionProvider>();
+        cacheCloudUpdates(cloudVersionProvider);
+        break;
+      case VersionType.local:
+      case VersionType.import:
+      case VersionType.playlist:
+      case VersionType.brandNew:
+        final versionProvider = context.read<LocalVersionProvider>();
+        final cipherProvider = context.read<CipherProvider>();
+        cacheLocalUpdates(versionProvider, cipherProvider);
+        break;
+    }
+
     for (var controller in controllers.values) {
       controller.dispose();
     }
@@ -361,19 +376,6 @@ class _MetadataTabState extends State<MetadataTab> {
         TextFormField(
           validator: validator,
           autovalidateMode: AutovalidateMode.onUnfocus,
-          onChanged: (value) {
-            switch (widget.versionType) {
-              case VersionType.cloud:
-                cacheCloudUpdate(cloudVersionProvider, field, value);
-                break;
-              case VersionType.local:
-              case VersionType.brandNew:
-              case VersionType.import:
-              case VersionType.playlist:
-                cacheLocalUpdates(versionProvider, cipherProvider);
-                break;
-            }
-          },
           controller: _getController(field),
           maxLines: maxLines,
           enabled: _isEnabled(context.read<SelectionProvider>(), field),
@@ -494,7 +496,7 @@ class _MetadataTabState extends State<MetadataTab> {
 
               switch (widget.versionType) {
                 case VersionType.cloud:
-                  cloudVersionProvider.cacheVersionUpdates(
+                  cloudVersionProvider.cacheUpdates(
                     widget.versionID!,
                     duration: duration.inSeconds,
                   );
@@ -548,107 +550,46 @@ class _MetadataTabState extends State<MetadataTab> {
     );
   }
 
-  void cacheCloudUpdate(
-    CloudVersionProvider cloudVersionProvider,
-    InfoField field,
-    String value,
-  ) {
-    switch (field) {
-      case InfoField.title:
-        cloudVersionProvider.cacheVersionUpdates(
-          widget.versionID!,
-          title: value,
-        );
-        break;
-      case InfoField.author:
-        cloudVersionProvider.cacheVersionUpdates(
-          widget.versionID!,
-          author: value,
-        );
-        break;
-      case InfoField.versionName:
-        cloudVersionProvider.cacheVersionUpdates(
-          widget.versionID!,
-          versionName: value,
-        );
-      case InfoField.key:
-        cloudVersionProvider.cacheVersionUpdates(
-          widget.versionID!,
-          transposedKey: value,
-        );
-        break;
-      case InfoField.language:
-        cloudVersionProvider.cacheVersionUpdates(
-          widget.versionID!,
-          language: value,
-        );
-        break;
-      case InfoField.tags:
-        throw Exception('Tags are not handled here');
-      case InfoField.bpm:
-        final bpm = int.tryParse(value) ?? 0;
-        cloudVersionProvider.cacheVersionUpdates(widget.versionID!, bpm: bpm);
-        break;
-      case InfoField.duration:
-        final duration = DateTimeUtils.parseDuration(value);
-        cloudVersionProvider.cacheVersionUpdates(
-          widget.versionID!,
-          duration: duration.inSeconds,
-        );
-        break;
-    }
+  void cacheCloudUpdates(CloudVersionProvider cloudVersionProvider) {
+    final bpm = int.tryParse(_getController(InfoField.bpm).text) ?? 0;
+    final duration = DateTimeUtils.parseDuration(
+      _getController(InfoField.duration).text,
+    );
+
+    cloudVersionProvider.cacheUpdates(
+      widget.versionID!,
+      title: _getController(InfoField.title).text,
+      author: _getController(InfoField.author).text,
+      versionName: _getController(InfoField.versionName).text,
+      transposedKey: _getController(InfoField.key).text,
+      language: _getController(InfoField.language).text,
+      bpm: bpm,
+      duration: duration.inSeconds,
+    );
   }
 
   void cacheLocalUpdates(
     LocalVersionProvider versionProvider,
     CipherProvider cipherProvider,
   ) {
-    for (var field in InfoField.values) {
-      switch (field) {
-        case InfoField.title:
-          cipherProvider.cacheCipherUpdates(
-            widget.cipherID!,
-            title: _getController(field).text,
-          );
-          break;
-        case InfoField.author:
-          cipherProvider.cacheCipherUpdates(
-            widget.cipherID!,
-            author: _getController(field).text,
-          );
-          break;
-        case InfoField.versionName:
-          versionProvider.cacheUpdates(
-            widget.versionID,
-            versionName: _getController(field).text,
-          );
-          break;
-        case InfoField.key:
-          cipherProvider.cacheCipherUpdates(
-            widget.cipherID!,
-            musicKey: _getController(field).text,
-          );
-          break;
-        case InfoField.language:
-          cipherProvider.cacheCipherUpdates(
-            widget.cipherID!,
-            language: _getController(field).text,
-          );
-          break;
-        case InfoField.bpm:
-          final bpm = int.tryParse(_getController(field).text) ?? 0;
-          versionProvider.cacheUpdates(widget.versionID, bpm: bpm);
-          break;
-        case InfoField.duration:
-          versionProvider.cacheUpdates(
-            widget.versionID,
-            duration: DateTimeUtils.parseDuration(_getController(field).text),
-          );
-          break;
-        case InfoField.tags:
-          // THIS FIELD IS NOT USED, ADDING TAGS IS HANDLED BY A BOTTOM SHEET
-          throw Exception('Tags are not handled here');
-      }
-    }
+    cipherProvider.cacheCipherUpdates(
+      widget.cipherID!,
+      title: _getController(InfoField.title).text,
+      author: _getController(InfoField.author).text,
+      musicKey: _getController(InfoField.key).text,
+      language: _getController(InfoField.language).text,
+    );
+
+    final bpm = int.tryParse(_getController(InfoField.bpm).text) ?? 0;
+    final duration = DateTimeUtils.parseDuration(
+      _getController(InfoField.duration).text,
+    );
+
+    versionProvider.cacheUpdates(
+      widget.versionID,
+      bpm: bpm,
+      versionName: _getController(InfoField.versionName).text,
+      duration: duration,
+    );
   }
 }

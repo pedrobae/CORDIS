@@ -211,7 +211,8 @@ class SectionProvider extends ChangeNotifier {
       if (versionID is String) {
         throw Exception('Cannot save sections for non-local version.');
       }
-      // For simplicity, delete all existing content and recreate
+      // TODO: Section updates
+      // For now, delete all existing content and recreate
       // This could be optimized later to only update changed content
       await _cipherRepository.deleteAllVersionSections(versionID);
 

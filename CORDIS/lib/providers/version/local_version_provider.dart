@@ -413,9 +413,7 @@ class LocalVersionProvider extends ChangeNotifier {
       await _cipherRepository.updateVersion(_versions[versionID]!);
     } catch (e) {
       _error = e.toString();
-      if (kDebugMode) {
-        print('Error updating cipher version: $e');
-      }
+      debugPrint('Error updating cipher version: $e');
     } finally {
       _isSaving = false;
       notifyListeners();

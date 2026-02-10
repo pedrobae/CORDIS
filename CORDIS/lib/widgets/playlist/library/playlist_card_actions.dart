@@ -128,15 +128,14 @@ class PlaylistCardActionsSheet extends StatelessWidget {
                                   context,
                                 )!.playlist,
                                 onConfirm: () async {
+                                  Navigator.of(context).pop();
+
                                   await _deletePlaylist(
                                     playlistProvider,
                                     versionProvider,
                                     navigationProvider,
                                     flowItemProvider,
                                   );
-                                  if (context.mounted) {
-                                    Navigator.of(context).pop();
-                                  }
                                 },
                               );
                             },

@@ -86,23 +86,19 @@ class Version {
 
   // To JSON for database (without content - sections handled separately)
   Map<String, dynamic> toSqLite() {
-    if (firebaseId == null || firebaseId!.isEmpty == false) {
-      return {
-        'cipher_id': cipherId,
-        'song_structure': songStructure.join(','),
-        'transposed_key': transposedKey,
-        'version_name': versionName,
-        'created_at': createdAt.toIso8601String(),
-      };
-    }
-    return {
-      'firebase_id': firebaseId,
+    final row = {
       'cipher_id': cipherId,
       'song_structure': songStructure.join(','),
+      'duration': duration.inSeconds,
+      'bpm': bpm,
       'transposed_key': transposedKey,
       'version_name': versionName,
       'created_at': createdAt.toIso8601String(),
     };
+    if (firebaseId != null && firebaseId!.isNotEmpty) {
+      row['firebase_id'] = firebaseId;
+    }
+    return row;
   }
 
   List<Section> getContentAsStruct() {
