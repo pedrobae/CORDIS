@@ -88,10 +88,6 @@ class CloudVersionProvider extends ChangeNotifier {
       for (final version in cloudVersions) {
         _versions[version.firebaseId!] = version;
       }
-
-      if (kDebugMode) {
-        print('LOADED ${cloudVersions.length} PUBLIC CIPHERS FROM FIRESTORE');
-      }
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {
@@ -143,11 +139,6 @@ class CloudVersionProvider extends ChangeNotifier {
       }
 
       _versions[firebaseId] = version;
-      if (kDebugMode) {
-        print(
-          'Loaded the cloud version: ${_versions[firebaseId]?.versionName} into cache',
-        );
-      }
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {

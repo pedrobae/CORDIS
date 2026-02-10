@@ -18,24 +18,27 @@ class MainScreenState extends State<MainScreen> {
   late MyAuthProvider _authProvider;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _authProvider = context.read<MyAuthProvider>();
-  }
-
-  @override
   void initState() {
     super.initState();
 
+    _authProvider = context.read<MyAuthProvider>();
+    _authProvider.addListener(_authListener);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _authProvider.addListener(_authListener);
+      if (mounted) _redirectIfNeeded();
     });
   }
 
   void _authListener() {
-    if (!_authProvider.isAuthenticated) {
-      Navigator.of(context).pushNamed('/login');
-    }
+    _redirectIfNeeded();
+  }
+
+  void _redirectIfNeeded() {
+    if (_authProvider.isAuthenticated) return;
+
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
   }
 
   @override
