@@ -68,7 +68,7 @@ class _MetadataTabState extends State<MetadataTab> {
     super.dispose();
   }
 
-  void _syncWithProviderData() {
+  void _syncWithProviderData() async {
     if (mounted) {
       final versionProvider = context.read<LocalVersionProvider>();
       final cloudVersionProvider = context.read<CloudVersionProvider>();
@@ -113,7 +113,7 @@ class _MetadataTabState extends State<MetadataTab> {
         case VersionType.import:
         case VersionType.playlist:
           final cipher = cipherProvider.getCipherById(widget.cipherID ?? -1)!;
-          final version = versionProvider.getVersion(
+          final version = versionProvider.cachedVersion(
             (widget.versionID is int) ? widget.versionID : -1,
           )!;
 

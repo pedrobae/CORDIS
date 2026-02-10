@@ -5,11 +5,13 @@ import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/repositories/cloud/schedule_repository.dart';
 import 'package:cordis/repositories/local/flow_item_repository.dart';
 import 'package:cordis/repositories/local/cipher_repository.dart';
 import 'package:cordis/repositories/local/playlist_repository.dart';
 import 'package:cordis/repositories/local/schedule_repository.dart';
+import 'package:cordis/repositories/local/section_repository.dart';
 import 'package:cordis/repositories/local/user_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +21,9 @@ class ScheduleSyncService {
   final _playlistRepo = PlaylistRepository();
   final _userRepo = UserRepository();
   final _flowRepo = FlowItemRepository();
-  final _versionRepo = LocalCipherRepository();
+  final _cipherRepo = CipherRepository();
+  final _versionRepo = LocalVersionProvider();
+  final _sectionRepo = SectionRepository();
 
   /// Sync owner's schedule to SQLite, so it can be accessed offline and edited
   /// Priority is given to the local version, so cloud diff are discarded,
@@ -58,27 +62,27 @@ class ScheduleSyncService {
               scheduleDto.playlist.versions[item.firebaseContentId]!;
 
           /// Ensure cipher exists and is up to date
-          int? cipherId = await _versionRepo.getCipherIdByTitleAuthor(
+          int? cipherId = await _cipherRepo.getCipherIdByTitleAuthor(
             title: versionDto.title,
             author: versionDto.author,
           );
 
           if (cipherId == null) {
             // Cipher doesn't exist locally, insert it
-            await _versionRepo.insertPrunedCipher(
+            await _cipherRepo.insertPrunedCipher(
               Cipher.fromVersionDto(versionDto),
             );
           } else {
             // Cipher exists, merge it
-            final existingCipher = await _versionRepo.getCipherById(cipherId);
+            final existingCipher = await _cipherRepo.getCipherById(cipherId);
             final mergedCipher = existingCipher!.mergeWith(
               Cipher.fromVersionDto(versionDto).copyWith(id: cipherId),
             );
-            await _versionRepo.updateCipher(mergedCipher);
+            await _cipherRepo.updateCipher(mergedCipher);
           }
 
           // Ensure version exists and is up to date
-          final existingVersion = await _versionRepo.getVersionWithFirebaseId(
+          final existingVersion = await _versionRepo.getVersionByFirebaseId(
             versionDto.firebaseId!,
           );
 
@@ -89,10 +93,9 @@ class ScheduleSyncService {
             );
             await _versionRepo.updateVersion(mergedVersion);
 
-            // Sync sections (delete all and re-insert)
-            await _versionRepo.deleteAllVersionSections(existingVersion.id!);
+            // Sync sections (upsert)
             for (final section in (mergedVersion.sections ?? {}).values) {
-              await _versionRepo.insertSection(
+              await _sectionRepo.upsertSection(
                 section.copyWith(versionId: existingVersion.id!),
               );
             }
@@ -103,7 +106,7 @@ class ScheduleSyncService {
             );
 
             for (final section in versionDto.sections.values) {
-              await _versionRepo.insertSection(
+              await _sectionRepo.insertSection(
                 Section.fromFirestore(section).copyWith(versionId: versionId),
               );
             }
@@ -143,12 +146,10 @@ class ScheduleSyncService {
     for (var item in domainPlaylist.items) {
       switch (item.type) {
         case PlaylistItemType.version:
-          final version = (await _versionRepo.getVersionWithId(
-            item.contentId!,
-          ));
+          final version = (await _versionRepo.getVersion(item.contentId!));
 
           if (version == null) break;
-          final cipher = (await _versionRepo.getCipherById(version.cipherId));
+          final cipher = (await _cipherRepo.getCipherById(version.cipherId));
 
           if (cipher == null) break;
           versions[item.id.toString()] = version.toDto(cipher);

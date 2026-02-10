@@ -4,7 +4,7 @@ import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/repositories/local/cipher_repository.dart';
 
 class CipherProvider extends ChangeNotifier {
-  final LocalCipherRepository _cipherRepository = LocalCipherRepository();
+  final CipherRepository _cipherRepository = CipherRepository();
 
   CipherProvider() {
     clearSearch();

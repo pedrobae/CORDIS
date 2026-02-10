@@ -34,7 +34,7 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
     SectionProvider sectionProvider,
   ) {
     final songStructure = localVersionProvider
-        .getVersion(widget.versionId ?? -1)!
+        .cachedVersion(widget.versionId ?? -1)!
         .songStructure;
 
     final sectionCode = songStructure[index];
@@ -66,7 +66,7 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
 
             if (widget.versionId is int) {
               songStructure = localVersionProvider
-                  .getVersion(widget.versionId ?? -1)!
+                  .cachedVersion(widget.versionId ?? -1)!
                   .songStructure;
             } else {
               songStructure = cloudVersionProvider

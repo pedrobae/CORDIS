@@ -1,11 +1,11 @@
+import 'package:cordis/repositories/local/section_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cordis/models/domain/cipher/section.dart';
-import 'package:cordis/repositories/local/cipher_repository.dart';
 
 class SectionProvider extends ChangeNotifier {
-  final LocalCipherRepository _cipherRepository = LocalCipherRepository();
+  final _repo = SectionRepository();
 
   SectionProvider();
 
@@ -112,7 +112,7 @@ class SectionProvider extends ChangeNotifier {
   Future<void> createSections(int newVersionId) async {
     final sections = _sections[-1];
     for (final code in sections!.keys) {
-      await _cipherRepository.insertSection(
+      await _repo.insertSection(
         sections[code]!.copyWith(versionId: newVersionId),
       );
     }
@@ -129,7 +129,7 @@ class SectionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _sections[versionId] = await _cipherRepository.getSections(versionId);
+      _sections[versionId] = await _repo.getSections(versionId);
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {
@@ -213,9 +213,7 @@ class SectionProvider extends ChangeNotifier {
       }
 
       for (final entry in _sections[versionID]!.entries) {
-        final sectionId = await _cipherRepository.upsertSection(
-          entry.value.copyWith(versionId: versionID),
-        );
+        await _repo.upsertSection(entry.value.copyWith(versionId: versionID));
       }
     } catch (e) {
       _error = e.toString();

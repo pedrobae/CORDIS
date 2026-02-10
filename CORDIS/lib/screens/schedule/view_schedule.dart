@@ -589,7 +589,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
     for (var item in domainPlaylist.items) {
       switch (item.type) {
         case PlaylistItemType.version:
-          final version = localVersionProvider.getVersion(item.contentId!);
+          final version = localVersionProvider.cachedVersion(item.contentId!);
 
           if (version == null) break;
           final cipher = cipherProvider.getCipherById(version.cipherId);

@@ -1,9 +1,11 @@
 import 'package:cordis/models/domain/cipher/version.dart';
-import 'package:cordis/repositories/local/cipher_repository.dart';
+import 'package:cordis/repositories/local/section_repository.dart';
+import 'package:cordis/repositories/local/version_repository.dart';
 import 'package:flutter/foundation.dart';
 
 class LocalVersionProvider extends ChangeNotifier {
-  final LocalCipherRepository _cipherRepository = LocalCipherRepository();
+  final LocalVersionRepository _repo = LocalVersionRepository();
+  final _sectionRepo = SectionRepository();
 
   final Map<int, Version> _versions = {}; // Cached versions localID -> Version
 
@@ -27,22 +29,32 @@ class LocalVersionProvider extends ChangeNotifier {
     return _versions.length;
   }
 
-  Version? getVersion(int versionID) => _versions[versionID];
+  Version? cachedVersion(int versionId) {
+    return _versions[versionId];
+  }
+
+  Future<Version?> getVersion(int versionID) async {
+    if (_versions.containsKey(versionID)) {
+      return _versions[versionID];
+    }
+
+    // Not loaded, check repository
+
+    return await _repo.getVersionWithId(versionID);
+  }
 
   /// Checks if a version exists locally by its Firebase ID
-  /// Returns the local id if found, otherwise null
-  Future<int?> getLocalIdByFirebaseId(String firebaseId) async {
+  /// Returns the version if found, otherwise null
+  Future<Version?> getVersionByFirebaseId(String firebaseId) async {
     for (var v in _versions.values) {
       if (v.firebaseId == firebaseId && v.id != null) {
-        return v.id;
+        return v;
       }
     }
     // Not in cache, query repository
-    final version = await _cipherRepository.getVersionWithFirebaseId(
-      firebaseId,
-    );
+    final version = await _repo.getVersionWithFirebaseId(firebaseId);
 
-    return version?.id;
+    return version;
   }
 
   Future<String?> getFirebaseIdByLocalId(int localId) async {
@@ -51,7 +63,7 @@ class LocalVersionProvider extends ChangeNotifier {
       return id;
     }
     // Not in cache, query repository
-    final version = await _cipherRepository.getVersionWithId(localId);
+    final version = await _repo.getVersionWithId(localId);
     return version?.firebaseId;
   }
 
@@ -103,7 +115,7 @@ class LocalVersionProvider extends ChangeNotifier {
         );
       }
 
-      versionId = await _cipherRepository.insertVersion(versionWithCipherId);
+      versionId = await _repo.insertVersion(versionWithCipherId);
 
       _versions[versionId] = versionWithCipherId.copyWith(id: versionId);
 
@@ -140,7 +152,7 @@ class LocalVersionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      versionId = await _cipherRepository.insertVersion(version);
+      versionId = await _repo.insertVersion(version);
       _versions[versionId] = version.copyWith(id: versionId);
       notifyListeners();
     } catch (e) {
@@ -162,7 +174,7 @@ class LocalVersionProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      final versionList = await _cipherRepository.getVersions(cipherId);
+      final versionList = await _repo.getVersions(cipherId);
       for (final version in versionList) {
         _versions[version.id!] = version;
       }
@@ -189,7 +201,7 @@ class LocalVersionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final version = await _cipherRepository.getVersionWithId(versionId);
+      final version = await _repo.getVersionWithId(versionId);
       if (version == null) {
         throw Exception('Version with id $versionId not found locally');
       }
@@ -223,7 +235,7 @@ class LocalVersionProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      version = await _cipherRepository.getVersionWithId(versionID);
+      version = await _repo.getVersionWithId(versionID);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -246,24 +258,24 @@ class LocalVersionProvider extends ChangeNotifier {
 
     try {
       // Check if version exists by its firebaseId
-      final versionId = await getLocalIdByFirebaseId(version.firebaseId!);
+      final existingVersion = await getVersionByFirebaseId(version.firebaseId!);
 
-      if (versionId != null) {
+      if (existingVersion != null) {
         // Update existing version
-        await _cipherRepository.updateVersion(version.copyWith(id: versionId));
+        await _repo.updateVersion(version.copyWith(id: existingVersion.id));
         for (final section in version.sections!.values) {
-          await _cipherRepository.updateSection(
-            section.copyWith(versionId: versionId),
+          await _sectionRepo.updateSection(
+            section.copyWith(versionId: existingVersion.id),
           );
         }
         if (kDebugMode) {
-          print('Updated existing version with id: $versionId');
+          print('Updated existing version with id: ${existingVersion.id}');
         }
       } else {
         // Insert new version
-        final versionId = await _cipherRepository.insertVersion(version);
+        final versionId = await _repo.insertVersion(version);
         for (final section in version.sections!.values) {
-          await _cipherRepository.insertSection(
+          await _sectionRepo.insertSection(
             section.copyWith(versionId: versionId),
           );
         }
@@ -293,7 +305,7 @@ class LocalVersionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _cipherRepository.updateVersion(version);
+      await _repo.updateVersion(version);
       loadVersion(version.id!);
 
       if (kDebugMode) {
@@ -322,7 +334,7 @@ class LocalVersionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _cipherRepository.updateFieldOfVersion(versionId, {
+      _repo.updateFieldOfVersion(versionId, {
         'song_structure': songStructure.join(','),
       });
 
@@ -383,7 +395,7 @@ class LocalVersionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _cipherRepository.deleteVersion(versionId);
+      await _repo.deleteVersion(versionId);
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {
@@ -410,7 +422,7 @@ class LocalVersionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _cipherRepository.updateVersion(_versions[versionID]!);
+      await _repo.updateVersion(_versions[versionID]!);
     } catch (e) {
       _error = e.toString();
       debugPrint('Error updating cipher version: $e');

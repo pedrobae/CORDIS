@@ -79,7 +79,7 @@ class _CipherCardState extends State<CipherCard> {
               );
             }
 
-            final version = versionProvider.getVersion(versionId);
+            final version = versionProvider.cachedVersion(versionId);
 
             if (version == null || cipher == null) {
               return SizedBox();

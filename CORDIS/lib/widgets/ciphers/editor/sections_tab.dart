@@ -56,11 +56,9 @@ class _SectionsTabState extends State<SectionsTab> {
               case VersionType.import:
               case VersionType.playlist:
               case VersionType.brandNew:
-                uniqueSections = localVersionProvider
-                    .getVersion(widget.versionID ?? -1)!
-                    .songStructure
-                    .toSet()
-                    .toList();
+                uniqueSections = (localVersionProvider.cachedVersion(
+                  widget.versionID ?? -1,
+                ))!.songStructure.toSet().toList();
                 break;
               case VersionType.cloud:
                 uniqueSections = cloudVersionProvider
@@ -108,7 +106,7 @@ class _SectionsTabState extends State<SectionsTab> {
 
                                 if ((widget.versionID is int &&
                                         localVersionProvider
-                                            .getVersion(widget.versionID)!
+                                            .cachedVersion(widget.versionID)!
                                             .songStructure
                                             .isNotEmpty) ||
                                     (widget.versionID is String &&
@@ -278,7 +276,7 @@ class _SectionsTabState extends State<SectionsTab> {
 
     if (widget.versionID is int) {
       songStructure = localVersionProvider
-          .getVersion(widget.versionID ?? -1)!
+          .cachedVersion(widget.versionID ?? -1)!
           .songStructure;
     } else {
       songStructure = cloudVersionProvider

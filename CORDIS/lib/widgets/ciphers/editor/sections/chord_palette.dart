@@ -89,10 +89,14 @@ class _ChordPaletteState extends State<ChordPalette> {
                       .originalKey;
             } else {
               key =
-                  versionProvider.getVersion(widget.versionId)!.transposedKey ??
+                  versionProvider
+                      .cachedVersion(widget.versionId)!
+                      .transposedKey ??
                   cipherProvider
                       .getCipherById(
-                        versionProvider.getVersion(widget.versionId)!.cipherId,
+                        versionProvider
+                            .cachedVersion(widget.versionId)!
+                            .cipherId,
                       )!
                       .musicKey;
             }

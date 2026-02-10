@@ -123,7 +123,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                       cipherProvider
                           .getCipherById(
                             versionProvider
-                                .getVersion(nextItem.contentId!)!
+                                .cachedVersion(nextItem.contentId!)!
                                 .cipherId,
                           )
                           ?.title ??

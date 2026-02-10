@@ -113,7 +113,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
         // Create a new copy of the version for editing
         // Load the version
         if (widget.versionID is int) {
-          final Version originalVersion = localVersionProvider.getVersion(
+          final Version originalVersion = localVersionProvider.cachedVersion(
             widget.versionID!,
           )!;
           // Create a copy of the version in cache

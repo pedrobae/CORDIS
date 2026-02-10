@@ -147,7 +147,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                   .songStructure;
             } else {
               songStructure = versionProvider
-                  .getVersion(widget.versionID)!
+                  .cachedVersion(widget.versionID)!
                   .songStructure;
             }
 

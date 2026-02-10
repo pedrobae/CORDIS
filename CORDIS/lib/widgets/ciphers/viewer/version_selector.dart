@@ -18,7 +18,7 @@ class VersionSelectorBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final version = context.watch<LocalVersionProvider>().getVersion(
+    final version = context.watch<LocalVersionProvider>().cachedVersion(
       currentVersionId,
     )!;
 
