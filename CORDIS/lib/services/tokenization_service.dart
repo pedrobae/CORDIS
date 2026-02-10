@@ -267,7 +267,7 @@ class TokenizationService {
   }
 
   /// Organizes the given list of WidgetWithSize into lines and words based on TokenType.
-  List<List<List<WidgetWithSize>>> _organizeInWordLine(
+  List<List<List<WidgetWithSize>>> _organize(
     List<WidgetWithSize> widgetsWithSize,
   ) {
     // Organize widgets by lines and words
@@ -328,6 +328,26 @@ class TokenizationService {
     return contentWidgetsWithSize;
   }
 
+  double _calculatePrecedingChordOffset(
+    List<List<List<WidgetWithSize>>> lines,
+    double letterSpacing,
+  ) {
+    double precedingOffset = 0;
+    for (var lineWidgets in lines) {
+      double linePrecedingOffset = 0;
+      for (var wordWidgets in lineWidgets) {
+        if (wordWidgets.isNotEmpty && wordWidgets[0].type != TokenType.lyric) {
+          linePrecedingOffset = wordWidgets[0].width + letterSpacing;
+          break;
+        }
+      }
+      if (linePrecedingOffset > precedingOffset) {
+        precedingOffset = linePrecedingOffset;
+      }
+    }
+    return precedingOffset;
+  }
+
   /// Positions the given list of WidgetWithSize into a List of Positioned widgets, with content height pre calculated.
   /// handling line breaks and spacing.
   ContentTokenized positionWidgets(
@@ -336,35 +356,25 @@ class TokenizationService {
     double lineSpacing = 8,
     double letterSpacing = 1,
   }) {
-    final contentWidgetsWithSize = _organizeInWordLine(widgetsWithSize);
+    final organizedWidgetsWithSize = _organize(widgetsWithSize);
     // Check if there is any preceding chord target in the content
     // Used to offset initial X position
-    double precedingOffset = 0;
-    for (var lineWidgetsWithSize in contentWidgetsWithSize) {
-      double linePrecedingOffset = 0;
-      for (var wordWidgetsWithSize in lineWidgetsWithSize) {
-        if (wordWidgetsWithSize.isNotEmpty &&
-            wordWidgetsWithSize[0].type != TokenType.lyric) {
-          linePrecedingOffset = wordWidgetsWithSize[0].width + letterSpacing;
-          break;
-        }
-      }
-      if (linePrecedingOffset > precedingOffset) {
-        precedingOffset = linePrecedingOffset;
-      }
-    }
+    final precedingOffset = _calculatePrecedingChordOffset(
+      organizedWidgetsWithSize,
+      letterSpacing,
+    );
 
     // Account for vertical padding (3 + 4 top + bottom from ChordToken)
     final double chordHeight = _fontSize + 7;
-    final double lineHeight = chordHeight + lineSpacing + _fontSize;
-
     // Account for padding (16, 16, 8 left + 8, 16, 16 right)
     final double maxWidth = MediaQuery.of(context).size.width - 80;
+
+    final double lineHeight = chordHeight + lineSpacing + _fontSize;
 
     int viewLineIndex = 0; // Last lyric line number
 
     final tokenWidgets = <Positioned>[];
-    for (var lineWidgets in contentWidgetsWithSize) {
+    for (var lineWidgets in organizedWidgetsWithSize) {
       double chordX = 0; // End of the last chord positioned
       double lyricsX = 0; // End of the last lyric/space positioned
       bool foundLyricInLine = false;
@@ -442,6 +452,7 @@ class TokenizationService {
 
             case TokenType.newline:
               lineBroke = true;
+              foundLyricInLine = false;
               break;
 
             case TokenType.precedingChordTarget:
@@ -468,7 +479,6 @@ class TokenizationService {
           viewLineIndex++;
           chordX = 0;
           lyricsX = precedingOffset;
-          foundLyricInLine = false;
           for (var posWithRef in tempWordWidgets) {
             final widgetWithSize = posWithRef.ref;
             switch (widgetWithSize.type) {
@@ -519,7 +529,6 @@ class TokenizationService {
           tokenWidgets.addAll(tempWordWidgets.map((e) => e.positioned));
         }
       }
-      // Incrementing view line index after processing a line is handled by newLine token
     }
 
     return ContentTokenized(

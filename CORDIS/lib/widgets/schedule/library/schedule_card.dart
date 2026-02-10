@@ -188,9 +188,13 @@ class ScheduleCard extends StatelessWidget {
                     ],
                   ),
                   // BOTTOM BUTTONS
+                  //vuew
                   FilledTextButton(
                     isDark: true,
                     isDense: true,
+                    text: AppLocalizations.of(
+                      context,
+                    )!.viewPlaceholder(AppLocalizations.of(context)!.schedule),
                     onPressed: () {
                       navigationProvider.push(
                         ViewScheduleScreen(scheduleId: scheduleId),
@@ -198,11 +202,11 @@ class ScheduleCard extends StatelessWidget {
                         showDrawerIcon: false,
                       );
                     },
-                    text: AppLocalizations.of(
-                      context,
-                    )!.viewPlaceholder(AppLocalizations.of(context)!.schedule),
                   ),
+                  //share
                   FilledTextButton(
+                    text: AppLocalizations.of(context)!.share,
+                    isDense: true,
                     onPressed: () {
                       showModalBottomSheet(
                         context: context,
@@ -217,8 +221,6 @@ class ScheduleCard extends StatelessWidget {
                         },
                       );
                     },
-                    text: AppLocalizations.of(context)!.share,
-                    isDense: true,
                   ),
                 ],
               ),

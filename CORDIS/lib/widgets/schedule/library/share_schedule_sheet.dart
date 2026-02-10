@@ -51,10 +51,6 @@ class _ShareScheduleSheetState extends State<ShareScheduleSheet> {
                 ? localScheduleProvider.getSchedule(widget.scheduleId)
                 : cloudScheduleProvider.getSchedule(widget.scheduleId);
 
-            final shareCode = (widget.scheduleId is int)
-                ? schedule.shareCode
-                : schedule.shareCode;
-
             return Container(
               decoration: BoxDecoration(
                 color: colorScheme.surface,
@@ -99,7 +95,7 @@ class _ShareScheduleSheetState extends State<ShareScheduleSheet> {
                           ),
                           SizedBox(height: 12),
                           SelectableText(
-                            shareCode,
+                            schedule.shareCode,
                             style: textTheme.headlineLarge?.copyWith(
                               fontSize: 32,
                               fontWeight: FontWeight.w700,
@@ -113,7 +109,9 @@ class _ShareScheduleSheetState extends State<ShareScheduleSheet> {
                                 ? AppLocalizations.of(context)!.codeCopied
                                 : AppLocalizations.of(context)!.copyCode,
                             onPressed: () {
-                              Clipboard.setData(ClipboardData(text: shareCode));
+                              Clipboard.setData(
+                                ClipboardData(text: schedule.shareCode),
+                              );
                               setState(() {
                                 copied = true;
                               });
@@ -171,15 +169,13 @@ class _ShareScheduleSheetState extends State<ShareScheduleSheet> {
                                         ),
                                       ),
                                       Text(
-                                        role.memberIds.isEmpty
+                                        role.users.isEmpty
                                             ? AppLocalizations.of(
                                                 context,
                                               )!.noMembers
                                             : AppLocalizations.of(
                                                 context,
-                                              )!.xMembers(
-                                                role.memberIds.length,
-                                              ),
+                                              )!.xMembers(role.users.length),
                                         style: textTheme.bodySmall?.copyWith(
                                           color: colorScheme.shadow,
                                         ),
