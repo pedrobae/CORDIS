@@ -204,24 +204,27 @@ class ScheduleCard extends StatelessWidget {
                     },
                   ),
                   //share
-                  FilledTextButton(
-                    text: AppLocalizations.of(context)!.share,
-                    isDense: true,
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (BuildContext context) {
-                          return Padding(
-                            padding: EdgeInsets.only(
-                              bottom: MediaQuery.of(context).viewInsets.bottom,
-                            ),
-                            child: ShareScheduleSheet(scheduleId: scheduleId),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                  if (schedule.ownerFirebaseId == authProvider.id)
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.share,
+                      isDense: true,
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (BuildContext context) {
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                bottom: MediaQuery.of(
+                                  context,
+                                ).viewInsets.bottom,
+                              ),
+                              child: ShareScheduleSheet(scheduleId: scheduleId),
+                            );
+                          },
+                        );
+                      },
+                    ),
                 ],
               ),
             );

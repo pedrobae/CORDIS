@@ -1,6 +1,5 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/screens/schedule/play_schedule.dart';
-import 'package:cordis/widgets/schedule/library/share_schedule_sheet.dart';
 
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
@@ -213,28 +212,6 @@ class CloudScheduleCard extends StatelessWidget {
                           );
                         },
                         text: AppLocalizations.of(context)!.play,
-                      ),
-                      FilledTextButton(
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            builder: (BuildContext context) {
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: MediaQuery.of(
-                                    context,
-                                  ).viewInsets.bottom,
-                                ),
-                                child: ShareScheduleSheet(
-                                  scheduleId: scheduleId,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        text: AppLocalizations.of(context)!.share,
-                        isDense: true,
                       ),
                     ],
                   ),
