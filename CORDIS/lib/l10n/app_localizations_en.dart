@@ -344,6 +344,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roles => 'Roles';
 
   @override
+  String get owner => 'Owner';
+
+  @override
   String get generalMember => 'General Member';
 
   @override

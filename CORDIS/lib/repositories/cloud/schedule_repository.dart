@@ -116,6 +116,7 @@ class CloudScheduleRepository {
         collectionPath: 'schedules',
         documentId: schedule.firebaseId!,
         data: schedule.toFirestore(),
+        merge: false,
       );
 
       await FirebaseAnalytics.instance.logEvent(

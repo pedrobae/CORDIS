@@ -139,7 +139,10 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                       '';
                 } else {
                   nextTitle =
-                      flowItemProvider.getFlowItem(nextItem.id!)?.title ?? '';
+                      flowItemProvider
+                          .getFlowItem(nextItem.contentId!)
+                          ?.title ??
+                      '';
                 }
               }
             }
@@ -208,7 +211,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                               } else {
                                 return PlayFlowItem(
                                   flowItem: flowItemProvider.getFlowItem(
-                                    item.id!,
+                                    item.contentId!,
                                   )!,
                                 );
                               }

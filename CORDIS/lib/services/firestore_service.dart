@@ -156,6 +156,7 @@ class FirestoreService {
     required String collectionPath,
     required String documentId,
     required Map<String, dynamic> data,
+    bool merge = true,
   }) async {
     try {
       data['updatedAt'] = FieldValue.serverTimestamp();

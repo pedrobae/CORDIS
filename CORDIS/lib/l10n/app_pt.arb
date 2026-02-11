@@ -241,6 +241,8 @@
   "@role": {"description": "User role label"},
   "roles": "Funções",
   "@roles": {"description": "User roles label"},
+  "owner": "Proprietário",
+  "@owner": {"description": "Owner user role label"},
   "generalMember": "Membro Geral",
   "@generalMember": {"description": "Default user role"},
   "viewPlaceholder": "Visualizar {object}",

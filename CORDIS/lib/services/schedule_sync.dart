@@ -152,12 +152,12 @@ class ScheduleSyncService {
           final cipher = (await _cipherRepo.getCipherById(version.cipherId));
 
           if (cipher == null) break;
-          versions[item.id.toString()] = version.toDto(cipher);
+          versions[item.contentId!.toString()] = version.toDto(cipher);
           break;
         case PlaylistItemType.flowItem:
           final flowItem = await (_flowRepo.getFlowItem(item.contentId!));
           if (flowItem != null) {
-            flowItems[item.id.toString()] = flowItem;
+            flowItems[item.contentId!.toString()] = flowItem;
           }
           break;
       }

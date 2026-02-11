@@ -346,6 +346,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get roles => 'Funções';
 
   @override
+  String get owner => 'Proprietário';
+
+  @override
   String get generalMember => 'Membro Geral';
 
   @override

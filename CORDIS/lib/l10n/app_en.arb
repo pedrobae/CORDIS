@@ -246,6 +246,8 @@
   "@role": {"description": "User role label"},
   "roles": "Roles",
   "@roles": {"description": "User roles label"},
+  "owner": "Owner",
+  "@owner": {"description": "Owner user role label"},
   "generalMember": "General Member",
   "@generalMember": {"description": "Default user role"},
   "viewPlaceholder": "View {object}",

@@ -61,16 +61,16 @@ class ScheduleCard extends StatelessWidget {
               schedule!.playlistId!,
             );
 
-            String userRole = AppLocalizations.of(context)!.generalMember;
-            String? roleFound;
+            String? userRole = AppLocalizations.of(context)!.generalMember;
             if (authProvider.id != null) {
-              roleFound = localScheduleProvider.getUserRoleInSchedule(
-                scheduleId,
-                userProvider.getLocalIdByFirebaseId(authProvider.id!),
-              );
-            }
-            if (roleFound != null) {
-              userRole = roleFound;
+              if (authProvider.id == schedule.ownerFirebaseId) {
+                userRole = AppLocalizations.of(context)!.owner;
+              } else {
+                userRole = localScheduleProvider.getUserRoleInSchedule(
+                  scheduleId,
+                  userProvider.getLocalIdByFirebaseId(authProvider.id!),
+                );
+              }
             }
 
             return Container(

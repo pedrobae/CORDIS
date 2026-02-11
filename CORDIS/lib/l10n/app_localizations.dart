@@ -740,6 +740,12 @@ abstract class AppLocalizations {
   /// **'Funções'**
   String get roles;
 
+  /// Owner user role label
+  ///
+  /// In pt, this message translates to:
+  /// **'Proprietário'**
+  String get owner;
+
   /// Default user role
   ///
   /// In pt, this message translates to:
