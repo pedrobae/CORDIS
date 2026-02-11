@@ -550,44 +550,41 @@ class TokenizationService {
     // Assign position to token for reference
     token.position = position;
 
+    // ChordTokens
+    final chordWidget = ChordToken(
+      token: token,
+      sectionColor: contentColor,
+      textStyle: TextStyle(
+        fontSize: _fontSize,
+        color: Colors.white,
+        fontFamily: fontFamily,
+      ),
+    );
+
+    final dimChordWidget = ChordToken(
+      token: token,
+      sectionColor: contentColor.withValues(alpha: .5),
+      textStyle: TextStyle(
+        fontSize: _fontSize,
+        color: Colors.white,
+        fontFamily: fontFamily,
+      ),
+    );
+
     // GestureDetector to handle long press to drag transition
     return isEnabled
-        ? Draggable<ContentToken>(
+        ? LongPressDraggable<ContentToken>(
             data: token,
             onDragStarted: toggleDrag,
             onDragEnd: (details) => toggleDrag(),
             feedback: Material(
               color: Colors.transparent,
-              child: ChordToken(
-                token: token,
-                sectionColor: contentColor.withValues(alpha: .5),
-                textStyle: TextStyle(
-                  fontSize: _fontSize,
-                  color: Colors.white,
-                  fontFamily: fontFamily,
-                ),
-              ),
+              child: dimChordWidget,
             ),
             childWhenDragging: SizedBox.shrink(),
-            child: ChordToken(
-              token: token,
-              sectionColor: contentColor,
-              textStyle: TextStyle(
-                fontSize: _fontSize,
-                color: Colors.white,
-                fontFamily: fontFamily,
-              ),
-            ),
+            child: chordWidget,
           )
-        : ChordToken(
-            token: token,
-            sectionColor: contentColor,
-            textStyle: TextStyle(
-              fontSize: _fontSize,
-              color: Colors.white,
-              fontFamily: fontFamily,
-            ),
-          );
+        : chordWidget;
   }
 
   DragTarget<ContentToken> _buildPrecedingChordDragTarget(
