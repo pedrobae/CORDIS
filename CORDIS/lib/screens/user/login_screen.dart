@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/routes/app_routes.dart';
@@ -30,26 +32,6 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _obscurePassword = !_obscurePassword;
     });
-  }
-
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Informe o e-mail';
-    }
-    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-      return 'E-mail inválido';
-    }
-    return null;
-  }
-
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Informe a senha';
-    }
-    if (value.length < 6) {
-      return 'A senha deve ter pelo menos 6 caracteres';
-    }
-    return null;
   }
 
   @override
@@ -133,7 +115,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         visualDensity: VisualDensity.compact,
                       ),
-                      validator: _validateEmail,
                     ),
                   ],
                 ),
@@ -193,7 +174,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         visualDensity: VisualDensity.compact,
                       ),
-                      validator: _validatePassword,
                     ),
                     Center(
                       child: Column(
@@ -312,53 +292,30 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                // Google Sign-In Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.g_mobiledata, size: 24),
-                    label: Text(
-                      'Entrar com Google',
-                      style: textTheme.labelLarge!.copyWith(
-                        color: colorScheme.onSecondaryContainer,
-                        fontWeight: FontWeight.bold,
+                // Google Sign-In Button - remove on iOS
+                if (!Platform.isIOS)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.g_mobiledata, size: 24),
+                      label: Text(
+                        'Entrar com Google',
+                        style: textTheme.labelLarge!.copyWith(
+                          color: colorScheme.onSecondaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.secondaryContainer,
-                      foregroundColor: colorScheme.onSecondaryContainer,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.secondaryContainer,
+                        foregroundColor: colorScheme.onSecondaryContainer,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 2,
                       ),
-                      elevation: 2,
+                      onPressed: _googleSignIn,
                     ),
-                    onPressed: _googleSignIn,
                   ),
-                ),
-                // SizedBox(
-                //   width: double.infinity,
-                //   child: ElevatedButton.icon(
-                //     icon: const Icon(Icons.person_outline),
-                //     label: Text(
-                //       'Entrar Anonimamente',
-                //       style: theme.textTheme.labelLarge!.copyWith(
-                //         color: colorScheme.onPrimary,
-                //         fontWeight: FontWeight.bold,
-                //       ),
-                //     ),
-                //     style: ElevatedButton.styleFrom(
-                //       backgroundColor: colorScheme.primary,
-                //       foregroundColor: colorScheme.onPrimary,
-                //       shape: RoundedRectangleBorder(
-                //         borderRadius: BorderRadius.circular(16),
-                //       ),
-                //       elevation: 2,
-                //     ),
-                //     onPressed: authProvider.isLoading
-                //         ? null
-                //         : () => authProvider.signInAnonymously(),
-                //   ),
-                // ),
               ],
             ),
           ),
