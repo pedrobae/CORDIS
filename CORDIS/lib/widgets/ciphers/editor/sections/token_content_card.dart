@@ -236,7 +236,10 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   /// CONTENT
                   Builder(
                     builder: (context) {
-                      final widgetsWithSize = _tokenizer.buildTokenWidgets(
+                      final contentTokens = _tokenizer.organize(tokens);
+
+                      final contentWidgets = _tokenizer.buildContentWidgets(
+                        contentTokens,
                         tokens,
                         layoutSettingsProvider.fontFamily,
                         section.contentColor,
@@ -249,7 +252,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
                       final content = _tokenizer.positionWidgets(
                         context,
-                        widgetsWithSize,
+                        contentWidgets,
                         lineSpacing: 15,
                         letterSpacing: 0,
                       );
