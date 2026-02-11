@@ -587,7 +587,7 @@ class TokenizationService {
         : chordWidget;
   }
 
-  DragTarget<ContentToken> _buildPrecedingChordDragTarget(
+  Widget _buildPrecedingChordDragTarget(
     List<ContentToken> tokens,
     int position,
     String fontFamily,
@@ -596,6 +596,16 @@ class TokenizationService {
     Function(List<ContentToken>, int) onRemoveChord,
     bool isEnabled,
   ) {
+    final dragTargetChild = Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        border: BorderDirectional(
+          bottom: BorderSide(color: Colors.grey.shade400, width: 2),
+        ),
+      ),
+    );
+
     return isEnabled
         ? DragTarget<ContentToken>(
             onAcceptWithDetails: (details) {
@@ -610,33 +620,18 @@ class TokenizationService {
             },
             builder: (context, candidateData, rejectedData) {
               if (candidateData.isNotEmpty) {
-                return ChordToken(
-                  token: candidateData.first!,
-                  sectionColor: contentColor,
-                  textStyle: TextStyle(
-                    fontSize: _fontSize,
-                    color: Colors.white,
-                    fontFamily: fontFamily,
-                  ),
-                );
-              } else {
-                return Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    border: BorderDirectional(
-                      bottom: BorderSide(color: Colors.grey.shade400, width: 2),
-                    ),
-                  ),
+                return _buildDragTargetFeedback(
+                  dragTargetChild,
+                  candidateData.first!,
+                  tokens,
+                  fontFamily,
+                  contentColor,
                 );
               }
+              return dragTargetChild;
             },
           )
-        : DragTarget<ContentToken>(
-            builder: (context, candidateData, rejectedData) {
-              return SizedBox.shrink();
-            },
-          );
+        : dragTargetChild;
   }
 
   Widget _buildLyricDragTarget(
@@ -649,77 +644,15 @@ class TokenizationService {
     Function(List<ContentToken>, int) onRemoveChord,
     bool isEnabled,
   ) {
-    return isEnabled
-        ? DragTarget<ContentToken>(
-            onAcceptWithDetails: (details) {
-              onAddChord(tokens, details.data, position);
-              if (details.data.position != null) {
-                int index = details.data.position!;
-                if (index > position) {
-                  index += 1;
-                }
-                onRemoveChord(tokens, index);
-              }
-            },
-            builder: (context, candidateData, rejectedData) {
-              if (candidateData.isNotEmpty) {
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Text(
-                      token.text,
-                      style: TextStyle(
-                        fontSize: _fontSize,
-                        color: Colors.black87,
-                        fontFamily: fontFamily,
-                      ),
-                    ),
-                    Positioned(
-                      top: -_fontSize,
-                      child: ChordToken(
-                        token: candidateData.first!,
-                        sectionColor: contentColor,
-                        textStyle: TextStyle(
-                          fontSize: _fontSize,
-                          color: Colors.white,
-                          fontFamily: fontFamily,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-              return Text(
-                token.text,
-                style: TextStyle(
-                  fontSize: _fontSize,
-                  color: Colors.black87,
-                  fontFamily: fontFamily,
-                ),
-              );
-            },
-          )
-        : Text(
-            token.text,
-            style: TextStyle(
-              fontSize: _fontSize,
-              color: Colors.black87,
-              fontFamily: fontFamily,
-            ),
-          );
-  }
+    final dragTargetChild = Text(
+      token.text,
+      style: TextStyle(
+        fontSize: _fontSize,
+        color: Colors.black87,
+        fontFamily: fontFamily,
+      ),
+    );
 
-  Widget _buildSpaceDragTarget(
-    List<ContentToken> tokens,
-    ContentToken token,
-    int position,
-    double width,
-    String fontFamily,
-    Color contentColor,
-    Function(List<ContentToken>, ContentToken, int) onAddChord,
-    Function(List<ContentToken>, int) onRemoveChord,
-    bool isEnabled,
-  ) {
     return isEnabled
         ? DragTarget<ContentToken>(
             onAcceptWithDetails: (details) {
@@ -734,28 +667,91 @@ class TokenizationService {
             },
             builder: (context, candidateData, rejectedData) {
               if (candidateData.isNotEmpty) {
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    SizedBox(width: width, height: 24),
-                    Positioned(
-                      top: -_fontSize,
-                      child: ChordToken(
-                        token: candidateData.first!,
-                        sectionColor: contentColor,
-                        textStyle: TextStyle(
-                          fontSize: _fontSize,
-                          color: Colors.white,
-                          fontFamily: fontFamily,
-                        ),
-                      ),
-                    ),
-                  ],
+                return _buildDragTargetFeedback(
+                  dragTargetChild,
+                  candidateData.first!,
+                  tokens,
+                  fontFamily,
+                  contentColor,
                 );
               }
-              return SizedBox(width: width, height: 24);
+              return dragTargetChild;
             },
           )
-        : SizedBox(width: width, height: 24);
+        : dragTargetChild;
+  }
+
+  Widget _buildSpaceDragTarget(
+    List<ContentToken> tokens,
+    ContentToken token,
+    int position,
+    double width,
+    String fontFamily,
+    Color contentColor,
+    Function(List<ContentToken>, ContentToken, int) onAddChord,
+    Function(List<ContentToken>, int) onRemoveChord,
+    bool isEnabled,
+  ) {
+    final dragTargetChild = SizedBox(width: width, height: 24);
+
+    return isEnabled
+        ? DragTarget<ContentToken>(
+            onAcceptWithDetails: (details) {
+              onAddChord(tokens, details.data, position);
+              if (details.data.position != null) {
+                int index = details.data.position!;
+                if (index > position) {
+                  index++;
+                }
+                onRemoveChord(tokens, index);
+              }
+            },
+            builder: (context, candidateData, rejectedData) {
+              if (candidateData.isNotEmpty) {
+                return _buildDragTargetFeedback(
+                  dragTargetChild,
+                  candidateData.first!,
+                  tokens,
+                  fontFamily,
+                  contentColor,
+                );
+              }
+              return dragTargetChild;
+            },
+          )
+        : dragTargetChild;
+  }
+
+  Widget _buildDragTargetFeedback(
+    Widget dragTargetChild,
+    ContentToken draggedToken,
+    List<ContentToken> tokens,
+    String fontFamily,
+    Color contentColor,
+  ) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        dragTargetChild,
+        Positioned(
+          top: -(_fontSize * 1.4),
+          child: Container(
+            decoration: BoxDecoration(
+              color: contentColor,
+              borderRadius: BorderRadius.circular(100),
+            ),
+            child: ChordToken(
+              token: draggedToken,
+              sectionColor: contentColor,
+              textStyle: TextStyle(
+                fontSize: _fontSize,
+                color: Colors.white,
+                fontFamily: fontFamily,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
