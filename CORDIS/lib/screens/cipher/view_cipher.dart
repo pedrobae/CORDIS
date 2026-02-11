@@ -129,7 +129,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                 _hasSetOriginalKey = true;
               }
             } else {
-              version = versionProvider.getVersion(widget.versionID);
+              version = versionProvider.cachedVersion(widget.versionID);
               key = cipher!.musicKey;
               duration = version.duration;
               if (!_hasSetOriginalKey) {

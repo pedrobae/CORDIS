@@ -119,7 +119,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
               version = cloudVersionProvider.getVersion(widget.versionId);
               isCloud = true;
             } else {
-              version = versionProvider.getVersion(widget.versionId);
+              version = versionProvider.cachedVersion(widget.versionId);
               isCloud = false;
             }
 
