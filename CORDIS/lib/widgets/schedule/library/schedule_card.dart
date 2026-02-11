@@ -62,10 +62,13 @@ class ScheduleCard extends StatelessWidget {
             );
 
             String userRole = AppLocalizations.of(context)!.generalMember;
-            final roleFound = localScheduleProvider.getUserRoleInSchedule(
-              scheduleId,
-              userProvider.getLocalIdByFirebaseId(authProvider.id!),
-            );
+            String? roleFound;
+            if (authProvider.id != null) {
+              roleFound = localScheduleProvider.getUserRoleInSchedule(
+                scheduleId,
+                userProvider.getLocalIdByFirebaseId(authProvider.id!),
+              );
+            }
             if (roleFound != null) {
               userRole = roleFound;
             }
