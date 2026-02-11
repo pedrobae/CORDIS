@@ -150,7 +150,7 @@ class UserProvider extends ChangeNotifier {
       if (kDebugMode) {
         print('User with Firebase ID $firebaseId not found locally.');
       }
-      throw Exception('User with Firebase ID $firebaseId not found locally.');
+      return null;
     }
   }
 

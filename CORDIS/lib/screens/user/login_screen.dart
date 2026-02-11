@@ -15,7 +15,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -264,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       text: AppLocalizations.of(context)!.login,
                       isDark: true,
                       isDisabled: authProvider.isLoading,
-                      onPressed: _emailSignIn,
+                      onPressed: () => _emailSignIn(),
                     ),
                     FilledTextButton(
                       text: AppLocalizations.of(context)!.enterShareCode,
@@ -369,29 +368,26 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _emailSignIn() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      final authProvider = context.read<MyAuthProvider>();
-      await authProvider.signInWithEmail(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
+    final authProvider = context.read<MyAuthProvider>();
+    await authProvider.signInWithEmail(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
 
-      if (authProvider.isAuthenticated && mounted) {
-        // Load users after successful login
-        final userProvider = context.read<UserProvider>();
-        await userProvider.loadUsers();
-        await userProvider.ensureUsersExist([authProvider.id!]);
+    if (authProvider.isAuthenticated && mounted) {
+      // Load users after successful login
+      final userProvider = context.read<UserProvider>();
+      await userProvider.loadUsers();
+      await userProvider.ensureUsersExist([authProvider.id!]);
 
-        if (mounted) {
-          Navigator.of(context).pushReplacementNamed(AppRoutes.main);
-        }
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(AppRoutes.main);
       }
     }
   }
 
   void _googleSignIn() async {
     final authProvider = context.read<MyAuthProvider>();
-    if (authProvider.isLoading) return;
     await authProvider.signInWithGoogle();
     if (authProvider.isAuthenticated && mounted) {
       // Load users after successful login

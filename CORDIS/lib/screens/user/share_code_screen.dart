@@ -85,7 +85,16 @@ class ShareCodeScreenState extends State<ShareCodeScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+            if (_cloudScheduleProvider.isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (_cloudScheduleProvider.error != null)
+              Text(
+                _cloudScheduleProvider.error!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            const SizedBox(height: 8),
             FilledTextButton(
               text: _authProvider.isAuthenticated
                   ? AppLocalizations.of(context)!.keepGoing
