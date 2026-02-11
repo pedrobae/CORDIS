@@ -173,6 +173,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sectionCodeInstruction => 'Máximo de 2 caracteres';
 
   @override
+  String get type => 'Tipo';
+
+  @override
   String get sectionType => 'Tipo da Seção';
 
   @override
@@ -190,6 +193,14 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get sectionTextHint =>
       'Insira o texto da seção, em formato chordPro. (letra[acorde])';
+
+  @override
+  String get duplicateSectionInstruction =>
+      'Selecione uma seção existente para repetir.';
+
+  @override
+  String get selectSectionInstruction =>
+      'Escolha uma estrutura para sua nova seção.';
 
   @override
   String get cipherEditorTitle => 'Editor de Cifras';
@@ -332,10 +343,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get role => 'Função';
 
   @override
-  String get generalMember => 'Membro Geral';
+  String get roles => 'Funções';
 
   @override
-  String get share => 'Compartilhar';
+  String get generalMember => 'Membro Geral';
 
   @override
   String viewPlaceholder(Object object) {
@@ -373,12 +384,89 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String downloadPlaceholder(Object object) {
+    return 'Baixar $object';
+  }
+
+  @override
+  String managePlaceholder(Object object) {
+    return 'Gerenciar $object';
+  }
+
+  @override
+  String newPlaceholder(Object object) {
+    return 'Nova $object';
+  }
+
+  @override
+  String changePlaceholder(Object object) {
+    return 'Alterar $object';
+  }
+
+  @override
+  String publishPlaceholder(Object object) {
+    return 'Publicar $object';
+  }
+
+  @override
+  String renamePlaceholder(Object object) {
+    return 'Renomear $object';
+  }
+
+  @override
+  String optionsPlaceholder(Object object) {
+    return 'Opções de $object';
+  }
+
+  @override
   String duplicateTooltip(Object object) {
     return 'Criar uma cópia desta $object';
   }
 
   @override
   String get createLocalCopy => 'Criar uma Cópia Local';
+
+  @override
+  String get share => 'Compartilhar';
+
+  @override
+  String get shareCode => 'Código de Compartilhamento';
+
+  @override
+  String get enterShareCode => 'Inserir Código de Compartilhamento';
+
+  @override
+  String get shareCodeInstructions =>
+      'Insira o código de compartilhamento fornecido pelo líder da sua equipe para acessar a agenda.';
+
+  @override
+  String get joinSchedule => 'Participar da Agenda';
+
+  @override
+  String get completed => 'Completo';
+
+  @override
+  String get draft => 'Rascunho';
+
+  @override
+  String get published => 'Publicado';
+
+  @override
+  String get publishScheduleWarning =>
+      'Uma vez publicada, a agenda poderá ser acessada por sua equipe.\nAlterações serão sincronizadas até a data do Serviço.\nEsta ação não pode ser desfeita.';
+
+  @override
+  String get sendToRoleMembers => 'Enviar para os Membros da Função';
+
+  @override
+  String get sendInvites => 'Enviar Convites';
+
+  @override
+  String get inviteSentSuccessfully => 'Convites enviados com sucesso!';
+
+  @override
+  String get emailInviteDescription =>
+      'Um convite por email foi enviado para as equipes';
 
   @override
   String get scheduleName => 'Nome da Agenda';
@@ -529,7 +617,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get importInstructions =>
-      '• Selecione um PDF com cifra\n• Fonte mono é recomendada se possível\n• Separe estrofes com linhas vazias\n• Acordes acima das letras';
+      '• Selecione um PDF com uma cifra\n• Escolha se o PDF tem colunas ou não\n• Processe o PDF e faça os ajustes necessários\n• Salve a cifra importada na sua biblioteca';
 
   @override
   String get importFromImage => 'Importar de Imagem';
@@ -617,6 +705,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get copySuffix => '(Cópia)';
 
   @override
+  String get copyCode => 'Copiar Código';
+
+  @override
+  String get codeCopied => 'Código copiado!';
+
+  @override
   String get assign => 'Atribuir';
 
   @override
@@ -646,6 +740,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get welcome => 'Bem-vindo';
 
   @override
+  String get getStarted => 'Vamos Começar';
+
+  @override
   String get getStartedMessage =>
       'Comece criando ou importando sua primeira cifra.';
 
@@ -665,6 +762,11 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String bpmWithPlaceholder(Object bpm) {
     return 'BPM: $bpm';
+  }
+
+  @override
+  String durationWithPlaceholder(Object duration) {
+    return 'Duração: $duration';
   }
 
   @override

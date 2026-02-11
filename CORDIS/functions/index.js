@@ -1,3 +1,6 @@
+// firebase deploy --only functions
+// npm run lint -- --fix
+
 const {setGlobalOptions} = require("firebase-functions");
 const {onCall} = require("firebase-functions/v2/https");
 const {beforeUserCreated} = require("firebase-functions/v2/identity");
@@ -182,8 +185,7 @@ exports.joinScheduleWithCode = onCall(async (request) => {
     }
 
     const scheduleDoc = scheduleSnap.docs[0];
-    const {scheduleId} = scheduleDoc.data();
-
+    const scheduleId = scheduleDoc.id;
 
     const scheduleData = scheduleDoc.data();
 
@@ -198,7 +200,7 @@ exports.joinScheduleWithCode = onCall(async (request) => {
 
     // Add user as collaborator to the schedule
     await db.collection("schedules").doc(scheduleId).update({
-      collaborators: admin.firestore.FieldValue.arrayUnion([userId]),
+      collaborators: admin.firestore.FieldValue.arrayUnion(userId),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 

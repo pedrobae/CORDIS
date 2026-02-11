@@ -1,5 +1,5 @@
 import 'package:cordis/models/dtos/version_dto.dart';
-import 'package:cordis/repositories/cloud_version_repository.dart';
+import 'package:cordis/repositories/cloud/version_repository.dart';
 import 'package:flutter/foundation.dart';
 
 class CloudVersionProvider extends ChangeNotifier {
@@ -88,10 +88,6 @@ class CloudVersionProvider extends ChangeNotifier {
       for (final version in cloudVersions) {
         _versions[version.firebaseId!] = version;
       }
-
-      if (kDebugMode) {
-        print('LOADED ${cloudVersions.length} PUBLIC CIPHERS FROM FIRESTORE');
-      }
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {
@@ -143,11 +139,6 @@ class CloudVersionProvider extends ChangeNotifier {
       }
 
       _versions[firebaseId] = version;
-      if (kDebugMode) {
-        print(
-          'Loaded the cloud version: ${_versions[firebaseId]?.versionName} into cache',
-        );
-      }
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {
@@ -160,7 +151,7 @@ class CloudVersionProvider extends ChangeNotifier {
   }
 
   // ===== UPDATE =====
-  void cacheVersionUpdates(
+  void cacheUpdates(
     String versionId, {
     String? versionName,
     String? transposedKey,
@@ -203,6 +194,15 @@ class CloudVersionProvider extends ChangeNotifier {
   // ===== DELETE =====
 
   // ===== HELPER METHODS =====
+  void clearCache() {
+    _versions.clear();
+    _error = null;
+    _isLoading = false;
+    _isSaving = false;
+    _searchTerm = '';
+
+    notifyListeners();
+  }
 
   /// Search cached cloud versions
   Future<void> setSearchTerm(String term) async {

@@ -1,5 +1,6 @@
 import 'package:cordis/helpers/database.dart';
 import 'package:cordis/models/domain/schedule.dart';
+import 'package:cordis/models/domain/user.dart';
 
 class LocalScheduleRepository {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
@@ -20,18 +21,19 @@ class LocalScheduleRepository {
     final db = await _databaseHelper.database;
     int roleId = await db.insert('role', role.toSqlite(scheduleId));
 
-    for (var memberId in role.memberIds) {
-      await insertMember(roleId, memberId);
+    for (var userId in role.users.map((user) => user.id)) {
+      if (userId == null || userId == -1) continue;
+      await insertMember(roleId, userId);
     }
 
     return roleId;
   }
 
-  Future<int> insertMember(int roleId, int memberId) async {
+  Future<int> insertMember(int roleId, int userId) async {
     final db = await _databaseHelper.database;
     return await db.insert('role_member', {
       'role_id': roleId,
-      'member_id': memberId,
+      'member_id': userId,
     });
   }
 
@@ -68,6 +70,22 @@ class LocalScheduleRepository {
     return Schedule.fromSqlite(maps.first, roles);
   }
 
+  Future<Schedule?> getScheduleByFirebaseId(String firebaseId) async {
+    final db = await _databaseHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'schedule',
+      where: 'firebase_id = ?',
+      whereArgs: [firebaseId],
+    );
+
+    if (maps.isEmpty) return null;
+
+    final scheduleId = maps.first['id'] as int;
+    final roles = await getRolesForSchedule(scheduleId);
+
+    return Schedule.fromSqlite(maps.first, roles);
+  }
+
   Future<List<Role>> getRolesForSchedule(int scheduleId) async {
     final db = await _databaseHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -79,14 +97,14 @@ class LocalScheduleRepository {
     List<Role> roles = [];
     for (var map in maps) {
       final roleId = map['id'] as int;
-      final memberIds = await getMemberIdsForRole(roleId);
-      roles.add(Role.fromSqlite(map, memberIds));
+      final users = await getUsersForRole(roleId);
+      roles.add(Role.fromSqlite(map, users));
     }
 
     return roles;
   }
 
-  Future<List<int>> getMemberIdsForRole(int roleId) async {
+  Future<List<User>> getUsersForRole(int roleId) async {
     final db = await _databaseHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
       'role_member',
@@ -94,12 +112,21 @@ class LocalScheduleRepository {
       whereArgs: [roleId],
     );
 
-    List<int> memberIds = [];
-    for (var map in maps) {
-      memberIds.add(map['member_id'] as int);
+    final userIds = maps.map((map) => map['member_id'] as int).toList();
+
+    // Fetch user details for each userId
+    final List<Map<String, dynamic>> userMaps = await db.query(
+      'user',
+      where: 'id IN (${List.filled(userIds.length, '?').join(',')})',
+      whereArgs: userIds,
+    );
+
+    List<User> users = [];
+    for (var map in userMaps) {
+      users.add(User.fromSqlite(map));
     }
 
-    return memberIds;
+    return users;
   }
 
   // ===== UPDATE =====

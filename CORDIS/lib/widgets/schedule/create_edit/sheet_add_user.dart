@@ -83,8 +83,8 @@ class _AddUserSheetState extends State<AddUserSheet> {
         _emailFilteredUsers = userProvider.knownUsers
             .where(
               (user) =>
-                  user.mail.toLowerCase().contains(query) &&
-                  user.mail.toLowerCase() != query &&
+                  user.email.toLowerCase().contains(query) &&
+                  user.email.toLowerCase() != query &&
                   !members.any((member) => member.id == user.id),
             )
             .toList();
@@ -129,35 +129,15 @@ class _AddUserSheetState extends State<AddUserSheet> {
 
     // Check if user exists in known users
     dynamic user = userProvider.knownUsers.firstWhereOrNull(
-      (user) => user.mail.toLowerCase() == email.toLowerCase(),
+      (user) => user.email.toLowerCase() == email.toLowerCase(),
     );
 
     if (widget.role is Role) {
       user ??= await userProvider.createLocalUnknownUser(username, email);
 
-      scheduleProvider.addMemberToRole(
-        widget.scheduleId,
-        widget.role.id,
-        user.id!,
-      );
+      scheduleProvider.addUserToRole(widget.scheduleId, widget.role.id, user);
     } else {
-      user ??= await userProvider.fetchUserDtoByEmail(email);
-
-      if (user == null) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.userNotFoundInCloud),
-            ),
-          );
-        }
-      } else {
-        scheduleProvider.addMemberToRole(
-          widget.scheduleId,
-          widget.role.name,
-          user.firebaseId,
-        );
-      }
+      // CLOUD - SKIP
     }
     if (context.mounted) {
       Navigator.of(context).pop();

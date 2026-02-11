@@ -2,14 +2,15 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/screens/cipher/import/import_pdf.dart';
 import 'package:cordis/screens/cipher/import/import_text.dart';
-import 'package:cordis/widgets/ciphers/editor/sections/edit_section.dart';
+import 'package:cordis/widgets/ciphers/editor/sections/select_type.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CreateCipherSheet extends StatelessWidget {
+class NewSectionSheet extends StatelessWidget {
   final bool secret;
-  const CreateCipherSheet({super.key, this.secret = false});
+  final int versionId;
+  const NewSectionSheet({super.key, this.secret = false, this.versionId = -1});
 
   @override
   Widget build(BuildContext context) {
@@ -44,16 +45,17 @@ class CreateCipherSheet extends StatelessWidget {
             FilledTextButton(
               text: AppLocalizations.of(
                 context,
-              )!.addPlaceholder(AppLocalizations.of(context)!.section),
+              )!.newPlaceholder(AppLocalizations.of(context)!.section),
               isDark: true,
               icon: Icons.add,
               trailingIcon: Icons.chevron_right,
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        EditSectionScreen(sectionCode: '', versionId: -1),
+                context.read<NavigationProvider>().pushForeground(
+                  SelectType(
+                    sectionCode: null,
+                    versionID: versionId,
+                    isNewSection: true,
                   ),
                 );
               },
@@ -70,9 +72,6 @@ class CreateCipherSheet extends StatelessWidget {
                 Navigator.of(context).pop();
                 context.read<NavigationProvider>().push(
                   const ImportTextScreen(),
-                  showAppBar: false,
-                  showDrawerIcon: false,
-                  showBottomNavBar: false,
                 );
               },
             ),
@@ -83,12 +82,7 @@ class CreateCipherSheet extends StatelessWidget {
             isDiscrete: true,
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<NavigationProvider>().push(
-                const ImportPdfScreen(),
-                showAppBar: false,
-                showDrawerIcon: false,
-                showBottomNavBar: false,
-              );
+              context.read<NavigationProvider>().push(const ImportPdfScreen());
             },
           ),
           if (secret)

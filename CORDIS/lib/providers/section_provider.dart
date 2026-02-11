@@ -1,11 +1,11 @@
+import 'package:cordis/repositories/local/section_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cordis/models/domain/cipher/section.dart';
-import 'package:cordis/repositories/local_cipher_repository.dart';
 
 class SectionProvider extends ChangeNotifier {
-  final LocalCipherRepository _cipherRepository = LocalCipherRepository();
+  final _repo = SectionRepository();
 
   SectionProvider();
 
@@ -38,8 +38,8 @@ class SectionProvider extends ChangeNotifier {
   }
 
   /// ===== CREATE =====
-  // Add a new section
-  void cacheAddSection(
+  // Add a new section, returns the new section code (with suffix if there was a conflict)
+  String cacheAddSection(
     dynamic versionKey,
     String contentCode,
     Color color,
@@ -52,10 +52,36 @@ class SectionProvider extends ChangeNotifier {
       contentType: sectionType,
       contentText: '',
     );
+    // CHECK IF ALREADY EXISTS
+    bool exists = false;
+    for (String key in _sections[newSection.versionId]?.keys ?? []) {
+      // Strip numbering suffixes for comparison, remove numbers
+      final strippedKey = key.toString().replaceAll(RegExp(r'\d+$'), '');
+      if (strippedKey == contentCode) {
+        exists = true;
+        break;
+      }
+    }
+    if (exists) {
+      debugPrint(
+        'Section with code ${newSection.contentCode} already exists in version ${newSection.versionId}.',
+      );
+      int suffix = 1;
+      String newCode;
+      do {
+        newCode = '${newSection.contentCode}$suffix';
+        suffix++;
+      } while (_sections[newSection.versionId] != null &&
+          _sections[newSection.versionId]!.containsKey(newCode));
+
+      debugPrint('Renaming new section to $newCode to avoid conflict.');
+      newSection.contentCode = newCode;
+    }
 
     _sections[newSection.versionId] ??= {};
     _sections[newSection.versionId]![newSection.contentCode] = newSection;
     notifyListeners();
+    return newSection.contentCode;
   }
 
   // Set new sections in cache (used when importing or on cloud load)
@@ -67,11 +93,26 @@ class SectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void cacheSectionCopy(dynamic versionId) {
+    final sections = _sections[versionId];
+    if (sections == null) return;
+
+    _sections[-1] ??= {};
+
+    for (final code in sections.keys) {
+      final originalSection = sections[code]!;
+      final newSection = originalSection.copyWith(versionId: -1);
+      _sections[-1]![newSection.contentCode] = newSection;
+    }
+
+    notifyListeners();
+  }
+
   ///Create sections for a new version from -1 cache
   Future<void> createSections(int newVersionId) async {
     final sections = _sections[-1];
     for (final code in sections!.keys) {
-      await _cipherRepository.insertSection(
+      await _repo.insertSection(
         sections[code]!.copyWith(versionId: newVersionId),
       );
     }
@@ -88,7 +129,7 @@ class SectionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _sections[versionId] = await _cipherRepository.getSections(versionId);
+      _sections[versionId] = await _repo.getSections(versionId);
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {
@@ -102,7 +143,7 @@ class SectionProvider extends ChangeNotifier {
 
   /// ===== UPDATE =====
   // Modify a section (content_text)
-  void cacheSection(
+  void cacheUpdate(
     dynamic versionKey,
     String contentCode, {
     String? newContentCode,
@@ -130,8 +171,6 @@ class SectionProvider extends ChangeNotifier {
       section.contentText = newContentText ?? section.contentText;
       section.contentColor = newColor ?? section.contentColor;
     }
-
-    notifyListeners();
   }
 
   void renameSectionKey(
@@ -172,24 +211,9 @@ class SectionProvider extends ChangeNotifier {
       if (versionID is String) {
         throw Exception('Cannot save sections for non-local version.');
       }
-      // For simplicity, delete all existing content and recreate
-      // This could be optimized later to only update changed content
-      await _cipherRepository.deleteAllVersionSections(versionID);
 
-      // Insert new content
-      if (kDebugMode) {
-        print(
-          'Saving ${_sections[versionID]!.length} sections for version $versionID',
-        );
-      }
       for (final entry in _sections[versionID]!.entries) {
-        final sectionId = await _cipherRepository.insertSection(
-          entry.value.copyWith(versionId: versionID),
-        );
-
-        if (kDebugMode) {
-          print('Inserted section with code ${entry.key} and id $sectionId');
-        }
+        await _repo.upsertSection(entry.value.copyWith(versionId: versionID));
       }
     } catch (e) {
       _error = e.toString();

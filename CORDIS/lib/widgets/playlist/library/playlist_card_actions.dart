@@ -1,11 +1,15 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/playlist/playlist.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
-import 'package:cordis/providers/flow_item_provider.dart';
+import 'package:cordis/providers/my_auth_provider.dart';
+import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
+import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/playlist/edit_playlist.dart';
 import 'package:cordis/widgets/delete_confirmation.dart';
+import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -48,7 +52,9 @@ class PlaylistCardActionsSheet extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.quickAction,
+                        AppLocalizations.of(context)!.optionsPlaceholder(
+                          AppLocalizations.of(context)!.playlist,
+                        ),
                         style: textTheme.titleMedium?.copyWith(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
@@ -66,45 +72,50 @@ class PlaylistCardActionsSheet extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // ACTIONS
-                  // RENAME PLAYLIST
-                  GestureDetector(
-                    onTap: () {
+
+                  /// ACTIONS
+                  // rename
+                  FilledTextButton(
+                    text: AppLocalizations.of(context)!.renamePlaceholder(''),
+                    trailingIcon: Icons.chevron_right,
+                    isDiscrete: true,
+                    onPressed: () {
                       Navigator.of(context).pop(); // Close the bottom sheet
                       navigationProvider.push(
                         EditPlaylistScreen(playlistId: playlistId),
+                        showBottomNavBar: true,
                       );
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: colorScheme.surfaceContainer),
-                        borderRadius: BorderRadius.circular(0),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.editPlaceholder(
-                              AppLocalizations.of(context)!.playlist,
-                            ),
-                            style: textTheme.titleMedium?.copyWith(
-                              color: colorScheme.onSurface,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          Icon(Icons.chevron_right, color: colorScheme.shadow),
-                        ],
-                      ),
-                    ),
                   ),
-                  // DELETE PLAYLIST
-                  GestureDetector(
-                    onTap: () {
+
+                  // duplicate
+                  FilledTextButton(
+                    text: AppLocalizations.of(
+                      context,
+                    )!.duplicatePlaceholder(''),
+                    trailingIcon: Icons.chevron_right,
+                    isDiscrete: true,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _duplicatePlaylist(
+                        context,
+                        playlistProvider,
+                        versionProvider,
+                        flowItemProvider,
+                      );
+                    },
+                  ),
+
+                  // delete
+                  FilledTextButton(
+                    text: AppLocalizations.of(context)!.delete,
+                    tooltip: AppLocalizations.of(
+                      context,
+                    )!.deletePlaylistDescription,
+                    trailingIcon: Icons.chevron_right,
+                    isDangerous: true,
+                    isDiscrete: true,
+                    onPressed: () {
                       showModalBottomSheet(
                         isScrollControlled: true,
                         context: context,
@@ -118,16 +129,14 @@ class PlaylistCardActionsSheet extends StatelessWidget {
                                   context,
                                 )!.playlist,
                                 onConfirm: () async {
+                                  Navigator.of(context).pop();
+
                                   await _deletePlaylist(
-                                    context,
                                     playlistProvider,
                                     versionProvider,
                                     navigationProvider,
                                     flowItemProvider,
                                   );
-                                  if (context.mounted) {
-                                    Navigator.of(context).pop();
-                                  }
                                 },
                               );
                             },
@@ -135,47 +144,9 @@ class PlaylistCardActionsSheet extends StatelessWidget {
                         },
                       );
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.red),
-                        borderRadius: BorderRadius.circular(0),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!.delete,
-                                  style: textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.red,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.deletePlaylistDescription,
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: Colors.red,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(Icons.chevron_right, color: Colors.red),
-                        ],
-                      ),
-                    ),
                   ),
+
+                  SizedBox(height: 16),
                 ],
               ),
             );
@@ -184,7 +155,6 @@ class PlaylistCardActionsSheet extends StatelessWidget {
   }
 
   Future<void> _deletePlaylist(
-    BuildContext context,
     PlaylistProvider playlistProvider,
     LocalVersionProvider versionProvider,
     NavigationProvider navigationProvider,
@@ -199,5 +169,71 @@ class PlaylistCardActionsSheet extends StatelessWidget {
     }
     await playlistProvider.deletePlaylist(playlistId);
     navigationProvider.pop();
+  }
+
+  Future<void> _duplicatePlaylist(
+    BuildContext context,
+    PlaylistProvider playlistProvider,
+    LocalVersionProvider localVersionProvider,
+    FlowItemProvider flowItemProvider,
+  ) async {
+    final userID = context.read<UserProvider>().getLocalIdByFirebaseId(
+      context.read<MyAuthProvider>().id!,
+    )!;
+
+    // Create pruned Playlist copy
+    final playlist = playlistProvider.getPlaylistById(playlistId);
+
+    await playlistProvider.createPlaylistFromDomain(
+      Playlist(
+        id: -1,
+        name: '${playlist!.name} ${AppLocalizations.of(context)!.copySuffix}',
+        createdBy: userID,
+      ),
+    );
+
+    // Create new Items and assign them to the newPlaylist
+    for (var item in playlist.items) {
+      switch (item.type) {
+        case PlaylistItemType.version:
+          final version = (await localVersionProvider.fetchVersion(
+            item.contentId!,
+          ))!;
+
+          if (!context.mounted) {
+            throw Exception('Context is not mounted');
+          }
+
+          localVersionProvider.setNewVersionInCache(
+            version.copyWith(
+              id: -1,
+              firebaseId: '',
+              versionName:
+                  '${version.versionName} ${AppLocalizations.of(context)!.copySuffix}',
+            ),
+          );
+          final newId = (await localVersionProvider.createVersion())!;
+
+          await playlistProvider.addVersionToPlaylist(playlistId, newId);
+
+        case PlaylistItemType.flowItem:
+          final flowItem = (await flowItemProvider.fetchFlowItem(
+            item.contentId!,
+          ))!;
+
+          if (!context.mounted) {
+            throw Exception('Context is not mounted');
+          }
+
+          await flowItemProvider.createFlowItem(
+            flowItem.copyWith(
+              firebaseId: '',
+              title:
+                  "${flowItem.title} ${AppLocalizations.of(context)!.copySuffix}",
+            ),
+          );
+          break;
+      }
+    }
   }
 }

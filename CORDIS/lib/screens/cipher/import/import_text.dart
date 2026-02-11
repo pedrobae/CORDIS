@@ -2,11 +2,11 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/models/domain/parsing_cipher.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/parser_provider.dart';
+import 'package:cordis/providers/cipher/parser_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
-import 'package:cordis/providers/import_provider.dart';
+import 'package:cordis/providers/cipher/import_provider.dart';
 import 'package:provider/provider.dart';
 
 class ImportTextScreen extends StatefulWidget {
@@ -169,6 +169,7 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
                                       versionID: -1,
                                       cipherID: -1,
                                     ),
+                                    showBottomNavBar: true,
                                   );
                                 }
                               },

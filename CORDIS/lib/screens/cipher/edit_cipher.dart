@@ -2,13 +2,14 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
+import 'package:cordis/providers/cipher/import_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/parser_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/cipher/parser_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cordis/providers/cipher_provider.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
@@ -59,8 +60,11 @@ class _EditCipherScreenState extends State<EditCipherScreen>
         final parserProvider = context.read<ParserProvider>();
 
         // Load imported cipher data
-        final cipher = parserProvider.parsedCipher!;
+        final cipher = parserProvider.parsedCipher;
 
+        if (cipher == null) {
+          break;
+        }
         cipherProvider.setNewCipherInCache(cipher);
         // Load imported version data
         final version = cipher.versions.first;
@@ -70,6 +74,10 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           -1,
           version.sections!,
         ); // -1 for new/imported versions
+
+        // CLEAR PARSE AND IMPORT PROVIDERS
+        parserProvider.clearCache();
+        context.read<ImportProvider>().clearCache();
         break;
       case VersionType.cloud:
         // Ensure cloud version
@@ -105,12 +113,13 @@ class _EditCipherScreenState extends State<EditCipherScreen>
         // Create a new copy of the version for editing
         // Load the version
         if (widget.versionID is int) {
-          final Version originalVersion = localVersionProvider.getVersion(
+          final Version originalVersion = localVersionProvider.cachedVersion(
             widget.versionID!,
           )!;
           // Create a copy of the version in cache
           localVersionProvider.setNewVersionInCache(
             originalVersion.copyWith(
+              firebaseId: '',
               versionName: AppLocalizations.of(
                 context,
               )!.playlistVersionName(playlistName),
@@ -122,24 +131,20 @@ class _EditCipherScreenState extends State<EditCipherScreen>
 
           // Load the sections in cache
           await sectionProvider.loadLocalSections(widget.versionID!);
-
-          sectionProvider.setNewSectionsInCache(
-            -1,
-            sectionProvider.getSections(widget.versionID!),
-          );
+          sectionProvider.cacheSectionCopy(widget.versionID!);
         } else {
           final VersionDto originalVersion = cloudVersionProvider.getVersion(
             widget.versionID!,
           )!;
 
           // Check if there exists a local cipher with the same title / author
-          final localCipherId = cipherProvider.getCipherIdByTitleOrAuthor(
+          final localCipherID = cipherProvider.getCipherIdByTitleOrAuthor(
             originalVersion.title,
             originalVersion.author,
           );
 
-          if (localCipherId != -1 && localCipherId != null) {
-            await cipherProvider.loadCipher(localCipherId);
+          if (localCipherID != -1 && localCipherID != null) {
+            await cipherProvider.loadCipher(localCipherID);
           } else {
             cipherProvider.setNewCipherInCache(
               Cipher.fromVersionDto(originalVersion),
@@ -153,7 +158,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           }
 
           final newVersion = originalVersion
-              .toDomain(cipherId: localCipherId)
+              .toDomain(cipherId: localCipherID)
               .copyWith(versionName: newName);
 
           // Create a copy of the version in cache
@@ -210,14 +215,17 @@ class _EditCipherScreenState extends State<EditCipherScreen>
                 ),
                 actions: [
                   IconButton(
-                    onPressed: () => _save(
-                      selectionProvider,
-                      versionProvider,
-                      cipherProvider,
-                      sectionProvider,
-                      playlistProvider,
-                      navigationProvider,
-                    ),
+                    onPressed: () async {
+                      await _save(
+                        selectionProvider,
+                        versionProvider,
+                        cipherProvider,
+                        sectionProvider,
+                        playlistProvider,
+                        navigationProvider,
+                      );
+                      navigationProvider.pop();
+                    },
                     icon: Icon(Icons.save, color: colorScheme.onSurface),
                   ),
                 ],
@@ -332,17 +340,19 @@ class _EditCipherScreenState extends State<EditCipherScreen>
       for (dynamic versionId in selectionProvider.selectedItemIds) {
         if (versionId.runtimeType == int) {
           // LOCAL VERSION: Create a copy of the version in the database
-          versionId = await versionProvider.createVersion(null);
-        } else {
+          versionId = await versionProvider.createVersion();
+        } else if (versionId.runtimeType == String) {
           // CLOUD VERSION: Upsert the version in the database
-          int? localCipherId = widget.cipherID;
+          int? localCipherID = widget.cipherID;
           if (widget.cipherID == null) {
-            localCipherId = await cipherProvider.createCipher();
+            localCipherID = await cipherProvider.createCipher();
           } else {
             await cipherProvider.saveCipher(widget.cipherID!);
           }
 
-          versionId = await versionProvider.createVersion(localCipherId);
+          versionId = await versionProvider.createVersion(
+            cipherID: localCipherID,
+          );
         }
         // Create Section entries for the new version
         await sectionProvider.createSections(versionId);
@@ -358,28 +368,32 @@ class _EditCipherScreenState extends State<EditCipherScreen>
     } else {
       switch (widget.versionType) {
         case VersionType.playlist:
-          versionProvider.saveVersion(widget.versionID);
-          sectionProvider.saveSections(versionID: widget.versionID);
+          await versionProvider.saveVersion(widget.versionID);
+          await sectionProvider.saveSections(versionID: widget.versionID);
           break;
 
         case VersionType.brandNew:
           final cipherID = await cipherProvider.createCipher();
-          final versionID = await versionProvider.createVersion(cipherID);
+          final versionID = await versionProvider.createVersion(
+            cipherID: cipherID,
+          );
           if (versionID == null) {
-            throw Exception('Failed to create version for imported cipher');
+            throw Exception('Failed to create version for new song');
           }
           await sectionProvider.createSections(versionID);
         case VersionType.import:
           final cipherID = await cipherProvider.createCipher();
-          final versionID = await versionProvider.createVersion(cipherID);
+          final versionID = await versionProvider.createVersion(
+            cipherID: cipherID,
+          );
           if (versionID == null) {
-            throw Exception('Failed to create version for imported cipher');
+            throw Exception('Failed to create version for imported song');
           }
           await sectionProvider.createSections(versionID);
           navigationProvider.pop();
           break;
         case VersionType.cloud:
-          // TODO_CLOUD - Save cloud version edits/upload, decide
+          // TODO:cloud - Save cloud version edits/upload, decide
           break;
 
         case VersionType.local:
@@ -388,7 +402,6 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           await sectionProvider.saveSections(versionID: widget.versionID);
           break;
       }
-      navigationProvider.pop();
     }
   }
 }

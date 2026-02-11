@@ -1,5 +1,5 @@
 import 'package:cordis/models/domain/playlist/flow_item.dart';
-import 'package:cordis/repositories/flow_item_repository.dart';
+import 'package:cordis/repositories/local/flow_item_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:async';
 
@@ -51,6 +51,7 @@ class FlowItemProvider extends ChangeNotifier {
     if (_flowItems.containsKey(id)) {
       return _flowItems[id];
     }
+
     return null;
   }
 
@@ -63,17 +64,22 @@ class FlowItemProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Fetches a flow item straight from SQLite, if exists
+  Future<FlowItem?> fetchFlowItem(int id) async {
+    return await _flowItemRepo.getFlowItem(id);
+  }
+
   // ===== CREATE =====
   // Create a new FlowItem from scratch
   Future<void> createFlowItem(FlowItem flowItem) async {
     if (_isSaving) return;
 
-    _isSaving = true;
-    _error = null;
-    notifyListeners();
-
     try {
-      int id = await _flowItemRepo.createFlowItem(flowItem);
+      _isSaving = true;
+      _error = null;
+      notifyListeners();
+
+      final id = await _flowItemRepo.createFlowItem(flowItem);
       await loadFlowItem(id);
     } catch (e) {
       _error = e.toString();

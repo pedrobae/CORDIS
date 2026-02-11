@@ -1,7 +1,10 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/providers/user_provider.dart';
+import 'package:cordis/routes/app_routes.dart';
+import 'package:cordis/screens/user/share_code_screen.dart';
+import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
-import 'package:cordis/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,35 +20,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  late final MyAuthProvider _authProvider;
-
-  @override
-  void initState() {
-    super.initState();
-    // Listen for authentication changes after the first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _authProvider = context.read<MyAuthProvider>();
-      _authProvider.addListener(_authListener);
-    });
-  }
-
-  void _authListener() {
-    if (_authProvider.isAuthenticated && context.mounted) {
-      _authProvider.removeListener(_authListener); // Prevent multiple calls
-      context.read<UserProvider>().ensureUsersExist([_authProvider.id!]);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) {
-          Navigator.of(context).pop();
-        }
-      });
-    }
-  }
-
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _authProvider.removeListener(_authListener);
     super.dispose();
   }
 
@@ -77,8 +55,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: Consumer<MyAuthProvider>(
@@ -87,6 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               spacing: 24,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(height: 40),
                 Image.asset(
@@ -97,20 +76,30 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   AppLocalizations.of(context)!.logInTitlePrefix +
                       AppLocalizations.of(context)!.appName,
-                  style: theme.textTheme.headlineMedium?.copyWith(
+                  style: textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: colorScheme.onSurface,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 Column(
                   spacing: 8,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      AppLocalizations.of(context)!.email,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      spacing: 2,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.email,
+                          style: textTheme.titleMedium,
+                        ),
+                        Text(
+                          '*',
+                          style: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.error,
+                          ),
+                        ),
+                      ],
                     ),
                     TextFormField(
                       controller: _emailController,
@@ -119,19 +108,27 @@ class _LoginScreenState extends State<LoginScreen> {
                       autofocus: true,
                       maxLines: 1,
                       decoration: InputDecoration(
-                        label: Text(AppLocalizations.of(context)!.email),
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        hint: Text(
+                          AppLocalizations.of(context)!.email,
+                          style: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.shadow,
+                          ),
+                        ),
                         prefixIcon: Icon(
                           Icons.email,
-                          color: colorScheme.primary,
+                          color: colorScheme.shadow,
                         ),
-                        border: OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(0),
+                          borderSide: BorderSide(
+                            color: colorScheme.surfaceContainerLowest,
+                            width: 1.2,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(0),
                           borderSide: BorderSide(
-                            color: colorScheme.primary,
+                            color: colorScheme.surfaceContainerLowest,
                             width: 2,
                           ),
                         ),
@@ -145,11 +142,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   spacing: 8,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      AppLocalizations.of(context)!.password,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      spacing: 2,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.password,
+                          style: textTheme.titleMedium,
+                        ),
+                        Text(
+                          '*',
+                          style: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.error,
+                          ),
+                        ),
+                      ],
                     ),
                     TextFormField(
                       controller: _passwordController,
@@ -157,28 +163,32 @@ class _LoginScreenState extends State<LoginScreen> {
                       textInputAction: TextInputAction.done,
                       maxLines: 1,
                       decoration: InputDecoration(
-                        label: Text(AppLocalizations.of(context)!.password),
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        prefixIcon: Icon(
-                          Icons.lock,
-                          color: colorScheme.primary,
+                        hintText: AppLocalizations.of(context)!.password,
+                        hintStyle: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.shadow,
                         ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        prefixIcon: Icon(Icons.lock, color: colorScheme.shadow),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword
                                 ? Icons.visibility_off
                                 : Icons.visibility,
-                            color: colorScheme.primary,
+                            color: colorScheme.shadow,
                           ),
                           onPressed: _toggleObscure,
                         ),
-                        border: OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(0),
+                          borderSide: BorderSide(
+                            color: colorScheme.surfaceContainerLowest,
+                            width: 1.2,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(0),
                           borderSide: BorderSide(
-                            color: colorScheme.primary,
+                            color: colorScheme.surfaceContainerLowest,
                             width: 2,
                           ),
                         ),
@@ -193,7 +203,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              // TODO: ResetPassword
+                              // TODO:auth - ResetPassword
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   backgroundColor: Colors.amberAccent,
@@ -246,39 +256,46 @@ class _LoginScreenState extends State<LoginScreen> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.login),
-                    label: Text(
-                      AppLocalizations.of(context)!.login,
-                      style: theme.textTheme.labelLarge!.copyWith(
-                        color: colorScheme.surface,
-                      ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 8,
+                  children: [
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.login,
+                      isDark: true,
+                      isDisabled: authProvider.isLoading,
+                      onPressed: _emailSignIn,
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.onSurface,
-                      foregroundColor: colorScheme.surface,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(0),
-                      ),
-                      elevation: 2,
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.enterShareCode,
+                      onPressed: () async {
+                        await authProvider.signInAnonymously();
+                        if (context.mounted) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => ShareCodeScreen(
+                                onBack: (context) {
+                                  authProvider.signOut();
+                                  Navigator.of(context).pop();
+                                },
+                                onSuccess: (context) {
+                                  Navigator.of(context).pushNamedAndRemoveUntil(
+                                    AppRoutes.main,
+                                    (route) => false,
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        }
+                      },
                     ),
-                    onPressed: authProvider.isLoading
-                        ? null
-                        : () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              authProvider.signInWithEmail(
-                                _emailController.text,
-                                _passwordController.text,
-                              );
-                            }
-                          },
-                  ),
+                  ],
                 ),
+
                 // Sign Up Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
                   children: [
                     Text(
                       AppLocalizations.of(context)!.accountCreationPrefix,
@@ -303,7 +320,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     icon: const Icon(Icons.g_mobiledata, size: 24),
                     label: Text(
                       'Entrar com Google',
-                      style: theme.textTheme.labelLarge!.copyWith(
+                      style: textTheme.labelLarge!.copyWith(
                         color: colorScheme.onSecondaryContainer,
                         fontWeight: FontWeight.bold,
                       ),
@@ -316,9 +333,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       elevation: 2,
                     ),
-                    onPressed: authProvider.isLoading
-                        ? null
-                        : () => authProvider.signInWithGoogle(),
+                    onPressed: _googleSignIn,
                   ),
                 ),
                 // SizedBox(
@@ -351,5 +366,42 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void _emailSignIn() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      final authProvider = context.read<MyAuthProvider>();
+      await authProvider.signInWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+
+      if (authProvider.isAuthenticated && mounted) {
+        // Load users after successful login
+        final userProvider = context.read<UserProvider>();
+        await userProvider.loadUsers();
+        await userProvider.ensureUsersExist([authProvider.id!]);
+
+        if (mounted) {
+          Navigator.of(context).pushReplacementNamed(AppRoutes.main);
+        }
+      }
+    }
+  }
+
+  void _googleSignIn() async {
+    final authProvider = context.read<MyAuthProvider>();
+    if (authProvider.isLoading) return;
+    await authProvider.signInWithGoogle();
+    if (authProvider.isAuthenticated && mounted) {
+      // Load users after successful login
+      final userProvider = context.read<UserProvider>();
+      await userProvider.loadUsers();
+      await userProvider.ensureUsersExist([authProvider.id!]);
+
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(AppRoutes.main);
+      }
+    }
   }
 }

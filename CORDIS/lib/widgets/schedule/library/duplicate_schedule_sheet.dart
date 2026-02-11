@@ -1,7 +1,7 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
@@ -160,20 +160,7 @@ class _DuplicateScheduleSheetState extends State<DuplicateScheduleSheet> {
                               );
 
                           localScheduleProvider.createSchedule(
-                            scheduleDto.toDomain(
-                              ownerLocalId,
-                              scheduleDto.roles
-                                  .map(
-                                    (role) => role.memberIds
-                                        .map(
-                                          (id) => userProvider
-                                              .getLocalIdByFirebaseId(id)!,
-                                        )
-                                        .toList(),
-                                  )
-                                  .toList(),
-                              playlistId,
-                            ),
+                            scheduleDto.toDomain(playlistLocalId: playlistId),
                           );
                         }
                         if (context.mounted) Navigator.of(context).pop();

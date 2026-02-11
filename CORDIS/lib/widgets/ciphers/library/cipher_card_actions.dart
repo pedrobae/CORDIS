@@ -1,6 +1,6 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
-import 'package:cordis/providers/cipher_provider.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
@@ -76,8 +76,7 @@ class CipherCardActionsSheet extends StatelessWidget {
                           versionID: versionProvider
                               .getIdOfOldestVersionOfCipher(cipherId),
                         ),
-                        showAppBar: false,
-                        showDrawerIcon: false,
+                        showBottomNavBar: true,
                       );
                     },
                     child: Container(

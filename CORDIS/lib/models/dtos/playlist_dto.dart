@@ -65,7 +65,7 @@ class PlaylistDto {
       ),
       versions:
           (json['versions'] as Map<String, dynamic>?)?.map(
-            (key, value) => MapEntry(key, VersionDto.fromFirestore(value, key)),
+            (key, value) => MapEntry(key, VersionDto.fromCache(value)),
           ) ??
           {},
     );
@@ -110,8 +110,8 @@ class PlaylistDto {
           PlaylistItem(
             id: -1,
             firebaseContentId: id[1],
-            type: PlaylistItemType.flowItem,
             position: position++,
+            type: PlaylistItemType.flowItem,
             duration: Duration(
               seconds: flowItems[id[1]]?['duration'] as int? ?? 0,
             ),

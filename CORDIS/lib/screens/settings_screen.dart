@@ -2,17 +2,18 @@ import 'package:cordis/helpers/database.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
+import 'package:cordis/services/cache_service.dart';
 
 import 'package:cordis/utils/app_theme.dart';
 
 import 'package:cordis/l10n/app_localizations.dart';
 
-import 'package:cordis/providers/cipher_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/settings_provider.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
-import 'package:cordis/providers/flow_item_provider.dart';
+import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
@@ -183,23 +184,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _clearCache() async {
+    final cacheService = CacheService();
+
+    await cacheService.clearAllCaches();
+  }
+
   Future<void> _reloadAllData() async {
     try {
       // Clear all provider caches first
       context.read<CipherProvider>().clearCache();
       context.read<PlaylistProvider>().clearCache();
       context.read<LocalVersionProvider>().clearCache();
+      context.read<CloudVersionProvider>().clearCache();
       context.read<SectionProvider>().clearCache();
       context.read<UserProvider>().clearCache();
       context.read<FlowItemProvider>().clearCache();
       context.read<LocalScheduleProvider>().clearCache();
       context.read<SelectionProvider>().disableSelectionMode();
       context.read<CloudScheduleProvider>().clearCache();
-
+      await _clearCache();
+      if (!mounted) return;
       // Force reload all providers from database
       await Future.wait([
         context.read<CipherProvider>().loadCiphers(forceReload: true),
-        context.read<CloudVersionProvider>().loadVersions(),
+        context.read<CloudVersionProvider>().loadVersions(forceReload: true),
         context.read<PlaylistProvider>().loadPlaylists(),
         context.read<UserProvider>().loadUsers(),
         context.read<LocalScheduleProvider>().loadSchedules(),

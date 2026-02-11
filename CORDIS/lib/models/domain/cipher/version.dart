@@ -86,14 +86,19 @@ class Version {
 
   // To JSON for database (without content - sections handled separately)
   Map<String, dynamic> toSqLite() {
-    return {
-      'firebase_id': firebaseId,
+    final row = {
       'cipher_id': cipherId,
       'song_structure': songStructure.join(','),
+      'duration': duration.inSeconds,
+      'bpm': bpm,
       'transposed_key': transposedKey,
       'version_name': versionName,
       'created_at': createdAt.toIso8601String(),
     };
+    if (firebaseId != null && firebaseId!.isNotEmpty) {
+      row['firebase_id'] = firebaseId;
+    }
+    return row;
   }
 
   List<Section> getContentAsStruct() {
@@ -107,8 +112,7 @@ class Version {
       transposedKey: transposedKey,
       songStructure: songStructure,
       sections: sections!.map(
-        (sectionCode, section) =>
-            MapEntry(sectionCode, section.toMap() as Map<String, String>),
+        (sectionCode, section) => MapEntry(sectionCode, section.toFirestore()),
       ),
       title: cipher.title,
       author: cipher.author,
@@ -136,7 +140,6 @@ class Version {
     int? id,
     String? firebaseId,
     int? cipherId,
-    String? firebaseCipherId,
     List<String>? songStructure,
     Duration? duration,
     int? bpm,
@@ -156,6 +159,27 @@ class Version {
       versionName: versionName ?? this.versionName,
       createdAt: createdAt ?? this.createdAt,
       sections: content ?? sections,
+    );
+  }
+
+  Version mergeWith(Version other) {
+    final mergedSections = {...(other.sections ?? {}), ...(sections ?? {})};
+
+    return Version(
+      id: id ?? other.id,
+      firebaseId: firebaseId ?? other.firebaseId,
+      cipherId: cipherId,
+      songStructure: songStructure.isNotEmpty
+          ? songStructure
+          : other.songStructure,
+      transposedKey: transposedKey ?? other.transposedKey,
+      duration: duration != Duration.zero ? duration : other.duration,
+      bpm: bpm != 0 ? bpm : other.bpm,
+      versionName: versionName.isNotEmpty ? versionName : other.versionName,
+      createdAt: createdAt.isBefore(other.createdAt)
+          ? createdAt
+          : other.createdAt,
+      sections: mergedSections.isNotEmpty ? mergedSections : sections,
     );
   }
 

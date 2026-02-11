@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
-import 'package:cordis/repositories/cloud_schedule_repository.dart';
+import 'package:cordis/repositories/cloud/schedule_repository.dart';
+import 'package:cordis/services/schedule_sync.dart';
 import 'package:flutter/material.dart';
 
 class CloudScheduleProvider extends ChangeNotifier {
-  final CloudScheduleRepository _repo = CloudScheduleRepository();
+  final _repo = CloudScheduleRepository();
+  final _syncService = ScheduleSyncService();
 
   CloudScheduleProvider();
 
@@ -58,6 +60,20 @@ class CloudScheduleProvider extends ChangeNotifier {
     return _schedules[scheduleId];
   }
 
+  ScheduleDto? getNextSchedule() {
+    final now = Timestamp.now();
+    ScheduleDto? nextSchedule;
+    for (var schedule in _schedules.values) {
+      if (schedule.datetime.compareTo(now) >= 0) {
+        if (nextSchedule == null ||
+            schedule.datetime.compareTo(nextSchedule.datetime) < 0) {
+          nextSchedule = schedule;
+        }
+      }
+    }
+    return nextSchedule;
+  }
+
   // ===== CREATE =====
   // Returns a copy of the schedule for local insertion
   ScheduleDto duplicateSchedule(
@@ -89,6 +105,24 @@ class CloudScheduleProvider extends ChangeNotifier {
     );
   }
 
+  Future<void> publishSchedule(ScheduleDto schedule) async {
+    if (_isSaving) return;
+
+    _isSaving = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final newScheduleId = await _repo.publishSchedule(schedule);
+      _schedules[newScheduleId] = schedule.copyWith(firebaseId: newScheduleId);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+  }
+
   // ===== READ =====
   /// Fetches all schedules from the cloud repository (user has to be a collaborator)
   Future<void> loadSchedules(String userId, {bool forceFetch = false}) async {
@@ -107,7 +141,12 @@ class CloudScheduleProvider extends ChangeNotifier {
       _schedules.clear();
 
       for (var schedule in schedules) {
-        _schedules[schedule.firebaseId!] = schedule;
+        if (schedule.ownerFirebaseId == userId) {
+          // If the user is the owner, we want to make sure we have the latest version from the cloud (in case they made changes on another device)
+          await _syncService.syncToLocal(schedule);
+        } else {
+          _schedules[schedule.firebaseId!] = schedule;
+        }
       }
     } catch (e) {
       _error = e.toString();
@@ -172,21 +211,6 @@ class CloudScheduleProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addMemberToRoleFirebase(
-    String scheduleId,
-    String
-    roleName, // Cloud roles dont have IDs, as they are nested on schedules
-    String existingUserFirebaseId,
-  ) {
-    final schedule = _schedules[scheduleId];
-    if (schedule == null) return;
-
-    final role = schedule.roles.firstWhere((role) => role.name == roleName);
-
-    role.memberIds.add(existingUserFirebaseId);
-    notifyListeners();
-  }
-
   Future<void> updateSchedule(String scheduleId, String ownerId) async {
     if (_isSaving) return;
 
@@ -206,7 +230,7 @@ class CloudScheduleProvider extends ChangeNotifier {
 
   // ===== DELETE =====
   /// Delete a schedule from the cache and in Firestore
-  void deleteSchedule(String userId, String scheduleId) {
+  Future<void> deleteSchedule(String userId, String scheduleId) async {
     if (_isSaving) return;
 
     _isSaving = true;
@@ -214,7 +238,7 @@ class CloudScheduleProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _repo.deleteSchedule(userId, scheduleId);
+      await _repo.deleteSchedule(userId, scheduleId);
       _schedules.remove(scheduleId);
     } catch (e) {
       _error = e.toString();
@@ -230,6 +254,24 @@ class CloudScheduleProvider extends ChangeNotifier {
     _searchTerm = '';
     _error = null;
     notifyListeners();
+  }
+
+  Future<bool> joinScheduleWithCode(String shareCode) async {
+    bool result = false;
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      result = await _repo.joinWithCode(shareCode);
+    } catch (e) {
+      _error = e.toString();
+      result = false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return result;
   }
 
   // ===== SEARCH & FILTER =====

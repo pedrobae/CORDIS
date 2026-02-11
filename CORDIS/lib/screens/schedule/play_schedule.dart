@@ -2,10 +2,10 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/playlist/flow_item.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
-import 'package:cordis/providers/cipher_provider.dart';
-import 'package:cordis/providers/flow_item_provider.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
+import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
@@ -120,7 +120,14 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                       '';
                 } else {
                   nextTitle =
-                      cipherProvider.getCipherById(nextItem.id!)?.title ?? '';
+                      cipherProvider
+                          .getCipherById(
+                            versionProvider
+                                .cachedVersion(nextItem.contentId!)!
+                                .cipherId,
+                          )
+                          ?.title ??
+                      '';
                 }
               } else if (nextItem.type == PlaylistItemType.flowItem) {
                 if (isCloud) {
@@ -244,6 +251,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                     width: MediaQuery.of(context).size.width,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
                       children: [
                         // PREVIOUS ITEM BUTTON
                         GestureDetector(
@@ -266,15 +274,20 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                         ),
 
                         // NEXT ITEM TITLE
-                        Text(
-                          nextTitle.isEmpty
-                              ? '-'
-                              : AppLocalizations.of(
-                                  context,
-                                )!.nextPlaceholder(nextTitle),
-                          style: textTheme.titleLarge?.copyWith(
-                            color: colorScheme.shadow,
-                            fontWeight: FontWeight.w500,
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 2,
+                          child: Text(
+                            nextTitle.isEmpty
+                                ? '-'
+                                : AppLocalizations.of(
+                                    context,
+                                  )!.nextPlaceholder(nextTitle),
+                            style: textTheme.titleLarge?.copyWith(
+                              color: colorScheme.shadow,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            softWrap: true,
+                            textAlign: TextAlign.center,
                           ),
                         ),
 

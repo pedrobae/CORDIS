@@ -4,6 +4,9 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/cipher/view_cipher.dart';
+import 'package:cordis/utils/date_utils.dart';
+import 'package:cordis/widgets/ciphers/library/download_cloud_version_sheet.dart';
+import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
@@ -16,8 +19,8 @@ class CloudCipherCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer3<
       SelectionProvider,
@@ -34,101 +37,114 @@ class CloudCipherCard extends StatelessWidget {
           ) {
             final version = cloudVersionProvider.getVersion(versionId)!;
 
-            return GestureDetector(
-              onTap: () {
-                if (selectionProvider.isSelectionMode) {
-                  selectionProvider.select(versionId);
-                  navigationProvider.push(
-                    EditCipherScreen(
-                      versionType: VersionType.playlist,
-                      playlistID: selectionProvider.targetId!,
-                      isEnabled: false,
-                      versionID: versionId,
-                    ),
-                  );
-                } else {
-                  navigationProvider.push(
-                    ViewCipherScreen(
-                      cipherId: null,
-                      versionId: versionId,
-                      versionType: VersionType.cloud,
-                    ),
-                    showAppBar: false,
-                    showDrawerIcon: false,
-                  );
-                }
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: colorScheme.surfaceContainerLowest),
-                ),
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    // INFO
-                    Expanded(
-                      child: Column(
-                        spacing: 2.0,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            version.title,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          Row(
-                            spacing: 16.0,
-                            children: [
-                              Text(
-                                '${AppLocalizations.of(context)!.musicKey}: ${version.transposedKey ?? version.originalKey}',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              version.bpm != 0
-                                  ? Text(
-                                      version.bpm.toString(),
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyMedium,
-                                    )
-                                  : Text('-'),
-                              version.duration != 0
-                                  ? Text(
-                                      version.duration.toString(),
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyMedium,
-                                    )
-                                  : Text('-'),
-                            ],
-                          ),
-                          Text(
-                            AppLocalizations.of(context)!.cloudCipher,
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.surfaceContainerLowest,
+            return Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: colorScheme.surfaceContainerLowest),
+              ),
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          spacing: 2.0,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // TITLE
+                            Text(version.title, style: textTheme.titleMedium),
+
+                            // INFO
+                            Row(
+                              spacing: 16.0,
+                              children: [
+                                Text(
+                                  '${AppLocalizations.of(context)!.musicKey}: ${version.transposedKey ?? version.originalKey}',
+                                  style: textTheme.bodyMedium,
                                 ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // ACTIONS
-                    IconButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: Colors.amberAccent,
-                            content: Text(
-                              AppLocalizations.of(context)!.comingSoon,
-                              style: TextStyle(color: Colors.black),
+                                version.bpm != 0
+                                    ? Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.bpmWithPlaceholder(
+                                          version.bpm.toString(),
+                                        ),
+                                        style: textTheme.bodyMedium,
+                                      )
+                                    : Text('-'),
+                                version.duration > 0
+                                    ? Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.durationWithPlaceholder(
+                                          DateTimeUtils.formatDuration(
+                                            Duration(seconds: version.duration),
+                                          ),
+                                        ),
+                                        style: textTheme.bodyMedium,
+                                      )
+                                    : Text('-'),
+                              ],
                             ),
+
+                            // CLOUD DETAIL
+                            Text(
+                              AppLocalizations.of(context)!.cloudCipher,
+                              style: textTheme.bodyMedium!.copyWith(
+                                color: colorScheme.shadow,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // DOWNLOAD VERSION
+                      IconButton(
+                        onPressed: () => showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (context) => Padding(
+                            padding: MediaQuery.of(context).viewInsets,
+                            child: DownloadVersionSheet(versionId: versionId),
                           ),
+                        ),
+                        icon: Icon(Icons.cloud_download),
+                      ),
+                    ],
+                  ),
+
+                  // VIEW BUTTON
+                  FilledTextButton(
+                    text: (selectionProvider.isSelectionMode)
+                        ? AppLocalizations.of(context)!.addToPlaylist
+                        : AppLocalizations.of(context)!.viewPlaceholder(''),
+                    isDense: true,
+                    onPressed: () {
+                      if (selectionProvider.isSelectionMode) {
+                        selectionProvider.select(versionId);
+                        navigationProvider.push(
+                          EditCipherScreen(
+                            versionType: VersionType.playlist,
+                            playlistID: selectionProvider.targetId!,
+                            isEnabled: false,
+                            versionID: versionId,
+                          ),
+                          showBottomNavBar: true,
                         );
-                      },
-                      icon: Icon(Icons.cloud_download),
-                    ),
-                  ],
-                ),
+                      } else {
+                        navigationProvider.push(
+                          ViewCipherScreen(
+                            cipherID: null,
+                            versionID: versionId,
+                            versionType: VersionType.cloud,
+                          ),
+                          showBottomNavBar: true,
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
             );
           },

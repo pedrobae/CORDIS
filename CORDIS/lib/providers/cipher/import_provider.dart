@@ -12,6 +12,7 @@ class ImportProvider extends ChangeNotifier {
   bool _isImporting = false;
   String? _selectedFile;
   String? _selectedFileName;
+  int? _fileSize;
   String? _error;
   ImportType? _importType;
   ParsingStrategy? _parsingStrategy;
@@ -20,6 +21,7 @@ class ImportProvider extends ChangeNotifier {
   ParsingCipher? get importedCipher => _importedCipher;
   String? get selectedFile => _selectedFile;
   String? get selectedFileName => _selectedFileName;
+  String? get fileSize => _parseFileSize(_fileSize);
   bool get isImporting => _isImporting;
   String? get error => _error;
   ImportType? get importType => _importType;
@@ -107,13 +109,9 @@ class ImportProvider extends ChangeNotifier {
   }
 
   /// Sets the selected file name.
-  void setSelectedFile(String fileName) {
-    _selectedFile = fileName;
-    notifyListeners();
-  }
-
-  /// Sets the selected file name.
-  void setSelectedFileName(String fileName) {
+  void setSelectedFile(String filePath, {int? fileSize, String? fileName}) {
+    _selectedFile = filePath;
+    _fileSize = fileSize;
     _selectedFileName = fileName;
     notifyListeners();
   }
@@ -134,5 +132,29 @@ class ImportProvider extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  void clearCache() {
+    _importedCipher = null;
+    _isImporting = false;
+    _selectedFile = null;
+    _selectedFileName = null;
+    _error = null;
+    _importType = null;
+    _parsingStrategy = null;
+    _importVariation = null;
+    notifyListeners();
+  }
+
+  String? _parseFileSize(int? sizeInBytes) {
+    if (sizeInBytes == null) return null;
+    if (sizeInBytes < 1024) return '$sizeInBytes B';
+    if (sizeInBytes < 1024 * 1024) {
+      return '${(sizeInBytes / 1024).toStringAsFixed(2)} KB';
+    }
+    if (sizeInBytes < 1024 * 1024 * 1024) {
+      return '${(sizeInBytes / (1024 * 1024)).toStringAsFixed(2)} MB';
+    }
+    return '${(sizeInBytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
   }
 }

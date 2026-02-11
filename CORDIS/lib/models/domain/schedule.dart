@@ -1,4 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cordis/helpers/codes.dart';
+import 'package:cordis/models/domain/user.dart';
+import 'package:cordis/models/dtos/playlist_dto.dart';
+import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:flutter/material.dart';
+
+enum ScheduleState { draft, published, completed }
 
 class Schedule {
   final int id;
@@ -12,6 +19,8 @@ class Schedule {
   final String? annotations;
   final int? playlistId;
   final List<Role> roles;
+  final String shareCode;
+  bool isPublic;
 
   Schedule({
     required this.id,
@@ -25,7 +34,21 @@ class Schedule {
     required this.playlistId,
     required this.roles,
     this.annotations,
+    required this.shareCode,
+    this.isPublic = false,
   });
+
+  ScheduleState get scheduleState {
+    if (!isPublic) {
+      return ScheduleState.draft;
+    } else {
+      if (DateTime.now().isAfter(date)) {
+        return ScheduleState.completed;
+      } else {
+        return ScheduleState.published;
+      }
+    }
+  }
 
   factory Schedule.fromSqlite(Map<String, dynamic> map, List<Role> roles) {
     return Schedule(
@@ -43,6 +66,8 @@ class Schedule {
       playlistId: map['playlist_id'] as int?,
       roles: roles,
       annotations: map['annotations'] as String?,
+      shareCode: map['share_code'] as String? ?? generateShareCode(),
+      isPublic: (map['is_public'] as int?) == 1,
     );
   }
 
@@ -58,6 +83,8 @@ class Schedule {
       'room_venue': roomVenue,
       'playlist_id': playlistId,
       'annotations': annotations,
+      'share_code': shareCode,
+      'is_public': isPublic ? 1 : 0,
     };
   }
 
@@ -73,6 +100,8 @@ class Schedule {
     int? playlistId,
     List<Role>? roles,
     String? annotations,
+    String? shareCode,
+    bool? isPublic,
   }) {
     return Schedule(
       id: id ?? this.id,
@@ -86,6 +115,50 @@ class Schedule {
       playlistId: playlistId ?? this.playlistId,
       roles: roles ?? this.roles,
       annotations: annotations ?? this.annotations,
+      shareCode: shareCode ?? this.shareCode,
+      isPublic: isPublic ?? this.isPublic,
+    );
+  }
+
+  ScheduleDto toDto(PlaylistDto playlist) {
+    final timestamp = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    return ScheduleDto(
+      firebaseId: firebaseId,
+      ownerFirebaseId: ownerFirebaseId,
+      name: name,
+      datetime: Timestamp.fromDate(timestamp),
+      location: location,
+      roomVenue: roomVenue,
+      annotations: annotations,
+      shareCode: shareCode,
+      playlist: playlist,
+      roles: roles.map((role) => role.toDto()).toList(),
+    );
+  }
+
+  Schedule mergeWith(Schedule other) {
+    return Schedule(
+      id: id,
+      firebaseId: firebaseId ?? other.firebaseId,
+      ownerFirebaseId: ownerFirebaseId,
+      name: name.isNotEmpty ? name : other.name,
+      date: date != DateTime(1970) ? date : other.date,
+      time: time != TimeOfDay(hour: 0, minute: 0) ? time : other.time,
+      location: location.isNotEmpty ? location : other.location,
+      roomVenue: (roomVenue != null && roomVenue!.isNotEmpty)
+          ? roomVenue
+          : other.roomVenue,
+      playlistId: playlistId ?? other.playlistId,
+      roles: roles.isNotEmpty ? roles : other.roles,
+      annotations: annotations ?? other.annotations,
+      shareCode: shareCode,
+      isPublic: true,
     );
   }
 }
@@ -93,19 +166,26 @@ class Schedule {
 class Role {
   final int id;
   String name;
-  final List<int> memberIds;
+  final List<User> users;
 
-  Role({required this.id, required this.name, required this.memberIds});
+  Role({required this.id, required this.name, required this.users});
 
-  factory Role.fromSqlite(Map<String, dynamic> map, List<int> memberIds) {
+  factory Role.fromSqlite(Map<String, dynamic> map, List<User> users) {
     return Role(
       id: map['id'] as int,
       name: map['name'] as String,
-      memberIds: memberIds,
+      users: users,
     );
   }
 
   Map<String, dynamic> toSqlite(int scheduleId) {
     return {'name': name, 'schedule_id': scheduleId};
+  }
+
+  RoleDto toDto() {
+    return RoleDto(
+      users: users.map((user) => user.toDto()).toList(),
+      name: name,
+    );
   }
 }

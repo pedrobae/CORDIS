@@ -26,7 +26,7 @@ extension PlaylistItemTypeExtension on PlaylistItemType {
 class PlaylistItem {
   final PlaylistItemType type;
   final int? id;
-  final int? contentId;
+  final int? contentId; // when contentID is null - firebaseContentId is not
   Duration duration;
   String? firebaseContentId;
   int position;
@@ -39,27 +39,6 @@ class PlaylistItem {
     required this.duration,
     this.firebaseContentId,
   });
-
-  factory PlaylistItem.fromJson(Map<String, dynamic> json) {
-    return PlaylistItem(
-      id: json['id'] as int,
-      type: PlaylistItemTypeExtension.getTypeByName(json['content_type']),
-      contentId: json['content_id'] as int,
-      position: json['order_index'] as int,
-      duration: Duration(seconds: json['duration'] as int),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'content_type': type,
-      'content_id': contentId,
-      'duration': duration.inSeconds,
-      'order_index': position,
-      'firebase_id': firebaseContentId,
-    };
-  }
-
   // Helper constructors
   PlaylistItem.version(
     int cipherVersionId,
@@ -74,9 +53,8 @@ class PlaylistItem {
         duration: duration,
       );
 
-  PlaylistItem.flowItem(int flowItemId, int position, int id, Duration duration)
+  PlaylistItem.flowItem(int flowItemId, int position, Duration duration)
     : this(
-        id: id,
         type: PlaylistItemType.flowItem,
         contentId: flowItemId,
         position: position,
@@ -84,8 +62,7 @@ class PlaylistItem {
       );
 
   // Type checking helpers
-  bool get isCipherVersion => type == PlaylistItemType.version;
-  bool get isTextSection => type == PlaylistItemType.flowItem;
+  bool get isFlowItem => type == PlaylistItemType.flowItem;
 
   PlaylistItem copyWith({
     PlaylistItemType? type,
@@ -113,9 +90,4 @@ class PlaylistItem {
 
   @override
   int get hashCode => type.hashCode ^ contentId.hashCode ^ position.hashCode;
-
-  @override
-  String toString() {
-    return 'PlaylistItem(type: $type, contentId: $contentId, order: $position)';
-  }
 }

@@ -1,7 +1,8 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/screens/schedule/view_schedule.dart';
@@ -9,6 +10,7 @@ import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/delete_confirmation.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/library/duplicate_schedule_sheet.dart';
+import 'package:cordis/widgets/schedule/library/share_schedule_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -87,12 +89,54 @@ class ScheduleCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // SCHEDULE NAME
-                            Text(
-                              schedule.name,
-                              style: theme.textTheme.titleMedium!.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.onSurface,
-                              ),
+                            Row(
+                              spacing: 8,
+                              children: [
+                                Text(
+                                  schedule.name,
+                                  style: theme.textTheme.titleMedium!.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 7),
+                                  decoration: BoxDecoration(
+                                    color: switch (schedule.scheduleState) {
+                                      ScheduleState.completed =>
+                                        colorScheme.onSurface,
+                                      ScheduleState.draft => Color(0XFFFFA500),
+                                      ScheduleState.published => Color(
+                                        0xFF52A94F,
+                                      ),
+                                    },
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  child: Text(
+                                    switch (schedule.scheduleState) {
+                                      ScheduleState.completed =>
+                                        AppLocalizations.of(context)!.completed,
+                                      ScheduleState.draft =>
+                                        AppLocalizations.of(context)!.draft,
+                                      ScheduleState.published =>
+                                        AppLocalizations.of(context)!.published,
+                                    },
+                                    style: theme.textTheme.bodyMedium!.copyWith(
+                                      color: switch (schedule.scheduleState) {
+                                        ScheduleState.completed =>
+                                          colorScheme.surface,
+                                        ScheduleState.draft =>
+                                          colorScheme.onSurface,
+                                        ScheduleState.published =>
+                                          colorScheme.surface,
+                                      },
+                                      fontSize: 13,
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
 
                             // WHEN & WHERE
@@ -144,36 +188,42 @@ class ScheduleCard extends StatelessWidget {
                     ],
                   ),
                   // BOTTOM BUTTONS
+                  //vuew
                   FilledTextButton(
                     isDark: true,
                     isDense: true,
-                    onPressed: () {
-                      navigationProvider.push(
-                        ViewScheduleScreen(scheduleId: scheduleId),
-                        showAppBar: false,
-                        showDrawerIcon: false,
-                      );
-                    },
                     text: AppLocalizations.of(
                       context,
                     )!.viewPlaceholder(AppLocalizations.of(context)!.schedule),
-                  ),
-                  FilledTextButton(
                     onPressed: () {
-                      // TODO: CLOUD - Implement share functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: Colors.amberAccent,
-                          content: Text(
-                            'Funcionalidade em desenvolvimento,',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ),
+                      navigationProvider.push(
+                        ViewScheduleScreen(scheduleId: scheduleId),
+                        showBottomNavBar: true,
                       );
                     },
-                    text: AppLocalizations.of(context)!.share,
-                    isDense: true,
                   ),
+                  //share
+                  if (schedule.ownerFirebaseId == authProvider.id)
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.share,
+                      isDense: true,
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (BuildContext context) {
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                bottom: MediaQuery.of(
+                                  context,
+                                ).viewInsets.bottom,
+                              ),
+                              child: ShareScheduleSheet(scheduleId: scheduleId),
+                            );
+                          },
+                        );
+                      },
+                    ),
                 ],
               ),
             );
@@ -229,27 +279,30 @@ class ScheduleCard extends StatelessWidget {
                 trailingIcon: Icons.chevron_right,
                 isDiscrete: true,
               ),
+
               // delete
               FilledTextButton(
                 text: AppLocalizations.of(context)!.delete,
                 tooltip: AppLocalizations.of(context)!.deleteScheduleTooltip,
+                trailingIcon: Icons.chevron_right,
+                isDangerous: true,
+                isDiscrete: true,
                 onPressed: () {
                   showModalBottomSheet(
                     context: context,
                     builder: (context) {
                       return DeleteConfirmationSheet(
                         itemType: AppLocalizations.of(context)!.schedule,
-                        onConfirm: () {
+                        onConfirm: () async {
                           Navigator.of(context).pop();
-                          localScheduleProvider.deleteSchedule(scheduleId);
+                          await localScheduleProvider.deleteSchedule(
+                            scheduleId,
+                          );
                         },
                       );
                     },
                   );
                 },
-                trailingIcon: Icons.chevron_right,
-                isDangerous: true,
-                isDiscrete: true,
               ),
 
               SizedBox(height: 16),

@@ -20,7 +20,7 @@ class PlaylistRepository {
 
   // ===== PLAYLIST CRUD =====
   // ===== CREATE =====
-  /// Creates a new playlist, as well as the playlist_cipher, and user_playlist relational objects
+  /// Creates a new playlist, as well as the playlist_version, and user_playlist relational objects
   Future<int> insertPlaylist(Playlist playlist) async {
     final db = await _databaseHelper.database;
 
@@ -66,7 +66,17 @@ class PlaylistRepository {
     List<Playlist> playlists = [];
 
     for (Map<String, dynamic> playlistData in playlistResults) {
-      playlists.add(Playlist.fromSQLite(playlistData));
+      final playlist = Playlist.fromSQLite(playlistData);
+
+      /// Gets all items of a playlist in order
+      final versionItems = await _getVersionItemsOfPlaylist(playlist.id);
+      final textItems = await _getTextItemsOfPlaylist(playlist.id);
+
+      // Combine and sort all items by position
+      final allItemResults = [...versionItems, ...textItems]
+        ..sort((a, b) => (a.position).compareTo(b.position));
+
+      playlists.add(playlist.copyWith(items: allItemResults));
     }
 
     return playlists;
@@ -85,7 +95,17 @@ class PlaylistRepository {
 
     if (playlistResults.isEmpty) return null;
 
-    return Playlist.fromSQLite(playlistResults.first);
+    /// Gets all items of a playlist in order
+    final versionItems = await _getVersionItemsOfPlaylist(playlistId);
+    final textItems = await _getTextItemsOfPlaylist(playlistId);
+
+    // Combine and sort all items by position
+    final allItemResults = [...versionItems, ...textItems]
+      ..sort((a, b) => (a.position).compareTo(b.position));
+
+    return Playlist.fromSQLite(
+      playlistResults.first,
+    ).copyWith(items: allItemResults);
   }
 
   // ===== UPDATE =====
@@ -158,7 +178,7 @@ class PlaylistRepository {
 
   // ===== VERSION MANAGEMENT =====
   /// Adds a version to the end of the playlist
-  Future<void> addVersionToPlaylist(int playlistId, int cipherMapId) async {
+  Future<void> addVersionToPlaylist(int playlistId, int versionID) async {
     final db = await _databaseHelper.database;
 
     await db.transaction((txn) async {
@@ -176,7 +196,7 @@ class PlaylistRepository {
 
       // Insert version relationship
       await txn.insert('playlist_version', {
-        'version_id': cipherMapId,
+        'version_id': versionID,
         'playlist_id': playlistId,
         'position': nextPosition,
         'included_at': DateTime.now().toIso8601String(),
@@ -187,7 +207,7 @@ class PlaylistRepository {
   /// Adds a version to a specific position in the playlist (used when importing)
   Future<void> addVersionToPlaylistAtPosition(
     int playlistId,
-    int cipherMapId,
+    int versionID,
     int position,
   ) async {
     final db = await _databaseHelper.database;
@@ -195,7 +215,7 @@ class PlaylistRepository {
     await db.transaction((txn) async {
       // Insert version relationship at the desired position
       await txn.insert('playlist_version', {
-        'version_id': cipherMapId,
+        'version_id': versionID,
         'playlist_id': playlistId,
         'position': position,
         'included_at': DateTime.now().toIso8601String(),
@@ -219,11 +239,11 @@ class PlaylistRepository {
   }
 
   /// Removes a version from a playlist by playlist version ID
-  Future<void> removeVersionFromPlaylist(int itemId, int playlistId) async {
+  Future<void> removeVersionFromPlaylist(int itemId) async {
     final db = await _databaseHelper.database;
 
     await db.transaction((txn) async {
-      // Remove cipher map relationship
+      // Remove version relationship
       await txn.delete(
         'playlist_version',
         where: 'id = ?',
@@ -273,61 +293,57 @@ class PlaylistRepository {
       for (var i = 0; i < items.length; i++) {
         final item = items[i];
         final tempPosition = -(i + 1000);
-        if (item.isCipherVersion) {
-          await txn.update(
-            'playlist_version',
-            {'position': tempPosition},
-            where: 'playlist_id = ? AND version_id = ?',
-            whereArgs: [playlistId, item.contentId],
-          );
-        } else if (item.isTextSection) {
-          await txn.update(
-            'flow_item',
-            {'position': tempPosition},
-            where: 'id = ?',
-            whereArgs: [item.contentId],
-          );
+
+        switch (item.type) {
+          case PlaylistItemType.version:
+            await txn.update(
+              'playlist_version',
+              {'position': tempPosition},
+              where: 'id = ?',
+              whereArgs: [item.id!],
+            );
+            break;
+
+          case PlaylistItemType.flowItem:
+            await txn.update(
+              'flow_item',
+              {'position': tempPosition},
+              where: 'id = ?',
+              whereArgs: [item.contentId],
+            );
+            break;
         }
       }
 
       for (var item in items) {
-        if (item.isCipherVersion) {
-          await txn.update(
-            'playlist_version',
-            {'position': item.position},
-            where: 'playlist_id = ? AND version_id = ?',
-            whereArgs: [playlistId, item.contentId],
-          );
-        } else if (item.isTextSection) {
-          await txn.update(
-            'flow_item',
-            {'position': item.position},
-            where: 'id = ?',
-            whereArgs: [item.contentId],
-          );
+        switch (item.type) {
+          case PlaylistItemType.version:
+            await txn.update(
+              'playlist_version',
+              {'position': item.position},
+              where: 'id = ?',
+              whereArgs: [item.id!],
+            );
+            break;
+          case PlaylistItemType.flowItem:
+            await txn.update(
+              'flow_item',
+              {'position': item.position},
+              where: 'id = ?',
+              whereArgs: [item.contentId],
+            );
         }
       }
     });
   }
 
-  /// Gets all items of a playlist in order
-  Future<List<PlaylistItem>> getItemsOfPlaylist(int playlistId) async {
-    final versionItems = await getVersionItemsOfPlaylist(playlistId);
-    final textItems = await getTextItemsOfPlaylist(playlistId);
-
-    // Combine and sort all items by position
-    final allItemResults = [...versionItems, ...textItems]
-      ..sort((a, b) => (a.position).compareTo(b.position));
-    return allItemResults;
-  }
-
   /// Gets text items of a playlist
-  Future<List<PlaylistItem>> getTextItemsOfPlaylist(int playlistId) async {
+  Future<List<PlaylistItem>> _getTextItemsOfPlaylist(int playlistId) async {
     final db = await _databaseHelper.database;
 
     final flowItemResults = await db.rawQuery(
       '''
-        SELECT id as content_id, position, duration, id
+        SELECT id as content_id, position, duration
         FROM flow_item
         WHERE playlist_id = ? 
         ORDER BY position ASC
@@ -336,17 +352,16 @@ class PlaylistRepository {
     );
 
     return flowItemResults.map((row) {
-      final id = row['id'] as int;
       final contentId = row['content_id'] as int;
       final position = row['position'] as int;
       final duration = Duration(seconds: row['duration'] as int);
 
-      return PlaylistItem.flowItem(contentId, position, id, duration);
+      return PlaylistItem.flowItem(contentId, position, duration);
     }).toList();
   }
 
   /// Gets version items of a playlist
-  Future<List<PlaylistItem>> getVersionItemsOfPlaylist(int playlistId) async {
+  Future<List<PlaylistItem>> _getVersionItemsOfPlaylist(int playlistId) async {
     final db = await _databaseHelper.database;
 
     final versionResults = await db.rawQuery(
@@ -363,7 +378,7 @@ class PlaylistRepository {
       final id = row['id'] as int;
       final contentId = row['content_id'] as int;
       final position = row['position'] as int;
-      final duration = Duration(milliseconds: row['duration'] as int);
+      final duration = Duration(seconds: row['duration'] as int);
 
       return PlaylistItem.version(contentId, position, id, duration);
     }).toList();
@@ -385,47 +400,6 @@ class PlaylistRepository {
       return result.first['id'] as int;
     } else {
       return null;
-    }
-  }
-
-  /// Inserts or updates a text item in a playlist
-  Future<void> upsertTextItem(
-    int addedBy,
-    String firebaseTextId,
-    int playlistId,
-    String title,
-    String content,
-    int position,
-  ) async {
-    final db = await _databaseHelper.database;
-
-    // First, try to find existing text item by firebase_id
-    final existingResult = await db.query(
-      'flow_item',
-      columns: ['id'],
-      where: 'firebase_id = ?',
-      whereArgs: [firebaseTextId],
-    );
-
-    if (existingResult.isNotEmpty) {
-      // Update existing text item
-      await db.update(
-        'flow_item',
-        {'title': title, 'content': content, 'position': position},
-        where: 'firebase_id = ?',
-        whereArgs: [firebaseTextId],
-      );
-    } else {
-      // Insert new text item
-      await db.insert('flow_item', {
-        'added_by': addedBy,
-        'firebase_id': firebaseTextId,
-        'playlist_id': playlistId,
-        'title': title,
-        'content': content,
-        'position': position,
-        'added_at': DateTime.now().toIso8601String(),
-      });
     }
   }
 

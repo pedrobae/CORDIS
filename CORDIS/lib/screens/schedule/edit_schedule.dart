@@ -1,10 +1,12 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/schedule.dart';
+import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/screens/playlist/playlist_library.dart';
+import 'package:cordis/services/schedule_sync.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/create_edit/details_form.dart';
@@ -153,11 +155,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
                       onPressed: () {
                         switch (widget.mode) {
                           case EditScheduleMode.details:
-                            _saveDetails(
-                              navigationProvider,
-                              scheduleProvider,
-                              widget.scheduleId,
-                            );
+                            _saveDetails(navigationProvider, scheduleProvider);
                             break;
                           case EditScheduleMode.playlist:
                             _savePlaylist(
@@ -190,13 +188,12 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
     );
   }
 
-  void _saveDetails(
+  Future<void> _saveDetails(
     NavigationProvider navigationProvider,
     LocalScheduleProvider scheduleProvider,
-    int scheduleId,
-  ) {
+  ) async {
     scheduleProvider.cacheScheduleDetails(
-      scheduleId,
+      widget.scheduleId,
       name: nameController.text,
       date: dateController.text,
       startTime: startTimeController.text,
@@ -204,15 +201,22 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
       roomVenue: roomVenueController.text,
       annotations: annotationsController.text,
     );
-    scheduleProvider.saveSchedule(scheduleId);
+    await scheduleProvider.saveSchedule(widget.scheduleId);
+    final schedule = scheduleProvider.getSchedule(widget.scheduleId)!;
+    if (schedule.isPublic && mounted) {
+      await ScheduleSyncService().syncToCloud(
+        schedule,
+        context.read<MyAuthProvider>().id!,
+      );
+    }
   }
 
-  void _savePlaylist(
+  Future<void> _savePlaylist(
     NavigationProvider navigationProvider,
     LocalScheduleProvider scheduleProvider,
     PlaylistProvider playlistProvider,
     SelectionProvider selectionProvider,
-  ) {
+  ) async {
     if (selectionProvider.selectedItemIds.isEmpty) return;
 
     final selectedPlaylistId = selectionProvider.selectedItemIds.first as int;
@@ -226,6 +230,14 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
       selectedPlaylistId,
     );
 
-    scheduleProvider.saveSchedule(widget.scheduleId);
+    await scheduleProvider.saveSchedule(widget.scheduleId);
+
+    final schedule = scheduleProvider.getSchedule(widget.scheduleId)!;
+    if (schedule.isPublic && mounted) {
+      await ScheduleSyncService().syncToCloud(
+        schedule,
+        context.read<MyAuthProvider>().id!,
+      );
+    }
   }
 }

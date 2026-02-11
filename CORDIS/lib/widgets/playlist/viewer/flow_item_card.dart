@@ -1,8 +1,8 @@
 import 'package:cordis/l10n/app_localizations.dart';
-import 'package:cordis/providers/flow_item_provider.dart';
+import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
-import 'package:cordis/widgets/ciphers/editor/custom_reorderable_delayed.dart';
+import 'package:cordis/widgets/custom_reorderable_delayed.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_editor.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_card_actions.dart';
@@ -12,11 +12,13 @@ import 'package:provider/provider.dart';
 class FlowItemCard extends StatelessWidget {
   final int flowItemId;
   final int playlistId;
+  final int index;
 
   const FlowItemCard({
     super.key,
     required this.flowItemId,
     required this.playlistId,
+    required this.index,
   });
 
   @override
@@ -50,7 +52,7 @@ class FlowItemCard extends StatelessWidget {
               CustomReorderableDelayed(
                 key: key,
                 delay: Duration(milliseconds: 100),
-                index: flowItem.position,
+                index: index,
                 child: Icon(Icons.drag_indicator),
               ),
               Expanded(
@@ -107,8 +109,7 @@ class FlowItemCard extends StatelessWidget {
                               playlistId: playlistId,
                               flowItemId: flowItemId,
                             ),
-                            showAppBar: false,
-                            showDrawerIcon: false,
+                            showBottomNavBar: true,
                           );
                         },
                       ),

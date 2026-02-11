@@ -2,6 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/widgets/schedule/library/cloud_schedule_card.dart';
 import 'package:cordis/widgets/schedule/library/schedule_card.dart';
 import 'package:flutter/material.dart';
@@ -76,6 +77,10 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
 
             final pastScheduleIds = [...localPast, ...cloudPast];
 
+            // If there are no past schedules, remove the listner
+            if (pastScheduleIds.isEmpty) {
+              _scrollController.removeListener(_listenForEndOfFutureSchedules);
+            }
             // Handle empty state
             if (futureScheduleIds.isEmpty && pastScheduleIds.isEmpty) {
               return Column(
@@ -145,6 +150,16 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
                 authProvider.id!,
                 forceFetch: true,
               );
+              for (var schedule in cloudScheduleProvider.schedules.values) {
+                for (var version in schedule.playlist.versions.entries) {
+                  if (mounted) {
+                    context.read<CloudVersionProvider>().setVersion(
+                      version.key,
+                      version.value,
+                    );
+                  }
+                }
+              }
             },
             child: SingleChildScrollView(
               controller: _scrollController,
@@ -171,6 +186,9 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
                         ),
                   SizedBox(height: 8.0),
                   ...pastScheduleIDs.map((scheduleId) {
+                    if (scheduleId is String) {
+                      return CloudScheduleCard(scheduleId: scheduleId);
+                    }
                     return ScheduleCard(scheduleId: scheduleId);
                   }),
                 ],

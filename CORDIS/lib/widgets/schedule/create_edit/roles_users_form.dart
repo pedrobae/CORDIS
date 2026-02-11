@@ -61,15 +61,21 @@ class _RolesAndUsersFormState extends State<RolesAndUsersForm> {
                   : ListView(
                       children: (schedule is Schedule)
                           ? schedule.roles.map((role) {
-                              return RoleCard(
-                                scheduleId: widget.scheduleId,
-                                role: role,
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 16.0),
+                                child: RoleCard(
+                                  scheduleId: widget.scheduleId,
+                                  role: role,
+                                ),
                               );
                             }).toList()
                           : (schedule as ScheduleDto).roles.map((role) {
-                              return RoleCard(
-                                scheduleId: widget.scheduleId,
-                                role: role,
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 16.0),
+                                child: RoleCard(
+                                  scheduleId: widget.scheduleId,
+                                  role: role,
+                                ),
                               );
                             }).toList(),
                     ),

@@ -118,80 +118,76 @@ class DocumentData {
         }
 
         // If the biggest gap is big enough, we have found a column split
-        if (maxGap > 25.0) {
-          hasColumns[pageEntry.key] = true;
+        hasColumns[pageEntry.key] = true;
 
-          // Create the column-reordered version
-          List<LineData> rightColumnLines = [];
-          List<LineData> leftColumnLines = [];
-          bool startedContent = false;
+        // Create the column-reordered version
+        List<LineData> rightColumnLines = [];
+        List<LineData> leftColumnLines = [];
+        bool startedContent = false;
 
-          for (var line in pageEntry.value) {
-            // Skip lines until we reach a left column line
-            if (line.bounds!.left < 100.0) {
-              startedContent = true;
-            }
+        for (var line in pageEntry.value) {
+          // Skip lines until we reach a left column line
+          if (line.bounds!.left < 100.0) {
+            startedContent = true;
+          }
 
-            if (!startedContent) {
-              leftColumnLines.add(line);
-              continue;
-            }
+          if (!startedContent) {
+            leftColumnLines.add(line);
+            continue;
+          }
 
-            List<WordData> wordsInLeftColumn = [];
-            List<WordData> wordsInRightColumn = [];
-            for (var word in line.wordList!) {
-              if (word.bounds.right < gapStart) {
-                wordsInLeftColumn.add(word);
-              } else {
-                wordsInRightColumn.add(word);
-              }
-            }
-
-            if (wordsInRightColumn.isNotEmpty) {
-              // There are words in the right column
-              rightColumnLines.add(
-                LineData(
-                  text: wordsInRightColumn.map((w) => w.text).join(' '),
-                  fontSize: line.fontSize,
-                  bounds: Rect.fromLTRB(
-                    wordsInRightColumn.first.bounds.left,
-                    line.bounds!.top,
-                    line.bounds!.right,
-                    line.bounds!.bottom,
-                  ),
-                  fontStyle: line.fontStyle,
-                  lineIndex: line.lineIndex,
-                  wordList: wordsInRightColumn,
-                ),
-              );
-            }
-            if (wordsInLeftColumn.isNotEmpty) {
-              leftColumnLines.add(
-                LineData(
-                  text: wordsInLeftColumn.map((w) => w.text).join(' '),
-                  fontSize: line.fontSize,
-                  bounds: Rect.fromLTRB(
-                    line.bounds!.left,
-                    line.bounds!.top,
-                    wordsInLeftColumn.last.bounds.right,
-                    line.bounds!.bottom,
-                  ),
-                  fontStyle: line.fontStyle,
-                  lineIndex: line.lineIndex,
-                  wordList: wordsInLeftColumn,
-                ),
-              );
+          List<WordData> wordsInLeftColumn = [];
+          List<WordData> wordsInRightColumn = [];
+          for (var word in line.wordList!) {
+            if (word.bounds.right < gapStart) {
+              wordsInLeftColumn.add(word);
+            } else {
+              wordsInRightColumn.add(word);
             }
           }
 
-          // Save the reordered version (left column, then right column)
-          pageLinesWithColumns[pageEntry.key] = [
-            ...leftColumnLines,
-            ...rightColumnLines,
-          ];
-        } else {
-          hasColumns[pageEntry.key] = false;
+          if (wordsInRightColumn.isNotEmpty) {
+            // There are words in the right column
+            rightColumnLines.add(
+              LineData(
+                text: wordsInRightColumn.map((w) => w.text).join(' '),
+                fontSize: line.fontSize,
+                bounds: Rect.fromLTRB(
+                  wordsInRightColumn.first.bounds.left,
+                  line.bounds!.top,
+                  line.bounds!.right,
+                  line.bounds!.bottom,
+                ),
+                fontStyle: line.fontStyle,
+                lineIndex: line.lineIndex,
+                wordList: wordsInRightColumn,
+              ),
+            );
+          }
+          if (wordsInLeftColumn.isNotEmpty) {
+            leftColumnLines.add(
+              LineData(
+                text: wordsInLeftColumn.map((w) => w.text).join(' '),
+                fontSize: line.fontSize,
+                bounds: Rect.fromLTRB(
+                  line.bounds!.left,
+                  line.bounds!.top,
+                  wordsInLeftColumn.last.bounds.right,
+                  line.bounds!.bottom,
+                ),
+                fontStyle: line.fontStyle,
+                lineIndex: line.lineIndex,
+                wordList: wordsInLeftColumn,
+              ),
+            );
+          }
         }
+
+        // Save the reordered version (left column, then right column)
+        pageLinesWithColumns[pageEntry.key] = [
+          ...leftColumnLines,
+          ...rightColumnLines,
+        ];
       } else {
         hasColumns[pageEntry.key] = false;
       }

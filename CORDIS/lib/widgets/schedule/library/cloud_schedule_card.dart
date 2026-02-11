@@ -4,7 +4,7 @@ import 'package:cordis/screens/schedule/play_schedule.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 
@@ -64,7 +64,9 @@ class CloudScheduleCard extends StatelessWidget {
             String userRole = AppLocalizations.of(context)!.generalMember;
 
             for (var role in schedule.roles) {
-              if (role.memberIds.contains(authProvider.id)) {
+              if (role.users.any(
+                (user) => user.firebaseId == authProvider.id,
+              )) {
                 userRole = role.name;
                 break;
               }
@@ -72,6 +74,19 @@ class CloudScheduleCard extends StatelessWidget {
 
             return Stack(
               children: [
+                // CLOUD WATERMARK
+                Positioned(
+                  right: -20,
+                  bottom: -50,
+                  child: Opacity(
+                    opacity: 0.08,
+                    child: Icon(
+                      Icons.cloud,
+                      size: 250,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ),
                 Container(
                   padding: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
@@ -91,12 +106,39 @@ class CloudScheduleCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // SCHEDULE NAME
-                                Text(
-                                  schedule.name,
-                                  style: theme.textTheme.titleMedium!.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface,
-                                  ),
+                                Row(
+                                  spacing: 8,
+                                  children: [
+                                    Text(
+                                      schedule.name,
+                                      style: theme.textTheme.titleMedium!
+                                          .copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            color: colorScheme.onSurface,
+                                          ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 7,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFF52A94F),
+                                        borderRadius: BorderRadius.circular(
+                                          100,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        AppLocalizations.of(context)!.published,
+                                        style: theme.textTheme.bodyMedium!
+                                            .copyWith(
+                                              fontSize: 13,
+                                              color: colorScheme.surface,
+                                              fontStyle: FontStyle.italic,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
 
                                 // WHEN & WHERE
@@ -164,26 +206,11 @@ class CloudScheduleCard extends StatelessWidget {
                         onPressed: () {
                           navigationProvider.push(
                             PlayScheduleScreen(scheduleId: scheduleId),
-                            showAppBar: false,
-                            showDrawerIcon: false,
-                            showBottomNavBar: false,
                           );
                         },
                         text: AppLocalizations.of(context)!.play,
                       ),
                     ],
-                  ),
-                ), // CLOUD WATERMARK
-                Positioned(
-                  right: -20,
-                  bottom: -40,
-                  child: Opacity(
-                    opacity: 0.08,
-                    child: Icon(
-                      Icons.cloud,
-                      size: 200,
-                      color: colorScheme.primary,
-                    ),
                   ),
                 ),
               ],

@@ -21,7 +21,7 @@ class DatabaseHelper {
 
       final db = await openDatabase(
         path,
-        version: 13,
+        version: 14,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade, // Handle migrations
       );
@@ -160,7 +160,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // Create playlist_text table, for written sections
+    // Create flow_item table, for written playlist Items
     await db.execute('''
       CREATE TABLE flow_item (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -188,6 +188,8 @@ class DatabaseHelper {
         annotations TEXT,
         firebase_id TEXT UNIQUE,
         owner_firebase_id TEXT NOT NULL,
+        share_code TEXT,
+        is_public BOOLEAN DEFAULT 0,
         FOREIGN KEY (playlist_id) REFERENCES playlist (id) ON DELETE CASCADE
       )
     ''');
@@ -304,7 +306,7 @@ class DatabaseHelper {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           role_id INTEGER NOT NULL,
           member_id INTEGER NOT NULL,
-          FOREIGN KEY (role_id) REFERENCES role (id) ON DELETE CASCADE) 
+          FOREIGN KEY (role_id) REFERENCES role (id) ON DELETE CASCADE,
           FOREIGN KEY (member_id) REFERENCES user (id) ON DELETE CASCADE) ''');
     }
     if (oldVersion < 7) {
@@ -371,6 +373,13 @@ class DatabaseHelper {
     if (oldVersion < 13) {
       // RENAME PLAYLIST_TEXT TABLE TO FLOW_ITEM
       await db.execute('ALTER TABLE playlist_text RENAME TO flow_item');
+    }
+    if (oldVersion < 14) {
+      // ADD SHARE_CODE AND IS_PUBLIC COLUMNS TO SCHEDULE TABLE
+      await db.execute('ALTER TABLE schedule ADD COLUMN share_code TEXT');
+      await db.execute(
+        'ALTER TABLE schedule ADD COLUMN is_public BOOLEAN DEFAULT 0',
+      );
     }
   }
 

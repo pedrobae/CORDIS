@@ -110,7 +110,7 @@ class _UsersBottomSheetState extends State<UsersBottomSheet> {
                               ),
                             ),
                             Text(
-                              member.mail,
+                              member.email,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: colorScheme.shadow,

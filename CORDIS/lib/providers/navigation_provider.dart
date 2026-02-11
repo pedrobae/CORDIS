@@ -14,8 +14,12 @@ class NavigationProvider extends ChangeNotifier {
   static final List<bool> _showAppBarStack = [];
   static final List<bool> _showDrawerIconStack = [];
   static final List<bool> _showBottomNavBarStack = [];
+  static final List<bool> _showFABStack = [];
 
   static final List<VoidCallback> _onPopCallbacks = [];
+
+  Widget?
+  _screenOnForeground; // Screen that can be placed on top of the current stack without affecting it
 
   bool _isLoading = false;
   String? _error;
@@ -23,16 +27,22 @@ class NavigationProvider extends ChangeNotifier {
   // Getters
   NavigationRoute get currentRoute => _currentRoute;
 
-  Widget get currentScreen => _screenStack.isNotEmpty
-      ? _screenStack.last
-      : _getScreenForRoute(_currentRoute);
+  Widget get currentScreen => Stack(
+    children: [
+      _screenStack.isNotEmpty
+          ? _screenStack.last
+          : _getScreenForRoute(_currentRoute),
+      if (_screenOnForeground != null) _screenOnForeground!,
+    ],
+  );
+  Widget? get screenOnForeground => _screenOnForeground;
   bool get showAppBar =>
       _showAppBarStack.isNotEmpty ? _showAppBarStack.last : true;
   bool get showDrawerIcon =>
       _showDrawerIconStack.isNotEmpty ? _showDrawerIconStack.last : true;
   bool get showBottomNavBar =>
       _showBottomNavBarStack.isNotEmpty ? _showBottomNavBarStack.last : true;
-
+  bool get showFAB => _showFABStack.isNotEmpty ? _showFABStack.last : true;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -41,10 +51,13 @@ class NavigationProvider extends ChangeNotifier {
   // Navigation methods following your provider pattern
   void navigateToRoute(NavigationRoute route) {
     _currentRoute = route;
+    _screenOnForeground =
+        null; // Clear any foreground screen when navigating to a new route
     _screenStack.clear();
     _showAppBarStack.clear();
     _showDrawerIconStack.clear();
     _showBottomNavBarStack.clear();
+    _showFABStack.clear();
 
     // Clear onPop callbacks
     while (_onPopCallbacks.isNotEmpty) {
@@ -58,27 +71,70 @@ class NavigationProvider extends ChangeNotifier {
 
   void push(
     Widget screen, {
-    bool showAppBar = true,
-    bool showDrawerIcon = true,
-    bool showBottomNavBar = true,
+    bool showAppBar = false,
+    bool showDrawerIcon = false,
+    bool showBottomNavBar = false,
+    bool showFAB = false,
     VoidCallback? onPopCallback,
   }) {
     _screenStack.add(screen);
     _showAppBarStack.add(showAppBar);
     _showDrawerIconStack.add(showDrawerIcon);
     _showBottomNavBarStack.add(showBottomNavBar);
+    _showFABStack.add(showFAB);
     _onPopCallbacks.add(onPopCallback ?? () {});
     notifyListeners();
   }
 
-  void pop() {
+  void pushForeground(Widget screen) {
+    _screenOnForeground = screen;
+    notifyListeners();
+  }
+
+  void pushReplacement(
+    Widget screen, {
+    bool showAppBar = false,
+    bool showDrawerIcon = false,
+    bool showBottomNavBar = false,
+    bool showFAB = false,
+    VoidCallback? onPopCallback,
+  }) {
     if (_screenStack.isNotEmpty) {
-      _onPopCallbacks.last();
+      _screenStack.removeLast();
+      _showAppBarStack.removeLast();
+      _showDrawerIconStack.removeLast();
+      _showBottomNavBarStack.removeLast();
+      _showFABStack.removeLast();
+      _onPopCallbacks.removeLast();
+    }
+    push(
+      screen,
+      showAppBar: showAppBar,
+      showDrawerIcon: showDrawerIcon,
+      showBottomNavBar: showBottomNavBar,
+      onPopCallback: onPopCallback,
+    );
+  }
+
+  void pop() {
+    if (_screenOnForeground != null) {
+      _screenOnForeground = null;
+      notifyListeners();
+      return;
+    }
+    if (_screenStack.isNotEmpty) {
+      try {
+        _onPopCallbacks.last();
+      } catch (e) {
+        // Silently catch callback errors during pop to avoid deactivated widget issues
+        debugPrint('Error in onPopCallback: $e');
+      }
       _onPopCallbacks.removeLast();
       _screenStack.removeLast();
       _showAppBarStack.removeLast();
       _showDrawerIconStack.removeLast();
       _showBottomNavBarStack.removeLast();
+      _showFABStack.removeLast();
       notifyListeners();
     }
   }
@@ -157,18 +213,22 @@ class NavigationProvider extends ChangeNotifier {
   }) {
     switch (route) {
       case NavigationRoute.home:
-        return Icon(Icons.home, color: iconColor, size: iconSize);
+        return Icon(Icons.home_outlined, color: iconColor, size: iconSize);
       case NavigationRoute.library:
-        return Icon(Icons.library_music, color: iconColor, size: iconSize);
+        return Icon(
+          Icons.library_music_outlined,
+          color: iconColor,
+          size: iconSize,
+        );
       case NavigationRoute.playlists:
         return Icon(
-          Icons.playlist_play_rounded,
+          Icons.playlist_play_outlined,
           color: iconColor,
           size: iconSize,
         );
       case NavigationRoute.schedule:
         return Icon(
-          Icons.calendar_month_sharp,
+          Icons.calendar_month_outlined,
           color: iconColor,
           size: iconSize,
         );
@@ -227,7 +287,11 @@ extension NavigationProviderAdmin on NavigationProvider {
     return [
       AdminNavigationItem(
         title: 'Gerenciamento de Usuários',
-        icon: Icon(Icons.manage_accounts, color: iconColor, size: iconSize),
+        icon: Icon(
+          Icons.manage_accounts_outlined,
+          color: iconColor,
+          size: iconSize,
+        ),
       ),
       // Add more admin items here as needed
     ];

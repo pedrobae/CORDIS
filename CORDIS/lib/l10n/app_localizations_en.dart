@@ -172,6 +172,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionCodeInstruction => 'Max 2 characters allowed';
 
   @override
+  String get type => 'Type';
+
+  @override
   String get sectionType => 'Section Type';
 
   @override
@@ -189,6 +192,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sectionTextHint =>
       'Enter the section text in chordPro format, (lyrics[chord])';
+
+  @override
+  String get duplicateSectionInstruction =>
+      'Select an existing section to repeat.';
+
+  @override
+  String get selectSectionInstruction =>
+      'Choose a structure for your new section.';
 
   @override
   String get cipherEditorTitle => 'Song Editor';
@@ -330,10 +341,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get role => 'Role';
 
   @override
-  String get generalMember => 'General Member';
+  String get roles => 'Roles';
 
   @override
-  String get share => 'Share';
+  String get generalMember => 'General Member';
 
   @override
   String viewPlaceholder(Object object) {
@@ -371,12 +382,89 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String downloadPlaceholder(Object object) {
+    return 'Download $object';
+  }
+
+  @override
+  String managePlaceholder(Object object) {
+    return 'Manage $object';
+  }
+
+  @override
+  String newPlaceholder(Object object) {
+    return 'New $object';
+  }
+
+  @override
+  String changePlaceholder(Object object) {
+    return 'Change $object';
+  }
+
+  @override
+  String publishPlaceholder(Object object) {
+    return 'Publish $object';
+  }
+
+  @override
+  String renamePlaceholder(Object object) {
+    return 'Rename $object';
+  }
+
+  @override
+  String optionsPlaceholder(Object object) {
+    return '$object Options';
+  }
+
+  @override
   String duplicateTooltip(Object object) {
     return 'Create a copy of this $object';
   }
 
   @override
   String get createLocalCopy => 'Create a Local Copy';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get shareCode => 'Share Code';
+
+  @override
+  String get enterShareCode => 'Enter Share Code';
+
+  @override
+  String get shareCodeInstructions =>
+      'Enter the share code provided by your team leader to access the schedule.';
+
+  @override
+  String get joinSchedule => 'Join Service';
+
+  @override
+  String get completed => 'Completed';
+
+  @override
+  String get draft => 'Draft';
+
+  @override
+  String get published => 'Published';
+
+  @override
+  String get publishScheduleWarning =>
+      'Once published, the schedule will be accessible to your team.\nChanges will be synced until the date of the Service.\nThis action cannot be undone.';
+
+  @override
+  String get sendToRoleMembers => 'Send to Role Members';
+
+  @override
+  String get sendInvites => 'Send Invites';
+
+  @override
+  String get inviteSentSuccessfully => 'Invites sent successfully!';
+
+  @override
+  String get emailInviteDescription =>
+      'An email invite has been sent to the teams';
 
   @override
   String get scheduleName => 'Schedule Name';
@@ -524,7 +612,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importInstructions =>
-      '• Select a PDF with the song map\n• Separate verses with empty lines or Labels\n• Chords above the lyrics at the correct positions';
+      '• Select a PDF with the song map\n• Choose whether the PDF has columns or not\n• Process the PDF and make the adjustments as needed\n• Save the imported song map to your library';
 
   @override
   String get importFromImage => 'Import from Image';
@@ -612,6 +700,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copySuffix => '(Copy)';
 
   @override
+  String get copyCode => 'Copy Code';
+
+  @override
+  String get codeCopied => 'Code Copied!';
+
+  @override
   String get assign => 'Assign';
 
   @override
@@ -640,6 +734,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcome => 'Welcome';
 
   @override
+  String get getStarted => 'Get Started';
+
+  @override
   String get getStartedMessage =>
       'Get started by creating or importing your first song map.';
 
@@ -659,6 +756,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String bpmWithPlaceholder(Object bpm) {
     return 'BPM: $bpm';
+  }
+
+  @override
+  String durationWithPlaceholder(Object duration) {
+    return 'Duration: $duration';
   }
 
   @override

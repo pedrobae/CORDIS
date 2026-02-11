@@ -1,8 +1,10 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/playlist/flow_item.dart';
-import 'package:cordis/providers/flow_item_provider.dart';
+import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/playlist_provider.dart';
+import 'package:cordis/providers/playlist/playlist_provider.dart';
+import 'package:cordis/utils/date_utils.dart';
+import 'package:cordis/widgets/duration_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -151,12 +153,10 @@ class _FlowItemEditorState extends State<FlowItemEditor> {
                           return null;
                         },
                       ),
-                      _buildFormFieldLabel(
+                      _buildDurationPicker(
                         context,
                         controller: durationController,
                         label: AppLocalizations.of(context)!.estimatedTime,
-                        hint: '00:00',
-                        validator: _validateDuration,
                       ),
                       _buildFormFieldLabel(
                         context,
@@ -176,24 +176,70 @@ class _FlowItemEditorState extends State<FlowItemEditor> {
     );
   }
 
-  String? _validateDuration(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context)!.fieldRequired;
-    }
+  Widget _buildDurationPicker(
+    BuildContext context, {
+    required String label,
+    required TextEditingController controller,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
-    final regex = RegExp(r'^\d{1,2}:\d{2}$');
-    if (!regex.hasMatch(value)) {
-      return AppLocalizations.of(context)!.invalidTimeFormat;
-    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 4,
+      children: [
+        Text(label, style: textTheme.titleMedium),
+        GestureDetector(
+          onTap: () async {
+            final initialDuration = controller.text.isNotEmpty
+                ? DateTimeUtils.parseDuration(controller.text)
+                : Duration.zero;
 
-    // Additional validation: check if seconds are valid (0-59)
-    final parts = value.split(':');
-    final seconds = int.tryParse(parts[1]) ?? 0;
-    if (seconds > 59) {
-      return AppLocalizations.of(context)!.invalidTimeFormat;
-    }
+            final duration = await showModalBottomSheet<Duration>(
+              context: context,
+              builder: (context) =>
+                  DurationPicker(initialDuration: initialDuration),
+            );
 
-    return null;
+            if (duration != null) {
+              controller.text = DateTimeUtils.formatDuration(duration);
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: colorScheme.surfaceContainerLowest,
+                width: 1.2,
+              ),
+              borderRadius: BorderRadius.circular(0),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ListenableBuilder(
+                  listenable: controller,
+                  builder: (context, child) {
+                    return Text(
+                      controller.text.isEmpty
+                          ? AppLocalizations.of(context)!.durationHint
+                          : controller.text,
+                      style: TextStyle(
+                        color: controller.text.isEmpty
+                            ? colorScheme.shadow
+                            : colorScheme.onSurface,
+                        fontSize: 16,
+                      ),
+                    );
+                  },
+                ),
+                Icon(Icons.access_time, color: colorScheme.shadow),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildFormFieldLabel(

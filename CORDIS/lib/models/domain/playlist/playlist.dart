@@ -29,25 +29,15 @@ class Playlist {
     return items.fold(Duration.zero, (a, b) => a + b.duration);
   }
 
-  Map<String, dynamic> toSQLite() {
-    return {
-      'id': id,
-      'name': name,
-      'created_by': createdBy,
-      'items': items.map((item) => item.toJson()).toList(),
-    };
-  }
-
   // Database-specific serialization (excludes relational data)
   Map<String, dynamic> toDatabaseJson() {
     return {'name': name, 'author_id': createdBy};
   }
 
-  PlaylistDto toDto(
-    String ownerFirebaseId,
-    Map<String, VersionDto> versions,
-    Map<String, FlowItem> flowItems,
-  ) {
+  PlaylistDto toDto({
+    required Map<String, VersionDto> versions,
+    required Map<String, FlowItem> flowItems,
+  }) {
     return PlaylistDto(
       name: name,
       itemOrder: items
@@ -98,16 +88,9 @@ class Playlist {
     return copyWith(items: reorderedItems, updatedAt: DateTime.now());
   }
 
-  // Convenience getters for filtering items by type
-  List<PlaylistItem> get cipherVersionItems =>
-      items.where((item) => item.isCipherVersion).toList();
-
-  List<PlaylistItem> get textSectionItems =>
-      items.where((item) => item.isTextSection).toList();
-
   // Helper to get text section IDs from items
   List<int?> get textSectionIdsFromItems => items
-      .where((item) => item.isTextSection)
+      .where((item) => item.isFlowItem)
       .map((item) => item.contentId)
       .toList();
 

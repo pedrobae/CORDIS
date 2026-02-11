@@ -2,8 +2,8 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
+import 'package:cordis/utils/section_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:cordis/utils/section_helper.dart';
 import 'package:cordis/utils/date_utils.dart';
 
 import 'package:cordis/widgets/ciphers/viewer/section_card.dart';
@@ -297,11 +297,17 @@ class _PlayCloudVersionState extends State<PlayCloudVersion> {
               maxWidth: MediaQuery.of(context).size.width - 66,
               minWidth: MediaQuery.of(context).size.width - 66,
             ),
-            child: StructureList(
-              versionId: widget.versionDTO.firebaseId,
-              filteredStructure: filteredStructure,
-              scrollController: _scrollController,
-              sectionKeys: sectionKeys,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 2.0,
+              ),
+              child: StructureList(
+                versionId: widget.versionDTO.firebaseId,
+                filteredStructure: filteredStructure,
+                scrollController: _scrollController,
+                sectionKeys: sectionKeys,
+              ),
             ),
           ),
         ),

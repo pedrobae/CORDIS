@@ -422,6 +422,12 @@ abstract class AppLocalizations {
   /// **'Máximo de 2 caracteres'**
   String get sectionCodeInstruction;
 
+  /// Type field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo'**
+  String get type;
+
   /// Section type field label
   ///
   /// In pt, this message translates to:
@@ -457,6 +463,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Insira o texto da seção, em formato chordPro. (letra[acorde])'**
   String get sectionTextHint;
+
+  /// Instruction for duplicating an existing section
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione uma seção existente para repetir.'**
+  String get duplicateSectionInstruction;
+
+  /// Instruction to select a section for editing
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha uma estrutura para sua nova seção.'**
+  String get selectSectionInstruction;
 
   /// Title for the cipher/song editor screen
   ///
@@ -716,17 +734,17 @@ abstract class AppLocalizations {
   /// **'Função'**
   String get role;
 
+  /// User roles label
+  ///
+  /// In pt, this message translates to:
+  /// **'Funções'**
+  String get roles;
+
   /// Default user role
   ///
   /// In pt, this message translates to:
   /// **'Membro Geral'**
   String get generalMember;
-
-  /// Share button label
-  ///
-  /// In pt, this message translates to:
-  /// **'Compartilhar'**
-  String get share;
 
   /// View button label
   ///
@@ -770,6 +788,48 @@ abstract class AppLocalizations {
   /// **'Definir {object}'**
   String setPlaceholder(Object object);
 
+  /// Download object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Baixar {object}'**
+  String downloadPlaceholder(Object object);
+
+  /// Manage object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerenciar {object}'**
+  String managePlaceholder(Object object);
+
+  /// New object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova {object}'**
+  String newPlaceholder(Object object);
+
+  /// Change object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterar {object}'**
+  String changePlaceholder(Object object);
+
+  /// Publish object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Publicar {object}'**
+  String publishPlaceholder(Object object);
+
+  /// Rename object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Renomear {object}'**
+  String renamePlaceholder(Object object);
+
+  /// Object Options sheet title
+  ///
+  /// In pt, this message translates to:
+  /// **'Opções de {object}'**
+  String optionsPlaceholder(Object object);
+
   /// Tooltip for duplicate action
   ///
   /// In pt, this message translates to:
@@ -781,6 +841,84 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Criar uma Cópia Local'**
   String get createLocalCopy;
+
+  /// Share button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar'**
+  String get share;
+
+  /// Share code field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de Compartilhamento'**
+  String get shareCode;
+
+  /// Enter share code button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Inserir Código de Compartilhamento'**
+  String get enterShareCode;
+
+  /// Instruction to share the code with others
+  ///
+  /// In pt, this message translates to:
+  /// **'Insira o código de compartilhamento fornecido pelo líder da sua equipe para acessar a agenda.'**
+  String get shareCodeInstructions;
+
+  /// Share code screen title
+  ///
+  /// In pt, this message translates to:
+  /// **'Participar da Agenda'**
+  String get joinSchedule;
+
+  /// Completed status label
+  ///
+  /// In pt, this message translates to:
+  /// **'Completo'**
+  String get completed;
+
+  /// Draft status label
+  ///
+  /// In pt, this message translates to:
+  /// **'Rascunho'**
+  String get draft;
+
+  /// Published status label
+  ///
+  /// In pt, this message translates to:
+  /// **'Publicado'**
+  String get published;
+
+  /// Warning message when publishing a schedule
+  ///
+  /// In pt, this message translates to:
+  /// **'Uma vez publicada, a agenda poderá ser acessada por sua equipe.\nAlterações serão sincronizadas até a data do Serviço.\nEsta ação não pode ser desfeita.'**
+  String get publishScheduleWarning;
+
+  /// Send/share to members of selected roles
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar para os Membros da Função'**
+  String get sendToRoleMembers;
+
+  /// Send invites button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar Convites'**
+  String get sendInvites;
+
+  /// Success message when invites are sent
+  ///
+  /// In pt, this message translates to:
+  /// **'Convites enviados com sucesso!'**
+  String get inviteSentSuccessfully;
+
+  /// Description for email invite confirmation
+  ///
+  /// In pt, this message translates to:
+  /// **'Um convite por email foi enviado para as equipes'**
+  String get emailInviteDescription;
 
   /// Label for schedule name input field
   ///
@@ -1049,7 +1187,7 @@ abstract class AppLocalizations {
   /// Instructions for importing a song map from a PDF file
   ///
   /// In pt, this message translates to:
-  /// **'• Selecione um PDF com cifra\n• Fonte mono é recomendada se possível\n• Separe estrofes com linhas vazias\n• Acordes acima das letras'**
+  /// **'• Selecione um PDF com uma cifra\n• Escolha se o PDF tem colunas ou não\n• Processe o PDF e faça os ajustes necessários\n• Salve a cifra importada na sua biblioteca'**
   String get importInstructions;
 
   /// Import from image option
@@ -1214,6 +1352,18 @@ abstract class AppLocalizations {
   /// **'(Cópia)'**
   String get copySuffix;
 
+  /// Copy to clipboard button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar Código'**
+  String get copyCode;
+
+  /// Confirmation message when code is copied to clipboard
+  ///
+  /// In pt, this message translates to:
+  /// **'Código copiado!'**
+  String get codeCopied;
+
   /// Assign button label
   ///
   /// In pt, this message translates to:
@@ -1262,6 +1412,12 @@ abstract class AppLocalizations {
   /// **'Bem-vindo'**
   String get welcome;
 
+  /// Get started button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos Começar'**
+  String get getStarted;
+
   /// Instructional message to get started with the app
   ///
   /// In pt, this message translates to:
@@ -1291,6 +1447,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'BPM: {bpm}'**
   String bpmWithPlaceholder(Object bpm);
+
+  /// Label for the duration with placeholder
+  ///
+  /// In pt, this message translates to:
+  /// **'Duração: {duration}'**
+  String durationWithPlaceholder(Object duration);
 
   /// Label for the music key with placeholder
   ///

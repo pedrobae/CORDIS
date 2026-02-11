@@ -1,11 +1,11 @@
 import 'package:cordis/models/domain/user.dart';
-import 'package:cordis/helpers/firestore_timestamp_helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cordis/utils/date_utils.dart';
 
 class UserDto {
   final String? firebaseId;
   final String username;
-  final String mail;
+  final String email;
   final String? profilePhoto;
   final String? googleId;
   final DateTime? createdAt;
@@ -15,7 +15,7 @@ class UserDto {
   const UserDto({
     this.firebaseId,
     required this.username,
-    required this.mail,
+    required this.email,
     this.profilePhoto,
     this.googleId,
     this.createdAt,
@@ -27,11 +27,11 @@ class UserDto {
     return UserDto(
       firebaseId: id,
       username: json['username'] as String,
-      mail: json['mail'] as String,
+      email: json['email'] as String,
       profilePhoto: json['profilePhoto'] as String?,
       googleId: json['googleId'] as String?,
-      createdAt: FirestoreTimestampHelper.toDateTime(json['createdAt']),
-      updatedAt: FirestoreTimestampHelper.toDateTime(json['updatedAt']),
+      createdAt: DateTimeUtils.parseDateTime(json['createdAt']),
+      updatedAt: DateTimeUtils.parseDateTime(json['updatedAt']),
       isActive: (json['isActive'] as bool?) ?? true,
     );
   }
@@ -39,21 +39,33 @@ class UserDto {
   Map<String, dynamic> toFirestore() {
     return {
       'username': username,
-      'mail': mail,
+      'mail': email,
       'profilePhoto': profilePhoto,
       'googleId': googleId,
-      'createdAt': FirestoreTimestampHelper.fromDateTime(createdAt),
+      'createdAt': DateTimeUtils.formatDate(createdAt ?? DateTime.now()),
       'updatedAt':
           FieldValue.serverTimestamp(), // Server timestamp to avoid client clock issues
       'isActive': isActive,
     };
   }
 
+  factory UserDto.fromSchedule(Map<String, dynamic> json) {
+    return UserDto(
+      firebaseId: json['id'] as String?,
+      username: json['username'] as String,
+      email: json['email'] as String,
+    );
+  }
+
+  Map<String, String> toSchedule() {
+    return {'id': firebaseId ?? '', 'username': username, 'email': email};
+  }
+
   User toDomain() {
     return User(
       firebaseId: firebaseId!,
       username: username,
-      mail: mail,
+      email: email,
       profilePhoto: profilePhoto,
       googleId: googleId,
       createdAt: createdAt,
@@ -65,7 +77,7 @@ class UserDto {
   UserDto copyWith({
     String? firebaseId,
     String? username,
-    String? mail,
+    String? email,
     String? profilePhoto,
     String? googleId,
     DateTime? createdAt,
@@ -75,7 +87,7 @@ class UserDto {
     return UserDto(
       firebaseId: firebaseId ?? this.firebaseId,
       username: username ?? this.username,
-      mail: mail ?? this.mail,
+      email: email ?? this.email,
       profilePhoto: profilePhoto ?? this.profilePhoto,
       googleId: googleId ?? this.googleId,
       createdAt: createdAt ?? this.createdAt,

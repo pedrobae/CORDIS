@@ -1,5 +1,5 @@
-import '../helpers/database.dart';
-import '../models/domain/user.dart';
+import '../../helpers/database.dart';
+import '../../models/domain/user.dart';
 
 class UserRepository {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
@@ -20,7 +20,7 @@ class UserRepository {
 
     final result = await db.query('user');
 
-    return result.map((row) => User.fromJson(row)).toList();
+    return result.map((row) => User.fromSqlite(row)).toList();
   }
 
   /// Gets a user by ID
@@ -35,7 +35,7 @@ class UserRepository {
     );
 
     if (results.isNotEmpty) {
-      return User.fromJson(results.first);
+      return User.fromSqlite(results.first);
     }
 
     return null;
@@ -43,18 +43,20 @@ class UserRepository {
 
   /// Gets users by Firebase ID
   /// Used when ensuring users exist locally
-  Future<List<String>> getUsersByFirebaseId(List<String> firebaseIds) async {
+  Future<User?> getUserByFirebaseId(String firebaseId) async {
     final db = await _databaseHelper.database;
 
     final results = await db.query(
-      columns: ['firebase_id'],
       'user',
-      where:
-          'firebase_id IN (${List.filled(firebaseIds.length, '?').join(',')})',
-      whereArgs: firebaseIds,
+      where: 'firebase_id = ?',
+      whereArgs: [firebaseId],
     );
 
-    return results.map((row) => row['firebase_id'] as String).toList();
+    if (results.isNotEmpty) {
+      return User.fromSqlite(results.first);
+    }
+
+    return null;
   }
 
   /// Gets all users that collaborate on a given playlist
@@ -71,7 +73,7 @@ class UserRepository {
       [playlistId],
     );
 
-    return results.map((row) => User.fromJson(row)).toList();
+    return results.map((row) => User.fromSqlite(row)).toList();
   }
 
   // ===== UPDATE =====

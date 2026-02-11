@@ -1,12 +1,12 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
-import 'package:cordis/providers/cipher_provider.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
-import 'package:cordis/utils/section_helper.dart';
+import 'package:cordis/utils/section_constants.dart';
 import 'package:cordis/widgets/ciphers/viewer/section_card.dart';
 import 'package:cordis/widgets/ciphers/viewer/structure_list.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +59,7 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
     final versionProvider = context.read<LocalVersionProvider>();
     final layoutProvider = context.read<LayoutSettingsProvider>();
 
-    final version = versionProvider.getVersion(widget.versionId);
+    final version = versionProvider.cachedVersion(widget.versionId);
 
     if (version == null) return;
 
@@ -129,7 +129,7 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
               _initializeSectionKeys();
             }
 
-            final version = versionProvider.getVersion(widget.versionId);
+            final version = versionProvider.cachedVersion(widget.versionId);
 
             // LOADING STATE
             if (versionProvider.isLoading ||
@@ -194,6 +194,7 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
                                   ),
                                   Container(
                                     key: _headerSectionKey,
+                                    padding: EdgeInsets.symmetric(vertical: 8),
                                     decoration: BoxDecoration(
                                       color: colorScheme.surface,
                                       border: Border.fromBorderSide(
@@ -331,6 +332,7 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
     return Row(
       children: [
         Container(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
           decoration: BoxDecoration(
             color: colorScheme.surface,
             border: Border(

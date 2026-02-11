@@ -42,7 +42,7 @@ CORDIS/lib/
 ├── providers/              # State management (16 ChangeNotifier providers)
 ├── screens/                # Full-screen UI components
 ├── widgets/                # Reusable UI components (cipher/editor, cipher/viewer)
-├── helpers/                # Database, factory, parsing utilities
+├── helpers/                # Database
 ├── services/               # Firebase, Auth, Settings, Import/Parsing services
 ├── utils/                  # Color, String, Datetime helpers
 ├── l10n/                   # Localization files (app_*.arb)
@@ -60,12 +60,10 @@ playlist → version (many:many via playlist_version)
 ```
 
 ### Database Initialization
-**CRITICAL**: Must initialize `DatabaseFactoryHelper` before database operations:
 ```dart
 // In main.dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DatabaseFactoryHelper.initialize(); // Handles desktop FFI vs mobile native
   await FirebaseService.initialize();
   runApp(const MyApp());
 }
@@ -73,8 +71,7 @@ void main() async {
 
 **Platform-Specific Behavior:**
 - **Mobile (iOS/Android)**: Uses native sqflite (no setup needed)
-- **Desktop (Windows/Linux/macOS)**: Uses sqflite_common_ffi (FFI initialized by `DatabaseFactoryHelper`)
-- **Web**: Not supported - throws UnsupportedError (use Firestore/SharedPreferences)
+- **Web**: -- Implemented later without local database, only firestore + cache
 
 ### Repository Layer Pattern
 All repositories follow access pattern:
@@ -292,24 +289,6 @@ if (isFirebaseCipher(widget.cipherId)) {
 }
 ```
 
-## 🧪 Testing Conventions
-
-### Test Setup Pattern
-```dart
-setUpAll(() {
-  DatabaseFactoryHelper.initializeForTesting();
-});
-
-setUp(() async {
-  dbHelper = DatabaseHelper();
-  await dbHelper.resetDatabase(); // Recreates and seeds
-  repository = CipherRepository();
-});
-```
-
-### Test Data Expectations
-Seeded database contains 4 hymns: "Amazing Grace", "How Great Thou Art", "Holy Holy Holy", "Be Thou My Vision"
-
 ## 🎨 UI Component Patterns
 
 ### Widget Organization
@@ -400,47 +379,11 @@ String colorToHex(Color? color)       // Converts back for storage
 - Complex navigation (with parameters) uses `Navigator.push` directly
 - `NavigationProvider` manages bottom navigation state
 
-## 🔧 Development Workflows
-
-### Build & Test Commands
-```powershell
-# From cipher_app/ directory
-flutter pub get                    # Install dependencies
-flutter test                       # Run unit tests (see test/*.dart)
-flutter analyze                    # Lint analysis
-flutter run -d chrome              # Debug on Chrome (web)
-flutter run -d windows             # Debug on Windows desktop
-flutter build web --release        # Production web build (→ build/web)
-flutter build windows              # Production Windows build
-```
-
-### Database Testing
-```dart
-// Test setup pattern
-setUpAll(() {
-  DatabaseFactoryHelper.initializeForTesting(); // Always uses FFI
-});
-
-setUp(() async {
-  dbHelper = DatabaseHelper();
-  await dbHelper.resetDatabase(); // Recreates and seeds with 4 sample hymns
-});
-```
-
-### Analyze & Fix Commands
-```powershell
-# From cipher_app/ directory
-flutter analyze                    # Check for lint/compilation issues
-dart fix --dry-run                # Preview suggested fixes
-dart fix --apply                  # Apply auto-fixes
-dart format .                     # Format code
-```
 
 ### Database Operations
 - **Current schema version**: 3 (includes table renaming migration)
 - **Seeded data**: 4 sample hymns on first creation (from `lib/helpers/seed_data/`)
 - **Test reset**: Use `dbHelper.resetDatabase()` to get clean state with seeds
-- **Database file location**: Platform-specific (set up by `DatabaseFactoryHelper`)
 - **Desktop support**: Windows, Linux, macOS use FFI; iOS/Android use native sqflite
 
 ### Cloud Functions & Firestore
@@ -448,14 +391,3 @@ dart format .                     # Format code
 - **Firestore Rules**: `firestore.rules` defines security rules
 - **Firebase Config**: `firebase.json` and `.firebaserc` configure projects
 - **Local Testing**: `firebase emulators:start` for local Firebase emulation
-
-## 🚨 Common Pitfalls
-
-1. **Don't skip `DatabaseFactoryHelper.initialize()`** - causes runtime errors on desktop
-2. **Always dispose TextControllers** in complex forms like `cipher_section_form.dart`
-3. **Use debouncing for form inputs** that trigger provider updates
-4. **Check provider loading states** before navigation or operations
-5. **Maintain Portuguese UI strings** - never hardcode English in user-facing text
-6. **Firebase offline-first**: Always sync to local SQLite first, then push to Firebase
-7. **Authentication flows**: Handle authentication state changes gracefully in providers
-

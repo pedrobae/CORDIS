@@ -1,5 +1,7 @@
+import 'package:cordis/helpers/codes.dart';
 import 'package:cordis/models/domain/schedule.dart';
-import 'package:cordis/repositories/local_schedule_repository.dart';
+import 'package:cordis/models/domain/user.dart';
+import 'package:cordis/repositories/local/schedule_repository.dart';
 import 'package:flutter/material.dart';
 
 class LocalScheduleProvider extends ChangeNotifier {
@@ -63,11 +65,27 @@ class LocalScheduleProvider extends ChangeNotifier {
     if (schedule == null) return null;
 
     for (var role in schedule.roles) {
-      if (role.memberIds.contains(localUserId)) {
+      if (role.users.any((user) => user.id == localUserId)) {
         return role.name;
       }
     }
     return null;
+  }
+
+  bool isPublished(int scheduleID) {
+    return _schedules[scheduleID]!.isPublic;
+  }
+
+  Future<Schedule?> getScheduleWithPlaylistId(int playlistId) async {
+    try {
+      await loadSchedules();
+
+      return _schedules.values.firstWhere(
+        (schedule) => schedule.playlistId == playlistId,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   // ===== CREATE =====
@@ -101,6 +119,7 @@ class LocalScheduleProvider extends ChangeNotifier {
       location: '',
       playlistId: playlistId,
       roles: [],
+      shareCode: generateShareCode(),
     );
   }
 
@@ -226,7 +245,7 @@ class LocalScheduleProvider extends ChangeNotifier {
     final schedule = _schedules[scheduleId];
     if (schedule == null) return;
 
-    final newRole = Role(id: -1, name: roleName, memberIds: []);
+    final newRole = Role(id: -1, name: roleName, users: []);
     (_schedules[scheduleId] as Schedule).roles.add(newRole);
 
     notifyListeners();
@@ -250,6 +269,15 @@ class LocalScheduleProvider extends ChangeNotifier {
       playlistId: playlistId,
     );
 
+    notifyListeners();
+  }
+
+  void publishSchedule(int scheduleId) {
+    final schedule = _schedules[scheduleId];
+    if (schedule == null) return;
+
+    _schedules[scheduleId] = schedule.copyWith(isPublic: true);
+    saveSchedule(scheduleId);
     notifyListeners();
   }
 
@@ -304,13 +332,13 @@ class LocalScheduleProvider extends ChangeNotifier {
 
   // ===== MEMBER MANAGEMENT =====
   /// Adds an existing user to a role in a schedule (local).
-  void addMemberToRole(int scheduleId, int roleId, int userId) {
+  void addUserToRole(int scheduleId, int roleId, User user) {
     final schedule = _schedules[scheduleId];
     if (schedule == null) return;
 
     final role = schedule.roles.firstWhere((role) => role.id == roleId);
 
-    role.memberIds.add(userId);
+    role.users.add(user);
     notifyListeners();
   }
 

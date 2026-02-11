@@ -4,6 +4,14 @@ import 'package:cordis/models/dtos/pdf_dto.dart';
 import 'package:flutter/material.dart';
 
 class ChordLineParser {
+  static const String _chordPattern =
+      r'\b[A-G](?:#|b)?' // Chord Root (C, D, E, F, G, A, B)(# or b)
+      r'(?:m|maj|min|sus|aug|dim)?' // Optional quality (minor, major, sus, etc)
+      r'(?:\d{1,2}|maj7|M7|m7|min7|sus2|sus4|add\d{1,2})?' // Optional extension
+      r'(?:M|maj)?' // Optional trailing major
+      r'(?:\/[A-G](?:#|b)?)?' // Optional slash chord
+      r'\b';
+
   /// Parses sections from the given [ImportVariant] and creates the parsed objects.
   void parseBySimpleText(ParsingResult result) {
     // Iterates through each section of the cipher creating Section objects
@@ -246,49 +254,37 @@ class ChordLineParser {
 
     String mergedLine = '';
 
-    WordData? chordGlyph;
-    GlyphData? lyricGlyph;
+    double lastLyricRightBound = 0.0;
     while (chordGlyphs.isNotEmpty || lyricGlyphs.isNotEmpty) {
-      try {
-        chordGlyph ??= chordGlyphs.removeAt(0);
-      } catch (e) {
-        //  No more chord glyphs
-        //  Append remaining lyric glyphs
+      if (chordGlyphs.isEmpty) {
+        // No more chord glyphs, append remaining lyric glyphs
         while (lyricGlyphs.isNotEmpty) {
-          if (lyricGlyph != null) {
-            mergedLine += lyricGlyph.text;
-            lyricGlyph = null;
-          }
           mergedLine += lyricGlyphs.removeAt(0).text;
         }
         break;
-      }
-
-      try {
-        lyricGlyph ??= lyricGlyphs.removeAt(0);
-      } catch (e) {
-        //  No more lyric glyphs
-        //  Append remaining chord glyphs
+      } else if (lyricGlyphs.isEmpty) {
+        // No more lyric glyphs, append remaining chord glyphs
+        // Creating space for the bounds difference
         while (chordGlyphs.isNotEmpty) {
-          if (chordGlyph != null) {
-            mergedLine += '[${chordGlyph.text}]';
-            chordGlyph = null;
-          }
-          mergedLine += '[${chordGlyphs.removeAt(0).text}]';
+          final chordGlyph = chordGlyphs.removeAt(0);
+
+          final spaceCount =
+              (chordGlyph.bounds.left - lastLyricRightBound) ~/
+              chordGlyph.fontSize!;
+          mergedLine += ' ' * spaceCount;
+          mergedLine += '[${chordGlyph.text}]';
+          lastLyricRightBound =
+              lastLyricRightBound + spaceCount * chordGlyph.fontSize!;
         }
         break;
-      }
-
-      if (chordGlyph.bounds.left <= lyricGlyph.bounds.left) {
-        // Next chord glyph is before the next lyric glyph
-        mergedLine += '[';
-        mergedLine += chordGlyph.text;
-        mergedLine += ']';
-        chordGlyph = null;
       } else {
-        // Next lyric glyph is before the next chord glyph
-        mergedLine += lyricGlyph.text;
-        lyricGlyph = null;
+        if (chordGlyphs[0].bounds.left <= lyricGlyphs[0].bounds.left) {
+          // Next chord glyph is before the next lyric glyph
+          mergedLine += '[${chordGlyphs.removeAt(0).text}]';
+        } else {
+          // Next lyric glyph is before the next chord glyph
+          mergedLine += lyricGlyphs.removeAt(0).text;
+        }
       }
     }
 
@@ -299,9 +295,7 @@ class ChordLineParser {
     // Formats a line that contains only chords into ChordPro format
     StringBuffer formattedLine = StringBuffer();
 
-    RegExp chordRegex = RegExp(
-      r'([CDEFGAB][#b]?)(m|maj|min|sus|aug|dim)?([7|maj7|m7|min7|sus2|sus4])?(\/[A-G][#b]?)?',
-    );
+    RegExp chordRegex = RegExp(_chordPattern);
     List<RegExpMatch> matches = chordRegex.allMatches(chordLine).toList();
     for (var match in matches) {
       formattedLine.write('[');
@@ -314,9 +308,7 @@ class ChordLineParser {
 
   bool _isChordLine(String text) {
     // Simple regex to identify chord patterns (e.g., C, G7, Am, F#m)
-    RegExp chordRegex = RegExp(
-      r'([CDEFGAB][#b]?)(m|maj|min|sus|aug|dim)?([7|maj7|m7|min7|sus2|sus4])?(\/[A-G][#b]?)?',
-    );
+    RegExp chordRegex = RegExp(_chordPattern);
     List<RegExpMatch> matches = chordRegex.allMatches(text).toList();
 
     // Check if the matches are part of a word

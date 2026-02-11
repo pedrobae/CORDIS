@@ -4,6 +4,7 @@ import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/services/firestore_service.dart';
 import 'package:cordis/services/auth_service.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/material.dart';
 
 class CloudVersionRepository {
   final FirestoreService _firestoreService = FirestoreService();
@@ -15,9 +16,7 @@ class CloudVersionRepository {
 
   DateTime? _lastCloudLoad;
 
-  CloudVersionRepository() {
-    _initializeCloudCache();
-  }
+  CloudVersionRepository();
 
   // ================== VERSION METHODS ==================
 
@@ -75,8 +74,12 @@ class CloudVersionRepository {
     if ((_lastCloudLoad != null &&
             now.difference(_lastCloudLoad!).inDays < 7) &&
         !forceReload) {
+      debugPrint('CACHE - Loading public versions');
+      await loadCache();
       return _repoCache;
     }
+
+    debugPrint('FIRESTORE - Loading public versions');
 
     final snapshot = await _firestoreService.fetchDocuments(
       collectionPath: 'publicVersions',
@@ -140,7 +143,7 @@ class CloudVersionRepository {
   /// Fetch a specific version by its ID (requires authentication)
   Future<VersionDto?> getUserVersionById(String versionId) async {
     await _guardHelper.requireAuth();
-
+    debugPrint('FIRESTORE - Loading user version with ID: $versionId');
     var doc = await _firestoreService.fetchDocumentById(
       collectionPath: 'publicVersions',
       documentId: versionId,
@@ -212,8 +215,9 @@ class CloudVersionRepository {
     );
   }
 
-  Future<void> _initializeCloudCache() async {
+  Future<void> loadCache() async {
     _lastCloudLoad = await _cacheService.loadLastCloudLoad();
+    _repoCache.clear();
     _repoCache.addAll(await _cacheService.loadCloudVersions());
   }
 

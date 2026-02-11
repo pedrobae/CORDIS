@@ -64,8 +64,8 @@ class AddToPlaylistSheet extends StatelessWidget {
                   // Navigate to Cipher Library Screen
                   navigationProvider.push(
                     CipherLibraryScreen(playlistId: playlistId),
-                    showAppBar: false,
-                    showDrawerIcon: false,
+                    showBottomNavBar: true,
+
                     onPopCallback: () {
                       // Disable selection mode when returning
                       selectionProvider.disableSelectionMode();
@@ -106,8 +106,7 @@ class AddToPlaylistSheet extends StatelessWidget {
                   Navigator.of(context).pop();
                   navigationProvider.push(
                     FlowItemEditor(playlistId: playlistId),
-                    showAppBar: false,
-                    showDrawerIcon: false,
+                    showBottomNavBar: true,
                   );
                 },
                 child: Container(

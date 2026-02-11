@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:cordis/models/domain/user.dart';
 import 'package:cordis/models/dtos/user_dto.dart';
-import 'package:cordis/repositories/local_user_repository.dart';
-import 'package:cordis/repositories/cloud_user_repository.dart';
+import 'package:cordis/repositories/local/user_repository.dart';
+import 'package:cordis/repositories/cloud/user_repository.dart';
 import 'package:flutter/foundation.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -60,13 +60,14 @@ class UserProvider extends ChangeNotifier {
   /// Ensures that all users in the provided list of Firebase IDs exist locally
   /// Downloads any missing users from the cloud
   Future<void> ensureUsersExist(List<String> firebaseUserIds) async {
-    final presentIds = await _localUserRepository.getUsersByFirebaseId(
-      firebaseUserIds,
-    );
+    final missingIds = <String>[];
 
-    final missingIds = firebaseUserIds
-        .where((id) => !presentIds.contains(id))
-        .toList();
+    for (final firebaseId in firebaseUserIds) {
+      final user = await _localUserRepository.getUserByFirebaseId(firebaseId);
+      if (user == null) {
+        missingIds.add(firebaseId);
+      }
+    }
 
     if (missingIds.isNotEmpty) {
       await downloadUsersFromCloud(missingIds);
@@ -77,7 +78,7 @@ class UserProvider extends ChangeNotifier {
     final newUser = User(
       id: -1,
       username: username,
-      mail: email,
+      email: email,
       firebaseId: null,
     );
 

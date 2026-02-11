@@ -1,31 +1,34 @@
 import 'dart:math';
 
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
-import 'package:cordis/screens/cipher/edit_cipher.dart';
+import 'package:cordis/screens/cipher/view_cipher.dart';
 import 'package:cordis/utils/date_utils.dart';
+import 'package:cordis/widgets/custom_reorderable_delayed.dart';
 import 'package:cordis/widgets/filled_text_button.dart';
 import 'package:cordis/widgets/playlist/viewer/version_card_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cordis/providers/cipher_provider.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
-import 'package:cordis/widgets/ciphers/editor/custom_reorderable_delayed.dart';
 
 class PlaylistVersionCard extends StatefulWidget {
   final int playlistId;
   final dynamic versionId;
   final int index;
+  final int itemId;
 
   const PlaylistVersionCard({
     super.key,
     required this.playlistId,
     required this.index,
     required this.versionId,
+    required this.itemId,
   });
 
   @override
@@ -116,12 +119,20 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
               version = cloudVersionProvider.getVersion(widget.versionId);
               isCloud = true;
             } else {
-              version = versionProvider.getVersion(widget.versionId);
+              version = versionProvider.cachedVersion(widget.versionId);
               isCloud = false;
             }
 
             // If version is not cached yet, show loading indicator
             if (version == null) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            Cipher? cipher = isCloud
+                ? null
+                : cipherProvider.getCipherById(version.cipherId);
+
+            if (!isCloud && cipher == null) {
               return Center(child: CircularProgressIndicator());
             }
 
@@ -168,13 +179,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      isCloud
-                                          ? version.title
-                                          : cipherProvider
-                                                .getCipherById(
-                                                  version.cipherId,
-                                                )!
-                                                .title,
+                                      isCloud ? version.title : cipher!.title,
                                       style: theme.textTheme.titleLarge
                                           ?.copyWith(
                                             fontWeight: FontWeight.w600,
@@ -196,11 +201,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                                   ? (version.transposedKey ??
                                                         version.originalKey)
                                                   : (version.transposedKey ??
-                                                        cipherProvider
-                                                            .getCipherById(
-                                                              version.cipherId,
-                                                            )!
-                                                            .musicKey),
+                                                        cipher!.musicKey),
                                               style: theme.textTheme.bodyLarge
                                                   ?.copyWith(
                                                     fontWeight: FontWeight.w500,
@@ -341,7 +342,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                 iconSize: 30,
                                 icon: Icon(Icons.more_vert_rounded),
                                 onPressed: () {
-                                  _openVersionActions(context);
+                                  _openVersionActions(context, version);
                                 },
                               ),
                             ],
@@ -353,14 +354,12 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                             isDense: true,
                             onPressed: () {
                               navigationProvider.push(
-                                EditCipherScreen(
-                                  versionType: isCloud
-                                      ? VersionType.cloud
-                                      : VersionType.local,
+                                ViewCipherScreen(
+                                  versionType: VersionType.playlist,
                                   versionID: widget.versionId,
                                   cipherID: isCloud ? null : version.cipherId,
-                                  isEnabled: false,
                                 ),
+                                showBottomNavBar: true,
                               );
                             },
                           ),
@@ -375,7 +374,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
     );
   }
 
-  void _openVersionActions(BuildContext context) {
+  void _openVersionActions(BuildContext context, final version) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -385,8 +384,10 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
           onClosing: () {},
           builder: (context) {
             return VersionCardActionsSheet(
-              versionId: widget.versionId,
-              playlistId: widget.playlistId,
+              itemID: widget.itemId,
+              versionID: widget.versionId,
+              cipherID: version.cipherId,
+              playlistID: widget.playlistId,
             );
           },
         );

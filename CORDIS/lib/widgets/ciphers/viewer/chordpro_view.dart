@@ -126,7 +126,7 @@ class ChordProView extends StatelessWidget {
     }
 
     return Column(
-      spacing: ls.lyricTextStyle.fontSize! * 0.8,
+      spacing: ls.lyricTextStyle.fontSize! * 0.9,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: sectionChildren,
     );

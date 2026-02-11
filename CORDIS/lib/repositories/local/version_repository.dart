@@ -1,0 +1,132 @@
+import 'package:cordis/models/domain/cipher/version.dart';
+
+import 'package:cordis/helpers/database.dart';
+import 'package:cordis/repositories/local/section_repository.dart';
+
+class LocalVersionRepository {
+  final _databaseHelper = DatabaseHelper();
+
+  final _sectionRepo = SectionRepository();
+
+  // ============= VERSION OPERATIONS =============
+
+  // ===== CREATE =====
+  /// Inserts a version to the SQLite database
+  /// Returns the local ID of the inserted version
+  Future<int> insertVersion(Version version) async {
+    final db = await _databaseHelper.database;
+    return await db.insert('version', version.toSqLite());
+  }
+
+  // ===== READ =====
+  /// Gets all versions of a cipher
+  Future<List<Version>> getVersions(int cipherId) async {
+    final db = await _databaseHelper.database;
+    final results = await db.query(
+      'version',
+      where: 'cipher_id = ?',
+      whereArgs: [cipherId],
+      orderBy: 'id',
+    );
+
+    List<Version> versions = [];
+    for (var row in results) {
+      versions.add(await _buildVersion(row));
+    }
+
+    return versions;
+  }
+
+  /// Gets version by its local ID
+  /// Returns null if not found
+  Future<Version?> getVersionWithId(int versionId) async {
+    final db = await _databaseHelper.database;
+    final result = await db.query(
+      'version',
+      where: 'id = ?',
+      whereArgs: [versionId],
+    );
+
+    if (result.isEmpty) return null;
+
+    Version version = await _buildVersion(result[0]);
+
+    return version;
+  }
+
+  /// Gets version by its Firebase ID
+  /// Returns null if not found
+  Future<Version?> getVersionWithFirebaseId(String firebaseId) async {
+    final db = await _databaseHelper.database;
+    final result = await db.query(
+      'version',
+      where: 'firebase_id = ?',
+      whereArgs: [firebaseId],
+    );
+
+    if (result.isEmpty) return null;
+
+    return _buildVersion(result[0]);
+  }
+
+  /// Gets list of versions by a list of local IDs
+  Future<List<Version>> getVersionsByIds(List<int?> versionIds) async {
+    if (versionIds.isEmpty) return [];
+
+    final db = await _databaseHelper.database;
+    final placeholders = versionIds.map((_) => '?').join(',');
+    final results = await db.query(
+      'version',
+      where: 'id IN ($placeholders)',
+      whereArgs: versionIds,
+      orderBy: 'id',
+    );
+
+    List<Version> versions = [];
+    for (var row in results) {
+      versions.add(await _buildVersion(row));
+    }
+
+    return versions;
+  }
+
+  // ===== UPDATE =====
+  /// Updates entire version
+  Future<void> updateVersion(Version version) async {
+    final db = await _databaseHelper.database;
+    await db.update(
+      'version',
+      version.toSqLite(),
+      where: 'id = ?',
+      whereArgs: [version.id],
+    );
+  }
+
+  /// Updates specific field(s) of a version
+  Future<void> updateFieldOfVersion(
+    int versionId,
+    Map<String, dynamic> field,
+  ) async {
+    final db = await _databaseHelper.database;
+    await db.update('version', field, where: 'id = ?', whereArgs: [versionId]);
+  }
+
+  /// Deletes all sections of a version
+  /// Used when updating version sections
+  Future<void> deleteAllVersionSections(int versionId) async {
+    final db = await _databaseHelper.database;
+    await db.delete('section', where: 'version_id = ?', whereArgs: [versionId]);
+  }
+
+  // ===== DELETE =====
+  /// Deletes version by its local ID
+  Future<void> deleteVersion(int id) async {
+    final db = await _databaseHelper.database;
+    await db.delete('version', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<Version> _buildVersion(Map<String, dynamic> row) async {
+    final section = await _sectionRepo.getSections(row['id']);
+    return Version.fromSqLiteNoSections(row).copyWith(content: section);
+  }
+}

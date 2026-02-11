@@ -77,7 +77,7 @@ class UserCard extends StatelessWidget {
                   color: colorScheme.onSurfaceVariant,
                 ),
                 onPressed: () {
-                  // TODO: Profile/user settings page
+                  // TODO:SideMenu - Profile/user settings page
                   Navigator.of(context).pop(); // Close drawer
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

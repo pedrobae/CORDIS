@@ -11,14 +11,9 @@ class CloudScheduleRepository {
   final GuardHelper _guardHelper = GuardHelper();
 
   final CacheService _cacheService = CacheService();
-  final List<ScheduleDto> _repoCache = [];
-  DateTime? _lastCloudLoad;
 
-  CloudScheduleRepository() {
-    _initializeCloudCache();
-  }
+  CloudScheduleRepository();
   // ===== CREATE =====
-
   /// Publish a new schedule to Firestore
   /// Returns the generated document ID
   Future<String> publishSchedule(ScheduleDto scheduleDto) async {
@@ -28,7 +23,7 @@ class CloudScheduleRepository {
 
       final docId = await _firestoreService.createDocument(
         collectionPath: 'schedules',
-        data: scheduleDto.toFirestore(),
+        data: scheduleDto.toFirestore()..['createdAt'] = DateTime.now(),
       );
 
       await FirebaseAnalytics.instance.logEvent(
@@ -49,44 +44,40 @@ class CloudScheduleRepository {
     bool forceFetch = false,
   }) async {
     final now = DateTime.now();
+
+    final (lastLoad, cachedSchedules) = await getCache(firebaseUserId);
+
     if (!forceFetch &&
         now.isBefore(
-          (_lastCloudLoad ?? DateTime(2000)).add(
-            Duration(days: 7),
-          ), // CHECK FOR NEW SCHEDULES WEEKLY
+          (lastLoad).add(Duration(days: 7)), // CHECK FOR NEW SCHEDULES WEEKLY
         )) {
-      final cachedSchedules = await _cacheService.loadCloudSchedules();
       if (cachedSchedules.isNotEmpty) {
+        debugPrint('LOADING CACHED SCHEDULES FOR USER $firebaseUserId.');
         return cachedSchedules;
       }
     }
-    return await _withErrorHandling('fetch_schedules_by_user_id', () async {
+    return await _withErrorHandling('fetch_user_schedules', () async {
       final querySnapshot = await _firestoreService
           .fetchDocumentsContainingValue(
             collectionPath: 'schedules',
             field: 'collaborators',
-            orderField: 'createdAt',
+            orderField: 'datetime',
             value: firebaseUserId,
           );
 
-      final schedules = querySnapshot
-          .map(
-            (doc) => ScheduleDto.fromFirestore(
-              doc.data() as Map<String, dynamic>,
-              doc.id,
-            ),
-          )
-          .toList();
+      final schedules = <ScheduleDto>[];
+      for (var doc in querySnapshot) {
+        final data = doc.data() as Map<String, dynamic>;
+        final id = doc.id;
+        schedules.add(ScheduleDto.fromFirestore(data, id));
+      }
 
       debugPrint(
-        'Fetched ${schedules.length} schedules for user $firebaseUserId from cloud.',
+        'FETCHED ${schedules.length} SCHEDULES FOR USER $firebaseUserId FROM CLOUD.',
       );
 
-      await _cacheService.saveCloudSchedules(schedules);
+      await _cacheService.saveCloudSchedules(schedules, firebaseUserId);
       await _cacheService.saveLastScheduleLoad(now);
-      _repoCache.clear();
-      _repoCache.addAll(schedules);
-      _lastCloudLoad = now;
 
       return schedules;
     });
@@ -135,8 +126,8 @@ class CloudScheduleRepository {
   }
 
   /// Enter Schedule via Share Code by adding the user as a collaborator
-  Future<String> enterSchedule(String shareCode) async {
-    return await _withErrorHandling('enter_schedule_via_share_code', () async {
+  Future<bool> joinWithCode(String shareCode) async {
+    return await _withErrorHandling('join_via_share_code', () async {
       await _guardHelper.requireAuth();
 
       final functions = FirebaseFunctions.instance;
@@ -147,8 +138,7 @@ class CloudScheduleRepository {
 
       // After successfully joining load the schedule
       if (result.data['success'] == true) {
-        final String scheduleId = result.data['scheduleId'];
-        return scheduleId;
+        return true;
       } else {
         throw Exception(
           'Failed to join schedule with the provided share code.',
@@ -184,23 +174,22 @@ class CloudScheduleRepository {
     try {
       return await action();
     } catch (e) {
+      final error = e as FirebaseFunctionsException;
+      debugPrint('Error during $actionDescription: ${error.message}');
       // Log error to analytics
       await FirebaseAnalytics.instance.logEvent(
         name: 'error_during_$actionDescription',
-        parameters: {'error': e.toString()},
+        parameters: {'error': error.message!},
       );
-
-      if (kDebugMode) {
-        print('Error during $actionDescription: $e');
-      }
 
       rethrow;
     }
   }
 
   // ===== CACHE INITIALIZATION =====
-  Future<void> _initializeCloudCache() async {
-    _repoCache.addAll(await _cacheService.loadCloudSchedules());
-    _lastCloudLoad = await _cacheService.loadLastScheduleLoad();
+  Future<(DateTime, List<ScheduleDto>)> getCache(String userId) async {
+    final schedules = await _cacheService.loadCloudSchedules(userId);
+    final lastLoad = await _cacheService.loadLastScheduleLoad();
+    return (lastLoad ?? DateTime(2000), schedules);
   }
 }
