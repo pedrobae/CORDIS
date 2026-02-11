@@ -47,16 +47,5 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Song Map Image</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.626503496187-6l578k83fq6t68qifpmss2kk0jm3rrcu</string>
-			</array>
-		</dict>
-	</array>
 </dict>
 </plist>
