@@ -1,3 +1,6 @@
+import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
+import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:provider/provider.dart';
@@ -17,39 +20,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  late final MyAuthProvider _authProvider;
-
-  @override
-  void initState() {
-    super.initState();
-    // Listen for authentication changes after the first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _authProvider = context.read<MyAuthProvider>();
-      _authProvider.addListener(_authListener);
-    });
-  }
-
-  void _authListener() {
-    if (_authProvider.isAuthenticated) {
-      _navigateToHome();
-    }
-  }
-
-  void _navigateToHome() {
-    // Remove listener to avoid memory leaks
-    _authProvider.removeListener(_authListener);
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      '/',
-      (Route<dynamic> route) => false, // Remove all previous routes
-    );
-  }
-
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _authProvider.removeListener(_authListener);
     super.dispose();
   }
 
@@ -102,251 +77,171 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       // Background Gradient
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              colorScheme.primaryContainer,
-              colorScheme.surfaceContainerLow,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Consumer<MyAuthProvider>(
-          builder: (context, authProvider, child) => Center(
-            child: SingleChildScrollView(
+      body: Consumer<MyAuthProvider>(
+        builder: (context, authProvider, child) => Center(
+          child: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.all(16),
               child: Column(
+                spacing: 16,
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Use SVG logo asset instead of music note icon
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Image.asset(
-                      'assets/logos/app_icon_rounded_reversed.png',
-                      width: 120,
-                      height: 120,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Criar Nova Conta',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Junte-se ao App de Cifras',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    constraints: const BoxConstraints(maxWidth: 340),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colorScheme.surfaceContainerHighest,
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
+                    padding: const EdgeInsets.symmetric(horizontal: 64.0),
+                    child: Column(
+                      spacing: 8,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Image.asset(
+                            'assets/logos/app_icon_transparent.png',
+                            width: 120,
+                            height: 120,
+                          ),
+                        ),
+                        Text(
+                          AppLocalizations.of(context)!.createNewAccount,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                        Text(
+                          AppLocalizations.of(context)!.joinAppDescription,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            autofocus: true,
-                            maxLines: 1,
-                            decoration: InputDecoration(
-                              label: const Text(
-                                'E-mail',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              prefixIcon: Icon(
-                                Icons.email,
-                                color: colorScheme.primary,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: BorderSide(
-                                  color: colorScheme.primary,
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                            validator: _validateEmail,
+                  ),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      spacing: 16,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // EMAIL
+                        LabeledTextField(
+                          label: AppLocalizations.of(context)!.email,
+                          controller: _emailController,
+                          validator: _validateEmail,
+                        ),
+
+                        // PASSWORD
+                        LabeledTextField(
+                          label: AppLocalizations.of(context)!.password,
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          validator: _validatePassword,
+                          prefixIcon: Icon(
+                            Icons.lock_outline,
+                            color: colorScheme.primary,
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: _obscurePassword,
-                            textInputAction: TextInputAction.next,
-                            maxLines: 1,
-                            decoration: InputDecoration(
-                              label: const Text(
-                                'Senha',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              prefixIcon: Icon(
-                                Icons.lock,
-                                color: colorScheme.primary,
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: colorScheme.primary,
-                                ),
-                                tooltip: _obscurePassword
-                                    ? 'Mostrar senha'
-                                    : 'Ocultar senha',
-                                onPressed: _toggleObscurePassword,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: BorderSide(
-                                  color: colorScheme.primary,
-                                  width: 2,
-                                ),
-                              ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: colorScheme.primary,
                             ),
-                            validator: _validatePassword,
+                            tooltip: _obscurePassword
+                                ? AppLocalizations.of(context)!.showPassword
+                                : AppLocalizations.of(context)!.hidePassword,
+                            onPressed: _toggleObscurePassword,
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _confirmPasswordController,
-                            obscureText: _obscureConfirmPassword,
-                            textInputAction: TextInputAction.done,
-                            maxLines: 1,
-                            decoration: InputDecoration(
-                              label: const Text(
-                                'Confirmar Senha',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              prefixIcon: Icon(
-                                Icons.lock_outline,
-                                color: colorScheme.primary,
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscureConfirmPassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: colorScheme.primary,
-                                ),
-                                tooltip: _obscureConfirmPassword
-                                    ? 'Mostrar senha'
-                                    : 'Ocultar senha',
-                                onPressed: _toggleObscureConfirmPassword,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: BorderSide(
-                                  color: colorScheme.primary,
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                            validator: _validateConfirmPassword,
+                        ),
+
+                        // CONFIRM PASSWORD
+                        LabeledTextField(
+                          controller: _confirmPasswordController,
+                          obscureText: _obscureConfirmPassword,
+                          label: AppLocalizations.of(context)!.confirmPassword,
+                          prefixIcon: Icon(
+                            Icons.lock_outline,
+                            color: colorScheme.primary,
                           ),
-                          const SizedBox(height: 12),
-                          if (authProvider.isLoading)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8),
-                              child: CircularProgressIndicator(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirmPassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: colorScheme.primary,
                             ),
-                          if (authProvider.error != null)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
+                            tooltip: _obscureConfirmPassword
+                                ? AppLocalizations.of(context)!.showPassword
+                                : AppLocalizations.of(context)!.hidePassword,
+                            onPressed: _toggleObscureConfirmPassword,
+                          ),
+                          validator: _validateConfirmPassword,
+                        ),
+
+                        // ERROR / LOADING STATES
+                        if (authProvider.isLoading)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: CircularProgressIndicator(),
+                          ),
+                        if (authProvider.error != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              authProvider.error!,
+                              style: TextStyle(
+                                color: colorScheme.error,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+
+                        // REGISTER BUTTON
+                        FilledTextButton(
+                          text: AppLocalizations.of(context)!.createPlaceholder(
+                            AppLocalizations.of(context)!.account,
+                          ),
+                          isDark: true,
+                          icon: Icons.person_add,
+                          isDisabled: authProvider.isLoading,
+                          onPressed: () {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              authProvider.signUpWithEmail(
+                                _emailController.text,
+                                _passwordController.text,
+                              );
+                            }
+                          },
+                        ),
+
+                        // BACK TO LOGIN
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.alreadyHaveAccount,
+                              style: TextStyle(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(
+                                  context,
+                                ).pushReplacementNamed('/login');
+                              },
                               child: Text(
-                                authProvider.error!,
+                                AppLocalizations.of(context)!.login,
                                 style: TextStyle(
-                                  color: colorScheme.error,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              icon: const Icon(Icons.person_add),
-                              label: Text(
-                                'Criar Conta',
-                                style: theme.textTheme.labelLarge!.copyWith(
-                                  color: colorScheme.onPrimaryContainer,
+                                  color: colorScheme.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: colorScheme.primaryContainer,
-                                foregroundColor: colorScheme.onPrimaryContainer,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                elevation: 2,
-                              ),
-                              onPressed: authProvider.isLoading
-                                  ? null
-                                  : () {
-                                      if (_formKey.currentState?.validate() ??
-                                          false) {
-                                        authProvider.signUpWithEmail(
-                                          _emailController.text,
-                                          _passwordController.text,
-                                        );
-                                      }
-                                    },
                             ),
-                          ),
-                          // Back to Login Button
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Já tem uma conta? ',
-                                style: TextStyle(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: Text(
-                                  'Entrar',
-                                  style: TextStyle(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],

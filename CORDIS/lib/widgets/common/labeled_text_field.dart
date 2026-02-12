@@ -8,6 +8,9 @@ class LabeledTextField extends StatelessWidget {
   final String? instruction;
   final bool isMultiline;
   final bool isEnabled;
+  final bool obscureText;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
 
   const LabeledTextField({
     super.key,
@@ -18,6 +21,9 @@ class LabeledTextField extends StatelessWidget {
     this.instruction,
     this.isMultiline = false,
     this.isEnabled = true,
+    this.obscureText = false,
+    this.prefixIcon,
+    this.suffixIcon,
   });
 
   @override
@@ -39,6 +45,8 @@ class LabeledTextField extends StatelessWidget {
           controller: controller,
           decoration: InputDecoration(
             hintText: hint,
+            prefixIcon: prefixIcon,
+            suffixIcon: suffixIcon,
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(color: colorScheme.surfaceContainerLowest),
               borderRadius: BorderRadius.circular(0),
@@ -50,6 +58,7 @@ class LabeledTextField extends StatelessWidget {
               ? TextInputType.multiline
               : TextInputType.text,
           enabled: isEnabled,
+          obscureText: obscureText,
         ),
         if (instruction != null)
           Text(

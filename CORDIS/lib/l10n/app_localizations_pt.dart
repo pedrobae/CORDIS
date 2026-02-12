@@ -12,6 +12,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get appName => 'CORDIS';
 
   @override
+  String appVersion(Object version) {
+    return 'Versão: $version';
+  }
+
+  @override
   String get newHeart => 'New Heart Music Ministries';
 
   @override
@@ -33,7 +38,56 @@ class AppLocalizationsPt extends AppLocalizations {
   String get current => 'Atual';
 
   @override
+  String get theme => 'Tema';
+
+  @override
+  String get themeSubtitle => 'Customize a aparência do aplicativo';
+
+  @override
+  String get changeLanguage => 'Mudar Idioma';
+
+  @override
+  String get changeLanguageSubtitle => 'Alterar o idioma do aplicativo';
+
+  @override
+  String get developmentTools => 'Ferramentas de Desenvolvimento';
+
+  @override
+  String get database => 'Banco de Dados';
+
+  @override
+  String get resetDatabase => 'Redefinir Banco de Dados';
+
+  @override
+  String get resetDatabaseSubtitle => 'Apaga todo o banco de dados';
+
+  @override
+  String get databaseInformation => 'Informações do Banco de Dados';
+
+  @override
+  String get recordsPerTable => 'Registros por tabela:';
+
+  @override
+  String tableData(Object tableName) {
+    return 'Dados da tabela: $tableName';
+  }
+
+  @override
+  String get databaseInfoSubtitle =>
+      'Visualizar tabelas e entradas no banco de dados';
+
+  @override
+  String get reloadInterface => 'Recarregar Interface';
+
+  @override
+  String get reloadInterfaceSubtitle =>
+      'Limpa os dados em cache e recarrega todos os provedores';
+
+  @override
   String get authentication => 'Autenticação';
+
+  @override
+  String get account => 'Conta';
 
   @override
   String get email => 'E-mail';
@@ -51,29 +105,54 @@ class AppLocalizationsPt extends AppLocalizations {
   String get logOut => 'Sair';
 
   @override
+  String get deleteAccountRequest => 'Solicitar exclusão de conta';
+
+  @override
   String get accountCreationPrefix => 'Não tem uma conta? ';
 
   @override
   String get accountCreationSuffix => 'Registre-se.';
 
   @override
+  String get createNewAccount => 'Criar Nova Conta';
+
+  @override
+  String get joinAppDescription =>
+      'Junte-se ao CORDIS, armazene, compartilhe e acesse suas músicas.';
+
+  @override
+  String get alreadyHaveAccount => 'Já tem uma conta? ';
+
+  @override
   String get forgotPassword => 'Esqueceu a Senha?';
+
+  @override
+  String get changePassword => 'Alterar Senha';
 
   @override
   String get forgotPasswordSuffix =>
       'Por favor, tente novamente ou solicite uma nova.';
 
   @override
+  String get showPassword => 'Mostrar Senha';
+
+  @override
+  String get hidePassword => 'Ocultar Senha';
+
+  @override
+  String get confirmPassword => 'Confirmar Senha';
+
+  @override
   String get user => 'Usuário';
 
   @override
-  String get username => 'Username';
+  String get username => 'Nome de Usuário';
 
   @override
-  String get country => 'Country';
+  String get country => 'País';
 
   @override
-  String get timezone => 'Timezone';
+  String get timezone => 'Fuso Horário';
 
   @override
   String get guest => 'Convidado';
@@ -301,52 +380,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get item => 'item';
-
-  @override
-  String get theme => 'Tema';
-
-  @override
-  String get themeSubtitle => 'Customize a aparência do aplicativo';
-
-  @override
-  String get changeLanguage => 'Mudar Idioma';
-
-  @override
-  String get changeLanguageSubtitle => 'Alterar o idioma do aplicativo';
-
-  @override
-  String get developmentTools => 'Ferramentas de Desenvolvimento';
-
-  @override
-  String get database => 'Banco de Dados';
-
-  @override
-  String get resetDatabase => 'Redefinir Banco de Dados';
-
-  @override
-  String get resetDatabaseSubtitle => 'Apaga todo o banco de dados';
-
-  @override
-  String get databaseInformation => 'Informações do Banco de Dados';
-
-  @override
-  String get recordsPerTable => 'Registros por tabela:';
-
-  @override
-  String tableData(Object tableName) {
-    return 'Dados da tabela: $tableName';
-  }
-
-  @override
-  String get databaseInfoSubtitle =>
-      'Visualizar tabelas e entradas no banco de dados';
-
-  @override
-  String get reloadInterface => 'Recarregar Interface';
-
-  @override
-  String get reloadInterfaceSubtitle =>
-      'Limpa os dados em cache e recarrega todos os provedores';
 
   @override
   String get role => 'Função';

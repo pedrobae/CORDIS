@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/routes/app_routes.dart';
+import 'package:cordis/screens/user/register_screen.dart';
 import 'package:cordis/screens/user/share_code_screen.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
@@ -281,7 +282,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(color: colorScheme.onSurfaceVariant),
                     ),
                     GestureDetector(
-                      onTap: () => Navigator.of(context).pushNamed('/signup'),
+                      onTap: () => Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const RegisterScreen(),
+                        ),
+                      ),
                       child: Text(
                         AppLocalizations.of(context)!.accountCreationSuffix,
                         style: TextStyle(

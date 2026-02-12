@@ -12,6 +12,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'CORDIS';
 
   @override
+  String appVersion(Object version) {
+    return 'Version: $version';
+  }
+
+  @override
   String get newHeart => 'New Heart Music Ministries';
 
   @override
@@ -33,7 +38,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get current => 'Current';
 
   @override
+  String get theme => 'Theme';
+
+  @override
+  String get themeSubtitle => 'Customize the appearance of the app';
+
+  @override
+  String get changeLanguage => 'Change Language';
+
+  @override
+  String get changeLanguageSubtitle => 'Change the application language';
+
+  @override
+  String get developmentTools => 'Development Tools';
+
+  @override
+  String get database => 'Database';
+
+  @override
+  String get resetDatabase => 'Reset Database';
+
+  @override
+  String get resetDatabaseSubtitle => 'Wipes the entire database';
+
+  @override
+  String get databaseInformation => 'Database Information';
+
+  @override
+  String get recordsPerTable => 'Records per Table';
+
+  @override
+  String tableData(Object tableName) {
+    return 'Table: $tableName';
+  }
+
+  @override
+  String get databaseInfoSubtitle => 'View tables and entries in the database';
+
+  @override
+  String get reloadInterface => 'Reload Interface';
+
+  @override
+  String get reloadInterfaceSubtitle =>
+      'Clears cached data and reloads all providers';
+
+  @override
   String get authentication => 'Authentication';
+
+  @override
+  String get account => 'Account';
 
   @override
   String get email => 'Email';
@@ -51,16 +104,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logOut => 'Sign Out';
 
   @override
+  String get deleteAccountRequest => 'Request account deletion';
+
+  @override
   String get accountCreationPrefix => 'New User? ';
 
   @override
   String get accountCreationSuffix => 'Sign Up';
 
   @override
+  String get createNewAccount => 'Create New Account';
+
+  @override
+  String get joinAppDescription =>
+      'Join CORDIS, store, share and access your songs.';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
+
+  @override
   String get forgotPassword => 'Forgot Password?';
 
   @override
+  String get changePassword => 'Change Password';
+
+  @override
   String get forgotPasswordSuffix => 'Please try again or Request a new one.';
+
+  @override
+  String get showPassword => 'Show Password';
+
+  @override
+  String get hidePassword => 'Hide Password';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
 
   @override
   String get user => 'User';
@@ -300,51 +378,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get item => 'item';
-
-  @override
-  String get theme => 'Theme';
-
-  @override
-  String get themeSubtitle => 'Customize the appearance of the app';
-
-  @override
-  String get changeLanguage => 'Change Language';
-
-  @override
-  String get changeLanguageSubtitle => 'Change the application language';
-
-  @override
-  String get developmentTools => 'Development Tools';
-
-  @override
-  String get database => 'Database';
-
-  @override
-  String get resetDatabase => 'Reset Database';
-
-  @override
-  String get resetDatabaseSubtitle => 'Wipes the entire database';
-
-  @override
-  String get databaseInformation => 'Database Information';
-
-  @override
-  String get recordsPerTable => 'Records per Table';
-
-  @override
-  String tableData(Object tableName) {
-    return 'Table: $tableName';
-  }
-
-  @override
-  String get databaseInfoSubtitle => 'View tables and entries in the database';
-
-  @override
-  String get reloadInterface => 'Reload Interface';
-
-  @override
-  String get reloadInterfaceSubtitle =>
-      'Clears cached data and reloads all providers';
 
   @override
   String get role => 'Role';

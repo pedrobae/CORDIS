@@ -104,6 +104,12 @@ abstract class AppLocalizations {
   /// **'CORDIS'**
   String get appName;
 
+  /// App version label
+  ///
+  /// In pt, this message translates to:
+  /// **'Versão: {version}'**
+  String appVersion(Object version);
+
   /// Company name
   ///
   /// In pt, this message translates to:
@@ -146,11 +152,101 @@ abstract class AppLocalizations {
   /// **'Atual'**
   String get current;
 
+  /// Theme field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Tema'**
+  String get theme;
+
+  /// Subtitle for theme settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Customize a aparência do aplicativo'**
+  String get themeSubtitle;
+
+  /// Change language field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar Idioma'**
+  String get changeLanguage;
+
+  /// Subtitle for change language settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterar o idioma do aplicativo'**
+  String get changeLanguageSubtitle;
+
+  /// Development tools section title
+  ///
+  /// In pt, this message translates to:
+  /// **'Ferramentas de Desenvolvimento'**
+  String get developmentTools;
+
+  /// Database section title
+  ///
+  /// In pt, this message translates to:
+  /// **'Banco de Dados'**
+  String get database;
+
+  /// Reset database dangerous action title
+  ///
+  /// In pt, this message translates to:
+  /// **'Redefinir Banco de Dados'**
+  String get resetDatabase;
+
+  /// Subtitle for reset database dangerous action
+  ///
+  /// In pt, this message translates to:
+  /// **'Apaga todo o banco de dados'**
+  String get resetDatabaseSubtitle;
+
+  /// Database information title
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações do Banco de Dados'**
+  String get databaseInformation;
+
+  /// Label for records per table in database information
+  ///
+  /// In pt, this message translates to:
+  /// **'Registros por tabela:'**
+  String get recordsPerTable;
+
+  /// Title for table data screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados da tabela: {tableName}'**
+  String tableData(Object tableName);
+
+  /// Subtitle for database information section
+  ///
+  /// In pt, this message translates to:
+  /// **'Visualizar tabelas e entradas no banco de dados'**
+  String get databaseInfoSubtitle;
+
+  /// Reload interface dangerous action title
+  ///
+  /// In pt, this message translates to:
+  /// **'Recarregar Interface'**
+  String get reloadInterface;
+
+  /// Subtitle for reload interface dangerous action
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpa os dados em cache e recarrega todos os provedores'**
+  String get reloadInterfaceSubtitle;
+
   /// Authentication related messages
   ///
   /// In pt, this message translates to:
   /// **'Autenticação'**
   String get authentication;
+
+  /// Account related messages
+  ///
+  /// In pt, this message translates to:
+  /// **'Conta'**
+  String get account;
 
   /// Email field label
   ///
@@ -182,6 +278,12 @@ abstract class AppLocalizations {
   /// **'Sair'**
   String get logOut;
 
+  /// Delete account request button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Solicitar exclusão de conta'**
+  String get deleteAccountRequest;
+
   /// Prefix text for account creation prompt
   ///
   /// In pt, this message translates to:
@@ -194,17 +296,59 @@ abstract class AppLocalizations {
   /// **'Registre-se.'**
   String get accountCreationSuffix;
 
+  /// Create new account button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar Nova Conta'**
+  String get createNewAccount;
+
+  /// Description for joining the app
+  ///
+  /// In pt, this message translates to:
+  /// **'Junte-se ao CORDIS, armazene, compartilhe e acesse suas músicas.'**
+  String get joinAppDescription;
+
+  /// Prompt for users who already have an account
+  ///
+  /// In pt, this message translates to:
+  /// **'Já tem uma conta? '**
+  String get alreadyHaveAccount;
+
   /// Forgot password link label
   ///
   /// In pt, this message translates to:
   /// **'Esqueceu a Senha?'**
   String get forgotPassword;
 
+  /// Change password button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterar Senha'**
+  String get changePassword;
+
   /// Suffix text for forgot password message
   ///
   /// In pt, this message translates to:
   /// **'Por favor, tente novamente ou solicite uma nova.'**
   String get forgotPasswordSuffix;
+
+  /// Tooltip for show password action
+  ///
+  /// In pt, this message translates to:
+  /// **'Mostrar Senha'**
+  String get showPassword;
+
+  /// Tooltip for hide password action
+  ///
+  /// In pt, this message translates to:
+  /// **'Ocultar Senha'**
+  String get hidePassword;
+
+  /// Confirm password field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar Senha'**
+  String get confirmPassword;
 
   /// User related messages
   ///
@@ -215,19 +359,19 @@ abstract class AppLocalizations {
   /// Username field label
   ///
   /// In pt, this message translates to:
-  /// **'Username'**
+  /// **'Nome de Usuário'**
   String get username;
 
   /// Country field label
   ///
   /// In pt, this message translates to:
-  /// **'Country'**
+  /// **'País'**
   String get country;
 
   /// Timezone field label
   ///
   /// In pt, this message translates to:
-  /// **'Timezone'**
+  /// **'Fuso Horário'**
   String get timezone;
 
   /// Guest user label
@@ -661,90 +805,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'item'**
   String get item;
-
-  /// Theme field label
-  ///
-  /// In pt, this message translates to:
-  /// **'Tema'**
-  String get theme;
-
-  /// Subtitle for theme settings
-  ///
-  /// In pt, this message translates to:
-  /// **'Customize a aparência do aplicativo'**
-  String get themeSubtitle;
-
-  /// Change language field label
-  ///
-  /// In pt, this message translates to:
-  /// **'Mudar Idioma'**
-  String get changeLanguage;
-
-  /// Subtitle for change language settings
-  ///
-  /// In pt, this message translates to:
-  /// **'Alterar o idioma do aplicativo'**
-  String get changeLanguageSubtitle;
-
-  /// Development tools section title
-  ///
-  /// In pt, this message translates to:
-  /// **'Ferramentas de Desenvolvimento'**
-  String get developmentTools;
-
-  /// Database section title
-  ///
-  /// In pt, this message translates to:
-  /// **'Banco de Dados'**
-  String get database;
-
-  /// Reset database dangerous action title
-  ///
-  /// In pt, this message translates to:
-  /// **'Redefinir Banco de Dados'**
-  String get resetDatabase;
-
-  /// Subtitle for reset database dangerous action
-  ///
-  /// In pt, this message translates to:
-  /// **'Apaga todo o banco de dados'**
-  String get resetDatabaseSubtitle;
-
-  /// Database information title
-  ///
-  /// In pt, this message translates to:
-  /// **'Informações do Banco de Dados'**
-  String get databaseInformation;
-
-  /// Label for records per table in database information
-  ///
-  /// In pt, this message translates to:
-  /// **'Registros por tabela:'**
-  String get recordsPerTable;
-
-  /// Title for table data screen
-  ///
-  /// In pt, this message translates to:
-  /// **'Dados da tabela: {tableName}'**
-  String tableData(Object tableName);
-
-  /// Subtitle for database information section
-  ///
-  /// In pt, this message translates to:
-  /// **'Visualizar tabelas e entradas no banco de dados'**
-  String get databaseInfoSubtitle;
-
-  /// Reload interface dangerous action title
-  ///
-  /// In pt, this message translates to:
-  /// **'Recarregar Interface'**
-  String get reloadInterface;
-
-  /// Subtitle for reload interface dangerous action
-  ///
-  /// In pt, this message translates to:
-  /// **'Limpa os dados em cache e recarrega todos os provedores'**
-  String get reloadInterfaceSubtitle;
 
   /// User role label
   ///

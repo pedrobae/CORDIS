@@ -2,6 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/settings_provider.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -47,6 +48,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Consumer<NavigationProvider>(
       builder: (context, navProvider, child) {
         return Scaffold(
@@ -60,7 +64,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           body: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 16,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 LabeledTextField(
                   label: AppLocalizations.of(context)!.username,
@@ -74,10 +79,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   label: AppLocalizations.of(context)!.language,
                   controller: languageController,
                 ),
-                const SizedBox(height: 16),
                 LabeledTextField(
                   label: AppLocalizations.of(context)!.timezone,
                   controller: timezoneController,
+                ),
+                Spacer(),
+                FilledTextButton(
+                  text: AppLocalizations.of(context)!.save,
+                  isDark: true,
+                  onPressed: () {
+                    // TODO:user - Handle save action
+                  },
+                ),
+                FilledTextButton(
+                  text: AppLocalizations.of(context)!.changePassword,
+                  onPressed: () {
+                    // TODO:user - Handle change password action
+                  },
+                ),
+                TextButton(
+                  onPressed: () {
+                    // TODO:user - Handle account deletion
+                  },
+                  child: Text(
+                    AppLocalizations.of(context)!.deleteAccountRequest,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.error,
+                    ),
+                  ),
+                ),
+                Text(
+                  // TODO:appVersion - Show app version and other info
+                  AppLocalizations.of(context)!.appVersion('TODO'),
+                  textAlign: TextAlign.center,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.surfaceContainerLow,
+                  ),
                 ),
               ],
             ),
