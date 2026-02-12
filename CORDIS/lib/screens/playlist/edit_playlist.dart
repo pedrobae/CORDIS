@@ -4,6 +4,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
+import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -90,26 +91,12 @@ class _EditPlaylistScreenState extends State<EditPlaylistScreen> {
                     ],
                   ),
                   // FORM
-                  Column(
-                    spacing: 8,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.playlistNameLabel,
-                        style: theme.textTheme.titleMedium!.copyWith(
-                          fontSize: 15,
-                        ),
-                      ),
-                      TextField(
-                        controller: playlistNameController,
-                        decoration: InputDecoration(
-                          hintText: AppLocalizations.of(
-                            context,
-                          )!.playlistNameHint,
-                        ),
-                      ),
-                    ],
+                  LabeledTextField(
+                    label: AppLocalizations.of(context)!.playlistNameLabel,
+                    controller: playlistNameController,
+                    hint: AppLocalizations.of(context)!.playlistNameHint,
                   ),
+
                   // ACTIONS
                   Column(
                     spacing: 16,

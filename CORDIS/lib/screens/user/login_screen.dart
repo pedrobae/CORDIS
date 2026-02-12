@@ -6,6 +6,7 @@ import 'package:cordis/routes/app_routes.dart';
 import 'package:cordis/screens/user/register_screen.dart';
 import 'package:cordis/screens/user/share_code_screen.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
+import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:provider/provider.dart';
@@ -64,160 +65,68 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                Column(
-                  spacing: 8,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      spacing: 2,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.email,
-                          style: textTheme.titleMedium,
-                        ),
-                        Text(
-                          '*',
-                          style: textTheme.titleMedium?.copyWith(
-                            color: colorScheme.error,
-                          ),
-                        ),
-                      ],
-                    ),
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      autofocus: true,
-                      maxLines: 1,
-                      decoration: InputDecoration(
-                        hint: Text(
-                          AppLocalizations.of(context)!.email,
-                          style: textTheme.titleMedium?.copyWith(
-                            color: colorScheme.shadow,
-                          ),
-                        ),
-                        prefixIcon: Icon(
-                          Icons.email,
-                          color: colorScheme.shadow,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(0),
-                          borderSide: BorderSide(
-                            color: colorScheme.surfaceContainerLowest,
-                            width: 1.2,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(0),
-                          borderSide: BorderSide(
-                            color: colorScheme.surfaceContainerLowest,
-                            width: 2,
-                          ),
-                        ),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ),
-                  ],
+
+                // EMAIL
+                LabeledTextField(
+                  controller: _emailController,
+                  label: AppLocalizations.of(context)!.email,
+                  prefixIcon: Icon(Icons.email, color: colorScheme.shadow),
                 ),
-                Column(
-                  spacing: 8,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      spacing: 2,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.password,
-                          style: textTheme.titleMedium,
-                        ),
-                        Text(
-                          '*',
-                          style: textTheme.titleMedium?.copyWith(
-                            color: colorScheme.error,
-                          ),
-                        ),
-                      ],
+
+                // PASSWORD
+                LabeledTextField(
+                  label: AppLocalizations.of(context)!.password,
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  prefixIcon: Icon(Icons.lock, color: colorScheme.shadow),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: colorScheme.shadow,
                     ),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      textInputAction: TextInputAction.done,
-                      maxLines: 1,
-                      decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context)!.password,
-                        hintStyle: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.shadow,
-                        ),
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        prefixIcon: Icon(Icons.lock, color: colorScheme.shadow),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: colorScheme.shadow,
-                          ),
-                          onPressed: _toggleObscure,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(0),
-                          borderSide: BorderSide(
-                            color: colorScheme.surfaceContainerLowest,
-                            width: 1.2,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(0),
-                          borderSide: BorderSide(
-                            color: colorScheme.surfaceContainerLowest,
-                            width: 2,
-                          ),
-                        ),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ),
-                    Center(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        spacing: 0,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              // TODO:auth - ResetPassword
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  backgroundColor: Colors.amberAccent,
-                                  content: Text(
-                                    'Funcionalidade em desenvolvimento,',
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                ),
-                              );
-                              // Navigator.of(context).push(
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return PasswordResetScreen(
-                              //         loginEmail: _emailController.text,
-                              //       );
-                              //     },
-                              //   ),
-                              // );
-                            },
-                            child: Text(
-                              AppLocalizations.of(context)!.forgotPassword,
-                              style: TextStyle(
-                                color: colorScheme.primary,
-                                fontWeight: FontWeight.bold,
+                    onPressed: _toggleObscure,
+                  ),
+                ),
+                Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 0,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          // TODO:auth - ResetPassword
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              backgroundColor: Colors.amberAccent,
+                              content: Text(
+                                'Funcionalidade em desenvolvimento,',
+                                style: TextStyle(color: Colors.black),
                               ),
                             ),
+                          );
+                          // Navigator.of(context).push(
+                          //   MaterialPageRoute(
+                          //     builder: (context) {
+                          //       return PasswordResetScreen(
+                          //         loginEmail: _emailController.text,
+                          //       );
+                          //     },
+                          //   ),
+                          // );
+                        },
+                        child: Text(
+                          AppLocalizations.of(context)!.forgotPassword,
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
                           ),
-                          Text(
-                            AppLocalizations.of(context)!.forgotPasswordSuffix,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                      Text(AppLocalizations.of(context)!.forgotPasswordSuffix),
+                    ],
+                  ),
                 ),
                 if (authProvider.isLoading)
                   const Padding(
