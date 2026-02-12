@@ -144,6 +144,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final dbHelper = DatabaseHelper();
       await dbHelper.resetDatabase();
 
+      final cacheService = CacheService();
+      await cacheService.clearAllCaches();
+
       // Check if widget is still mounted before using context
       if (mounted) {
         await context.read<CloudVersionProvider>().loadVersions(

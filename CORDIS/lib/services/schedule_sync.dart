@@ -5,7 +5,6 @@ import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
-import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/repositories/cloud/schedule_repository.dart';
 import 'package:cordis/repositories/local/flow_item_repository.dart';
 import 'package:cordis/repositories/local/cipher_repository.dart';
@@ -13,6 +12,7 @@ import 'package:cordis/repositories/local/playlist_repository.dart';
 import 'package:cordis/repositories/local/schedule_repository.dart';
 import 'package:cordis/repositories/local/section_repository.dart';
 import 'package:cordis/repositories/local/user_repository.dart';
+import 'package:cordis/repositories/local/version_repository.dart';
 import 'package:flutter/material.dart';
 
 class ScheduleSyncService {
@@ -22,7 +22,7 @@ class ScheduleSyncService {
   final _userRepo = UserRepository();
   final _flowRepo = FlowItemRepository();
   final _cipherRepo = CipherRepository();
-  final _versionRepo = LocalVersionProvider();
+  final _versionRepo = LocalVersionRepository();
   final _sectionRepo = SectionRepository();
 
   /// Sync owner's schedule to SQLite, so it can be accessed offline and edited
@@ -81,8 +81,8 @@ class ScheduleSyncService {
             await _cipherRepo.updateCipher(mergedCipher);
           }
 
-          // Ensure version exists and is up to date
-          final existingVersion = await _versionRepo.getVersionByFirebaseId(
+          // Ensure version exists on SQLite and is up to date
+          final existingVersion = await _versionRepo.getVersionWithFirebaseId(
             versionDto.firebaseId!,
           );
 
@@ -146,7 +146,9 @@ class ScheduleSyncService {
     for (var item in domainPlaylist.items) {
       switch (item.type) {
         case PlaylistItemType.version:
-          final version = (await _versionRepo.getVersion(item.contentId!));
+          final version = (await _versionRepo.getVersionWithId(
+            item.contentId!,
+          ));
 
           if (version == null) break;
           final cipher = (await _cipherRepo.getCipherById(version.cipherId));
