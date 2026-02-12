@@ -7,8 +7,8 @@ import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/ciphers/editor/metadata.dart/add_tag_sheet.dart';
 import 'package:cordis/widgets/ciphers/editor/metadata.dart/select_key_sheet.dart';
-import 'package:cordis/widgets/duration_picker.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/common/duration_picker.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

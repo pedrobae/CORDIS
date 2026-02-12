@@ -18,7 +18,7 @@ import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/schedule/edit_schedule.dart';
 import 'package:cordis/screens/schedule/play_schedule.dart';
 import 'package:cordis/utils/date_utils.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

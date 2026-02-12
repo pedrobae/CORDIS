@@ -2,7 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/create_edit/sheet_add_user.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

@@ -6,6 +6,7 @@ class SettingsProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
   ThemeColor _themeColor = ThemeColor.green;
   Locale _locale = const Locale('pt', 'BR');
+  String _timeZone = 'UTC';
   bool _notificationsEnabled = true;
   bool _reminderNotifications = true;
 
@@ -13,6 +14,7 @@ class SettingsProvider extends ChangeNotifier {
   ThemeMode get themeMode => _themeMode;
   ThemeColor get themeColor => _themeColor;
   Locale get locale => _locale;
+  String get timeZone => _timeZone;
   bool get notificationsEnabled => _notificationsEnabled;
   bool get reminderNotifications => _reminderNotifications;
 
@@ -21,6 +23,7 @@ class SettingsProvider extends ChangeNotifier {
     _themeMode = SettingsService.getThemeMode();
     _themeColor = SettingsService.getThemeColor();
     _locale = SettingsService.getLocale();
+    _timeZone = SettingsService.getTimeZone();
     _notificationsEnabled = SettingsService.getNotificationsEnabled();
     _reminderNotifications = SettingsService.getReminderNotifications();
     notifyListeners();

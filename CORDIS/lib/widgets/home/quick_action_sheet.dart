@@ -6,7 +6,7 @@ import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/playlist/edit_playlist.dart';
 import 'package:cordis/screens/schedule/create_new_schedule.dart';
 import 'package:cordis/screens/user/share_code_screen.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

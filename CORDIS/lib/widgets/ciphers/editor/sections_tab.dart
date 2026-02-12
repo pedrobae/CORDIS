@@ -4,7 +4,7 @@ import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_palette.dart';
 import 'package:cordis/widgets/ciphers/editor/new_section_sheet.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/section_provider.dart';

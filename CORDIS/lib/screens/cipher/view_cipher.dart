@@ -203,7 +203,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                       icon: const Icon(Icons.tune),
                       onPressed: _showLayoutSettings,
                     ),
-                    if (widget.versionType != VersionType.playlist)
+                    if (widget.versionType == VersionType.local)
                       IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {

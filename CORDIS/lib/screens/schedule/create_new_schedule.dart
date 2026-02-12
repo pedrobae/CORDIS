@@ -4,7 +4,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/screens/playlist/playlist_library.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/create_edit/details_form.dart';
 import 'package:cordis/widgets/schedule/create_edit/roles_users_form.dart';
 import 'package:flutter/material.dart';

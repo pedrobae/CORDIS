@@ -4,7 +4,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/routes/app_routes.dart';
 import 'package:cordis/screens/user/share_code_screen.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:provider/provider.dart';

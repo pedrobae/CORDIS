@@ -3,7 +3,7 @@ import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:cordis/widgets/custom_reorderable_delayed.dart';
+import 'package:cordis/widgets/common/custom_reorderable_delayed.dart';
 import 'package:provider/provider.dart';
 
 class ReorderableStructure extends StatefulWidget {

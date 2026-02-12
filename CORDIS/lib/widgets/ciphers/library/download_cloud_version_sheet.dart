@@ -9,7 +9,7 @@ import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 
 import 'package:flutter/material.dart';
 
@@ -84,7 +84,7 @@ class _DownloadVersionSheetState extends State<DownloadVersionSheet> {
                       children: [
                         Text(
                           AppLocalizations.of(context)!.downloadPlaceholder(
-                            AppLocalizations.of(context)!.version,
+                            AppLocalizations.of(context)!.cipher,
                           ),
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,

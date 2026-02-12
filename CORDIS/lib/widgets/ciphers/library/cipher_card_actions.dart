@@ -4,7 +4,7 @@ import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
-import 'package:cordis/widgets/delete_confirmation.dart';
+import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

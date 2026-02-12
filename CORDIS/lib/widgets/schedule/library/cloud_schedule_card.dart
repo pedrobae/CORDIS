@@ -10,8 +10,8 @@ import 'package:cordis/providers/user_provider.dart';
 
 import 'package:cordis/utils/date_utils.dart';
 
-import 'package:cordis/widgets/delete_confirmation.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/common/delete_confirmation.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/library/duplicate_schedule_sheet.dart';
 
 import 'package:flutter/material.dart';

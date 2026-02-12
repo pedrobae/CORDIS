@@ -7,8 +7,8 @@ import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/screens/schedule/view_schedule.dart';
 import 'package:cordis/utils/date_utils.dart';
-import 'package:cordis/widgets/delete_confirmation.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/common/delete_confirmation.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/library/duplicate_schedule_sheet.dart';
 import 'package:cordis/widgets/schedule/library/share_schedule_sheet.dart';
 import 'package:flutter/material.dart';
@@ -84,6 +84,7 @@ class ScheduleCard extends StatelessWidget {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 8,
                 children: [
                   Row(
                     children: [
@@ -191,7 +192,7 @@ class ScheduleCard extends StatelessWidget {
                     ],
                   ),
                   // BOTTOM BUTTONS
-                  //vuew
+                  //view
                   FilledTextButton(
                     isDark: true,
                     isDense: true,

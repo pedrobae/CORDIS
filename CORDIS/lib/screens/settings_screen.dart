@@ -18,8 +18,8 @@ import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 
-import 'package:cordis/widgets/delete_confirmation.dart';
-import 'package:cordis/widgets/filled_text_button.dart';
+import 'package:cordis/widgets/common/delete_confirmation.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';

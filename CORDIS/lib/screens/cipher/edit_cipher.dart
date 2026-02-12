@@ -393,8 +393,9 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           navigationProvider.pop();
           break;
         case VersionType.cloud:
-          // TODO:cloud - Save cloud version edits/upload, decide
-          break;
+          throw Exception(
+            'Cannot save directly a cloud version. Please download to create a local copy of this version.',
+          );
 
         case VersionType.local:
           await cipherProvider.saveCipher(widget.cipherID!);

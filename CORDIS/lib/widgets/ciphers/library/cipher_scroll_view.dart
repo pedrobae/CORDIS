@@ -3,7 +3,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/ciphers/library/cipher_card.dart';
-import 'package:cordis/widgets/ciphers/library/cloud_cipher_card.dart';
+import 'package:cordis/widgets/ciphers/library/cipher_card_cloud.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

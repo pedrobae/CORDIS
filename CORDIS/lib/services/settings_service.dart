@@ -7,6 +7,7 @@ class SettingsService {
   static const String _keyThemeMode = 'theme_mode';
   static const String _keyThemeColor = 'theme_color';
   static const String _keyLocale = 'locale';
+  static const String _keyTimeZone = 'time_zone';
 
   // Layout Settings Keys
   static const String _keyFontSize = 'layout_font_size';
@@ -20,7 +21,7 @@ class SettingsService {
   static const String _keyShowTransitions = 'layout_show_transitions';
   static const String _keyShowTextSections = 'layout_show_text_sections';
 
-  // Notification Settnigs Keys
+  // Notification Settings Keys
   static const String _keyNotificationsEnabled = 'notifications_enabled';
   static const String _keyReminderNotifications = 'reminder_notifications';
 
@@ -81,6 +82,16 @@ class SettingsService {
     } else {
       return Locale(parts[0]);
     }
+  }
+
+  /// Save time zone
+  static Future<void> setTimeZone(String timeZone) async {
+    await _preferences.setString(_keyTimeZone, timeZone);
+  }
+
+  /// Get time zone
+  static String getTimeZone() {
+    return _preferences.getString(_keyTimeZone) ?? 'UTC';
   }
 
   // === LAYOUT SETTINGS ===

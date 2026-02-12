@@ -4,7 +4,7 @@ import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
-import 'package:cordis/widgets/duration_picker.dart';
+import 'package:cordis/widgets/common/duration_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
