@@ -66,6 +66,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get user => 'User';
 
   @override
+  String get username => 'Username';
+
+  @override
+  String get country => 'Country';
+
+  @override
+  String get timezone => 'Timezone';
+
+  @override
   String get guest => 'Guest';
 
   @override

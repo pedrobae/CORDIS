@@ -2,6 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/settings_provider.dart';
+import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -61,32 +62,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextField(
+                LabeledTextField(
+                  label: AppLocalizations.of(context)!.username,
                   controller: userNameController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.username,
-                  ),
                 ),
-                const SizedBox(height: 16),
-                TextField(
+                LabeledTextField(
+                  label: AppLocalizations.of(context)!.country,
                   controller: countryController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.country,
-                  ),
                 ),
-                const SizedBox(height: 16),
-                TextField(
+                LabeledTextField(
+                  label: AppLocalizations.of(context)!.language,
                   controller: languageController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.language,
-                  ),
                 ),
                 const SizedBox(height: 16),
-                TextField(
+                LabeledTextField(
+                  label: AppLocalizations.of(context)!.timezone,
                   controller: timezoneController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.timezone,
-                  ),
                 ),
               ],
             ),

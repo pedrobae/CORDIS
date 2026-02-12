@@ -9,6 +9,7 @@ import 'package:cordis/widgets/ciphers/editor/metadata.dart/add_tag_sheet.dart';
 import 'package:cordis/widgets/ciphers/editor/metadata.dart/select_key_sheet.dart';
 import 'package:cordis/widgets/common/duration_picker.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
+import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -158,29 +159,22 @@ class _MetadataTabState extends State<MetadataTab> {
     return controllers[field]!;
   }
 
-  Text _getLabel(InfoField field) {
-    return Text(
-      switch (field) {
-        InfoField.title => AppLocalizations.of(context)!.title,
-        InfoField.author => AppLocalizations.of(context)!.author,
-        InfoField.versionName => AppLocalizations.of(context)!.versionName,
-        InfoField.bpm => AppLocalizations.of(context)!.bpm,
-        InfoField.duration => AppLocalizations.of(context)!.duration,
-        InfoField.key => AppLocalizations.of(context)!.musicKey,
-        InfoField.language => AppLocalizations.of(context)!.language,
-        InfoField.tags => AppLocalizations.of(
-          context,
-        )!.pluralPlaceholder(AppLocalizations.of(context)!.tag),
-      },
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        color: Theme.of(context).colorScheme.onSurface,
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
-      ),
-    );
+  String _getLabel(InfoField field) {
+    return switch (field) {
+      InfoField.title => AppLocalizations.of(context)!.title,
+      InfoField.author => AppLocalizations.of(context)!.author,
+      InfoField.versionName => AppLocalizations.of(context)!.versionName,
+      InfoField.bpm => AppLocalizations.of(context)!.bpm,
+      InfoField.duration => AppLocalizations.of(context)!.duration,
+      InfoField.key => AppLocalizations.of(context)!.musicKey,
+      InfoField.language => AppLocalizations.of(context)!.language,
+      InfoField.tags => AppLocalizations.of(
+        context,
+      )!.pluralPlaceholder(AppLocalizations.of(context)!.tag),
+    };
   }
 
-  String _getHintText(InfoField field) {
+  String _getHint(InfoField field) {
     return switch (field) {
       InfoField.title => AppLocalizations.of(context)!.titleHint,
       InfoField.author => AppLocalizations.of(context)!.authorHint,
@@ -193,7 +187,8 @@ class _MetadataTabState extends State<MetadataTab> {
     };
   }
 
-  bool _isEnabled(SelectionProvider selectionProvider, InfoField field) {
+  bool _isEnabled(InfoField field) {
+    final selectionProvider = context.read<SelectionProvider>();
     switch (field) {
       case InfoField.title:
       case InfoField.versionName:
@@ -230,12 +225,9 @@ class _MetadataTabState extends State<MetadataTab> {
               children: [
                 for (var field in InfoField.values)
                   switch (field) {
-                    InfoField.duration => _buildDurationPicker(
-                      context: context,
-                      cipherProvider: cipherProvider,
-                      versionProvider: versionProvider,
-                      cloudVersionProvider: cloudVersionProvider,
-                      field: field,
+                    InfoField.duration => DurationPickerField(
+                      controller: _getController(field),
+                      label: _getLabel(field),
                     ),
                     InfoField.tags => _buildTags(
                       context: context,
@@ -244,13 +236,11 @@ class _MetadataTabState extends State<MetadataTab> {
                       cloudVersionProvider: cloudVersionProvider,
                       field: field,
                     ),
-                    InfoField.bpm => _buildTextField(
-                      context: context,
-                      cipherProvider: cipherProvider,
-                      versionProvider: versionProvider,
-                      cloudVersionProvider: cloudVersionProvider,
-                      field: field,
-                      maxLines: 1,
+                    InfoField.bpm => LabeledTextField(
+                      label: _getLabel(field),
+                      hint: _getHint(field),
+                      controller: _getController(field),
+                      isEnabled: _isEnabled(field),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return null;
@@ -270,13 +260,10 @@ class _MetadataTabState extends State<MetadataTab> {
                       versionProvider: versionProvider,
                       field: field,
                     ),
-                    _ => _buildTextField(
-                      context: context,
-                      cipherProvider: cipherProvider,
-                      versionProvider: versionProvider,
-                      cloudVersionProvider: cloudVersionProvider,
-                      field: field,
-                      maxLines: 1,
+                    _ => LabeledTextField(
+                      label: _getLabel(field),
+                      hint: _getHint(field),
+                      controller: _getController(field),
                     ),
                   },
               ],
@@ -298,7 +285,12 @@ class _MetadataTabState extends State<MetadataTab> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        _getLabel(field),
+        Text(
+          _getLabel(field),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         GestureDetector(
           onTap: () {
             showModalBottomSheet(
@@ -351,51 +343,6 @@ class _MetadataTabState extends State<MetadataTab> {
     );
   }
 
-  Widget _buildTextField({
-    required BuildContext context,
-    required CipherProvider cipherProvider,
-    required LocalVersionProvider versionProvider,
-    required CloudVersionProvider cloudVersionProvider,
-    required InfoField field,
-    String? Function(String?)? validator,
-    int? maxLines = 1,
-  }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
-      children: [
-        _getLabel(field),
-        TextFormField(
-          validator: validator,
-          onChanged: (_) => _cacheUpdates(field),
-          autovalidateMode: AutovalidateMode.onUnfocus,
-          controller: _getController(field),
-          maxLines: maxLines,
-          enabled: _isEnabled(context.read<SelectionProvider>(), field),
-          decoration: InputDecoration(
-            visualDensity: VisualDensity.compact,
-            hintText: _getHintText(field),
-            hintStyle: TextStyle(color: colorScheme.shadow, fontSize: 16),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(0),
-              borderSide: BorderSide(
-                color: colorScheme.surfaceContainerLowest,
-                width: 1.2,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(0),
-              borderSide: BorderSide(color: colorScheme.primary, width: 2),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildTags({
     required BuildContext context,
     required CipherProvider cipherProvider,
@@ -413,7 +360,10 @@ class _MetadataTabState extends State<MetadataTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _getLabel(field),
+        Text(
+          _getLabel(field),
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+        ),
         SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -456,200 +406,5 @@ class _MetadataTabState extends State<MetadataTab> {
         ),
       ],
     );
-  }
-
-  Widget _buildDurationPicker({
-    required BuildContext context,
-    required CipherProvider cipherProvider,
-    required LocalVersionProvider versionProvider,
-    required CloudVersionProvider cloudVersionProvider,
-    required InfoField field,
-  }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
-      children: [
-        _getLabel(field),
-        GestureDetector(
-          onTap: () async {
-            final initialDuration = _getController(field).text.isNotEmpty
-                ? DateTimeUtils.parseDuration(_getController(field).text)
-                : Duration.zero;
-
-            final duration = await showModalBottomSheet<Duration>(
-              context: context,
-              builder: (context) =>
-                  DurationPicker(initialDuration: initialDuration),
-            );
-
-            if (duration != null) {
-              _getController(field).text = DateTimeUtils.formatDuration(
-                duration,
-              );
-
-              switch (widget.versionType) {
-                case VersionType.cloud:
-                  cloudVersionProvider.cacheUpdates(
-                    widget.versionID!,
-                    duration: duration.inSeconds,
-                  );
-                  break;
-                case VersionType.local:
-                case VersionType.import:
-                case VersionType.playlist:
-                case VersionType.brandNew:
-                  versionProvider.cacheUpdates(
-                    (widget.versionID as int?) ?? -1,
-                    duration: duration,
-                  );
-                  break;
-              }
-            }
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: colorScheme.surfaceContainerLowest,
-                width: 1.2,
-              ),
-              borderRadius: BorderRadius.circular(0),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ListenableBuilder(
-                  listenable: _getController(field),
-                  builder: (context, child) {
-                    return Text(
-                      _getController(field).text.isEmpty
-                          ? AppLocalizations.of(context)!.durationHint
-                          : _getController(field).text,
-                      style: TextStyle(
-                        color: _getController(field).text.isEmpty
-                            ? colorScheme.shadow
-                            : colorScheme.onSurface,
-                        fontSize: 16,
-                      ),
-                    );
-                  },
-                ),
-                Icon(Icons.access_time, color: colorScheme.shadow),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _cacheUpdates(InfoField field) {
-    switch (widget.versionType) {
-      case VersionType.cloud:
-        final cloudVersionProvider = context.read<CloudVersionProvider>();
-        _cacheCloudFieldUpdate(cloudVersionProvider, field);
-        break;
-      case VersionType.local:
-      case VersionType.import:
-      case VersionType.playlist:
-      case VersionType.brandNew:
-        final versionProvider = context.read<LocalVersionProvider>();
-        final cipherProvider = context.read<CipherProvider>();
-        _cacheLocalFieldUpdates(versionProvider, cipherProvider, field);
-        break;
-    }
-  }
-
-  void _cacheCloudFieldUpdate(
-    CloudVersionProvider cloudVersionProvider,
-    InfoField field,
-  ) {
-    switch (field) {
-      case InfoField.title:
-        cloudVersionProvider.cacheUpdates(
-          widget.versionID!,
-          title: _getController(field).text,
-        );
-        break;
-      case InfoField.author:
-        cloudVersionProvider.cacheUpdates(
-          widget.versionID!,
-          author: _getController(field).text,
-        );
-        break;
-      case InfoField.versionName:
-        cloudVersionProvider.cacheUpdates(
-          widget.versionID!,
-          versionName: _getController(field).text,
-        );
-        break;
-      case InfoField.key:
-        // Handled separately in the key selector
-        break;
-      case InfoField.bpm:
-        final bpm = int.tryParse(_getController(field).text) ?? 0;
-        cloudVersionProvider.cacheUpdates(widget.versionID!, bpm: bpm);
-        break;
-      case InfoField.duration:
-        // Handled separately in the duration picker
-        break;
-      case InfoField.language:
-        cloudVersionProvider.cacheUpdates(
-          widget.versionID!,
-          language: _getController(field).text,
-        );
-        break;
-      case InfoField.tags:
-        // THIS CONTROLLER IS NOT USED, ADDING TAGS IS HANDLED BY A BOTTOM SHEET
-        break;
-    }
-  }
-
-  void _cacheLocalFieldUpdates(
-    LocalVersionProvider versionProvider,
-    CipherProvider cipherProvider,
-    InfoField field,
-  ) {
-    switch (field) {
-      case InfoField.title:
-        cipherProvider.cacheUpdates(
-          widget.cipherID!,
-          title: _getController(field).text,
-        );
-        break;
-      case InfoField.author:
-        cipherProvider.cacheUpdates(
-          widget.cipherID!,
-          author: _getController(field).text,
-        );
-        break;
-      case InfoField.versionName:
-        versionProvider.cacheUpdates(
-          widget.versionID,
-          versionName: _getController(field).text,
-        );
-        break;
-      case InfoField.key:
-        // Handled separately in the key selector
-        break;
-      case InfoField.bpm:
-        final bpm = int.tryParse(_getController(field).text) ?? 0;
-        versionProvider.cacheUpdates(widget.versionID, bpm: bpm);
-        break;
-      case InfoField.duration:
-        // Handled separately in the duration picker
-        break;
-      case InfoField.language:
-        cipherProvider.cacheUpdates(
-          widget.cipherID!,
-          language: _getController(field).text,
-        );
-      case InfoField.tags:
-        // THIS CONTROLLER IS NOT USED, ADDING TAGS IS HANDLED BY A BOTTOM SHEET
-        break;
-    }
   }
 }

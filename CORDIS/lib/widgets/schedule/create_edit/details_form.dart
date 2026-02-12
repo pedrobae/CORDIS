@@ -2,6 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/utils/date_time_theme.dart';
+import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -70,9 +71,9 @@ class _ScheduleFormState extends State<ScheduleForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 16,
             children: [
-              _buildFormField(
-                AppLocalizations.of(context)!.scheduleName,
-                widget.nameController,
+              LabeledTextField(
+                label: AppLocalizations.of(context)!.scheduleName,
+                controller: widget.nameController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return AppLocalizations.of(
@@ -83,8 +84,8 @@ class _ScheduleFormState extends State<ScheduleForm> {
                 },
               ),
               _buildDatePickerField(
-                AppLocalizations.of(context)!.date,
-                widget.dateController,
+                label: AppLocalizations.of(context)!.date,
+                controller: widget.dateController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return AppLocalizations.of(context)!.pleaseEnterDate;
@@ -102,9 +103,9 @@ class _ScheduleFormState extends State<ScheduleForm> {
                   return null;
                 },
               ),
-              _buildFormField(
-                AppLocalizations.of(context)!.location,
-                widget.locationController,
+              LabeledTextField(
+                label: AppLocalizations.of(context)!.location,
+                controller: widget.locationController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return AppLocalizations.of(context)!.pleaseEnterLocation;
@@ -112,18 +113,18 @@ class _ScheduleFormState extends State<ScheduleForm> {
                   return null;
                 },
               ),
-              _buildFormField(
-                AppLocalizations.of(
+              LabeledTextField(
+                label: AppLocalizations.of(
                   context,
                 )!.optionalPlaceholder(AppLocalizations.of(context)!.roomVenue),
-                widget.roomVenueController,
+                controller: widget.roomVenueController,
               ),
               if (widget.annotationsController != null)
-                _buildFormField(
-                  AppLocalizations.of(context)!.optionalPlaceholder(
+                LabeledTextField(
+                  label: AppLocalizations.of(context)!.optionalPlaceholder(
                     AppLocalizations.of(context)!.annotations,
                   ),
-                  widget.annotationsController!,
+                  controller: widget.annotationsController!,
                 ),
             ],
           ),
@@ -132,42 +133,9 @@ class _ScheduleFormState extends State<ScheduleForm> {
     );
   }
 
-  Widget _buildFormField(
-    String label,
-    TextEditingController controller, {
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
-      children: [
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
-        ),
-        TextFormField(
-          validator: validator,
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: label,
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.surfaceContainerLowest,
-              ),
-              borderRadius: BorderRadius.circular(0),
-            ),
-            visualDensity: VisualDensity.compact,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDatePickerField(
-    String label,
-    TextEditingController controller, {
+  Widget _buildDatePickerField({
+    required String label,
+    required TextEditingController controller,
     String? Function(String?)? validator,
   }) {
     return Column(

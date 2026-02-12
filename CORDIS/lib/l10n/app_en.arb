@@ -74,6 +74,12 @@
 
   "user": "User",
   "@user": {"description": "User related messages"},
+  "username": "Username",
+  "@username": {"description": "Username field label"},
+  "country": "Country",
+  "@country": {"description": "Country field label"},
+  "timezone": "Timezone",
+  "@timezone": {"description": "Timezone field label"},
   "guest": "Guest",
   "@guest" : {"description": "Guest user label"},
   "name": "Name",

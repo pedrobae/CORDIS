@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 
 class LabeledTextField extends StatelessWidget {
   final String label;
+  final String? hint;
   final TextEditingController controller;
   final String? Function(String?)? validator;
+  final bool isMultiline;
+  final bool isEnabled;
 
   const LabeledTextField({
     super.key,
     required this.label,
+    this.hint,
     required this.controller,
     this.validator,
+    this.isMultiline = false,
+    this.isEnabled = true,
   });
 
   @override
@@ -29,7 +35,7 @@ class LabeledTextField extends StatelessWidget {
           validator: validator,
           controller: controller,
           decoration: InputDecoration(
-            hintText: label,
+            hintText: hint,
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
                 color: Theme.of(context).colorScheme.surfaceContainerLowest,
@@ -38,6 +44,8 @@ class LabeledTextField extends StatelessWidget {
             ),
             visualDensity: VisualDensity.compact,
           ),
+          maxLines: isMultiline ? null : 1,
+          enabled: isEnabled,
         ),
       ],
     );

@@ -67,6 +67,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get user => 'Usuário';
 
   @override
+  String get username => 'Username';
+
+  @override
+  String get country => 'Country';
+
+  @override
+  String get timezone => 'Timezone';
+
+  @override
   String get guest => 'Convidado';
 
   @override

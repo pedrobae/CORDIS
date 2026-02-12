@@ -212,6 +212,24 @@ abstract class AppLocalizations {
   /// **'Usuário'**
   String get user;
 
+  /// Username field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// Country field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Country'**
+  String get country;
+
+  /// Timezone field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Timezone'**
+  String get timezone;
+
   /// Guest user label
   ///
   /// In pt, this message translates to:
