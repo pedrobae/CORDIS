@@ -52,7 +52,11 @@ class DateTimeUtils {
   }
 
   /// Parses a duration string in the format "HH:MM:SS" or "MM:SS" into a Duration object
+  /// Returns Duration.zero if the string is empty
   static Duration parseDuration(String durationStr) {
+    if (durationStr.isEmpty) {
+      return Duration.zero;
+    }
     final parts = durationStr.split(':').map(int.parse).toList();
     if (parts.length == 3) {
       return Duration(hours: parts[0], minutes: parts[1], seconds: parts[2]);

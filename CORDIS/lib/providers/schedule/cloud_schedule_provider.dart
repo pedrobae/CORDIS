@@ -257,6 +257,7 @@ class CloudScheduleProvider extends ChangeNotifier {
   }
 
   Future<bool> joinScheduleWithCode(String shareCode) async {
+    if (_isLoading) return false;
     bool result = false;
     try {
       _isLoading = true;

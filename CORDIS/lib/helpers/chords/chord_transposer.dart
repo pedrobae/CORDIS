@@ -33,7 +33,7 @@ class ChordTransposer extends ChordHelper {
 
   // Calculate the transposed key first, then determine if we should use flats
   String get transposedKey {
-    String tempKey = transpose(originalKey, transposeValue, true);
+    String tempKey = transpose(originalKey, transposeValue, useFlats: true);
     String key = '';
     tempKey == 'Gb' ? key = 'F#' : key = tempKey;
     return key;
@@ -75,11 +75,15 @@ class ChordTransposer extends ChordHelper {
     }
 
     // Transpose root and bass
-    String transposedRoot = transpose(root, transposeValue, useFlats);
+    String transposedRoot = transpose(root, transposeValue, useFlats: useFlats);
     String result = transposedRoot + chordSuffix;
 
     if (bass != null) {
-      String transposedBass = transpose(bass, transposeValue, useFlats);
+      String transposedBass = transpose(
+        bass,
+        transposeValue,
+        useFlats: useFlats,
+      );
       result += '/$transposedBass';
     }
 

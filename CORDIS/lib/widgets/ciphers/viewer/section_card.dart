@@ -92,7 +92,6 @@ class SectionCard extends StatelessWidget {
               ),
               ChordProView(
                 chordPro: sectionText,
-                maxWidth: double.infinity,
                 isAnnotation: sectionCode == 'N',
               ),
             ],

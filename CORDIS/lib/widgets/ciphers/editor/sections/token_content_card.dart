@@ -311,6 +311,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
               FilledTextButton(
                 text: AppLocalizations.of(context)!.editPlaceholder(''),
                 trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
                 onPressed: () {
                   Navigator.pop(context); // Close the bottom sheet
                   context.read<NavigationProvider>().pushForeground(
@@ -320,24 +321,25 @@ class _TokenContentCardState extends State<TokenContentCard> {
                     ),
                   );
                 },
-                isDiscrete: true,
               ),
               // duplicate
               FilledTextButton(
                 text: AppLocalizations.of(context)!.duplicatePlaceholder(''),
                 trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
                 onPressed: () {
                   context.read<LocalVersionProvider>().addSectionToStruct(
                     widget.versionID ?? -1,
                     widget.sectionCode,
                   );
                 },
-                isDiscrete: true,
               ),
               // delete
               FilledTextButton(
                 text: AppLocalizations.of(context)!.delete,
                 trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
+                isDangerous: true,
                 onPressed: () {
                   showModalBottomSheet(
                     context: context,
@@ -361,8 +363,6 @@ class _TokenContentCardState extends State<TokenContentCard> {
                     },
                   );
                 },
-                isDiscrete: true,
-                isDangerous: true,
               ),
               SizedBox(height: 8),
             ],

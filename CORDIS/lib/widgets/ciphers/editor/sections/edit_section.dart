@@ -6,6 +6,7 @@ import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/select_type.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
+import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -142,102 +143,28 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                     ),
                   ),
                   // SECTION CODE
-                  Column(
-                    spacing: 4,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.sectionCode,
-                        style: textTheme.titleMedium,
-                      ),
-
-                      TextField(
-                        controller: contentCodeController,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.all(8),
-                          hintText: AppLocalizations.of(
-                            context,
-                          )!.sectionCodeHint,
-                          hintStyle: textTheme.titleMedium?.copyWith(
-                            color: colorScheme.surfaceContainerLow,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: colorScheme.surfaceContainerLow,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Text(
-                        AppLocalizations.of(context)!.sectionCodeInstruction,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.surfaceContainerLow,
-                        ),
-                      ),
-                    ],
+                  LabeledTextField(
+                    label: AppLocalizations.of(context)!.sectionCode,
+                    hint: AppLocalizations.of(context)!.sectionCodeHint,
+                    controller: contentCodeController,
+                    instruction: AppLocalizations.of(
+                      context,
+                    )!.sectionCodeInstruction,
                   ),
 
                   // SECTION TYPE
-                  Column(
-                    spacing: 4,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.sectionType,
-                        style: textTheme.titleMedium,
-                      ),
-                      TextField(
-                        controller: contentTypeController,
-                        decoration: InputDecoration(
-                          hintText: AppLocalizations.of(
-                            context,
-                          )!.sectionTypeHint,
-                          hintStyle: textTheme.titleMedium?.copyWith(
-                            color: colorScheme.surfaceContainerLow,
-                          ),
-                          contentPadding: EdgeInsets.all(8),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: colorScheme.surfaceContainerLow,
-                            ),
-                            borderRadius: BorderRadius.circular(0),
-                          ),
-                        ),
-                      ),
-                    ],
+                  LabeledTextField(
+                    label: AppLocalizations.of(context)!.sectionType,
+                    hint: AppLocalizations.of(context)!.sectionTypeHint,
+                    controller: contentTypeController,
                   ),
 
                   // SECTION TEXT
-                  Column(
-                    spacing: 4,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.sectionText,
-                        style: textTheme.titleMedium,
-                      ),
-                      TextField(
-                        controller: contentTextController,
-                        minLines: 6,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.all(8),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: colorScheme.surfaceContainerLow,
-                            ),
-                            borderRadius: BorderRadius.circular(0),
-                          ),
-                          hintText: AppLocalizations.of(
-                            context,
-                          )!.sectionTextHint,
-                          hintStyle: textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.surfaceContainerLow,
-                          ),
-                        ),
-                        maxLines: null,
-                        keyboardType: TextInputType.multiline,
-                      ),
-                    ],
+                  LabeledTextField(
+                    label: AppLocalizations.of(context)!.sectionText,
+                    hint: AppLocalizations.of(context)!.sectionTextHint,
+                    controller: contentTextController,
+                    isMultiline: true,
                   ),
 
                   // DELETE BUTTON

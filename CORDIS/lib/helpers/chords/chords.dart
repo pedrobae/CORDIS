@@ -62,8 +62,8 @@ class ChordHelper {
     switch (index) {
       case 0:
         return [
-          '$chord/${transpose(chord, 4, useFlats)}',
-          '$chord/${transpose(chord, 7, useFlats)}',
+          '$chord/${transpose(chord, 4, useFlats: useFlats)}',
+          '$chord/${transpose(chord, 7, useFlats: useFlats)}',
           '${chord}maj7',
           '${chord}9',
         ];
@@ -73,18 +73,18 @@ class ChordHelper {
         return ['${chord}7', minorToMajor(chord), '${minorToMajor(chord)}7'];
       case 3:
         return [
-          '$chord/${transpose(chord, 4, useFlats)}',
-          '$chord/${transpose(chord, 7, useFlats)}',
+          '$chord/${transpose(chord, 4, useFlats: useFlats)}',
+          '$chord/${transpose(chord, 7, useFlats: useFlats)}',
           '${chord}maj7',
-          '$chord/${transpose(chord, 2, useFlats)}',
+          '$chord/${transpose(chord, 2, useFlats: useFlats)}',
           '${chord}9',
           '${chord}m',
         ];
       case 4:
         return [
           '${chord}7',
-          '$chord/${transpose(chord, 4, useFlats)}',
-          '$chord/${transpose(chord, 7, useFlats)}',
+          '$chord/${transpose(chord, 4, useFlats: useFlats)}',
+          '$chord/${transpose(chord, 7, useFlats: useFlats)}',
           '${chord}9',
           '${chord}m',
         ];
@@ -93,14 +93,14 @@ class ChordHelper {
           '${dimToMajor(chord)}ø',
           '${dimToMajor(chord)}m',
           dimToMajor(chord),
-          '${dimToMajor(chord)}m/${transpose(dimToMajor(chord), 3, false)}',
+          '${dimToMajor(chord)}m/${transpose(dimToMajor(chord), 3, useFlats: useFlats)}',
         ];
       default:
         return [];
     }
   }
 
-  String transpose(String chord, int value, bool useFlats) {
+  String transpose(String chord, int value, {required bool useFlats}) {
     final chromatic = useFlats ? notesFlat : notesSharp;
     int rootIndex = chromatic.indexOf(chord);
     if (rootIndex == -1) {

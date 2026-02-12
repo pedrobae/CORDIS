@@ -44,14 +44,12 @@ class MetadataTab extends StatefulWidget {
 
 class _MetadataTabState extends State<MetadataTab> {
   Map<InfoField, TextEditingController> controllers = {};
-  Map<InfoField, FocusNode> focusNodes = {};
 
   @override
   void initState() {
     super.initState();
     for (var i = 0; i < InfoField.values.length; i++) {
       controllers[InfoField.values[i]] = TextEditingController();
-      focusNodes[InfoField.values[i]] = FocusNode();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _syncWithProviderData();
@@ -62,9 +60,6 @@ class _MetadataTabState extends State<MetadataTab> {
   void dispose() {
     for (var controller in controllers.values) {
       controller.dispose();
-    }
-    for (var focusNode in focusNodes.values) {
-      focusNode.dispose();
     }
     super.dispose();
   }

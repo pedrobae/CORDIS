@@ -9,7 +9,9 @@ class Song {
   bool hasPrecedingChord = false;
   double? precedingChordOffset;
 
-  Song(this.linesMap, this.chordsMap);
+  Song(this.linesMap, this.chordsMap) {
+    _checkForPrecedingChord(const TextStyle());
+  }
 
   Song copyWith({
     Map<int, String>? linesMap,
@@ -20,7 +22,7 @@ class Song {
     return Song(linesMap ?? this.linesMap, chordsMap ?? this.chordsMap);
   }
 
-  void checkForPrecedingChord(TextStyle chordStyle) {
+  void _checkForPrecedingChord(TextStyle chordStyle) {
     double precedingOffset = 0.0;
     for (int i = 0; i < linesMap.length; i++) {
       if (linesMap[i]!.isNotEmpty && linesMap[i]![0] == ' ') {

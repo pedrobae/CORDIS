@@ -5,6 +5,7 @@ class LabeledTextField extends StatelessWidget {
   final String? hint;
   final TextEditingController controller;
   final String? Function(String?)? validator;
+  final String? instruction;
   final bool isMultiline;
   final bool isEnabled;
 
@@ -14,12 +15,16 @@ class LabeledTextField extends StatelessWidget {
     this.hint,
     required this.controller,
     this.validator,
+    this.instruction,
     this.isMultiline = false,
     this.isEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -27,9 +32,7 @@ class LabeledTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
         ),
         TextFormField(
           validator: validator,
@@ -37,16 +40,24 @@ class LabeledTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hint,
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.surfaceContainerLowest,
-              ),
+              borderSide: BorderSide(color: colorScheme.surfaceContainerLowest),
               borderRadius: BorderRadius.circular(0),
             ),
             visualDensity: VisualDensity.compact,
           ),
           maxLines: isMultiline ? null : 1,
+          keyboardType: isMultiline
+              ? TextInputType.multiline
+              : TextInputType.text,
           enabled: isEnabled,
         ),
+        if (instruction != null)
+          Text(
+            instruction!,
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.surfaceContainerLow,
+            ),
+          ),
       ],
     );
   }

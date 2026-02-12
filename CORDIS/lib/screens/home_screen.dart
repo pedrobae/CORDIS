@@ -4,6 +4,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
+import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/widgets/schedule/library/cloud_schedule_card.dart';
 import 'package:cordis/widgets/schedule/library/schedule_card.dart';
@@ -30,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadData() async {
     final authProvider = context.read<MyAuthProvider>();
+    final userProvider = context.read<UserProvider>();
     final localScheduleProvider = context.read<LocalScheduleProvider>();
     final cloudScheduleProvider = context.read<CloudScheduleProvider>();
     final cloudVersionProvider = context.read<CloudVersionProvider>();
@@ -39,6 +41,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     await cloudScheduleProvider.loadSchedules(authProvider.id!);
     await localScheduleProvider.loadSchedules();
+
+    final user = userProvider.getUserByFirebaseId(authProvider.id!);
+    if (user != null) {
+      authProvider.setUserData(user);
+    }
 
     for (var schedule in cloudScheduleProvider.schedules.values) {
       for (var versionEntry in schedule.playlist.versions.entries) {
