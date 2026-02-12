@@ -326,16 +326,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _emailSignIn() async {
     final authProvider = context.read<MyAuthProvider>();
+    final userProvider = context.read<UserProvider>();
+
     await authProvider.signInWithEmail(
       _emailController.text.trim(),
       _passwordController.text,
     );
 
-    if (authProvider.isAuthenticated && mounted) {
+    if (authProvider.isAuthenticated) {
       // Load users after successful login
-      final userProvider = context.read<UserProvider>();
       await userProvider.loadUsers();
       await userProvider.ensureUsersExist([authProvider.id!]);
+
+      authProvider.setUserData(
+        userProvider.getUserByFirebaseId(authProvider.id!)!,
+      );
 
       if (mounted) {
         Navigator.of(context).pushReplacementNamed(AppRoutes.main);
@@ -345,12 +350,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _googleSignIn() async {
     final authProvider = context.read<MyAuthProvider>();
+    final userProvider = context.read<UserProvider>();
+
     await authProvider.signInWithGoogle();
-    if (authProvider.isAuthenticated && mounted) {
+    if (authProvider.isAuthenticated) {
       // Load users after successful login
-      final userProvider = context.read<UserProvider>();
       await userProvider.loadUsers();
       await userProvider.ensureUsersExist([authProvider.id!]);
+
+      authProvider.setUserData(
+        userProvider.getUserByFirebaseId(authProvider.id!)!,
+      );
 
       if (mounted) {
         Navigator.of(context).pushReplacementNamed(AppRoutes.main);

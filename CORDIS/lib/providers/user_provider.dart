@@ -170,10 +170,26 @@ class UserProvider extends ChangeNotifier {
     return _knownUsers.where((user) => ids.contains(user.id)).toList();
   }
 
+  User? getUserById(int id) {
+    try {
+      return _knownUsers.firstWhere((user) => user.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
   List<User> getUsersByFirebaseIds(List<String> firebaseIds) {
     return _knownUsers
         .where((user) => firebaseIds.contains(user.firebaseId))
         .toList();
+  }
+
+  User? getUserByFirebaseId(String firebaseId) {
+    try {
+      return _knownUsers.firstWhere((user) => user.firebaseId == firebaseId);
+    } catch (e) {
+      return null;
+    }
   }
 
   void clearCache() {

@@ -1,37 +1,39 @@
+import 'package:cordis/models/domain/user.dart';
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:cordis/services/auth_service.dart';
 
 class MyAuthProvider extends ChangeNotifier {
-  final AuthService _authService = AuthService();
-  User? _user;
+  final _authService = AuthService();
+
+  firebase_auth.User? _authUser;
+  User? _userData;
   bool _isAdmin = false;
   bool _isLoading = false;
   String? _error;
 
-  bool get isAuthenticated => _user != null;
-  String? get id => _user?.uid;
+  bool get isAuthenticated => _authUser != null;
+  String? get id => _authUser?.uid;
   bool get isAdmin => _isAdmin;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  String? get userName => _user?.displayName;
-  String? get userEmail => _user?.email;
-  String? get photoURL => _user?.photoURL;
+  String? get userName => _userData?.username;
+  String? get userEmail => _userData?.email;
+  String? get photoURL => _userData?.profilePhoto;
 
   MyAuthProvider() {
     // Listen to auth state changes and check admin status
     _authService.authStateChanges.listen(_onAuthStateChanged);
-    _checkAdminStatus();
   }
 
-  void _onAuthStateChanged(User? user) {
-    _user = user;
+  void _onAuthStateChanged(firebase_auth.User? user) {
+    _authUser = user;
     _checkAdminStatus();
     notifyListeners();
   }
 
   Future<void> _checkAdminStatus() async {
-    if (_user != null) {
+    if (_authUser != null) {
       _isAdmin = await _authService.isAdmin;
     } else {
       _isAdmin = false;
@@ -161,6 +163,11 @@ class MyAuthProvider extends ChangeNotifier {
 
   void clearError() {
     _error = null;
+    notifyListeners();
+  }
+
+  void setUserData(User user) {
+    _userData = user;
     notifyListeners();
   }
 }
