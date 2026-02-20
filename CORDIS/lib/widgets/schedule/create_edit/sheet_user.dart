@@ -75,7 +75,10 @@ class _UsersBottomSheetState extends State<UsersBottomSheet> {
                   FilledTextButton(
                     text: AppLocalizations.of(context)!.clear,
                     onPressed: () {
-                      // TODO: Clear all users from role
+                      scheduleProvider.clearUsersFromRole(
+                        widget.scheduleId,
+                        widget.role.id,
+                      );
                     },
                     isDense: true,
                   ),
@@ -121,7 +124,11 @@ class _UsersBottomSheetState extends State<UsersBottomSheet> {
                       ),
                       IconButton(
                         onPressed: () {
-                          // TODO: Remove user from role
+                          scheduleProvider.removeUserFromRole(
+                            widget.scheduleId,
+                            widget.role.id,
+                            member.id,
+                          );
                         },
                         icon: Icon(Icons.remove_circle_outline),
                         color: colorScheme.error,

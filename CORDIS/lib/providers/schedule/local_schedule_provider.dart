@@ -342,6 +342,26 @@ class LocalScheduleProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void removeUserFromRole(int scheduleId, int roleId, int userId) {
+    final schedule = _schedules[scheduleId];
+    if (schedule == null) return;
+
+    final role = schedule.roles.firstWhere((role) => role.id == roleId);
+
+    role.users.removeWhere((user) => user.id == userId);
+    notifyListeners();
+  }
+
+  void clearUsersFromRole(int scheduleId, int roleId) {
+    final schedule = _schedules[scheduleId];
+    if (schedule == null) return;
+
+    final role = schedule.roles.firstWhere((role) => role.id == roleId);
+
+    role.users.clear();
+    notifyListeners();
+  }
+
   // ===== DELETE =====
   /// Deletes a role from a schedule (local).
   /// Also removes all members assigned to that role.
