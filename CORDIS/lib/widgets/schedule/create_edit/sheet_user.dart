@@ -61,7 +61,7 @@ class _UsersBottomSheetState extends State<UsersBottomSheet> {
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 4,
+                spacing: 6,
                 children: [
                   FilledTextButton(
                     text: AppLocalizations.of(
