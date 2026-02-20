@@ -145,10 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           'EEEE, MMM d',
                           locale.languageCode,
                         ).format(DateTime.now()),
-                        style: textTheme.bodyMedium!.copyWith(
-                          color: colorScheme.onSurface,
-                          fontSize: 14,
-                        ),
+                        style: textTheme.bodyLarge,
                       ),
 
                       _buildWelcomeMessage(context, authProvider, textTheme),
@@ -176,10 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
       AppLocalizations.of(context)!.helloUser(
         authProvider.userName ?? AppLocalizations.of(context)!.guest,
       ),
-      style: textTheme.headlineLarge!.copyWith(
-        fontWeight: FontWeight.w700,
-        fontSize: 24,
-      ),
+      style: textTheme.headlineSmall,
     );
   }
 
@@ -202,19 +196,11 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(height: 32),
           Text(
             AppLocalizations.of(context)!.welcome,
-            style: textTheme.titleMedium!.copyWith(
-              color: colorScheme.onSurface,
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-            ),
+            style: textTheme.headlineSmall,
           ),
           Text(
             AppLocalizations.of(context)!.getStartedMessage,
-            style: textTheme.bodyMedium!.copyWith(
-              color: colorScheme.onSurface,
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-            ),
+            style: textTheme.bodyLarge,
           ),
         ],
       );
@@ -227,11 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // SCHEDULE LABEL
         Text(
           AppLocalizations.of(context)!.nextUp,
-          style: textTheme.titleMedium!.copyWith(
-            color: colorScheme.onSurface,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: textTheme.titleMedium,
         ),
         // SCHEDULE CARD
         (nextSchedule is Schedule)

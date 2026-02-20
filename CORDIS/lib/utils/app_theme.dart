@@ -248,7 +248,7 @@ class AppTheme {
   static ThemeData getTheme(String color, bool isDark) {
     // Get pre-calculated color schemes for optimization
     final colorScheme = _getColorScheme(color, isDark);
-    return _buildTheme(colorScheme, isDark);
+    return _buildTheme(colorScheme, _textTheme, isDark);
   }
 
   static ColorScheme _getColorScheme(String color, bool isDark) {
@@ -266,11 +266,52 @@ class AppTheme {
     }
   }
 
-  static ThemeData _buildTheme(ColorScheme colorScheme, bool isDark) {
+  static final TextTheme _textTheme = TextTheme(
+    headlineLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w700),
+    headlineMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+    headlineSmall: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+    titleLarge: TextStyle(
+      fontSize: 22,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.2,
+    ),
+    titleMedium: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.15,
+    ),
+    titleSmall: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.1,
+    ),
+    bodyLarge: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      letterSpacing: 0.15,
+    ),
+    bodyMedium: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      letterSpacing: 0.15,
+    ),
+    bodySmall: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      letterSpacing: 0.15,
+    ),
+  );
+
+  static ThemeData _buildTheme(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    bool isDark,
+  ) {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
       fontFamily: 'FormaDJRMicro',
+      textTheme: textTheme,
       shadowColor: isDark
           ? NeutralPalette.shadowDark
           : NeutralPalette.shadowLight,
