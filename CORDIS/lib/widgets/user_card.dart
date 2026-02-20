@@ -31,15 +31,15 @@ class UserCard extends StatelessWidget {
               spacing: 8,
               children: [
                 CircleAvatar(
-                  radius: 24,
+                  radius: 20,
                   backgroundColor: colorScheme.primaryContainer,
                   // photoURL, Initials fallback, Person Icon fallback
                   child: authProvider.photoURL != null
                       ? ClipOval(
                           child: Image.network(
                             authProvider.photoURL!,
-                            width: 48,
-                            height: 48,
+                            width: 40,
+                            height: 40,
                             fit: BoxFit.cover,
                           ),
                         )
@@ -53,9 +53,7 @@ class UserCard extends StatelessWidget {
                               .take(2)
                               .join()
                               .toUpperCase(),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: colorScheme.onPrimaryContainer,
-                          ),
+                          style: theme.textTheme.labelLarge,
                         )
                       : Icon(
                           Icons.person,
@@ -68,7 +66,7 @@ class UserCard extends StatelessWidget {
                     children: [
                       Text(
                         authProvider.userName ?? 'Guest',
-                        style: theme.textTheme.titleMedium,
+                        style: theme.textTheme.labelLarge,
                       ),
                       if (authProvider.userEmail != null)
                         Text(
