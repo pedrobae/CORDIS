@@ -820,9 +820,11 @@ class TokenizationService {
           measureTextWidth(token.text, fontFamily) + 1; // Add letter spacing
     }
 
-    // Calculate the offset to center the cutout around the dragged to token,
+    // Calculate the offset to position the cutout around the dragged to token,
     // while ensuring it doesn't go off screen
-    // If the dragged to token is in the cutout, center around it
+    // For now simple logic to shift left if the dragged to token is in the last 3 tokens of the line,
+    // and shift half left if it's in the middle, to ensure the dragged to token is always visible in the cutout
+
     double leftOffset = 0.0;
     if (draggedToIndex > 2) {
       leftOffset = -xOffset / 2;
