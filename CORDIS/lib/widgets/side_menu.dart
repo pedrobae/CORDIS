@@ -137,9 +137,7 @@ class SideMenu extends StatelessWidget {
                       Icon(Icons.logout),
                       Text(
                         AppLocalizations.of(context)!.logOut,
-                        style: theme.textTheme.bodyMedium!.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: theme.textTheme.bodyMedium,
                       ),
                     ],
                   ),
@@ -164,7 +162,6 @@ class SideMenu extends StatelessWidget {
                       AppLocalizations.of(context)!.newHeart,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.surface,
-                        fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
                     ),

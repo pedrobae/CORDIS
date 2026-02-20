@@ -187,9 +187,7 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
                                       AppLocalizations.of(
                                         context,
                                       )!.songStructure,
-                                      style: textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: textTheme.titleMedium,
                                     ),
                                   ),
                                   Container(
@@ -254,19 +252,14 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 4,
       children: [
-        Text(
-          cipher.title,
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-        ),
+        Text(cipher.title, style: textTheme.titleMedium),
         _buildMetadataRow(version, textTheme),
       ],
     );
   }
 
   Widget _buildMetadataRow(Version version, TextTheme textTheme) {
-    final bodyStyle = textTheme.bodyLarge?.copyWith(
-      fontWeight: FontWeight.w500,
-    );
+    final bodyStyle = textTheme.bodyMedium;
     return Row(
       spacing: 16.0,
       children: [

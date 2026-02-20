@@ -28,17 +28,10 @@ class PlayFlowItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: 4,
                 children: [
-                  Text(
-                    flowItem.title,
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  Text(flowItem.title, style: textTheme.titleMedium),
                   Text(
                     '${AppLocalizations.of(context)!.estimatedTime}: ${DateTimeUtils.formatDuration(flowItem.duration)}',
-                    style: textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: textTheme.bodyMedium,
                   ),
                 ],
               ),
@@ -77,7 +70,6 @@ class PlayFlowItem extends StatelessWidget {
                         child: Text(
                           AppLocalizations.of(context)!.annotations,
                           style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
                             fontFamily:
                                 layoutSettings.lyricTextStyle.fontFamily,
                           ),
@@ -88,7 +80,7 @@ class PlayFlowItem extends StatelessWidget {
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
                             flowItem.contentText,
-                            style: textTheme.bodyLarge?.copyWith(
+                            style: textTheme.bodyMedium?.copyWith(
                               height: 1.4,
                               fontFamily:
                                   layoutSettings.lyricTextStyle.fontFamily,

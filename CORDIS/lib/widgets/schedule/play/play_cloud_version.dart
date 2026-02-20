@@ -140,9 +140,7 @@ class _PlayCloudVersionState extends State<PlayCloudVersion> {
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: Text(
                                   AppLocalizations.of(context)!.songStructure,
-                                  style: textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: textTheme.titleMedium,
                                 ),
                               ),
                               Container(
@@ -203,19 +201,14 @@ class _PlayCloudVersionState extends State<PlayCloudVersion> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 4,
       children: [
-        Text(
-          widget.versionDTO.title,
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-        ),
+        Text(widget.versionDTO.title, style: textTheme.titleMedium),
         _buildMetadataRow(textTheme),
       ],
     );
   }
 
   Widget _buildMetadataRow(TextTheme textTheme) {
-    final bodyStyle = textTheme.bodyLarge?.copyWith(
-      fontWeight: FontWeight.w500,
-    );
+    final bodyStyle = textTheme.bodySmall;
     return Row(
       spacing: 16.0,
       children: [
