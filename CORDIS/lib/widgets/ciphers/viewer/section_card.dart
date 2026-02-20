@@ -82,11 +82,7 @@ class SectionCard extends StatelessWidget {
                         ? sectionType[0].toUpperCase() +
                               sectionType.substring(1)
                         : sectionType,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w500,
-                      fontSize: layoutSettingsProvider.fontSize - 2,
-                    ),
+                    style: textTheme.labelLarge,
                   ),
                 ],
               ),

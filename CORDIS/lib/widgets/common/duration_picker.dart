@@ -39,7 +39,7 @@ class _DurationPickerFieldState extends State<DurationPickerField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 4,
       children: [
-        Text(widget.label, style: textTheme.titleMedium),
+        Text(widget.label, style: textTheme.labelLarge),
         GestureDetector(
           onTap: () async {
             _openDurationPicker(context);
@@ -107,9 +107,7 @@ class _DurationPickerFieldState extends State<DurationPickerField> {
                         AppLocalizations.of(context)!.setPlaceholder(
                           AppLocalizations.of(context)!.duration,
                         ),
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: textTheme.titleMedium,
                       ),
                       CloseButton(onPressed: () => Navigator.of(context).pop()),
                     ],
@@ -132,9 +130,8 @@ class _DurationPickerFieldState extends State<DurationPickerField> {
                             itemCount: 4,
                             minValue: 0,
                             maxValue: 59,
-                            textStyle: textTheme.titleMedium?.copyWith(
+                            textStyle: textTheme.labelLarge?.copyWith(
                               color: colorScheme.surfaceContainerLowest,
-                              fontWeight: FontWeight.w400,
                             ),
                             selectedTextStyle: textTheme.headlineSmall
                                 ?.copyWith(
@@ -161,9 +158,8 @@ class _DurationPickerFieldState extends State<DurationPickerField> {
                             itemCount: 4,
                             minValue: 0,
                             maxValue: 59,
-                            textStyle: textTheme.titleMedium?.copyWith(
+                            textStyle: textTheme.labelLarge?.copyWith(
                               color: colorScheme.surfaceContainerLowest,
-                              fontWeight: FontWeight.w400,
                             ),
                             selectedTextStyle: textTheme.headlineSmall
                                 ?.copyWith(

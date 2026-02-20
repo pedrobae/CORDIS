@@ -36,7 +36,6 @@ class DeleteConfirmationSheet extends StatelessWidget {
               Text(
                 AppLocalizations.of(context)!.deleteConfirmationTitle,
                 style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
                   color: isDangerous ? Colors.red : colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
