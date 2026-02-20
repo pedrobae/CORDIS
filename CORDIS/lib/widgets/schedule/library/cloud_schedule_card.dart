@@ -112,11 +112,7 @@ class CloudScheduleCard extends StatelessWidget {
                                   children: [
                                     Text(
                                       schedule.name,
-                                      style: theme.textTheme.titleMedium!
-                                          .copyWith(
-                                            fontWeight: FontWeight.w500,
-                                            color: colorScheme.onSurface,
-                                          ),
+                                      style: theme.textTheme.titleMedium,
                                     ),
                                     StatusChip(
                                       schedule: schedule.toDomain(
@@ -134,26 +130,17 @@ class CloudScheduleCard extends StatelessWidget {
                                       DateTimeUtils.formatDate(
                                         schedule.datetime.toDate(),
                                       ),
-                                      style: theme.textTheme.bodyMedium!
-                                          .copyWith(
-                                            color: colorScheme.onSurface,
-                                          ),
+                                      style: theme.textTheme.bodyMedium,
                                     ),
                                     Text(
                                       DateTimeUtils.formatDate(
                                         schedule.datetime.toDate(),
                                       ),
-                                      style: theme.textTheme.bodyMedium!
-                                          .copyWith(
-                                            color: colorScheme.onSurface,
-                                          ),
+                                      style: theme.textTheme.bodyMedium,
                                     ),
                                     Text(
                                       schedule.location,
-                                      style: theme.textTheme.bodyMedium!
-                                          .copyWith(
-                                            color: colorScheme.onSurface,
-                                          ),
+                                      style: theme.textTheme.bodyMedium,
                                     ),
                                   ],
                                 ),
@@ -229,9 +216,7 @@ class CloudScheduleCard extends StatelessWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.scheduleActions,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                   IconButton(
                     icon: Icon(Icons.close),

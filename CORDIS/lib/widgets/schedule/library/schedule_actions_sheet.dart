@@ -36,9 +36,7 @@ class ScheduleActionsSheet extends StatelessWidget {
                     AppLocalizations.of(
                       context,
                     )!.addPlaceholder(AppLocalizations.of(context)!.schedule),
-                    style: textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: textTheme.titleMedium,
                   ),
                   CloseButton(onPressed: () => Navigator.of(context).pop()),
                 ],
@@ -54,6 +52,7 @@ class ScheduleActionsSheet extends StatelessWidget {
                     text: AppLocalizations.of(context)!.createPlaceholder(
                       AppLocalizations.of(context)!.schedule,
                     ),
+                    trailingIcon: Icons.chevron_right,
                     isDark: true,
                     onPressed: () {
                       Navigator.of(context).pop(); // Close the bottom sheet
@@ -73,6 +72,7 @@ class ScheduleActionsSheet extends StatelessWidget {
                   // IMPORT FROM SHARE CODE BUTTON
                   FilledTextButton(
                     text: AppLocalizations.of(context)!.shareCode,
+                    trailingIcon: Icons.chevron_right,
                     onPressed: () {
                       Navigator.of(context).pop(); // Close the bottom sheet
                       navigationProvider.push(

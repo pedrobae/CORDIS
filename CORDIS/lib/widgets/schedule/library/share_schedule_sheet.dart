@@ -88,19 +88,13 @@ class _ShareScheduleSheetState extends State<ShareScheduleSheet> {
                         children: [
                           Text(
                             AppLocalizations.of(context)!.shareCode,
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: textTheme.bodyMedium,
                             textAlign: TextAlign.center,
                           ),
                           SizedBox(height: 12),
                           SelectableText(
                             schedule.shareCode,
-                            style: textTheme.headlineLarge?.copyWith(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w700,
-                              color: colorScheme.onSurface,
-                            ),
+                            style: textTheme.headlineMedium,
                             textAlign: TextAlign.center,
                           ),
                           FilledTextButton(
@@ -134,9 +128,7 @@ class _ShareScheduleSheetState extends State<ShareScheduleSheet> {
                       children: [
                         Text(
                           AppLocalizations.of(context)!.sendToRoleMembers,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: textTheme.titleMedium,
                           textAlign: TextAlign.center,
                         ),
                         for (var role in schedule.roles)
@@ -164,9 +156,7 @@ class _ShareScheduleSheetState extends State<ShareScheduleSheet> {
                                     children: [
                                       Text(
                                         role.name,
-                                        style: textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: textTheme.titleMedium,
                                       ),
                                       Text(
                                         role.users.isEmpty
@@ -176,9 +166,7 @@ class _ShareScheduleSheetState extends State<ShareScheduleSheet> {
                                             : AppLocalizations.of(
                                                 context,
                                               )!.xMembers(role.users.length),
-                                        style: textTheme.bodySmall?.copyWith(
-                                          color: colorScheme.shadow,
-                                        ),
+                                        style: textTheme.bodySmall,
                                       ),
                                     ],
                                   ),
@@ -261,9 +249,7 @@ class _ShareScheduleSheetState extends State<ShareScheduleSheet> {
                                         )!.sendInvites,
                                         emailProvider.error!,
                                       ),
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        color: Colors.black,
-                                      ),
+                                      style: textTheme.bodyMedium,
                                     ),
                                   ),
                                 );

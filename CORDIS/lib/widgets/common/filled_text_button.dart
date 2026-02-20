@@ -112,8 +112,8 @@ class FilledTextButton extends StatelessWidget {
         Text(
           text,
           style: TextStyle(
-            fontSize: isDense ? 14 : 18,
-            fontWeight: isDiscrete ? FontWeight.w400 : FontWeight.w500,
+            fontSize: isDense ? 13 : 16,
+            fontWeight: isDense ? FontWeight.w500 : FontWeight.w400,
             color: isDisabled
                 ? colorScheme.shadow
                 : (isDangerous

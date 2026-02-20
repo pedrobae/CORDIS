@@ -105,9 +105,7 @@ class _DuplicateScheduleSheetState extends State<DuplicateScheduleSheet> {
                           AppLocalizations.of(context)!.duplicatePlaceholder(
                             AppLocalizations.of(context)!.schedule,
                           ),
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: textTheme.titleMedium,
                         ),
                         IconButton(
                           icon: Icon(Icons.close),

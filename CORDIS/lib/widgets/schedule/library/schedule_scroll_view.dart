@@ -47,7 +47,6 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer3<
       LocalScheduleProvider,
@@ -89,10 +88,7 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
                   SizedBox(height: 64),
                   Text(
                     AppLocalizations.of(context)!.emptyScheduleLibrary,
-                    style: textTheme.bodyLarge!.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: textTheme.bodyLarge!,
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -127,17 +123,13 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
             ? (pastScheduleIDs.isNotEmpty
                   ? Text(
                       AppLocalizations.of(context)!.pastSchedules,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: textTheme.titleMedium,
                     )
                   : SizedBox.shrink())
             : (futureScheduleIDs.isNotEmpty
                   ? Text(
                       AppLocalizations.of(context)!.futureSchedules,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: textTheme.titleMedium,
                     )
                   : SizedBox.shrink()),
 
@@ -180,9 +172,7 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
                       : Text(
                           key: _pastHeaderKey,
                           AppLocalizations.of(context)!.pastSchedules,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: textTheme.titleMedium,
                         ),
                   SizedBox(height: 8.0),
                   ...pastScheduleIDs.map((scheduleId) {
