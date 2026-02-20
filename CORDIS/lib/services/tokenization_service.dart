@@ -820,12 +820,24 @@ class TokenizationService {
           measureTextWidth(token.text, fontFamily) + 1; // Add letter spacing
     }
 
+    // Calculate the offset to center the cutout around the dragged to token,
+    // while ensuring it doesn't go off screen
+    // If the dragged to token is in the cutout, center around it
+    double leftOffset = 0.0;
+    if (draggedToIndex > 2) {
+      leftOffset = -xOffset / 2;
+    }
+    if (draggedToIndex >= lyricTokens.length - 3) {
+      leftOffset = -xOffset;
+    }
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
         dragTargetChild,
         Positioned(
           top: -(_fontSize * 3),
+          left: leftOffset,
           child: Container(
             height: 2 * (_fontSize + 8), // Height to fit the chord and lyrics
             width: 130,
