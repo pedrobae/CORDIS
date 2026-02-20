@@ -2,6 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/screens/cipher/cipher_library.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -33,11 +34,7 @@ class AddToPlaylistSheet extends StatelessWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.quickAction,
-                    style: textTheme.titleMedium?.copyWith(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurface,
-                    ),
+                    style: textTheme.titleMedium,
                     textAlign: TextAlign.center,
                   ),
                   IconButton(
@@ -52,8 +49,13 @@ class AddToPlaylistSheet extends StatelessWidget {
               ),
               // ACTIONS
               // ADD SONG TO PLAYLIST
-              GestureDetector(
-                onTap: () {
+              FilledTextButton(
+                text: AppLocalizations.of(
+                  context,
+                )!.addPlaceholder(AppLocalizations.of(context)!.cipher),
+                trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
+                onPressed: () {
                   // Enable selection mode
                   selectionProvider.enableSelectionMode();
                   selectionProvider.setTarget(playlistId);
@@ -73,97 +75,23 @@ class AddToPlaylistSheet extends StatelessWidget {
                     },
                   );
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: colorScheme.surfaceContainer),
-                    borderRadius: BorderRadius.circular(0),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        AppLocalizations.of(
-                          context,
-                        )!.addPlaceholder(AppLocalizations.of(context)!.cipher),
-                        style: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      Icon(Icons.chevron_right, color: colorScheme.shadow),
-                    ],
-                  ),
-                ),
               ),
               // ADD FLOW ITEM TO PLAYLIST
-              GestureDetector(
-                onTap: () {
+              FilledTextButton(
+                text: AppLocalizations.of(
+                  context,
+                )!.addPlaceholder(AppLocalizations.of(context)!.flowItem),
+                trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
+                onPressed: () {
                   Navigator.of(context).pop();
                   navigationProvider.push(
                     FlowItemEditor(playlistId: playlistId),
                     showBottomNavBar: true,
                   );
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: colorScheme.surfaceContainer),
-                    borderRadius: BorderRadius.circular(0),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.addPlaceholder(
-                          AppLocalizations.of(context)!.flowItem,
-                        ),
-                        style: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w400,
-                          fontSize: 18,
-                        ),
-                      ),
-                      Icon(Icons.chevron_right, color: colorScheme.shadow),
-                    ],
-                  ),
-                ),
               ),
-              // DELETE PLAYLIST
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.red),
-                    borderRadius: BorderRadius.circular(0),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.delete,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.red,
-                          fontSize: 18,
-                        ),
-                      ),
-                      Icon(Icons.chevron_right, color: Colors.red),
-                    ],
-                  ),
-                ),
-              ),
+              SizedBox(),
             ],
           ),
         );

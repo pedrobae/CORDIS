@@ -34,10 +34,7 @@ class QuickActionSheet extends StatelessWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.quickAction,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 18,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),

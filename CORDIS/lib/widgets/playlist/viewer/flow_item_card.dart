@@ -77,15 +77,13 @@ class FlowItemCard extends StatelessWidget {
                               children: [
                                 Text(
                                   flowItem.title,
-                                  style: textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: textTheme.titleMedium,
                                 ),
                                 Text(
                                   DateTimeUtils.formatDuration(
                                     flowItem.duration,
                                   ),
-                                  style: textTheme.bodyLarge,
+                                  style: textTheme.bodyMedium,
                                 ),
                               ],
                             ),
@@ -103,6 +101,7 @@ class FlowItemCard extends StatelessWidget {
                           AppLocalizations.of(context)!.flowItem,
                         ),
                         isDense: true,
+                        isDiscrete: true,
                         onPressed: () {
                           navigationProvider.push(
                             FlowItemEditor(

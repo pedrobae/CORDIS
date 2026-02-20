@@ -462,6 +462,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String actionPlaceholder(Object object) {
+    return '$object Action';
+  }
+
+  @override
   String duplicateTooltip(Object object) {
     return 'Create a copy of this $object';
   }

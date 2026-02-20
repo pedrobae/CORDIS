@@ -914,6 +914,12 @@ abstract class AppLocalizations {
   /// **'Opções de {object}'**
   String optionsPlaceholder(Object object);
 
+  /// Object Action sheet title
+  ///
+  /// In pt, this message translates to:
+  /// **'Ações de {object}'**
+  String actionPlaceholder(Object object);
+
   /// Tooltip for duplicate action
   ///
   /// In pt, this message translates to:

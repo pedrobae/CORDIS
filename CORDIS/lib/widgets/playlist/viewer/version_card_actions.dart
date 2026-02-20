@@ -61,19 +61,17 @@ class VersionCardActionsSheet extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.quickAction,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
+                        AppLocalizations.of(context)!.actionPlaceholder(
+                          AppLocalizations.of(context)!.version,
                         ),
+                        style: textTheme.titleMedium,
                         textAlign: TextAlign.center,
                       ),
                       IconButton(
                         icon: Icon(
                           Icons.close,
                           color: colorScheme.onSurface,
-                          size: 32,
+                          size: 24,
                         ),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
@@ -102,9 +100,9 @@ class VersionCardActionsSheet extends StatelessWidget {
 
                   // duplicate
                   FilledTextButton(
-                    text: AppLocalizations.of(context)!.duplicatePlaceholder(
-                      AppLocalizations.of(context)!.version,
-                    ),
+                    text: AppLocalizations.of(
+                      context,
+                    )!.duplicatePlaceholder(''),
                     isDiscrete: true,
                     trailingIcon: Icons.chevron_right,
                     onPressed: () {
@@ -158,7 +156,7 @@ class VersionCardActionsSheet extends StatelessWidget {
                       );
                     },
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(),
                 ],
               ),
             );

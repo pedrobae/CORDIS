@@ -3,6 +3,7 @@ import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -44,28 +45,26 @@ class FlowItemCardActionsSheet extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.quickAction,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
+                        AppLocalizations.of(context)!.actionPlaceholder(
+                          AppLocalizations.of(context)!.flowItem,
                         ),
-                        textAlign: TextAlign.center,
+                        style: textTheme.titleMedium,
                       ),
                       IconButton(
-                        icon: Icon(
-                          Icons.close,
-                          color: colorScheme.onSurface,
-                          size: 32,
-                        ),
+                        icon: Icon(Icons.close, size: 24),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
                   ),
                   // ACTIONS
                   // DUPLICATE FLOW ITEM
-                  GestureDetector(
-                    onTap: () {
+                  FilledTextButton(
+                    text: AppLocalizations.of(
+                      context,
+                    )!.duplicatePlaceholder(''),
+                    trailingIcon: Icons.chevron_right,
+                    isDiscrete: true,
+                    onPressed: () {
                       flowItemProvider.duplicateFlowItem(
                         flowItemId,
                         AppLocalizations.of(context)!.copySuffix,
@@ -75,36 +74,14 @@ class FlowItemCardActionsSheet extends StatelessWidget {
                             .length,
                       );
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: colorScheme.surfaceContainer),
-                        borderRadius: BorderRadius.circular(0),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.duplicatePlaceholder(
-                              AppLocalizations.of(context)!.flowItem,
-                            ),
-                            style: textTheme.titleMedium?.copyWith(
-                              color: colorScheme.onSurface,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          Icon(Icons.chevron_right, color: colorScheme.shadow),
-                        ],
-                      ),
-                    ),
                   ),
                   // DELETE FLOW ITEM
-                  GestureDetector(
-                    onTap: () {
+                  FilledTextButton(
+                    text: AppLocalizations.of(context)!.delete,
+                    trailingIcon: Icons.chevron_right,
+                    isDiscrete: true,
+                    isDangerous: true,
+                    onPressed: () {
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -135,38 +112,8 @@ class FlowItemCardActionsSheet extends StatelessWidget {
                         },
                       );
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.red),
-                        borderRadius: BorderRadius.circular(0),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!.delete,
-                                  style: textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.red,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(Icons.chevron_right, color: Colors.red),
-                        ],
-                      ),
-                    ),
                   ),
+                  SizedBox(),
                 ],
               ),
             );

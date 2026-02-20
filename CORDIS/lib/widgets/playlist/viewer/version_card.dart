@@ -180,10 +180,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                   children: [
                                     Text(
                                       isCloud ? version.title : cipher!.title,
-                                      style: theme.textTheme.titleLarge
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                      style: theme.textTheme.titleMedium,
                                       softWrap: true,
                                     ),
                                     Wrap(
@@ -194,7 +191,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                           children: [
                                             Text(
                                               '${AppLocalizations.of(context)!.musicKey}: ',
-                                              style: theme.textTheme.bodyLarge,
+                                              style: theme.textTheme.bodyMedium,
                                             ),
                                             Text(
                                               isCloud
@@ -202,10 +199,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                                         version.originalKey)
                                                   : (version.transposedKey ??
                                                         cipher!.musicKey),
-                                              style: theme.textTheme.bodyLarge
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
+                                              style: theme.textTheme.bodyMedium,
                                             ),
                                           ],
                                         ),
@@ -214,14 +208,11 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                           children: [
                                             Text(
                                               '${AppLocalizations.of(context)!.bpm}: ',
-                                              style: theme.textTheme.bodyLarge,
+                                              style: theme.textTheme.bodyMedium,
                                             ),
                                             Text(
                                               version.bpm.toString(),
-                                              style: theme.textTheme.bodyLarge
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
+                                              style: theme.textTheme.bodyMedium,
                                             ),
                                           ],
                                         ),
@@ -233,7 +224,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                                   )
                                                 : version.duration,
                                           ),
-                                          style: theme.textTheme.bodyLarge,
+                                          style: theme.textTheme.bodyMedium,
                                         ),
                                       ],
                                     ),
@@ -352,6 +343,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                               AppLocalizations.of(context)!.cipher,
                             ),
                             isDense: true,
+                            isDiscrete: true,
                             onPressed: () {
                               navigationProvider.push(
                                 ViewCipherScreen(

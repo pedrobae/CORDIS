@@ -55,12 +55,7 @@ class PlaylistCardActionsSheet extends StatelessWidget {
                         AppLocalizations.of(context)!.optionsPlaceholder(
                           AppLocalizations.of(context)!.playlist,
                         ),
-                        style: textTheme.titleMedium?.copyWith(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
-                        textAlign: TextAlign.center,
+                        style: textTheme.titleMedium,
                       ),
                       IconButton(
                         icon: Icon(

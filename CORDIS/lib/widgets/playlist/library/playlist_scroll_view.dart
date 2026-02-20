@@ -17,7 +17,6 @@ class _PlaylistScrollViewState extends State<PlaylistScrollView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Consumer3<PlaylistProvider, MyAuthProvider, UserProvider>(
       builder:
@@ -58,10 +57,7 @@ class _PlaylistScrollViewState extends State<PlaylistScrollView> {
                         SizedBox(height: 64),
                         Text(
                           AppLocalizations.of(context)!.emptyPlaylistLibrary,
-                          style: theme.textTheme.bodyLarge!.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: theme.textTheme.bodyLarge,
                           textAlign: TextAlign.center,
                         ),
                       ],

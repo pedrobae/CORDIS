@@ -22,8 +22,8 @@ class PlaylistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer5<
       PlaylistProvider,
@@ -91,14 +91,7 @@ class PlaylistCard extends StatelessWidget {
                             spacing: 2.0,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                playlist.name,
-                                style: Theme.of(context).textTheme.titleMedium!
-                                    .copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 18,
-                                    ),
-                              ),
+                              Text(playlist.name, style: textTheme.titleMedium),
                               Row(
                                 spacing: 8,
                                 children: [
@@ -108,26 +101,16 @@ class PlaylistCard extends StatelessWidget {
                                             AppLocalizations.of(context)!.item, //
                                           )}'
                                         : '$itemCount ${AppLocalizations.of(context)!.item}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium!
-                                        .copyWith(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.shadow,
-                                        ),
+                                    style: textTheme.bodyMedium!.copyWith(
+                                      color: colorScheme.shadow,
+                                    ),
                                   ),
                                   itemCount > 0
                                       ? Text(
                                           '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(playlist.getTotalDuration())}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium!
-                                              .copyWith(
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.shadow,
-                                              ),
+                                          style: textTheme.bodyMedium!.copyWith(
+                                            color: colorScheme.shadow,
+                                          ),
                                         )
                                       : const SizedBox.shrink(),
                                 ],
