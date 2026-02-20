@@ -138,11 +138,10 @@ class CloudScheduleProvider extends ChangeNotifier {
         forceFetch: forceFetch,
       );
 
-      _schedules.clear();
-
       for (var schedule in schedules) {
         if (schedule.ownerFirebaseId == userId) {
-          // If the user is the owner, we want to make sure we have the latest version from the cloud (in case they made changes on another device)
+          // If the user is the owner, we want to make sure we have the latest version from the cloud
+          // (in case they made changes on another device)
           await _syncService.syncToLocal(schedule);
         } else {
           _schedules[schedule.firebaseId!] = schedule;

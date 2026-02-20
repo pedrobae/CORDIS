@@ -6,6 +6,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/utils/section_constants.dart';
+import 'package:cordis/widgets/ciphers/viewer/annotation_card.dart';
 import 'package:cordis/widgets/ciphers/viewer/section_card.dart';
 import 'package:cordis/widgets/ciphers/viewer/structure_list.dart';
 import 'package:flutter/material.dart';
@@ -151,17 +152,20 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                   .songStructure;
             }
 
-            final filteredStructure = songStructure
-                .where(
-                  (sectionCode) =>
-                      ((settings.showAnnotations ||
-                          !isAnnotation(sectionCode)) &&
-                      (settings.showTransitions || !isTransition(sectionCode))),
-                )
-                .toList()
-                .asMap();
+            final filteredStructure = <String>[];
+            for (var sectionCode in songStructure) {
+              if (!settings.showAnnotations && isAnnotation(sectionCode)) {
+                continue;
+              }
+              if (!settings.showTransitions && isTransition(sectionCode)) {
+                continue;
+              }
+              filteredStructure.add(sectionCode);
+            }
 
-            final sectionCardList = filteredStructure.entries.map((entry) {
+            final sectionCardList = filteredStructure.asMap().entries.map((
+              entry,
+            ) {
               String trimmedCode = entry.value.trim();
 
               final section = sectionProvider.getSection(
@@ -179,13 +183,21 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                 return const SizedBox.shrink();
               }
 
-              return SectionCard(
-                key: sectionKeys[entry.key],
-                sectionType: section.contentType,
-                sectionCode: trimmedCode,
-                sectionText: section.contentText,
-                sectionColor: section.contentColor,
-              );
+              if (isAnnotation(trimmedCode)) {
+                return AnnotationCard(
+                  key: sectionKeys[entry.key],
+                  sectionText: section.contentText,
+                  sectionType: section.contentType,
+                );
+              } else {
+                return SectionCard(
+                  key: sectionKeys[entry.key],
+                  sectionType: section.contentType,
+                  sectionCode: trimmedCode,
+                  sectionText: section.contentText,
+                  sectionColor: section.contentColor,
+                );
+              }
             }).toList();
 
             // Add space at the end of the list for better scrolling
@@ -298,8 +310,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                               ),
                               StructureList(
                                 versionId: widget.versionID,
-                                filteredStructure: filteredStructure.values
-                                    .toList(),
+                                filteredStructure: filteredStructure,
                                 scrollController: scrollController,
                                 sectionKeys: sectionKeys,
                               ),

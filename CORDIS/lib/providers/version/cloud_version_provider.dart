@@ -1,3 +1,4 @@
+import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/repositories/cloud/version_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -22,7 +23,7 @@ class CloudVersionProvider extends ChangeNotifier {
     return _versions[firebaseId];
   }
 
-  List<String> get filteredCloudVersions {
+  List<String> get filteredCloudVersionIds {
     if (_searchTerm.isEmpty) {
       return _versions.keys.toList();
     } else {
@@ -73,7 +74,10 @@ class CloudVersionProvider extends ChangeNotifier {
   // ===== READ =====
 
   /// Loads public versions from Firestore
-  Future<void> loadVersions({bool forceReload = false}) async {
+  Future<void> loadVersions({
+    bool forceReload = false,
+    List<Cipher> localCiphers = const [],
+  }) async {
     if (_isLoading) return;
 
     _isLoading = true;
@@ -81,11 +85,18 @@ class CloudVersionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      _versions.clear();
       final cloudVersions = await _repo.getPublicVersions(
         forceReload: forceReload,
       );
 
       for (final version in cloudVersions) {
+        if (localCiphers.any(
+          (cipher) =>
+              cipher.title == version.title && cipher.author == version.author,
+        )) {
+          continue; // Skip versions whose ciphers are already in local cache
+        }
         _versions[version.firebaseId!] = version;
       }
     } catch (e) {

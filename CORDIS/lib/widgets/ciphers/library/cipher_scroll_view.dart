@@ -33,11 +33,14 @@ class _CipherScrollViewState extends State<CipherScrollView> {
 
     localVersionProvider.clearCache();
     await cipherProvider.loadCiphers(forceReload: forceReload);
-    await cloudVersionProvider.loadVersions(forceReload: forceReload);
+    await cloudVersionProvider.loadVersions(
+      forceReload: forceReload,
+      localCiphers: cipherProvider.ciphers.values.toList(),
+    );
 
     setState(() {
-      localIds = cipherProvider.filteredCiphers;
-      cloudIds = cloudVersionProvider.filteredCloudVersions;
+      localIds = cipherProvider.filteredCipherIds;
+      cloudIds = cloudVersionProvider.filteredCloudVersionIds;
     });
 
     for (var cipherId in localIds) {

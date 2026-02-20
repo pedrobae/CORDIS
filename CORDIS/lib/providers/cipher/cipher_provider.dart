@@ -22,7 +22,7 @@ class CipherProvider extends ChangeNotifier {
 
   // Getters
   Map<int, Cipher> get ciphers => _ciphers;
-  List<int> get filteredCiphers {
+  List<int> get filteredCipherIds {
     if (_searchTerm.isEmpty) {
       return _ciphers.keys.toList();
     } else {

@@ -145,13 +145,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final cacheService = CacheService();
       await cacheService.clearAllCaches();
 
-      // Check if widget is still mounted before using context
-      if (mounted) {
-        await context.read<CloudVersionProvider>().loadVersions(
-          forceReload: true,
-        );
-      }
-
       if (mounted) {
         await context.read<UserProvider>().ensureUsersExist([
           context.read<MyAuthProvider>().id!,
@@ -209,7 +202,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // Force reload all providers from database
       await Future.wait([
         context.read<CipherProvider>().loadCiphers(forceReload: true),
-        context.read<CloudVersionProvider>().loadVersions(forceReload: true),
+        context.read<CloudVersionProvider>().loadVersions(
+          forceReload: true,
+          localCiphers: context.read<CipherProvider>().ciphers.values.toList(),
+        ),
         context.read<PlaylistProvider>().loadPlaylists(),
         context.read<UserProvider>().loadUsers(),
         context.read<LocalScheduleProvider>().loadSchedules(),
