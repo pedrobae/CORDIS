@@ -142,12 +142,7 @@ class _ScheduleFormState extends State<ScheduleForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
-        ),
+        Text(label, style: Theme.of(context).textTheme.labelLarge),
         TextFormField(
           validator: validator,
           controller: controller,
@@ -181,12 +176,7 @@ class _ScheduleFormState extends State<ScheduleForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
-        ),
+        Text(label, style: Theme.of(context).textTheme.labelLarge),
         TextFormField(
           validator: validator,
           controller: controller,

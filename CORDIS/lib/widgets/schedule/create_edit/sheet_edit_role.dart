@@ -1,12 +1,13 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
+import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EditRoleSheet extends StatefulWidget {
   final dynamic scheduleId;
-  final dynamic role; // Role or RoleDTO object
+  final dynamic role; // Role or RoleDTO object or Null for new role
 
   const EditRoleSheet({
     super.key,
@@ -19,6 +20,16 @@ class EditRoleSheet extends StatefulWidget {
 }
 
 class _EditRoleSheetState extends State<EditRoleSheet> {
+  final _nameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.role != null) {
+      _nameController.text = widget.role.name;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -41,12 +52,14 @@ class _EditRoleSheetState extends State<EditRoleSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    AppLocalizations.of(
-                      context,
-                    )!.editPlaceholder(AppLocalizations.of(context)!.role),
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    widget.role == null
+                        ? AppLocalizations.of(context)!.createPlaceholder(
+                            AppLocalizations.of(context)!.role,
+                          )
+                        : AppLocalizations.of(context)!.editPlaceholder(
+                            AppLocalizations.of(context)!.role,
+                          ),
+                    style: textTheme.titleMedium,
                   ),
                   IconButton(
                     icon: Icon(Icons.close),
@@ -55,35 +68,37 @@ class _EditRoleSheetState extends State<EditRoleSheet> {
                 ],
               ),
               // NAME FIELD
-              TextFormField(
-                initialValue: widget.role.name,
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: colorScheme.surfaceContainerLowest,
-                      width: 1.2,
-                    ),
-                  ),
-                  labelText: AppLocalizations.of(context)!.roleNameHint,
-                ),
-                onChanged: (value) {
-                  scheduleProvider.updateRoleName(
-                    widget.scheduleId,
-                    widget.role.name,
-                    value,
-                  );
-                },
+              LabeledTextField(
+                label: AppLocalizations.of(context)!.name,
+                controller: _nameController,
+                hint: AppLocalizations.of(context)!.roleNameHint,
               ),
               // SAVE BUTTON
               FilledTextButton(
-                text: AppLocalizations.of(context)!.save,
+                text: widget.role == null
+                    ? AppLocalizations.of(context)!.create
+                    : AppLocalizations.of(context)!.save,
                 isDark: true,
                 onPressed: () {
+                  if (widget.role == null) {
+                    // CREATE NEW ROLE
+                    scheduleProvider.addRoleToSchedule(
+                      widget.scheduleId,
+                      _nameController.text,
+                    );
+                  } else {
+                    // UPDATE EXISTING ROLE
+                    scheduleProvider.updateRoleName(
+                      widget.scheduleId,
+                      widget.role.name,
+                      _nameController.text,
+                    );
+                  }
                   Navigator.of(context).pop();
                 },
               ),
 
-              SizedBox(height: 16),
+              SizedBox(),
             ],
           ),
         );

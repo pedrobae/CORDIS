@@ -15,6 +15,7 @@ class RoleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer<LocalScheduleProvider>(
@@ -35,21 +36,16 @@ class RoleCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      role.name,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
+                    Text(role.name, style: textTheme.titleMedium),
                     Text(
                       role.users.isEmpty
                           ? AppLocalizations.of(context)!.noMembers
                           : AppLocalizations.of(
                               context,
                             )!.xMembers(role.users.length),
-                      style: TextStyle(fontSize: 14, color: colorScheme.shadow),
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.surfaceContainerLowest,
+                      ),
                       softWrap: false,
                     ),
                   ],

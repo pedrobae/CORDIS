@@ -1,9 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/schedule.dart';
+import 'package:cordis/models/domain/user.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
+import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -44,9 +46,9 @@ class _AddUserSheetState extends State<AddUserSheet> {
   void _onUsernameChanged() {
     if (!mounted) return;
     final userProvider = context.read<UserProvider>();
-    final members = (widget.role is Role)
-        ? userProvider.getUsersByIds(widget.role.memberIds)
-        : userProvider.getUsersByFirebaseIds(widget.role.memberIds);
+    final List<User> members = (widget.role is Role)
+        ? widget.role.users
+        : widget.role.users.map((user) => user.toDomain()).toList();
 
     final query = _usernameController.text.toLowerCase();
     setState(() {
@@ -70,9 +72,9 @@ class _AddUserSheetState extends State<AddUserSheet> {
   void _onEmailChanged() {
     if (!mounted) return;
     final userProvider = context.read<UserProvider>();
-    final members = (widget.role is Role)
-        ? userProvider.getUsersByIds(widget.role.memberIds)
-        : userProvider.getUsersByFirebaseIds(widget.role.memberIds);
+    final List<User> members = (widget.role is Role)
+        ? widget.role.users
+        : widget.role.users.map((user) => user.toDomain()).toList();
 
     final query = _emailController.text.toLowerCase();
     setState(() {
@@ -93,18 +95,18 @@ class _AddUserSheetState extends State<AddUserSheet> {
     });
   }
 
-  void _selectUserByUsername(dynamic user) {
+  void _selectUserByUsername(User user) {
     setState(() {
       _usernameController.text = user.username;
-      _emailController.text = user.mail;
+      _emailController.text = user.email;
       _showUsernameDropdown = false;
       _usernameFilteredUsers = [];
     });
   }
 
-  void _selectUserByEmail(dynamic user) {
+  void _selectUserByEmail(User user) {
     setState(() {
-      _emailController.text = user.mail;
+      _emailController.text = user.email;
       _usernameController.text = user.username;
       _showEmailDropdown = false;
       _emailFilteredUsers = [];
@@ -147,7 +149,6 @@ class _AddUserSheetState extends State<AddUserSheet> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Consumer2<UserProvider, LocalScheduleProvider>(
       builder: (context, userProvider, scheduleProvider, child) {
@@ -163,9 +164,8 @@ class _AddUserSheetState extends State<AddUserSheet> {
               children: [
                 // HEADER
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    SizedBox(),
                     IconButton(
                       onPressed: () {
                         Navigator.of(context).pop();
@@ -184,26 +184,10 @@ class _AddUserSheetState extends State<AddUserSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 8,
                       children: [
-                        Text(
-                          AppLocalizations.of(context)!.name,
-                          style: textTheme.titleMedium,
-                        ),
-                        TextField(
+                        LabeledTextField(
+                          label: AppLocalizations.of(context)!.name,
                           controller: _usernameController,
-                          decoration: InputDecoration(
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(4),
-                              borderSide: BorderSide(
-                                color: colorScheme.surfaceContainerLowest,
-                              ),
-                            ),
-                            hintStyle: TextStyle(
-                              color: colorScheme.surfaceContainerLowest,
-                            ),
-                            hintText: AppLocalizations.of(
-                              context,
-                            )!.enterNameHint,
-                          ),
+                          hint: AppLocalizations.of(context)!.enterNameHint,
                         ),
                         if (_showUsernameDropdown &&
                             _usernameFilteredUsers.isNotEmpty)
@@ -222,7 +206,7 @@ class _AddUserSheetState extends State<AddUserSheet> {
                                 final user = _usernameFilteredUsers[index];
                                 return ListTile(
                                   title: Text(user.username),
-                                  subtitle: Text(user.mail),
+                                  subtitle: Text(user.email),
                                   onTap: () => _selectUserByUsername(user),
                                 );
                               },
@@ -236,26 +220,10 @@ class _AddUserSheetState extends State<AddUserSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 8,
                       children: [
-                        Text(
-                          AppLocalizations.of(context)!.email,
-                          style: textTheme.titleMedium,
-                        ),
-                        TextField(
+                        LabeledTextField(
+                          label: AppLocalizations.of(context)!.email,
                           controller: _emailController,
-                          decoration: InputDecoration(
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(4),
-                              borderSide: BorderSide(
-                                color: colorScheme.surfaceContainerLowest,
-                              ),
-                            ),
-                            hintStyle: TextStyle(
-                              color: colorScheme.surfaceContainerLowest,
-                            ),
-                            hintText: AppLocalizations.of(
-                              context,
-                            )!.enterEmailHint,
-                          ),
+                          hint: AppLocalizations.of(context)!.enterEmailHint,
                         ),
                         if (_showEmailDropdown &&
                             _emailFilteredUsers.isNotEmpty)
@@ -273,7 +241,7 @@ class _AddUserSheetState extends State<AddUserSheet> {
                               itemBuilder: (context, index) {
                                 final user = _emailFilteredUsers[index];
                                 return ListTile(
-                                  title: Text(user.mail),
+                                  title: Text(user.email),
                                   subtitle: Text(user.username),
                                   onTap: () => _selectUserByEmail(user),
                                 );
@@ -283,7 +251,6 @@ class _AddUserSheetState extends State<AddUserSheet> {
                       ],
                     ),
 
-                    SizedBox(height: 16),
                     // ADD BUTTON
                     FilledTextButton(
                       onPressed: () => _addUser(context),
@@ -292,6 +259,7 @@ class _AddUserSheetState extends State<AddUserSheet> {
                       )!.addPlaceholder(AppLocalizations.of(context)!.member),
                       isDark: true,
                     ),
+                    SizedBox(),
                   ],
                 ),
               ],

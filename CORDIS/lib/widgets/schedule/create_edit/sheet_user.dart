@@ -30,8 +30,8 @@ class _UsersBottomSheetState extends State<UsersBottomSheet> {
     return Consumer2<UserProvider, LocalScheduleProvider>(
       builder: (context, userProvider, scheduleProvider, child) {
         final users = (widget.role is Role)
-            ? userProvider.getUsersByIds(widget.role.memberIds)
-            : userProvider.getUsersByFirebaseIds(widget.role.memberIds);
+            ? widget.role.users
+            : widget.role.users.map((user) => user.toDomain()).toList();
 
         return Container(
           decoration: BoxDecoration(
@@ -42,6 +42,7 @@ class _UsersBottomSheetState extends State<UsersBottomSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 16,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -50,9 +51,7 @@ class _UsersBottomSheetState extends State<UsersBottomSheet> {
                     AppLocalizations.of(
                       context,
                     )!.assignMembersToRole(widget.role.name),
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: textTheme.titleMedium,
                   ),
                   IconButton(
                     icon: Icon(Icons.close),
@@ -75,12 +74,13 @@ class _UsersBottomSheetState extends State<UsersBottomSheet> {
                   ),
                   FilledTextButton(
                     text: AppLocalizations.of(context)!.clear,
-                    onPressed: () {},
+                    onPressed: () {
+                      // TODO: Clear all users from role
+                    },
                     isDense: true,
                   ),
                 ],
               ),
-              SizedBox(height: 24),
               // MEMBERS OF ROLE LIST
               ...users.map<Widget>((member) {
                 return Container(
@@ -120,7 +120,9 @@ class _UsersBottomSheetState extends State<UsersBottomSheet> {
                         ),
                       ),
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          // TODO: Remove user from role
+                        },
                         icon: Icon(Icons.remove_circle_outline),
                         color: colorScheme.error,
                       ),
@@ -128,7 +130,6 @@ class _UsersBottomSheetState extends State<UsersBottomSheet> {
                   ),
                 );
               }),
-              SizedBox(height: 24),
 
               // SAVE BUTTON
               FilledTextButton(
@@ -138,6 +139,7 @@ class _UsersBottomSheetState extends State<UsersBottomSheet> {
                   Navigator.of(context).pop();
                 },
               ),
+              SizedBox(),
             ],
           ),
         );
