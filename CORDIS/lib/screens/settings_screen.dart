@@ -127,7 +127,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       spacing: 16,
       children: [
         Icon(icon, color: Theme.of(context).colorScheme.primary, size: 20),
-        Text(title, style: Theme.of(context).textTheme.titleLarge),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
       ],
     );
   }

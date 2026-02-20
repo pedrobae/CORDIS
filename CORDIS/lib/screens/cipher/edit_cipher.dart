@@ -204,11 +204,9 @@ class _EditCipherScreenState extends State<EditCipherScreen>
               appBar: AppBar(
                 leading: BackButton(onPressed: () => navigationProvider.pop()),
                 title: Text(
-                  selectionProvider.isSelectionMode
-                      ? AppLocalizations.of(
-                          context,
-                        )!.editPlaceholder(AppLocalizations.of(context)!.cipher)
-                      : AppLocalizations.of(context)!.cipherEditorTitle,
+                  AppLocalizations.of(
+                    context,
+                  )!.editPlaceholder(AppLocalizations.of(context)!.cipher),
                   style: textTheme.titleMedium,
                 ),
                 actions: [
@@ -368,7 +366,6 @@ class _EditCipherScreenState extends State<EditCipherScreen>
       }
       selectionProvider.clearSelection();
       navigationProvider.pop(); // Close editor
-      navigationProvider.pop(); // Close cipher library
     } else {
       switch (widget.versionType) {
         case VersionType.playlist:

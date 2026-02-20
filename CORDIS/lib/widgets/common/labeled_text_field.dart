@@ -45,7 +45,11 @@ class LabeledTextField extends StatelessWidget {
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: colorScheme.surfaceContainerLowest),
+              borderSide: BorderSide(color: colorScheme.shadow),
+              borderRadius: BorderRadius.circular(0),
+            ),
+            disabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: colorScheme.surfaceContainer),
               borderRadius: BorderRadius.circular(0),
             ),
             visualDensity: VisualDensity.compact,

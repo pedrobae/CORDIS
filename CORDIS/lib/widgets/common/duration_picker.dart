@@ -47,10 +47,7 @@ class _DurationPickerFieldState extends State<DurationPickerField> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: colorScheme.surfaceContainerLowest,
-                width: 1.2,
-              ),
+              border: Border.all(color: colorScheme.shadow, width: 1),
               borderRadius: BorderRadius.circular(0),
             ),
             child: Row(
@@ -72,7 +69,7 @@ class _DurationPickerFieldState extends State<DurationPickerField> {
                     );
                   },
                 ),
-                Icon(Icons.access_time, color: colorScheme.shadow),
+                Icon(Icons.access_time, color: colorScheme.onSurface),
               ],
             ),
           ),

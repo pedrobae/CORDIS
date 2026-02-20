@@ -70,12 +70,15 @@ class LocalScheduleRepository {
     return Schedule.fromSqlite(maps.first, roles);
   }
 
-  Future<Schedule?> getScheduleByFirebaseId(String firebaseId) async {
+  Future<Schedule?> getScheduleByFirebaseIdOrShareCode(
+    String firebaseId,
+    String shareCode,
+  ) async {
     final db = await _databaseHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
       'schedule',
-      where: 'firebase_id = ?',
-      whereArgs: [firebaseId],
+      where: 'firebase_id = ? OR share_code = ?',
+      whereArgs: [firebaseId, shareCode],
     );
 
     if (maps.isEmpty) return null;

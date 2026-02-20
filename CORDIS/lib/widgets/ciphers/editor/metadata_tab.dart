@@ -1,7 +1,6 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
-import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
@@ -51,8 +50,9 @@ class _MetadataTabState extends State<MetadataTab> {
     for (var i = 0; i < InfoField.values.length; i++) {
       controllers[InfoField.values[i]] = TextEditingController();
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _syncWithProviderData();
+    _addListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _syncWithProviderData();
     });
   }
 
@@ -64,7 +64,7 @@ class _MetadataTabState extends State<MetadataTab> {
     super.dispose();
   }
 
-  void _syncWithProviderData() async {
+  Future<void> _syncWithProviderData() async {
     if (mounted) {
       final versionProvider = context.read<LocalVersionProvider>();
       final cloudVersionProvider = context.read<CloudVersionProvider>();
@@ -150,6 +150,113 @@ class _MetadataTabState extends State<MetadataTab> {
     }
   }
 
+  void _addListeners() {
+    final cipherProvider = context.read<CipherProvider>();
+    final localVersionProvider = context.read<LocalVersionProvider>();
+    final cloudVersionProvider = context.read<CloudVersionProvider>();
+
+    for (var field in InfoField.values) {
+      controllers[field]!.addListener(() {
+        final text = controllers[field]!.text;
+        switch (field) {
+          case InfoField.title:
+            if (widget.versionType == VersionType.cloud) {
+              cloudVersionProvider.cacheUpdates(widget.versionID, title: text);
+            } else {
+              cipherProvider.cacheUpdates(widget.cipherID ?? -1, title: text);
+            }
+            break;
+
+          case InfoField.author:
+            if (widget.versionType == VersionType.cloud) {
+              cloudVersionProvider.cacheUpdates(widget.versionID, author: text);
+            } else {
+              cipherProvider.cacheUpdates(widget.cipherID ?? -1, author: text);
+            }
+            break;
+          case InfoField.versionName:
+            if (widget.versionType == VersionType.cloud) {
+              cloudVersionProvider.cacheUpdates(
+                widget.versionID,
+                versionName: text,
+              );
+            } else {
+              localVersionProvider.cacheUpdates(
+                widget.versionID ?? -1,
+                versionName: text,
+              );
+            }
+            break;
+          case InfoField.language:
+            if (widget.versionType == VersionType.cloud) {
+              cloudVersionProvider.cacheUpdates(
+                widget.versionID,
+                language: text,
+              );
+            } else {
+              cipherProvider.cacheUpdates(
+                widget.cipherID ?? -1,
+                language: text,
+              );
+            }
+            break;
+          case InfoField.bpm:
+            final bpm = int.tryParse(text) ?? 0;
+            if (widget.versionType == VersionType.cloud) {
+              cloudVersionProvider.cacheUpdates(widget.versionID, bpm: bpm);
+            } else {
+              localVersionProvider.cacheUpdates(
+                widget.versionID ?? -1,
+                bpm: bpm,
+              );
+            }
+            break;
+          case InfoField.key:
+            switch (widget.versionType) {
+              case VersionType.cloud:
+                cloudVersionProvider.cacheUpdates(
+                  widget.versionID,
+                  transposedKey: text,
+                );
+                break;
+              case VersionType.local:
+              case VersionType.import:
+              case VersionType.brandNew:
+                cipherProvider.cacheUpdates(
+                  widget.cipherID ?? -1,
+                  musicKey: text,
+                );
+                break;
+              case VersionType.playlist:
+                localVersionProvider.cacheUpdates(
+                  widget.cipherID ?? -1,
+                  transposedKey: text,
+                );
+                break;
+            }
+            break;
+          case InfoField.duration:
+            final duration = DateTimeUtils.parseDuration(text);
+            if (widget.versionType == VersionType.cloud) {
+              cloudVersionProvider.cacheUpdates(
+                widget.versionID,
+                duration: duration.inSeconds,
+              );
+            } else {
+              localVersionProvider.cacheUpdates(
+                widget.versionID ?? -1,
+                duration: duration,
+              );
+            }
+            break;
+          case InfoField.tags:
+            // THIS CONTROLLER IS NOT USED, ADDING TAGS IS HANDLED BY A BOTTOM SHEET
+            break;
+        }
+      });
+    }
+  }
+
   TextEditingController _getController(InfoField field) {
     return controllers[field]!;
   }
@@ -180,23 +287,6 @@ class _MetadataTabState extends State<MetadataTab> {
       InfoField.language => AppLocalizations.of(context)!.languageHint,
       InfoField.tags => AppLocalizations.of(context)!.tagHint,
     };
-  }
-
-  bool _isEnabled(InfoField field) {
-    final selectionProvider = context.read<SelectionProvider>();
-    switch (field) {
-      case InfoField.title:
-      case InfoField.versionName:
-      case InfoField.author:
-      case InfoField.tags:
-        if (!widget.isEnabled) return false;
-        return !selectionProvider.isSelectionMode;
-      case InfoField.bpm:
-      case InfoField.duration:
-      case InfoField.key:
-      case InfoField.language:
-        return true;
-    }
   }
 
   @override
@@ -235,7 +325,7 @@ class _MetadataTabState extends State<MetadataTab> {
                       label: _getLabel(field),
                       hint: _getHint(field),
                       controller: _getController(field),
-                      isEnabled: _isEnabled(field),
+                      isEnabled: widget.isEnabled,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return null;
@@ -259,6 +349,7 @@ class _MetadataTabState extends State<MetadataTab> {
                       label: _getLabel(field),
                       hint: _getHint(field),
                       controller: _getController(field),
+                      isEnabled: widget.isEnabled,
                     ),
                   },
               ],
@@ -299,10 +390,7 @@ class _MetadataTabState extends State<MetadataTab> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: colorScheme.surfaceContainerLowest,
-                width: 1.2,
-              ),
+              border: Border.all(color: colorScheme.shadow, width: 1),
               borderRadius: BorderRadius.circular(0),
             ),
             child: Row(
@@ -324,7 +412,7 @@ class _MetadataTabState extends State<MetadataTab> {
                     );
                   },
                 ),
-                Icon(Icons.arrow_drop_down, color: colorScheme.shadow),
+                Icon(Icons.arrow_drop_down, color: colorScheme.onSurface),
               ],
             ),
           ),

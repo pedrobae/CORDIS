@@ -81,17 +81,17 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
             padding: const EdgeInsets.all(16),
             child: playlist.items.isEmpty
                 ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         AppLocalizations.of(context)!.emptyPlaylist,
-                        style: theme.textTheme.headlineSmall,
+                        style: theme.textTheme.titleMedium,
                         textAlign: TextAlign.center,
                       ),
                       Text(
                         AppLocalizations.of(context)!.emptyPlaylistInstructions,
-                        style: theme.textTheme.titleMedium,
+                        style: theme.textTheme.bodyLarge,
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   )

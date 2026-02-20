@@ -421,6 +421,7 @@ class FirestoreService {
       final querySnapshot = await _firestore
           .collection(collectionPath)
           .where(field, arrayContains: value)
+          .where(orderField, isGreaterThanOrEqualTo: Timestamp.now())
           .orderBy(orderField)
           .limit(limit)
           .get();

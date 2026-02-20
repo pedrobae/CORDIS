@@ -40,7 +40,7 @@ class ScheduleSyncService {
     }
 
     final playlistId = await _playlistRepo.upsertPlaylist(
-      scheduleDto.playlist.toDomain(localUser.id!).copyWith(),
+      scheduleDto.playlist.toDomain(localUser.id!),
     );
 
     // Upsert each playlist Item in the playlist
@@ -100,7 +100,7 @@ class ScheduleSyncService {
               );
             }
           } else {
-            // Version doesn't exist locally, insert it and add it
+            // Version doesn't exist locally, insert it and add it to the playlist
             final versionId = await _versionRepo.insertVersion(
               versionDto.toDomain(cipherId: cipherId),
             );
@@ -117,8 +117,9 @@ class ScheduleSyncService {
 
     final schedule = scheduleDto.toDomain(playlistLocalId: playlistId);
 
-    final existing = await _localRepo.getScheduleByFirebaseId(
+    final existing = await _localRepo.getScheduleByFirebaseIdOrShareCode(
       scheduleDto.firebaseId!,
+      scheduleDto.shareCode,
     );
     if (existing == null) {
       // Schedule doesn't exist locally, insert it
