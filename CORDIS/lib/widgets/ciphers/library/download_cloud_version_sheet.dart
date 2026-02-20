@@ -86,9 +86,7 @@ class _DownloadVersionSheetState extends State<DownloadVersionSheet> {
                           AppLocalizations.of(context)!.downloadPlaceholder(
                             AppLocalizations.of(context)!.cipher,
                           ),
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: textTheme.titleMedium,
                         ),
                         IconButton(
                           icon: Icon(Icons.close),
@@ -104,9 +102,7 @@ class _DownloadVersionSheetState extends State<DownloadVersionSheet> {
                       children: [
                         Text(
                           AppLocalizations.of(context)!.versionName,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: textTheme.labelLarge,
                         ),
                         TextField(
                           controller: versionNameController,

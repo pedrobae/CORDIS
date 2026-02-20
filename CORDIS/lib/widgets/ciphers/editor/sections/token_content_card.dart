@@ -181,7 +181,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                         Expanded(
                           child: Text(
                             section.contentType,
-                            style: textTheme.titleMedium,
+                            style: textTheme.bodyLarge,
                           ),
                         ),
 
@@ -289,9 +289,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.quickAction,
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: textTheme.titleMedium,
                   ),
                   CloseButton(onPressed: () => Navigator.pop(context)),
                 ],

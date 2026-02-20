@@ -33,6 +33,7 @@ class _SectionsTabState extends State<SectionsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return Consumer4<
       SectionProvider,
@@ -97,11 +98,7 @@ class _SectionsTabState extends State<SectionsTab> {
                                 // LABEL
                                 Text(
                                   AppLocalizations.of(context)!.songStructure,
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      ),
+                                  style: textTheme.titleMedium,
                                 ),
 
                                 if ((widget.versionID is int &&
@@ -128,10 +125,8 @@ class _SectionsTabState extends State<SectionsTab> {
                                       AppLocalizations.of(
                                         context,
                                       )!.managePlaceholder(''),
-                                      style: TextStyle(
+                                      style: textTheme.labelLarge?.copyWith(
                                         color: colorScheme.primary,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
                                       ),
                                     ),
                                   ),
@@ -150,11 +145,7 @@ class _SectionsTabState extends State<SectionsTab> {
                             // LABEL
                             Text(
                               AppLocalizations.of(context)!.lyrics,
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
+                              style: textTheme.titleMedium,
                             ),
 
                             // SECTIONS
@@ -162,7 +153,7 @@ class _SectionsTabState extends State<SectionsTab> {
                               Text(
                                 AppLocalizations.of(context)!.noLyrics,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(color: colorScheme.onSurface),
+                                style: textTheme.bodyMedium,
                               )
                             else
                               ...uniqueSections.map((sectionCode) {
@@ -319,19 +310,14 @@ class _SectionsTabState extends State<SectionsTab> {
                           AppLocalizations.of(context)!.duplicatePlaceholder(
                             AppLocalizations.of(context)!.section,
                           ),
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                          ),
+                          style: textTheme.titleMedium,
                         ),
                         Text(
                           AppLocalizations.of(
                             context,
                           )!.duplicateSectionInstruction,
                           style: textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.surfaceContainerLowest,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
+                            color: colorScheme.shadow,
                           ),
                         ),
                       ],
@@ -394,9 +380,7 @@ class _SectionsTabState extends State<SectionsTab> {
                                   Expanded(
                                     child: Text(
                                       section.contentCode,
-                                      style: textTheme.bodyLarge?.copyWith(
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                      style: textTheme.bodyLarge,
                                     ),
                                   ),
                                   Icon(

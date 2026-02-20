@@ -97,9 +97,6 @@ class _CipherScrollViewState extends State<CipherScrollView> {
     CipherProvider cipherProvider,
     CloudVersionProvider cloudVersionProvider,
   ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return RefreshIndicator(
       onRefresh: () async {
         _loadData(context, forceReload: true);
@@ -111,10 +108,7 @@ class _CipherScrollViewState extends State<CipherScrollView> {
                 SizedBox(height: 64),
                 Text(
                   AppLocalizations.of(context)!.emptyCipherLibrary,
-                  style: theme.textTheme.bodyLarge!.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: Theme.of(context).textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                 ),
               ],

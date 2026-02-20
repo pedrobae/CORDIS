@@ -280,12 +280,7 @@ class _MetadataTabState extends State<MetadataTab> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        Text(
-          _getLabel(field),
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        Text(_getLabel(field), style: theme.textTheme.labelLarge),
         GestureDetector(
           onTap: () {
             showModalBottomSheet(
@@ -355,10 +350,7 @@ class _MetadataTabState extends State<MetadataTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          _getLabel(field),
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
-        ),
+        Text(_getLabel(field), style: textTheme.labelLarge),
         SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -372,12 +364,7 @@ class _MetadataTabState extends State<MetadataTab> {
                   color: colorScheme.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Text(
-                  tag,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
-                ),
+                child: Text(tag, style: textTheme.labelMedium),
               ),
           ],
         ),

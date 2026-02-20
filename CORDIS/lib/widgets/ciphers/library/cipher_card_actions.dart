@@ -5,6 +5,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
+import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -46,11 +47,7 @@ class CipherCardActionsSheet extends StatelessWidget {
                     children: [
                       Text(
                         AppLocalizations.of(context)!.quickAction,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
+                        style: textTheme.titleMedium,
                         textAlign: TextAlign.center,
                       ),
                       IconButton(
@@ -65,8 +62,13 @@ class CipherCardActionsSheet extends StatelessWidget {
                   ),
                   // ACTIONS
                   // EDIT CIPHER
-                  GestureDetector(
-                    onTap: () {
+                  FilledTextButton(
+                    text: AppLocalizations.of(
+                      context,
+                    )!.editPlaceholder(AppLocalizations.of(context)!.cipher),
+                    trailingIcon: Icons.chevron_right,
+                    isDiscrete: true,
+                    onPressed: () {
                       Navigator.of(context).pop(); // Close the bottom sheet
                       navigationProvider.push(
                         EditCipherScreen(
@@ -79,36 +81,17 @@ class CipherCardActionsSheet extends StatelessWidget {
                         showBottomNavBar: true,
                       );
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: colorScheme.surfaceContainer),
-                        borderRadius: BorderRadius.circular(0),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.editPlaceholder(
-                              AppLocalizations.of(context)!.cipher,
-                            ),
-                            style: textTheme.titleMedium?.copyWith(
-                              color: colorScheme.onSurface,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          Icon(Icons.chevron_right, color: colorScheme.shadow),
-                        ],
-                      ),
-                    ),
                   ),
                   // DELETE CIPHER
-                  GestureDetector(
-                    onTap: () {
+                  FilledTextButton(
+                    text: AppLocalizations.of(context)!.delete,
+                    tooltip: AppLocalizations.of(
+                      context,
+                    )!.deleteCipherDescription,
+                    trailingIcon: Icons.chevron_right,
+                    isDiscrete: true,
+                    isDangerous: true,
+                    onPressed: () {
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -129,47 +112,8 @@ class CipherCardActionsSheet extends StatelessWidget {
                         },
                       );
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.red),
-                        borderRadius: BorderRadius.circular(0),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!.delete,
-                                  style: textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.red,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.deleteCipherDescription,
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: Colors.red,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(Icons.chevron_right, color: Colors.red),
-                        ],
-                      ),
-                    ),
                   ),
+                  SizedBox(),
                 ],
               ),
             );

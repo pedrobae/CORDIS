@@ -106,12 +106,7 @@ class _CipherCardState extends State<CipherCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // TITLE
-                              Text(
-                                cipher.title,
-                                style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                              Text(cipher.title, style: textTheme.titleMedium),
 
                               // INFO
                               Row(
