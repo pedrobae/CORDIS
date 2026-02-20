@@ -91,9 +91,7 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
                 leading: BackButton(onPressed: () => navigationProvider.pop()),
                 title: Text(
                   AppLocalizations.of(context)!.schedulePlaylist,
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: textTheme.titleMedium,
                 ),
               ),
               body: Padding(
@@ -107,9 +105,7 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
                       AppLocalizations.of(
                         context,
                       )!.stepXofY(widget.creationStep, 3),
-                      style: textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: textTheme.titleLarge,
                     ),
                     // STEP INSTRUCTION
                     switch (widget.creationStep) {

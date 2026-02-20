@@ -121,9 +121,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
                   AppLocalizations.of(context)!.editPlaceholder(
                     AppLocalizations.of(context)!.scheduleDetails,
                   ),
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: textTheme.titleMedium,
                 ),
               ),
               body: Padding(

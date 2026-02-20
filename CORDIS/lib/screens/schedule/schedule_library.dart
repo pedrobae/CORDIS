@@ -115,7 +115,7 @@ class _ScheduleLibraryScreenState extends State<ScheduleLibraryScreen> {
                           localScheduleProvider.error ??
                               cloudScheduleProvider.error ??
                               '',
-                          style: theme.textTheme.bodyMedium!.copyWith(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.error,
                           ),
                         ),

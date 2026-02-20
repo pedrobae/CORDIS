@@ -69,7 +69,7 @@ class ScheduleSyncService {
 
           if (cipherId == null) {
             // Cipher doesn't exist locally, insert it
-            await _cipherRepo.insertPrunedCipher(
+            cipherId = await _cipherRepo.insertPrunedCipher(
               Cipher.fromVersionDto(versionDto),
             );
           } else {

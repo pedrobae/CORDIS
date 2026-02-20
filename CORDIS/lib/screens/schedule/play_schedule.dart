@@ -270,7 +270,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                             height: 48,
                             child: Icon(
                               Icons.chevron_left,
-                              color: colorScheme.shadow,
+                              color: colorScheme.surfaceContainerLowest,
                               size: 48,
                             ),
                           ),
@@ -285,10 +285,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                                 : AppLocalizations.of(
                                     context,
                                   )!.nextPlaceholder(nextTitle),
-                            style: textTheme.titleLarge?.copyWith(
-                              color: colorScheme.shadow,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: textTheme.bodyLarge,
                             softWrap: true,
                             textAlign: TextAlign.center,
                           ),
@@ -308,7 +305,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                             height: 48,
                             child: Icon(
                               Icons.chevron_right,
-                              color: colorScheme.shadow,
+                              color: colorScheme.surfaceContainerLowest,
                               size: 48,
                             ),
                           ),

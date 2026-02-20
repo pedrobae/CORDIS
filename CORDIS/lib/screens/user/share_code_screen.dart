@@ -52,9 +52,7 @@ class ShareCodeScreenState extends State<ShareCodeScreen> {
             Text(
               AppLocalizations.of(context)!.joinSchedule,
               textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),

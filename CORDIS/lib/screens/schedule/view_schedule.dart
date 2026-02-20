@@ -19,6 +19,7 @@ import 'package:cordis/screens/schedule/edit_schedule.dart';
 import 'package:cordis/screens/schedule/play_schedule.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
+import 'package:cordis/widgets/schedule/status_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -171,10 +172,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                   AppLocalizations.of(
                     context,
                   )!.viewPlaceholder(AppLocalizations.of(context)!.schedule),
-                  style: textTheme.titleMedium?.copyWith(
-                    fontSize: 18,
-                    color: colorScheme.onSurface,
-                  ),
+                  style: textTheme.titleMedium,
                 ),
                 leading: BackButton(
                   onPressed: () {
@@ -225,40 +223,9 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                   children: [
                                     Text(
                                       schedule.name,
-                                      style: textTheme.headlineSmall?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: textTheme.headlineSmall,
                                     ),
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 7,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: schedule.isPublic
-                                            ? Color(0xFF52A94F)
-                                            : Color(0XFFFFA500),
-                                        borderRadius: BorderRadius.circular(
-                                          100,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        schedule.isPublic
-                                            ? AppLocalizations.of(
-                                                context,
-                                              )!.published
-                                            : AppLocalizations.of(
-                                                context,
-                                              )!.draft,
-                                        style: textTheme.bodyMedium!.copyWith(
-                                          color: schedule.isPublic
-                                              ? colorScheme.surface
-                                              : colorScheme.onSurface,
-                                          fontSize: 13,
-                                          fontStyle: FontStyle.italic,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
+                                    StatusChip(schedule: schedule),
                                   ],
                                 ),
                                 Row(
@@ -271,14 +238,19 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                             : (schedule as ScheduleDto).datetime
                                                   .toDate(),
                                       ),
+                                      style: textTheme.bodySmall,
                                     ),
                                     Text(
                                       (schedule is Schedule)
                                           ? schedule.time.format(context)
                                           : '${schedule.datetime.toDate().hour.toString().padLeft(2, '0')}:${ //
                                             schedule.datetime.toDate().minute.toString().padLeft(2, '0')}',
+                                      style: textTheme.bodySmall,
                                     ),
-                                    Text(schedule.location),
+                                    Text(
+                                      schedule.location,
+                                      style: textTheme.bodySmall,
+                                    ),
                                   ],
                                 ),
                               ],
@@ -314,7 +286,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                         padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: colorScheme.surfaceContainerHigh,
+                            color: colorScheme.surfaceContainerLowest,
                           ),
                         ),
                         child: Row(
@@ -325,7 +297,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                               children: [
                                 Text(
                                   AppLocalizations.of(context)!.playlist,
-                                  style: textTheme.titleMedium?.copyWith(
+                                  style: textTheme.bodySmall?.copyWith(
                                     color: colorScheme.surfaceContainerLowest,
                                   ),
                                 ),
@@ -334,17 +306,13 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                     AppLocalizations.of(
                                       context,
                                     )!.noPlaylistAssigned,
-                                    style: textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: textTheme.titleMedium,
                                     textAlign: TextAlign.center,
                                   ),
                                 ] else ...[
                                   Text(
                                     playlist.name,
-                                    style: textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: textTheme.titleMedium,
                                   ),
                                   Row(
                                     spacing: 16,
@@ -355,12 +323,14 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                             : '${playlist.items.length} ${AppLocalizations.of(context)!.pluralPlaceholder(
                                                 AppLocalizations.of(context)!.item, //
                                               )}',
+                                        style: textTheme.bodyMedium,
                                       ),
                                       Text(
                                         (playlist.getTotalDuration() ==
                                                 Duration.zero)
                                             ? '-'
                                             : '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(playlist.getTotalDuration())}',
+                                        style: textTheme.bodyMedium,
                                       ),
                                     ],
                                   ),
@@ -408,7 +378,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                         padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: colorScheme.surfaceContainerHigh,
+                            color: colorScheme.surfaceContainerLowest,
                           ),
                         ),
                         child: Row(
@@ -419,16 +389,14 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                               children: [
                                 Text(
                                   '${AppLocalizations.of(context)!.roles} & ${AppLocalizations.of(context)!.pluralPlaceholder(AppLocalizations.of(context)!.member)}',
-                                  style: textTheme.titleMedium?.copyWith(
+                                  style: textTheme.bodySmall?.copyWith(
                                     color: colorScheme.surfaceContainerLowest,
                                   ),
                                 ),
                                 if (schedule.roles.isEmpty) ...[
                                   Text(
                                     AppLocalizations.of(context)!.noRoles,
-                                    style: textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: textTheme.titleMedium,
                                     textAlign: TextAlign.center,
                                   ),
                                 ] else ...[
@@ -436,15 +404,13 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                     (schedule.roles.length == 1)
                                         ? '1 ${AppLocalizations.of(context)!.role}'
                                         : '${schedule.roles.length} ${AppLocalizations.of(context)!.roles}',
-                                    style: textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: textTheme.titleMedium,
                                   ),
                                   Text(
                                     (memberCount == 1)
                                         ? '1 ${AppLocalizations.of(context)!.member}'
                                         : '$memberCount ${AppLocalizations.of(context)!.pluralPlaceholder(AppLocalizations.of(context)!.member)}',
-                                    style: textTheme.bodyMedium,
+                                    style: textTheme.bodySmall,
                                   ),
                                 ],
                               ],
@@ -504,10 +470,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                               context,
                                             )!.schedule,
                                           ),
-                                          style: textTheme.headlineSmall
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w500,
-                                              ),
+                                          style: textTheme.headlineSmall,
                                           textAlign: TextAlign.center,
                                         ),
 
@@ -519,10 +482,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                             AppLocalizations.of(
                                               context,
                                             )!.publishScheduleWarning,
-                                            style: textTheme.bodyMedium
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.w500,
-                                                ),
+                                            style: textTheme.bodySmall,
                                             textAlign: TextAlign.center,
                                           ),
                                         ),

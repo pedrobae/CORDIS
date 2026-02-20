@@ -102,16 +102,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         Text(
                           AppLocalizations.of(context)!.createNewAccount,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onSurface,
-                          ),
+                          style: theme.textTheme.headlineSmall,
                         ),
                         Text(
                           AppLocalizations.of(context)!.joinAppDescription,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                          style: theme.textTheme.bodyMedium,
                           textAlign: TextAlign.center,
                         ),
                       ],

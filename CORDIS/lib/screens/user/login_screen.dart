@@ -59,10 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   AppLocalizations.of(context)!.logInTitlePrefix +
                       AppLocalizations.of(context)!.appName,
-                  style: textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
-                  ),
+                  style: textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
 
@@ -214,10 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       icon: const Icon(Icons.g_mobiledata, size: 24),
                       label: Text(
                         'Entrar com Google',
-                        style: textTheme.labelLarge!.copyWith(
-                          color: colorScheme.onSecondaryContainer,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: textTheme.labelLarge,
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colorScheme.secondaryContainer,

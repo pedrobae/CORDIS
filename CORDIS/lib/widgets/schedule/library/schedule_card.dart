@@ -1,5 +1,4 @@
 import 'package:cordis/l10n/app_localizations.dart';
-import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
@@ -11,6 +10,7 @@ import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/library/duplicate_schedule_sheet.dart';
 import 'package:cordis/widgets/schedule/library/share_schedule_sheet.dart';
+import 'package:cordis/widgets/schedule/status_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -103,43 +103,7 @@ class ScheduleCard extends StatelessWidget {
                                     color: colorScheme.onSurface,
                                   ),
                                 ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 7),
-                                  decoration: BoxDecoration(
-                                    color: switch (schedule.scheduleState) {
-                                      ScheduleState.completed =>
-                                        colorScheme.onSurface,
-                                      ScheduleState.draft => Color(0XFFFFA500),
-                                      ScheduleState.published => Color(
-                                        0xFF52A94F,
-                                      ),
-                                    },
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: Text(
-                                    switch (schedule.scheduleState) {
-                                      ScheduleState.completed =>
-                                        AppLocalizations.of(context)!.completed,
-                                      ScheduleState.draft =>
-                                        AppLocalizations.of(context)!.draft,
-                                      ScheduleState.published =>
-                                        AppLocalizations.of(context)!.published,
-                                    },
-                                    style: theme.textTheme.bodyMedium!.copyWith(
-                                      color: switch (schedule.scheduleState) {
-                                        ScheduleState.completed =>
-                                          colorScheme.surface,
-                                        ScheduleState.draft =>
-                                          colorScheme.onSurface,
-                                        ScheduleState.published =>
-                                          colorScheme.surface,
-                                      },
-                                      fontSize: 13,
-                                      fontStyle: FontStyle.italic,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
+                                StatusChip(schedule: schedule),
                               ],
                             ),
 
