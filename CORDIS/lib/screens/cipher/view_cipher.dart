@@ -239,16 +239,12 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                             children: [
                               Text(
                                 cipher?.title ?? version.title,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.w700),
+                                style: Theme.of(context).textTheme.titleMedium,
                               ),
                               Text(
                                 '${AppLocalizations.of(context)!.by} ${cipher?.author ?? (version as VersionDto).author}',
                                 style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: colorScheme.onSurface,
-                                      fontStyle: FontStyle.italic,
-                                    ),
+                                    ?.copyWith(fontStyle: FontStyle.italic),
                               ),
                               SizedBox(height: 8.0),
                               // info
@@ -298,10 +294,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                             children: [
                               Text(
                                 AppLocalizations.of(context)!.songStructure,
-                                style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
+                                style: textTheme.titleMedium,
                               ),
                               StructureList(
                                 versionId: widget.versionID,

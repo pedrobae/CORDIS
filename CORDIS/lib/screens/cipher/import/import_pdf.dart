@@ -74,9 +74,7 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
               appBar: AppBar(
                 title: Text(
                   AppLocalizations.of(context)!.importFromPDF,
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: textTheme.titleMedium,
                 ),
                 leading: BackButton(
                   onPressed: () {
@@ -120,9 +118,7 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                                 children: [
                                   Text(
                                     importProvider.selectedFileName!,
-                                    style: textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                    style: textTheme.titleSmall,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -214,9 +210,7 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                               Expanded(
                                 child: Text(
                                   importProvider.error!,
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onErrorContainer,
-                                  ),
+                                  style: textTheme.bodySmall,
                                 ),
                               ),
                             ],
@@ -243,17 +237,13 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                               Icon(Icons.info, color: colorScheme.shadow),
                               Text(
                                 AppLocalizations.of(context)!.howToImport,
-                                style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: textTheme.titleMedium,
                               ),
                             ],
                           ),
                           Text(
                             AppLocalizations.of(context)!.importInstructions,
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w400,
-                            ),
+                            style: textTheme.bodyMedium,
                           ),
                         ],
                       ),

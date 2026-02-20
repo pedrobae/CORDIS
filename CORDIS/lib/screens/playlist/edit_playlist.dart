@@ -75,18 +75,14 @@ class _EditPlaylistScreenState extends State<EditPlaylistScreen> {
                     children: [
                       Text(
                         AppLocalizations.of(context)!.namePlaylistPrompt,
-                        style: theme.textTheme.headlineSmall!.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: theme.textTheme.titleMedium,
                       ),
                       if (!isEditing)
                         Text(
                           AppLocalizations.of(
                             context,
                           )!.createPlaylistInstructions,
-                          style: theme.textTheme.titleMedium!.copyWith(
-                            fontSize: 15,
-                          ),
+                          style: theme.textTheme.bodyLarge,
                         ),
                     ],
                   ),

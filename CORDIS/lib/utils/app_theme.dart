@@ -278,12 +278,12 @@ class AppTheme {
     titleMedium: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w700,
-      letterSpacing: 0.15,
+      letterSpacing: 0.2,
     ),
     titleSmall: TextStyle(
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: FontWeight.w700,
-      letterSpacing: 0.1,
+      letterSpacing: 0.2,
     ),
     bodyLarge: TextStyle(
       fontSize: 16,

@@ -41,9 +41,7 @@ class _CipherLibraryScreenState extends State<CipherLibraryScreen> {
                       leading: const BackButton(),
                       title: Text(
                         AppLocalizations.of(context)!.addToPlaylist,
-                        style: theme.textTheme.titleLarge!.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: theme.textTheme.titleMedium,
                       ),
                     )
                   : null,

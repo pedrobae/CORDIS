@@ -178,8 +178,8 @@ class _EditCipherScreenState extends State<EditCipherScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer6<
       CipherProvider,
@@ -209,9 +209,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
                           context,
                         )!.editPlaceholder(AppLocalizations.of(context)!.cipher)
                       : AppLocalizations.of(context)!.cipherEditorTitle,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: textTheme.titleMedium,
                 ),
                 actions: [
                   IconButton(
@@ -271,7 +269,10 @@ class _EditCipherScreenState extends State<EditCipherScreen>
                               spacing: 8,
                               children: [
                                 const Icon(Icons.info_outline),
-                                Text(AppLocalizations.of(context)!.info),
+                                Text(
+                                  AppLocalizations.of(context)!.info,
+                                  style: textTheme.titleSmall,
+                                ),
                               ],
                             ),
                           ),
@@ -283,7 +284,10 @@ class _EditCipherScreenState extends State<EditCipherScreen>
                               spacing: 8,
                               children: [
                                 const Icon(Icons.music_note),
-                                Text(AppLocalizations.of(context)!.sections),
+                                Text(
+                                  AppLocalizations.of(context)!.sections,
+                                  style: textTheme.titleSmall,
+                                ),
                               ],
                             ),
                           ),

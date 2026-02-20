@@ -67,14 +67,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
         return Scaffold(
           appBar: AppBar(
             leading: BackButton(color: colorScheme.onSurface),
-            title: Text(
-              playlist.name,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-                color: colorScheme.onSurface,
-              ),
-            ),
+            title: Text(playlist.name, style: theme.textTheme.titleMedium),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
@@ -93,18 +86,12 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
                     children: [
                       Text(
                         AppLocalizations.of(context)!.emptyPlaylist,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: theme.textTheme.headlineSmall,
                         textAlign: TextAlign.center,
                       ),
                       Text(
                         AppLocalizations.of(context)!.emptyPlaylistInstructions,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: theme.textTheme.titleMedium,
                       ),
                     ],
                   )
