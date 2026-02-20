@@ -12,13 +12,8 @@ double _fontSize = 20;
 
 class ChordPalette extends StatefulWidget {
   final dynamic versionId;
-  final VoidCallback onClose;
 
-  const ChordPalette({
-    super.key,
-    required this.versionId,
-    required this.onClose,
-  });
+  const ChordPalette({super.key, required this.versionId});
   @override
   State<ChordPalette> createState() => _ChordPaletteState();
 }

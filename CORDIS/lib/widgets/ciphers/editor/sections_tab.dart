@@ -179,10 +179,7 @@ class _SectionsTabState extends State<SectionsTab> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (paletteIsOpen) ...[
-                          ChordPalette(
-                            versionId: widget.versionID ?? -1,
-                            onClose: _togglePalette,
-                          ),
+                          ChordPalette(versionId: widget.versionID ?? -1),
                         ],
                         // Palette FAB
                         if (widget.isEnabled)

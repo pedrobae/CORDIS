@@ -171,6 +171,7 @@ class SectionProvider extends ChangeNotifier {
       section.contentText = newContentText ?? section.contentText;
       section.contentColor = newColor ?? section.contentColor;
     }
+    notifyListeners();
   }
 
   void renameSectionKey(
