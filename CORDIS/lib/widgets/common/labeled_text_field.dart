@@ -36,10 +36,7 @@ class LabeledTextField extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       spacing: 8,
       children: [
-        Text(
-          label,
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
-        ),
+        Text(label, style: textTheme.labelLarge),
         TextFormField(
           validator: validator,
           controller: controller,
@@ -54,6 +51,7 @@ class LabeledTextField extends StatelessWidget {
             visualDensity: VisualDensity.compact,
           ),
           maxLines: isMultiline ? null : 1,
+
           keyboardType: isMultiline
               ? TextInputType.multiline
               : TextInputType.text,

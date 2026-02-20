@@ -118,10 +118,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   child: Center(
                     child: Text(
                       'Section not found or empty',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontSize: 16,
-                      ),
+                      style: textTheme.bodyMedium,
                     ),
                   ),
                 ),
@@ -173,10 +170,8 @@ class _TokenContentCardState extends State<TokenContentCard> {
                             child: Text(
                               section.contentCode,
                               textAlign: TextAlign.center,
-                              style: textTheme.titleMedium?.copyWith(
+                              style: textTheme.labelLarge?.copyWith(
                                 color: colorScheme.surface,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
                               ),
                             ),
                           ),
@@ -186,11 +181,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                         Expanded(
                           child: Text(
                             section.contentType,
-                            style: textTheme.titleMedium?.copyWith(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: colorScheme.onSurface,
-                            ),
+                            style: textTheme.titleMedium,
                           ),
                         ),
 

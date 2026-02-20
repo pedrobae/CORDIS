@@ -55,9 +55,7 @@ class SelectKeySheet extends StatelessWidget {
             children: [
               Text(
                 AppLocalizations.of(context)!.keyHint,
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: textTheme.titleMedium,
               ),
               CloseButton(
                 onPressed: () {

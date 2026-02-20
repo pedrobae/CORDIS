@@ -125,10 +125,7 @@ class _ChordPaletteState extends State<ChordPalette> {
                   // HEADER
                   Text(
                     AppLocalizations.of(context)!.commonChordsOfKey(chords[0]),
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
-                    ),
+                    style: textTheme.titleMedium,
                   ),
                   // CUSTOM CHORD INPUT
                   Column(
@@ -145,15 +142,9 @@ class _ChordPaletteState extends State<ChordPalette> {
                             label: Text(
                               AppLocalizations.of(context)!.customChord,
                             ),
-                            labelStyle: textTheme.labelMedium?.copyWith(
-                              color: colorScheme.onSurface,
-                            ),
+                            labelStyle: textTheme.titleMedium,
                             floatingLabelBehavior: FloatingLabelBehavior.always,
-                            floatingLabelStyle: textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface,
-                              fontSize: 18,
-                            ),
+                            floatingLabelStyle: textTheme.titleMedium,
                             hintText: AppLocalizations.of(
                               context,
                             )!.customChordInstruction,
@@ -235,14 +226,12 @@ class _ChordPaletteState extends State<ChordPalette> {
                       Text(
                         AppLocalizations.of(context)!.draggableChordInstruction,
                         style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
                       Text(
                         AppLocalizations.of(context)!.chordExpansionInstruction,
                         style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
                           fontStyle: FontStyle.italic,
                         ),
                       ),

@@ -300,6 +300,21 @@ class AppTheme {
       fontWeight: FontWeight.w400,
       letterSpacing: 0.15,
     ),
+    labelLarge: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.1,
+    ),
+    labelMedium: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.1,
+    ),
+    labelSmall: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.1,
+    ),
   );
 
   static ThemeData _buildTheme(

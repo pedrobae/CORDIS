@@ -61,9 +61,7 @@ class _AddTagSheetState extends State<AddTagSheet> {
                   AppLocalizations.of(
                     context,
                   )!.addPlaceholder(AppLocalizations.of(context)!.tag),
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: textTheme.titleMedium,
                 ),
                 CloseButton(
                   onPressed: () {

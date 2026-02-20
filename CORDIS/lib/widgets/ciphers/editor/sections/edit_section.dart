@@ -60,8 +60,9 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
 
     return Container(
       color: colorScheme.surface,
-      padding: EdgeInsets.only(left: 16, right: 16, top: 16),
+      padding: EdgeInsets.all(16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 16,
         children: [
           // HEADER
@@ -113,10 +114,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                         Expanded(
                           child: Text(
                             contentTypeController.text,
-
-                            style: textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w400,
-                            ),
+                            style: textTheme.bodyLarge,
                           ),
                         ),
                         GestureDetector(
@@ -135,7 +133,6 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                             ),
                             style: textTheme.bodyMedium?.copyWith(
                               color: colorScheme.primary,
-                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -166,31 +163,31 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                     controller: contentTextController,
                     isMultiline: true,
                   ),
-
-                  // DELETE BUTTON
-                  if (!widget.isNewSection)
-                    FilledTextButton(
-                      text: AppLocalizations.of(context)!.delete,
-                      isDangerous: true,
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) {
-                            return DeleteConfirmationSheet(
-                              itemType: AppLocalizations.of(context)!.section,
-                              onConfirm: () {
-                                _deleteSection();
-                                context.read<NavigationProvider>().pop();
-                              },
-                            );
-                          },
-                        );
-                      },
-                    ),
                 ],
               ),
             ),
           ),
+
+          // DELETE BUTTON
+          if (!widget.isNewSection)
+            FilledTextButton(
+              text: AppLocalizations.of(context)!.delete,
+              isDangerous: true,
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+                    return DeleteConfirmationSheet(
+                      itemType: AppLocalizations.of(context)!.section,
+                      onConfirm: () {
+                        _deleteSection();
+                        context.read<NavigationProvider>().pop();
+                      },
+                    );
+                  },
+                );
+              },
+            ),
         ],
       ),
     );

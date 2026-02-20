@@ -29,7 +29,8 @@ class ChordToken extends StatelessWidget {
             textAlign: TextAlign.center,
             style: textStyle.copyWith(
               fontSize: textStyle.fontSize! * 0.8,
-              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),

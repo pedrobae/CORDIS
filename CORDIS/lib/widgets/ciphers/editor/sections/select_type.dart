@@ -54,9 +54,7 @@ class SelectType extends StatelessWidget {
                     AppLocalizations.of(
                       context,
                     )!.editPlaceholder(AppLocalizations.of(context)!.section),
-                    style: textTheme.titleMedium!.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: textTheme.titleMedium,
                   ),
                 ),
               ),
@@ -68,15 +66,11 @@ class SelectType extends StatelessWidget {
             children: [
               Text(
                 AppLocalizations.of(context)!.selectSectionType,
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: textTheme.titleLarge,
               ),
               Text(
                 AppLocalizations.of(context)!.selectSectionInstruction,
-                style: textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: textTheme.bodyLarge,
               ),
             ],
           ),
@@ -147,9 +141,7 @@ class SelectType extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 section.officialLabel,
-                                style: textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w400,
-                                ),
+                                style: textTheme.labelLarge,
                               ),
                             ),
                             Icon(
