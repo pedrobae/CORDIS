@@ -86,6 +86,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authentication => 'Authentication';
 
   @override
+  String get reauthenticationRequired => 'Re-authentication Required';
+
+  @override
   String get account => 'Account';
 
   @override

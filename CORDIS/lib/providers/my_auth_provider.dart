@@ -161,6 +161,44 @@ class MyAuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> reauthenticate(String email, String password) async {
+    if (isLoading) return;
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _authService.reauthenticate(email, password);
+    } catch (e) {
+      _error = 'Erro ao reautenticar: $e';
+      if (kDebugMode) {
+        print('Erro ao reautenticar: $e');
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    if (isLoading) return;
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _authService.deleteAccount();
+    } catch (e) {
+      _error = 'Erro ao solicitar exclusão de conta: $e';
+      if (kDebugMode) {
+        print('Erro ao solicitar exclusão de conta: $e');
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

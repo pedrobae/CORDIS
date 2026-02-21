@@ -44,4 +44,15 @@ class CloudUserRepository {
     }
     return null;
   }
+
+  // ===== UPDATE =====
+
+  // ===== DELETE =====
+  /// Deletes the user document from Firestore
+  Future<void> deleteUserById(String userId) async {
+    await _firestoreService.deleteDocument(
+      collectionPath: 'users',
+      documentId: userId,
+    );
+  }
 }

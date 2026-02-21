@@ -242,6 +242,12 @@ abstract class AppLocalizations {
   /// **'Autenticação'**
   String get authentication;
 
+  /// Title for re-authentication required message
+  ///
+  /// In pt, this message translates to:
+  /// **'Reautenticação Necessária'**
+  String get reauthenticationRequired;
+
   /// Account related messages
   ///
   /// In pt, this message translates to:

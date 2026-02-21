@@ -55,6 +55,8 @@
 
   "authentication": "Authentication",
   "@authentication": {"description": "Authentication related messages"},
+  "reauthenticationRequired": "Re-authentication Required",
+  "@reauthenticationRequired": {"description": "Title for re-authentication required message"},
   "account": "Account",
   "@account": {"description": "Account related messages"},
   "email": "Email",

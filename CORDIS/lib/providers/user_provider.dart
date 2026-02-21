@@ -192,6 +192,20 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  // ===== DELETE =====
+  /// Deletes all user data from firestore
+  Future<void> deleteUserData(String userId) async {
+    try {
+      await _cloudUserRepository.deleteUserById(userId);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error deleting user data from cloud: $e');
+      }
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
   void clearCache() {
     _knownUsers = [];
     _error = null;

@@ -1,5 +1,6 @@
 import 'package:cordis/services/firebase_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
@@ -114,26 +115,31 @@ class AuthService {
     }
   }
 
-  // USER CRUD
-  // ===== CREATE =====
-  /// User document is created/updated when user signs in via a CloudFunction
-
-  // ===== READ =====
-  /// Fetches a user by their Firebase ID from Firestore
-  Future<User?> fetchUserById(String userId) async {
+  Future<void> reauthenticate(String email, String password) async {
     try {
-      final userDoc = await FirebaseService().firestore
-          .collection('users')
-          .doc(userId)
-          .get();
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('No user currently signed in');
 
-      if (userDoc.exists) {
-        return _auth.currentUser; // Return the current authenticated user
-      } else {
-        return null; // User document does not exist
+      final credential = EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+    } catch (e) {
+      throw Exception('Failed to re-authenticate: $e');
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.delete();
       }
     } catch (e) {
-      throw Exception('Failed to fetch user by ID: $e');
+      debugPrint('Failed to delete account: $e');
+      rethrow;
     }
   }
 }

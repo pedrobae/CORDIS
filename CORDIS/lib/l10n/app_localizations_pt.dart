@@ -87,6 +87,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get authentication => 'Autenticação';
 
   @override
+  String get reauthenticationRequired => 'Reautenticação Necessária';
+
+  @override
   String get account => 'Conta';
 
   @override

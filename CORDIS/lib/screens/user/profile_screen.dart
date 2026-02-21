@@ -2,8 +2,10 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/settings_provider.dart';
+import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
+import 'package:cordis/widgets/sheet_reauthenticate.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -51,8 +53,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Consumer<NavigationProvider>(
-      builder: (context, navProvider, child) {
+    return Consumer3<NavigationProvider, MyAuthProvider, UserProvider>(
+      builder: (context, navProvider, authProvider, userProvider, child) {
+        if (authProvider.error != null &&
+            authProvider.error!.contains('requires-recent-login')) {
+          // If the error indicates that re-authentication is required, show the re-authentication sheet
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) {
+                return BottomSheet(
+                  onClosing: () {},
+                  shape: ContinuousRectangleBorder(),
+                  builder: (BuildContext context) {
+                    return ReAuthSheet(
+                      onReAuthSuccess: () {
+                        authProvider.deleteAccount();
+                        authProvider.clearError();
+                        userProvider.deleteUserData(authProvider.id!);
+                        Navigator.of(context).pop();
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          });
+        }
         return Scaffold(
           appBar: AppBar(
             leading: BackButton(
@@ -99,7 +127,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 TextButton(
                   onPressed: () {
-                    // TODO:user - Handle account deletion
+                    authProvider.deleteAccount();
+                    userProvider.deleteUserData(authProvider.id!);
                   },
                   child: Text(
                     AppLocalizations.of(context)!.deleteAccountRequest,
