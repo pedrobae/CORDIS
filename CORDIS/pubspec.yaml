@@ -10,19 +10,29 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   flutter_localizations:
     sdk: flutter
+
   intl: any
-  provider: ^6.0.5
-  flutter_svg: ^2.0.10+1
-  flutter_staggered_grid_view: ^0.7.0
-  sqflite: ^2.3.0
   path: ^1.8.3
-  cupertino_icons: ^1.0.8
-  flutter_colorpicker: ^1.0.3
-  shared_preferences: ^2.2.2
-  flutter_speed_dial: ^7.0.0
   path_provider: ^2.1.1
+
+  shared_preferences: ^2.2.2
+  provider: ^6.0.5
+  sqflite: ^2.3.0
+
+  webview_flutter: ^4.8.0
+  flutter_svg: ^2.0.10+1
+  cupertino_icons: ^1.0.8
+  flutter_launcher_icons: ^0.14.4
+  
+  flutter_speed_dial: ^7.0.0
+  numberpicker: ^2.1.2
+  flutter_colorpicker: ^1.0.3
+
+  flutter_staggered_grid_view: ^0.7.0
+
   firebase_core: ^4.1.1
   cloud_firestore: ^6.0.2
   firebase_auth: ^6.1.0
@@ -30,12 +40,10 @@ dependencies:
   firebase_analytics: ^12.0.2
   google_sign_in: ^6.2.1
   cloud_functions: ^6.0.3
+
   file_picker: ^8.1.4
   syncfusion_flutter_pdf: ^31.2.18
-  flutter_launcher_icons: ^0.14.4
   collection: ^1.19.1
-  numberpicker: ^2.1.2
-  webview_flutter: ^4.8.0
 
 dev_dependencies:
   flutter_test:
@@ -43,7 +51,7 @@ dev_dependencies:
   mockito: ^5.4.4
   build_runner: ^2.4.9
   flutter_lints: ^6.0.0
-  fl_chart: ^0.69.0                # Charts for data visualization (PDF analysis preview)
+  fl_chart: ^0.69.0
 
 flutter_launcher_icons:
   android: true
