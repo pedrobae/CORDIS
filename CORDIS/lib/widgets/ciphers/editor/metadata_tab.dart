@@ -486,6 +486,7 @@ class _MetadataTabState extends State<MetadataTab> {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
+              iconEnabledColor: colorScheme.onSurface,
               value: _getController(field).text.isEmpty
                   ? null
                   : _getController(field).text,
