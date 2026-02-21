@@ -64,6 +64,20 @@ class User {
     );
   }
 
+  User mergeWith(User other) {
+    return User(
+      id: id,
+      firebaseId: firebaseId ?? other.firebaseId,
+      username: username.isNotEmpty ? username : other.username,
+      email: email.isNotEmpty ? email : other.email,
+      profilePhoto: profilePhoto ?? other.profilePhoto,
+      googleId: googleId ?? other.googleId,
+      createdAt: createdAt ?? other.createdAt,
+      updatedAt: updatedAt ?? other.updatedAt,
+      isActive: isActive,
+    );
+  }
+
   User copyWith({
     int? id,
     String? firebaseId,

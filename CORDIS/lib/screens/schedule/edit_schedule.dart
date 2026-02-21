@@ -163,6 +163,10 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
                               selectionProvider,
                             );
                           case EditScheduleMode.roleMember:
+                            _saveRoleMember(
+                              navigationProvider,
+                              scheduleProvider,
+                            );
                             break;
                         }
                         navigationProvider.pop();
@@ -230,6 +234,20 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
 
     await scheduleProvider.saveSchedule(widget.scheduleId);
 
+    final schedule = scheduleProvider.getSchedule(widget.scheduleId)!;
+    if (schedule.isPublic && mounted) {
+      await ScheduleSyncService().syncToCloud(
+        schedule,
+        context.read<MyAuthProvider>().id!,
+      );
+    }
+  }
+
+  Future<void> _saveRoleMember(
+    NavigationProvider navigationProvider,
+    LocalScheduleProvider scheduleProvider,
+  ) async {
+    await scheduleProvider.saveSchedule(widget.scheduleId);
     final schedule = scheduleProvider.getSchedule(widget.scheduleId)!;
     if (schedule.isPublic && mounted) {
       await ScheduleSyncService().syncToCloud(

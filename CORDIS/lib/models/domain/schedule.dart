@@ -143,21 +143,43 @@ class Schedule {
   }
 
   Schedule mergeWith(Schedule other) {
+    final localTimestamp = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    final otherTimestamp = DateTime(
+      other.date.year,
+      other.date.month,
+      other.date.day,
+      other.time.hour,
+      other.time.minute,
+    );
+
+    bool localIsNewer = localTimestamp.isAfter(otherTimestamp);
+
+    final Schedule source = localIsNewer ? this : other;
+    final Schedule target = localIsNewer ? other : this;
+
     return Schedule(
       id: id,
-      firebaseId: firebaseId ?? other.firebaseId,
-      ownerFirebaseId: ownerFirebaseId,
-      name: name.isNotEmpty ? name : other.name,
-      date: date != DateTime(1970) ? date : other.date,
-      time: time != TimeOfDay(hour: 0, minute: 0) ? time : other.time,
-      location: location.isNotEmpty ? location : other.location,
-      roomVenue: (roomVenue != null && roomVenue!.isNotEmpty)
-          ? roomVenue
-          : other.roomVenue,
-      playlistId: playlistId ?? other.playlistId,
-      roles: roles.isNotEmpty ? roles : other.roles,
-      annotations: annotations ?? other.annotations,
-      shareCode: shareCode,
+      firebaseId: source.firebaseId ?? target.firebaseId,
+      ownerFirebaseId: source.ownerFirebaseId,
+      name: source.name.isNotEmpty ? source.name : target.name,
+      date: source.date != DateTime(1970) ? source.date : target.date,
+      time: source.time != TimeOfDay(hour: 0, minute: 0)
+          ? source.time
+          : target.time,
+      location: source.location.isNotEmpty ? source.location : target.location,
+      roomVenue: (source.roomVenue != null && source.roomVenue!.isNotEmpty)
+          ? source.roomVenue
+          : target.roomVenue,
+      playlistId: source.playlistId ?? target.playlistId,
+      roles: source.roles.isNotEmpty ? source.roles : target.roles,
+      annotations: source.annotations ?? target.annotations,
+      shareCode: source.shareCode,
       isPublic: true,
     );
   }
@@ -186,6 +208,14 @@ class Role {
     return RoleDto(
       users: users.map((user) => user.toDto()).toList(),
       name: name,
+    );
+  }
+
+  Role copyWith({int? id, String? name, List<User>? users}) {
+    return Role(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      users: users ?? this.users,
     );
   }
 }

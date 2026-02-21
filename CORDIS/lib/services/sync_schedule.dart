@@ -3,6 +3,7 @@ import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/models/domain/playlist/flow_item.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/domain/schedule.dart';
+import 'package:cordis/models/domain/user.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/repositories/cloud/schedule_repository.dart';
@@ -128,6 +129,31 @@ class ScheduleSyncService {
       // Schedule exists, update it (this will keep local changes if there are any, but fill in any missing fields from the cloud version)
       final merged = existing.mergeWith(schedule);
       await _localRepo.updateSchedule(merged);
+
+      // Sync roles (upsert)
+      for (var role in merged.roles) {
+        final users = <User>[];
+        for (var user in role.users) {
+          User? localUser;
+          if (user.id == null) {
+            localUser = await _userRepo.getUserByFirebaseId(user.firebaseId!);
+          } else {
+            localUser = await _userRepo.getUserById(user.id!);
+          }
+          if (localUser == null) {
+            // User doesn't exist locally, insert them
+            final newUserId = await _userRepo.createUser(user);
+            users.add(user.copyWith(id: newUserId));
+          } else {
+            // User exists locally, ensure it's up to date
+            final mergedUser = localUser.mergeWith(user);
+            await _userRepo.updateUser(mergedUser);
+            users.add(user.copyWith(id: mergedUser.id!));
+          }
+        }
+        // Role exists locally, update it
+        await _localRepo.upsertRole(merged.id, role.copyWith(users: users));
+      }
     }
   }
 
