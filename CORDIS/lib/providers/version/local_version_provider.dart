@@ -207,7 +207,6 @@ class LocalVersionProvider extends ChangeNotifier {
       }
 
       _versions[versionId] = version;
-      _versions[versionId] = version;
       if (kDebugMode) {
         print(
           'Loaded the version: ${_versions[versionId]?.versionName} into cache',

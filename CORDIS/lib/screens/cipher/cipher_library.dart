@@ -7,7 +7,7 @@ import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 
-import 'package:cordis/widgets/ciphers/library/cipher_scroll_view.dart';
+import 'package:cordis/widgets/ciphers/library/scroll_view.dart';
 
 class CipherLibraryScreen extends StatefulWidget {
   final int? playlistId;

@@ -4,6 +4,7 @@ import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
+import 'package:cordis/widgets/ciphers/library/sheet_select_version.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
@@ -82,6 +83,32 @@ class CipherCardActionsSheet extends StatelessWidget {
                       );
                     },
                   ),
+                  // SELECT VERSION
+                  // Only show if there are multiple versions available
+                  if (versionProvider.getVersionsByCipherId(cipherId).length >
+                      1)
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.selectPlaceholder(
+                        AppLocalizations.of(context)!.version,
+                      ),
+                      trailingIcon: Icons.chevron_right,
+                      isDiscrete: true,
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close the bottom sheet
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            return BottomSheet(
+                              shape: LinearBorder(),
+                              onClosing: () {},
+                              builder: (context) {
+                                return SelectVersionSheet(cipherId: cipherId);
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
                   // DELETE CIPHER
                   FilledTextButton(
                     text: AppLocalizations.of(context)!.delete,

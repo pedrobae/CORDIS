@@ -11,7 +11,7 @@ import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/cipher/view_cipher.dart';
 import 'package:cordis/utils/date_utils.dart';
-import 'package:cordis/widgets/ciphers/library/cipher_card_actions.dart';
+import 'package:cordis/widgets/ciphers/library/sheet_actions.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

@@ -920,6 +920,12 @@ abstract class AppLocalizations {
   /// **'Ações de {object}'**
   String actionPlaceholder(Object object);
 
+  /// Select object prompt
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecionar {object}'**
+  String selectPlaceholder(Object object);
+
   /// Tooltip for duplicate action
   ///
   /// In pt, this message translates to:
@@ -1519,6 +1525,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'por'**
   String get by;
+
+  /// Belonging/ownership preposition
+  ///
+  /// In pt, this message translates to:
+  /// **'de'**
+  String get belongingTo;
 
   /// Label for the song title with placeholder
   ///

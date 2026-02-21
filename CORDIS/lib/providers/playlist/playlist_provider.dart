@@ -92,6 +92,11 @@ class PlaylistProvider extends ChangeNotifier {
     return playlistId;
   }
 
+  void setPlaylist(Playlist playlist) {
+    _playlists[playlist.id] = playlist;
+    notifyListeners();
+  }
+
   // ===== READ =====
   // Load Playlists from local SQLite database
   Future<void> loadPlaylists() async {

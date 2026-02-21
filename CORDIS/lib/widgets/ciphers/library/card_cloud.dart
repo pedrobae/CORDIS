@@ -5,7 +5,7 @@ import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/cipher/view_cipher.dart';
 import 'package:cordis/utils/date_utils.dart';
-import 'package:cordis/widgets/ciphers/library/download_cloud_version_sheet.dart';
+import 'package:cordis/widgets/ciphers/library/sheet_download.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

@@ -8,6 +8,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
+import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/schedule/play/play_cloud_version.dart';
 import 'package:cordis/widgets/schedule/play/play_flow_item.dart';
@@ -48,6 +49,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
     final cipherProvider = context.read<CipherProvider>();
     final versionProvider = context.read<LocalVersionProvider>();
     final flowItemProvider = context.read<FlowItemProvider>();
+    final sectionProvider = context.read<SectionProvider>();
 
     if (widget.scheduleId == null) throw Exception("Schedule ID is required");
 
@@ -62,6 +64,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
         if (item.type == PlaylistItemType.version) {
           await versionProvider.loadVersion(item.contentId!);
           await cipherProvider.loadCipherOfVersion(item.contentId!);
+          await sectionProvider.loadLocalSections(item.contentId!);
         } else if (item.type == PlaylistItemType.flowItem) {
           await flowItemProvider.loadFlowItem(item.contentId!);
         }
@@ -98,7 +101,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
       builder:
           (
             context,
-            scheduleProvider,
+            cloudScheduleProvider,
             playlistProvider,
             versionProvider,
             cipherProvider,
@@ -106,52 +109,12 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
             navigationProvider,
             child,
           ) {
-            String nextTitle = '';
-            if (currentTabIndex + 1 < items.length) {
-              final nextItem = items[currentTabIndex + 1];
-              if (nextItem.type == PlaylistItemType.version) {
-                if (isCloud) {
-                  nextTitle =
-                      ((scheduleProvider.schedules[widget.scheduleId]
-                              as ScheduleDto)
-                          .playlist
-                          .versions[nextItem.firebaseContentId]
-                          ?.title) ??
-                      '';
-                } else {
-                  nextTitle =
-                      cipherProvider
-                          .getCipherById(
-                            versionProvider
-                                .cachedVersion(nextItem.contentId!)!
-                                .cipherId,
-                          )
-                          ?.title ??
-                      '';
-                }
-              } else if (nextItem.type == PlaylistItemType.flowItem) {
-                if (isCloud) {
-                  nextTitle =
-                      ((scheduleProvider.schedules[widget.scheduleId]
-                              as ScheduleDto)
-                          .playlist
-                          .flowItems[nextItem.firebaseContentId]?['title']) ??
-                      '';
-                } else {
-                  nextTitle =
-                      flowItemProvider
-                          .getFlowItem(nextItem.contentId!)
-                          ?.title ??
-                      '';
-                }
-              }
-            }
             return Stack(
               children: [
                 // TAB VIEWER
                 items.isEmpty
                     ? (versionProvider.isLoading ||
-                              scheduleProvider.isLoading ||
+                              cloudScheduleProvider.isLoading ||
                               flowItemProvider.isLoading ||
                               cipherProvider.isLoading ||
                               playlistProvider.isLoading)
@@ -174,7 +137,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                               if (isCloud) {
                                 return PlayCloudVersion(
                                   versionDTO:
-                                      (scheduleProvider.schedules[widget
+                                      (cloudScheduleProvider.schedules[widget
                                                   .scheduleId]
                                               as ScheduleDto)
                                           .playlist
@@ -189,7 +152,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                             case PlaylistItemType.flowItem:
                               if (isCloud) {
                                 final flowItemMap =
-                                    (scheduleProvider.schedules[widget
+                                    (cloudScheduleProvider.schedules[widget
                                                 .scheduleId]
                                             as ScheduleDto)
                                         .playlist
@@ -279,15 +242,71 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                         // NEXT ITEM TITLE
                         SizedBox(
                           width: MediaQuery.of(context).size.width / 2,
-                          child: Text(
-                            nextTitle.isEmpty
-                                ? '-'
-                                : AppLocalizations.of(
-                                    context,
-                                  )!.nextPlaceholder(nextTitle),
-                            style: textTheme.bodyLarge,
-                            softWrap: true,
-                            textAlign: TextAlign.center,
+                          child: Builder(
+                            builder: (context) {
+                              String nextTitle = '';
+                              if (currentTabIndex < items.length - 1) {
+                                final nextItem = items[currentTabIndex + 1];
+                                switch (nextItem.type) {
+                                  case PlaylistItemType.version:
+                                    if (isCloud) {
+                                      nextTitle =
+                                          ((cloudScheduleProvider
+                                                      .schedules[widget
+                                                      .scheduleId]
+                                                  as ScheduleDto)
+                                              .playlist
+                                              .versions[nextItem
+                                                  .firebaseContentId]
+                                              ?.title) ??
+                                          '';
+                                    } else {
+                                      final version = versionProvider
+                                          .cachedVersion(nextItem.contentId!);
+
+                                      if (version == null) {
+                                        return CircularProgressIndicator();
+                                      }
+
+                                      nextTitle =
+                                          cipherProvider
+                                              .getCipherById(version.cipherId)
+                                              ?.title ??
+                                          '';
+                                    }
+                                    break;
+                                  case PlaylistItemType.flowItem:
+                                    if (isCloud) {
+                                      nextTitle =
+                                          ((cloudScheduleProvider
+                                                      .schedules[widget
+                                                      .scheduleId]
+                                                  as ScheduleDto)
+                                              .playlist
+                                              .flowItems[nextItem
+                                              .firebaseContentId]?['title']) ??
+                                          '';
+                                    } else {
+                                      nextTitle =
+                                          flowItemProvider
+                                              .getFlowItem(nextItem.contentId!)
+                                              ?.title ??
+                                          '';
+                                    }
+                                    break;
+                                }
+                              }
+                              return Text(
+                                nextTitle.isEmpty
+                                    ? '-'
+                                    : AppLocalizations.of(
+                                        context,
+                                      )!.nextPlaceholder(nextTitle),
+                                style: textTheme.bodyLarge,
+                                softWrap: true,
+                                textAlign: TextAlign.center,
+                              );
+                            },
                           ),
                         ),
 

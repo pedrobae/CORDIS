@@ -306,6 +306,8 @@
   "@optionsPlaceholder": {"description": "Object Options sheet title", "placeholders": {"object": {}}},
   "actionPlaceholder": "{object} Action",
   "@actionPlaceholder": {"description": "Object Action sheet title", "placeholders": {"object": {}}},
+  "selectPlaceholder": "Select {object}",
+  "@selectPlaceholder": {"description": "Select object prompt", "placeholders": {"object": {}}},
 
   "duplicateTooltip": "Create a copy of this {object}",
   "@duplicateTooltip": {"description": "Tooltip for duplicate action", "placeholders": {"object": {}}},
@@ -533,6 +535,8 @@
 
   "by": "by",
   "@by": {"description": "By/author preposition"},
+  "belongingTo": "of",
+  "@belongingTo": {"description": "Belonging/ownership preposition"},
 
 
   "titleWithPlaceholder": "Title: {title}",

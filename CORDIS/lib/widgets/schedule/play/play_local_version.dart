@@ -35,7 +35,6 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
     _scrollController = ScrollController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _ensureDataLoaded();
       _initializeSectionKeys();
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -45,14 +44,6 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
         }
       });
     });
-  }
-
-  Future<void> _ensureDataLoaded() async {
-    final versionProvider = context.read<LocalVersionProvider>();
-    final sectionProvider = context.read<SectionProvider>();
-
-    await versionProvider.loadVersion(widget.versionId);
-    await sectionProvider.loadLocalSections(widget.versionId);
   }
 
   void _initializeSectionKeys() {
@@ -170,7 +161,7 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
                         spacing: 16,
                         children: [
                           const SizedBox(height: 8),
-                          // Header section for height measurement
+                          // HEADER
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             spacing: 16,
@@ -253,20 +244,24 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
       spacing: 4,
       children: [
         Text(cipher.title, style: textTheme.titleMedium),
-        _buildMetadataRow(version, textTheme),
+        _buildMetadataRow(version, cipher, textTheme),
       ],
     );
   }
 
-  Widget _buildMetadataRow(Version version, TextTheme textTheme) {
+  Widget _buildMetadataRow(
+    Version version,
+    Cipher cipher,
+    TextTheme textTheme,
+  ) {
     final bodyStyle = textTheme.bodyMedium;
     return Row(
       spacing: 16.0,
       children: [
         Text(
-          AppLocalizations.of(context)!.keyWithPlaceholder(
-            version.transposedKey ?? version.cipherId.toString(),
-          ),
+          AppLocalizations.of(
+            context,
+          )!.keyWithPlaceholder(version.transposedKey ?? cipher.musicKey),
           style: bodyStyle,
         ),
         Text(

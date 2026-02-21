@@ -467,6 +467,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String selectPlaceholder(Object object) {
+    return 'Select $object';
+  }
+
+  @override
   String duplicateTooltip(Object object) {
     return 'Create a copy of this $object';
   }
@@ -792,6 +797,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get by => 'by';
+
+  @override
+  String get belongingTo => 'of';
 
   @override
   String titleWithPlaceholder(Object title) {

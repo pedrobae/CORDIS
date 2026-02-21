@@ -15,6 +15,7 @@ import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
+import 'package:cordis/screens/playlist/view_playlist.dart';
 import 'package:cordis/screens/schedule/edit_schedule.dart';
 import 'package:cordis/screens/schedule/play_schedule.dart';
 import 'package:cordis/utils/date_utils.dart';
@@ -39,6 +40,29 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
   void initState() {
     super.initState();
     isCloud = widget.scheduleId is String;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final localScheduleProvider = context.read<LocalScheduleProvider>();
+      final cloudScheduleProvider = context.read<CloudScheduleProvider>();
+      final playlistProvider = context.read<PlaylistProvider>();
+
+      if (isCloud) {
+        final schedule = cloudScheduleProvider.getSchedule(widget.scheduleId)!;
+        playlistProvider.setPlaylist(
+          schedule.playlist.toDomain(
+            context.read<UserProvider>().getLocalIdByFirebaseId(
+                  schedule.ownerFirebaseId,
+                ) ??
+                -1,
+          ),
+        );
+      } else {
+        final schedule = localScheduleProvider.getSchedule(widget.scheduleId)!;
+        if (schedule.playlistId != null) {
+          playlistProvider.loadPlaylist(schedule.playlistId!);
+        }
+      }
+    });
   }
 
   @override
@@ -340,24 +364,15 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                             SizedBox(
                               width: 75,
                               child: FilledTextButton(
+                                isDisabled: playlist == null,
                                 text: AppLocalizations.of(
                                   context,
                                 )!.editPlaceholder(''),
                                 onPressed: () {
                                   if (isCloud) return;
-                                  selectionProvider.enableSelectionMode(
-                                    targetId: widget.scheduleId,
-                                  );
-                                  selectionProvider.select(
-                                    localScheduleProvider
-                                        .getSchedule(widget.scheduleId)!
-                                        .playlistId,
-                                  );
-
                                   navigationProvider.push(
-                                    EditScheduleScreen(
-                                      mode: EditScheduleMode.playlist,
-                                      scheduleId: widget.scheduleId,
+                                    ViewPlaylistScreen(
+                                      playlistId: playlist!.id,
                                     ),
                                     showBottomNavBar: true,
 
