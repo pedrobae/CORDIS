@@ -106,9 +106,10 @@ class _EditCipherScreenState extends State<EditCipherScreen>
       case VersionType.playlist:
         final playlistProvider = context.read<PlaylistProvider>();
 
-        final String playlistName = playlistProvider
-            .getPlaylistById(widget.playlistID!)!
-            .name;
+        final String playlistName = AppLocalizations.of(context)!
+            .playlistVersionName(
+              playlistProvider.getPlaylistById(widget.playlistID!)!.name,
+            );
 
         // Create a new copy of the version for editing
         // Load the version
@@ -118,12 +119,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           )!;
           // Create a copy of the version in cache
           localVersionProvider.setNewVersionInCache(
-            originalVersion.copyWith(
-              firebaseId: '',
-              versionName: AppLocalizations.of(
-                context,
-              )!.playlistVersionName(playlistName),
-            ),
+            originalVersion.copyWith(firebaseId: '', versionName: playlistName),
           );
 
           // Load the cipher

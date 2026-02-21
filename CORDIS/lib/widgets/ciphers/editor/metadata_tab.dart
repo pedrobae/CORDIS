@@ -1,4 +1,5 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
@@ -74,80 +75,50 @@ class _MetadataTabState extends State<MetadataTab> {
         case VersionType.cloud:
           final version = cloudVersionProvider.getVersion(widget.versionID!)!;
 
-          for (var field in InfoField.values) {
-            switch (field) {
-              case InfoField.title:
-                controllers[field]!.text = version.title;
-                break;
-              case InfoField.author:
-                controllers[field]!.text = version.author;
-                break;
-              case InfoField.versionName:
-                controllers[field]!.text = version.versionName;
-                break;
-              case InfoField.bpm:
-                controllers[field]!.text = version.bpm.toString();
-                break;
-              case InfoField.key:
-                controllers[field]!.text =
-                    version.transposedKey ?? version.originalKey;
-                break;
-              case InfoField.language:
-                controllers[field]!.text = version.language;
-                break;
-              case InfoField.tags:
-                // THIS CONTROLLER IS NOT USED, ADDING TAGS IS HANDLED BY A BOTTOM SHEET
-                break;
-              case InfoField.duration:
-                controllers[field]!.text = DateTimeUtils.formatDuration(
-                  Duration(seconds: version.duration),
-                );
-                break;
-            }
-          }
+          controllers[InfoField.title]!.text = version.title;
+          controllers[InfoField.author]!.text = version.author;
+          controllers[InfoField.versionName]!.text = version.versionName;
+          controllers[InfoField.bpm]!.text = version.bpm.toString();
+          controllers[InfoField.key]!.text =
+              version.transposedKey ?? version.originalKey;
+          controllers[InfoField.language]!.text = version.language;
+          controllers[InfoField.duration]!.text = DateTimeUtils.formatDuration(
+            Duration(seconds: version.duration),
+          );
+          // TAGS CONTROLLER IS NOT USED, ADDING TAGS IS HANDLED BY A BOTTOM SHEET
+          break;
+
         case VersionType.local:
         case VersionType.import:
-        case VersionType.playlist:
           final cipher = cipherProvider.getCipherById(widget.cipherID ?? -1)!;
           final version = versionProvider.cachedVersion(
             (widget.versionID is int) ? widget.versionID : -1,
           )!;
-
-          for (var field in InfoField.values) {
-            switch (field) {
-              case InfoField.title:
-                controllers[field]!.text = cipher.title;
-                break;
-              case InfoField.author:
-                controllers[field]!.text = cipher.author;
-                break;
-              case InfoField.versionName:
-                controllers[field]!.text = version.versionName;
-                break;
-              case InfoField.bpm:
-                controllers[field]!.text = version.bpm.toString();
-                break;
-              case InfoField.key:
-                controllers[field]!.text =
-                    version.transposedKey ?? cipher.musicKey;
-                break;
-              case InfoField.language:
-                controllers[field]!.text = cipher.language;
-                break;
-              case InfoField.duration:
-                controllers[field]!.text = DateTimeUtils.formatDuration(
-                  version.duration,
-                );
-              case InfoField.tags:
-                // THIS CONTROLLER IS NOT USED, ADDING TAGS IS HANDLED BY A BOTTOM SHEET
-                break;
-            }
-          }
+          _syncLocalVersion(cipher, version);
+          break;
+        case VersionType.playlist:
+          final cipher = cipherProvider.getCipherById(widget.cipherID ?? -1)!;
+          final version = versionProvider.cachedVersion(-1)!;
+          _syncLocalVersion(cipher, version);
+          break;
         case VersionType.brandNew:
           // Do nothing for brand new versions
           break;
       }
     }
+  }
+
+  void _syncLocalVersion(Cipher cipher, Version version) {
+    controllers[InfoField.title]!.text = cipher.title;
+    controllers[InfoField.author]!.text = cipher.author;
+    controllers[InfoField.versionName]!.text = version.versionName;
+    controllers[InfoField.bpm]!.text = version.bpm.toString();
+    controllers[InfoField.key]!.text = version.transposedKey ?? cipher.musicKey;
+    controllers[InfoField.language]!.text = cipher.language;
+    controllers[InfoField.duration]!.text = DateTimeUtils.formatDuration(
+      version.duration,
+    );
+    // TAGS CONTROLLER IS NOT USED, ADDING TAGS IS HANDLED BY A BOTTOM SHEET
   }
 
   void _addListeners() {

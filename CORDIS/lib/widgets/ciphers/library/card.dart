@@ -226,6 +226,7 @@ class _CipherCardState extends State<CipherCard> {
                               versionID: versionId,
                               versionType: VersionType.playlist,
                               playlistID: widget.playlistId,
+                              isEnabled: false,
                             ),
                             showBottomNavBar: true,
 
