@@ -199,6 +199,25 @@ class MyAuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> updatePassword(String newPassword) async {
+    if (isLoading) return;
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _authService.updatePassword(newPassword);
+    } catch (e) {
+      _error = 'Erro ao atualizar senha: $e';
+      if (kDebugMode) {
+        print('Erro ao atualizar senha: $e');
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

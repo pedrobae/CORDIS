@@ -356,6 +356,24 @@ abstract class AppLocalizations {
   /// **'Confirmar Senha'**
   String get confirmPassword;
 
+  /// Validation message for empty fields
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, preencha todos os campos.'**
+  String get fillAllFields;
+
+  /// Validation message for password mismatch
+  ///
+  /// In pt, this message translates to:
+  /// **'As senhas não coincidem.'**
+  String get passwordsDoNotMatch;
+
+  /// Validation message for short password
+  ///
+  /// In pt, this message translates to:
+  /// **'A senha deve ter pelo menos {minLength} caracteres.'**
+  String passwordTooShort(Object minLength);
+
   /// User related messages
   ///
   /// In pt, this message translates to:

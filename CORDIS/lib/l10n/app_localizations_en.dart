@@ -144,6 +144,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmPassword => 'Confirm Password';
 
   @override
+  String get fillAllFields => 'Please fill in all fields.';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match.';
+
+  @override
+  String passwordTooShort(Object minLength) {
+    return 'Password must be at least $minLength characters.';
+  }
+
+  @override
   String get user => 'User';
 
   @override

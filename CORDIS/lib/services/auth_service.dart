@@ -107,6 +107,19 @@ class AuthService {
     }
   }
 
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.updatePassword(newPassword);
+      } else {
+        throw Exception('No user currently signed in');
+      }
+    } catch (e) {
+      throw Exception('Failed to update password: $e');
+    }
+  }
+
   Future<void> signOut() async {
     try {
       await _auth.signOut();

@@ -146,6 +146,17 @@ class AppLocalizationsPt extends AppLocalizations {
   String get confirmPassword => 'Confirmar Senha';
 
   @override
+  String get fillAllFields => 'Por favor, preencha todos os campos.';
+
+  @override
+  String get passwordsDoNotMatch => 'As senhas não coincidem.';
+
+  @override
+  String passwordTooShort(Object minLength) {
+    return 'A senha deve ter pelo menos $minLength caracteres.';
+  }
+
+  @override
   String get user => 'Usuário';
 
   @override

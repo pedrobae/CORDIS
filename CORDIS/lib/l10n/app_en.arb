@@ -93,6 +93,12 @@
   "@hidePassword": {"description": "Tooltip for hide password action"},
   "confirmPassword": "Confirm Password",
   "@confirmPassword": {"description": "Confirm password field label"},
+  "fillAllFields": "Please fill in all fields.",
+  "@fillAllFields": {"description": "Validation message for empty fields"},
+  "passwordsDoNotMatch": "Passwords do not match.",
+  "@passwordsDoNotMatch": {"description": "Validation message for password mismatch"},
+  "passwordTooShort": "Password must be at least {minLength} characters.",
+  "@passwordTooShort": {"description": "Validation message for short password", "placeholders": {"minLength": {}}},
 
   "user": "User",
   "@user": {"description": "User related messages"},

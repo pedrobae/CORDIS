@@ -3,6 +3,7 @@ import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/settings_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
+import 'package:cordis/screens/user/new_password_screen.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:cordis/widgets/sheet_reauthenticate.dart';
@@ -64,13 +65,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               isScrollControlled: true,
               builder: (context) {
                 return BottomSheet(
-                  onClosing: () {},
+                  onClosing: () {
+                    authProvider.clearError();
+                  },
                   shape: ContinuousRectangleBorder(),
                   builder: (BuildContext context) {
                     return ReAuthSheet(
                       onReAuthSuccess: () {
                         authProvider.deleteAccount();
-                        authProvider.clearError();
                         userProvider.deleteUserData(authProvider.id!);
                         Navigator.of(context).pop();
                       },
@@ -122,7 +124,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 FilledTextButton(
                   text: AppLocalizations.of(context)!.changePassword,
                   onPressed: () {
-                    // TODO:user - Handle change password action
+                    navProvider.push(
+                      NewPasswordScreen(),
+                      showBottomNavBar: true,
+                    );
                   },
                 ),
                 TextButton(
@@ -130,10 +135,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     authProvider.deleteAccount();
                     userProvider.deleteUserData(authProvider.id!);
                   },
-                  child: Text(
-                    AppLocalizations.of(context)!.deleteAccountRequest,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.error,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: BorderDirectional(
+                        bottom: BorderSide(color: colorScheme.error),
+                      ),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.deleteAccountRequest,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.error,
+                      ),
                     ),
                   ),
                 ),
