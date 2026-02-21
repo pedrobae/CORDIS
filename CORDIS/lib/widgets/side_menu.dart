@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/screens/settings_screen.dart';
+import 'package:cordis/screens/web_view_screen.dart';
 import 'package:cordis/widgets/user_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -75,15 +76,13 @@ class SideMenu extends StatelessWidget {
                       child: ListTile(
                         title: Text(AppLocalizations.of(context)!.about),
                         onTap: () {
-                          // TODO:SideMenu About Screen
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              backgroundColor: Colors.amberAccent,
-                              content: Text(
-                                'Funcionalidade em desenvolvimento,',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
+                          /// WEBSITE WEBVIEW
+                          Navigator.of(context).pop(); // Close the drawer first
+                          navigationProvider.push(
+                            const WebViewScreen(),
+                            showBottomNavBar: true,
+                            showAppBar: true,
+                            showDrawerIcon: true,
                           );
                         },
                         trailing: Icon(
