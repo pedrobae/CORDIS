@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:cordis/repositories/cloud/schedule_repository.dart';
-import 'package:cordis/services/schedule_sync.dart';
+import 'package:cordis/services/sync_schedule.dart';
 import 'package:flutter/material.dart';
 
 class CloudScheduleProvider extends ChangeNotifier {
