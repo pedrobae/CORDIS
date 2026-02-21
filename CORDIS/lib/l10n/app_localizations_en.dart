@@ -241,10 +241,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyStructure =>
-      'No sections in structure.\nUse the button above to add sections.';
+      'No sections in structure.\nUse the add button below to add sections.';
 
   @override
-  String get noLyrics => 'Please add lyrics & chords to get started.';
+  String get noLyrics => 'Use the add button below to create new sections';
 
   @override
   String get lyrics => 'Lyrics';

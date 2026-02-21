@@ -551,13 +551,13 @@ abstract class AppLocalizations {
   /// Prompt displayed when there are no sections in the song structure
   ///
   /// In pt, this message translates to:
-  /// **'Nenhuma seção na estrutura.\nUse o botão acima para adicionar seções.'**
+  /// **'Nenhuma seção na estrutura.\nUse o botão abaixo para adicionar seções.'**
   String get emptyStructure;
 
   /// Prompt displayed when there are no lyrics in the section
   ///
   /// In pt, this message translates to:
-  /// **'Por favor, adicione Letra e acordes para começar.'**
+  /// **'Use o botão abaixo para criar novas seções'**
   String get noLyrics;
 
   /// Lyrics field label

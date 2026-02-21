@@ -243,10 +243,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get emptyStructure =>
-      'Nenhuma seção na estrutura.\nUse o botão acima para adicionar seções.';
+      'Nenhuma seção na estrutura.\nUse o botão abaixo para adicionar seções.';
 
   @override
-  String get noLyrics => 'Por favor, adicione Letra e acordes para começar.';
+  String get noLyrics => 'Use o botão abaixo para criar novas seções';
 
   @override
   String get lyrics => 'Letra';

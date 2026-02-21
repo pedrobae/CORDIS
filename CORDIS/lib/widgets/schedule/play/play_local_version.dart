@@ -7,6 +7,7 @@ import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/utils/section_constants.dart';
+import 'package:cordis/widgets/ciphers/viewer/annotation_card.dart';
 import 'package:cordis/widgets/ciphers/viewer/section_card.dart';
 import 'package:cordis/widgets/ciphers/viewer/structure_list.dart';
 import 'package:flutter/material.dart';
@@ -297,6 +298,13 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
 
         if (section == null) {
           return const SizedBox.shrink();
+        }
+
+        if (isAnnotation(trimmedCode)) {
+          return AnnotationCard(
+            sectionText: section.contentText,
+            sectionType: section.contentType,
+          );
         }
 
         return RepaintBoundary(

@@ -1,5 +1,3 @@
-import 'package:sqflite/sqflite.dart';
-
 import 'package:cordis/models/domain/cipher/section.dart';
 
 import 'package:cordis/helpers/database.dart';
@@ -20,11 +18,29 @@ class SectionRepository {
 
   Future<int> upsertSection(Section section) async {
     final db = await _databaseHelper.database;
-    return await db.insert(
+
+    final existing = await db.query(
       'section',
-      section.toSqlite()..['version_id'] = section.versionId,
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      where: 'version_id = ? AND content_code = ?',
+      whereArgs: [section.versionId, section.contentCode],
     );
+
+    if (existing.isNotEmpty) {
+      // Section exists, update it
+      await db.update(
+        'section',
+        section.toSqlite(),
+        where: 'version_id = ? AND content_code = ?',
+        whereArgs: [section.versionId, section.contentCode],
+      );
+      return existing.first['id'] as int;
+    } else {
+      // Section doesn't exist, insert it
+      return await db.insert(
+        'section',
+        section.toSqlite()..['version_id'] = section.versionId,
+      );
+    }
   }
 
   // ===== READ =====
