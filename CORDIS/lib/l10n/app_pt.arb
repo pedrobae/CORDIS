@@ -566,7 +566,7 @@
   "@bpmHint": {"description": "Hint text for BPM input"},
   "durationHint": "Insira a duração em MM:SS",
   "@durationHint": {"description": "Hint text for duration input"},
-  "languageHint": "Insira o idioma da música",
+  "languageHint": "Escolha um idioma",
   "@languageHint": {"description": "Hint text for song language input"},
   "tagHint": "Digite uma tag",
   "@tagHint": {"description": "Hint text for tag input"},

@@ -10,6 +10,7 @@ import 'package:cordis/widgets/ciphers/editor/metadata.dart/select_key_sheet.dar
 import 'package:cordis/widgets/common/duration_picker.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
+import 'package:cordis/widgets/common/labeled_language_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -316,11 +317,11 @@ class _MetadataTabState extends State<MetadataTab> {
                       versionProvider: versionProvider,
                       field: field,
                     ),
-                    InfoField.language => _buildLanguageDropDown(
-                      context: context,
-                      cipherProvider: cipherProvider,
-                      versionProvider: versionProvider,
-                      field: field,
+                    InfoField.language => LabeledLanguagePicker(
+                      language: _getController(field).text,
+                      onLanguageChanged: (value) {
+                        _getController(field).text = value;
+                      },
                     ),
                     _ => LabeledTextField(
                       label: _getLabel(field),
@@ -449,64 +450,6 @@ class _MetadataTabState extends State<MetadataTab> {
                 versionType: widget.versionType,
               );
             },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLanguageDropDown({
-    required BuildContext context,
-    required CipherProvider cipherProvider,
-    required LocalVersionProvider versionProvider,
-    required InfoField field,
-  }) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    // GET AVAILABLE LANGUAGES
-    final languages = AppLocalizations.supportedLocales.map((locale) {
-      return switch (locale.languageCode) {
-        'en' => AppLocalizations.of(context)!.english,
-        'pt' => AppLocalizations.of(context)!.portuguese,
-        _ => locale.languageCode,
-      };
-    }).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
-      children: [
-        Text(_getLabel(field), style: textTheme.labelLarge),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            border: Border.all(color: colorScheme.shadow, width: 1),
-            borderRadius: BorderRadius.circular(0),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              iconEnabledColor: colorScheme.onSurface,
-              value: _getController(field).text.isEmpty
-                  ? null
-                  : _getController(field).text,
-              style: textTheme.bodyLarge,
-              hint: Text(
-                AppLocalizations.of(context)!.languageHint,
-                style: textTheme.bodyLarge?.copyWith(color: colorScheme.shadow),
-              ),
-              isExpanded: true,
-              items: languages
-                  .map(
-                    (lang) => DropdownMenuItem(value: lang, child: Text(lang)),
-                  )
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  _getController(field).text = value;
-                }
-              },
-            ),
           ),
         ),
       ],

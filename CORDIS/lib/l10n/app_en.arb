@@ -572,7 +572,7 @@
   "@durationHint": {"description": "Hint text for duration input"},
   "bpmHint": "Enter tempo in BPM",
   "@bpmHint": {"description": "Hint text for BPM input"},
-  "languageHint": "Enter song language",
+  "languageHint": "Pick a language",
   "@languageHint": {"description": "Hint text for song language input"},
   "tagHint": "Type a tag",
   "@tagHint": {"description": "Hint text for tag input"},

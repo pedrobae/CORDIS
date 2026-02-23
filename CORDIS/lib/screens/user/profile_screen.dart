@@ -4,7 +4,9 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/settings_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/screens/user/new_password_screen.dart';
+import 'package:cordis/utils/locale.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
+import 'package:cordis/widgets/common/labeled_language_picker.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:cordis/widgets/sheet_reauthenticate.dart';
 import 'package:flutter/material.dart';
@@ -20,9 +22,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final userNameController = TextEditingController();
   final countryController = TextEditingController();
-  final languageController = TextEditingController();
   final timezoneController = TextEditingController();
-  bool hasChanges = false;
 
   @override
   void initState() {
@@ -35,7 +35,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       userNameController.text =
           authProvider.userName ?? AppLocalizations.of(context)!.guest;
       countryController.text = settingsProvider.locale.countryCode ?? '';
-      languageController.text = settingsProvider.locale.toLanguageTag();
       timezoneController.text = settingsProvider.timeZone;
     });
   }
@@ -44,7 +43,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void dispose() {
     userNameController.dispose();
     countryController.dispose();
-    languageController.dispose();
     timezoneController.dispose();
     super.dispose();
   }
@@ -54,114 +52,134 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Consumer3<NavigationProvider, MyAuthProvider, UserProvider>(
-      builder: (context, navProvider, authProvider, userProvider, child) {
-        if (authProvider.error != null &&
-            authProvider.error!.contains('requires-recent-login')) {
-          // If the error indicates that re-authentication is required, show the re-authentication sheet
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (context) {
-                return BottomSheet(
-                  onClosing: () {
-                    authProvider.clearError();
-                  },
-                  shape: ContinuousRectangleBorder(),
-                  builder: (BuildContext context) {
-                    return ReAuthSheet(
-                      onReAuthSuccess: () {
-                        authProvider.deleteAccount();
-                        userProvider.deleteUserData(authProvider.id!);
-                        Navigator.of(context).pop();
+    return Consumer4<
+      NavigationProvider,
+      MyAuthProvider,
+      UserProvider,
+      SettingsProvider
+    >(
+      builder:
+          (
+            context,
+            navProvider,
+            authProvider,
+            userProvider,
+            settingsProvider,
+            child,
+          ) {
+            if (authProvider.error != null &&
+                authProvider.error!.contains('requires-recent-login')) {
+              // If the error indicates that re-authentication is required, show the re-authentication sheet
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) {
+                    return BottomSheet(
+                      onClosing: () {
+                        authProvider.clearError();
+                      },
+                      shape: ContinuousRectangleBorder(),
+                      builder: (BuildContext context) {
+                        return ReAuthSheet(
+                          onReAuthSuccess: () {
+                            authProvider.deleteAccount();
+                            userProvider.deleteUserData(authProvider.id!);
+                            Navigator.of(context).pop();
+                          },
+                        );
                       },
                     );
                   },
                 );
-              },
-            );
-          });
-        }
-        return Scaffold(
-          appBar: AppBar(
-            leading: BackButton(
-              onPressed: () {
-                navProvider.pop();
-              },
-            ),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              spacing: 16,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                LabeledTextField(
-                  label: AppLocalizations.of(context)!.username,
-                  controller: userNameController,
-                ),
-                LabeledTextField(
-                  label: AppLocalizations.of(context)!.country,
-                  controller: countryController,
-                ),
-                LabeledTextField(
-                  label: AppLocalizations.of(context)!.language,
-                  controller: languageController,
-                ),
-                LabeledTextField(
-                  label: AppLocalizations.of(context)!.timezone,
-                  controller: timezoneController,
-                ),
-                Spacer(),
-                FilledTextButton(
-                  text: AppLocalizations.of(context)!.save,
-                  isDark: true,
+              });
+            }
+            return Scaffold(
+              appBar: AppBar(
+                leading: BackButton(
                   onPressed: () {
-                    // TODO:user - Handle save action
+                    navProvider.pop();
                   },
                 ),
-                FilledTextButton(
-                  text: AppLocalizations.of(context)!.changePassword,
-                  onPressed: () {
-                    navProvider.push(
-                      NewPasswordScreen(),
-                      showBottomNavBar: true,
-                    );
-                  },
-                ),
-                TextButton(
-                  onPressed: () {
-                    authProvider.deleteAccount();
-                    userProvider.deleteUserData(authProvider.id!);
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: BorderDirectional(
-                        bottom: BorderSide(color: colorScheme.error),
+              ),
+              body: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  spacing: 16,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    LabeledTextField(
+                      label: AppLocalizations.of(context)!.username,
+                      controller: userNameController,
+                    ),
+                    LabeledTextField(
+                      label: AppLocalizations.of(context)!.country,
+                      controller: countryController,
+                    ),
+                    LabeledLanguagePicker(
+                      language: LocaleUtils.getLanguageName(
+                        settingsProvider.locale,
+                        context,
+                      ),
+                      onLanguageChanged: (value) {
+                        settingsProvider.setLocale(
+                          LocaleUtils.getLocaleFromLanguageName(value, context),
+                        );
+                      },
+                    ),
+                    LabeledTextField(
+                      label: AppLocalizations.of(context)!.timezone,
+                      controller: timezoneController,
+                    ),
+                    Spacer(),
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.save,
+                      isDark: true,
+                      onPressed: () {
+                        // TODO:user - Handle save action
+                      },
+                    ),
+                    FilledTextButton(
+                      text: AppLocalizations.of(context)!.changePassword,
+                      onPressed: () {
+                        navProvider.push(
+                          NewPasswordScreen(),
+                          showBottomNavBar: true,
+                        );
+                      },
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        authProvider.deleteAccount();
+                        userProvider.deleteUserData(authProvider.id!);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: BorderDirectional(
+                            bottom: BorderSide(color: colorScheme.error),
+                          ),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.deleteAccountRequest,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.error,
+                          ),
+                        ),
                       ),
                     ),
-                    child: Text(
-                      AppLocalizations.of(context)!.deleteAccountRequest,
+                    Text(
+                      // TODO:appVersion - Show app version and other info
+                      AppLocalizations.of(context)!.appVersion('TODO'),
+                      textAlign: TextAlign.center,
                       style: textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.error,
+                        color: colorScheme.surfaceContainerLow,
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                Text(
-                  // TODO:appVersion - Show app version and other info
-                  AppLocalizations.of(context)!.appVersion('TODO'),
-                  textAlign: TextAlign.center,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.surfaceContainerLow,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+              ),
+            );
+          },
     );
   }
 }

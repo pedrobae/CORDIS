@@ -1631,7 +1631,7 @@ abstract class AppLocalizations {
   /// Hint text for song language input
   ///
   /// In pt, this message translates to:
-  /// **'Insira o idioma da música'**
+  /// **'Escolha um idioma'**
   String get languageHint;
 
   /// Hint text for tag input

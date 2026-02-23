@@ -864,7 +864,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get durationHint => 'Enter the Estimated Time (MM:SS)';
 
   @override
-  String get languageHint => 'Enter song language';
+  String get languageHint => 'Pick a language';
 
   @override
   String get tagHint => 'Type a tag';

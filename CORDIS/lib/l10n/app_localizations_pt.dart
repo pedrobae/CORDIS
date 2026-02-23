@@ -870,7 +870,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get durationHint => 'Insira a duração em MM:SS';
 
   @override
-  String get languageHint => 'Insira o idioma da música';
+  String get languageHint => 'Escolha um idioma';
 
   @override
   String get tagHint => 'Digite uma tag';
