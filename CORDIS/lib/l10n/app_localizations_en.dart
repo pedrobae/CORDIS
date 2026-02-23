@@ -733,6 +733,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chooseLanguage => 'Choose Language';
 
   @override
+  String get chooseTimezone => 'Choose Timezone';
+
+  @override
   String get selectAppLanguage => 'Select the application language:';
 
   @override
@@ -865,6 +868,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageHint => 'Pick a language';
+
+  @override
+  String get timezoneHint => 'Pick a timezone';
+
+  @override
+  String get searchTimezone => 'Search locale...';
 
   @override
   String get tagHint => 'Type a tag';

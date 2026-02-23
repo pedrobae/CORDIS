@@ -479,6 +479,8 @@
 
   "chooseLanguage": "Escolher Idioma",
   "@chooseLanguage": {"description": "Choose language prompt"},
+  "chooseTimezone": "Escolher Fuso Horário",
+  "@chooseTimezone": {"description": "Choose timezone prompt"},
   "selectAppLanguage": "Selecione o idioma do aplicativo:",
   "@selectAppLanguage": {"description": "Language selection instruction"},
   "portuguese": "Português",
@@ -568,6 +570,10 @@
   "@durationHint": {"description": "Hint text for duration input"},
   "languageHint": "Escolha um idioma",
   "@languageHint": {"description": "Hint text for song language input"},
+  "timezoneHint": "Selecione seu fuso horário",
+  "@timezoneHint": {"description": "Hint text for timezone selection"},
+  "searchTimezone": "Pesquisar localidade...",
+  "@searchTimezone": {"description": "Hint text for searching timezones"},
   "tagHint": "Digite uma tag",
   "@tagHint": {"description": "Hint text for tag input"},
 

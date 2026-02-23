@@ -8,6 +8,7 @@ import 'package:cordis/utils/locale.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/common/labeled_language_picker.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
+import 'package:cordis/widgets/common/labeled_timezone_picker.dart';
 import 'package:cordis/widgets/sheet_reauthenticate.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +21,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final emailController = TextEditingController();
   final userNameController = TextEditingController();
   final countryController = TextEditingController();
   final timezoneController = TextEditingController();
@@ -32,6 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final authProvider = context.read<MyAuthProvider>();
       final settingsProvider = context.read<SettingsProvider>();
 
+      emailController.text = authProvider.userEmail ?? '';
       userNameController.text =
           authProvider.userName ?? AppLocalizations.of(context)!.guest;
       countryController.text = settingsProvider.locale.countryCode ?? '';
@@ -41,6 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void dispose() {
+    emailController.dispose();
     userNameController.dispose();
     countryController.dispose();
     timezoneController.dispose();
@@ -109,6 +113,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     LabeledTextField(
+                      label: AppLocalizations.of(context)!.email,
+                      isEnabled: false,
+                      controller: emailController,
+                    ),
+                    LabeledTextField(
                       label: AppLocalizations.of(context)!.username,
                       controller: userNameController,
                     ),
@@ -127,9 +136,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
-                    LabeledTextField(
-                      label: AppLocalizations.of(context)!.timezone,
-                      controller: timezoneController,
+                    LabeledTimezonePicker(
+                      onTimezoneChanged: (value) {
+                        settingsProvider.setTimeZone(value);
+                      },
+                      timezone: settingsProvider.timeZone,
                     ),
                     Spacer(),
                     FilledTextButton(

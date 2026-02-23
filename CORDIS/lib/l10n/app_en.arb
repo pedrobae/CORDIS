@@ -486,6 +486,8 @@
 
   "chooseLanguage": "Choose Language",
   "@chooseLanguage": {"description": "Choose language prompt"},
+  "chooseTimezone": "Choose Timezone",
+  "@chooseTimezone": {"description": "Choose timezone prompt"},
   "selectAppLanguage": "Select the application language:",
   "@selectAppLanguage": {"description": "Language selection instruction"},
   "portuguese": "Portuguese",
@@ -574,6 +576,10 @@
   "@bpmHint": {"description": "Hint text for BPM input"},
   "languageHint": "Pick a language",
   "@languageHint": {"description": "Hint text for song language input"},
+  "timezoneHint": "Pick a timezone",
+  "@timezoneHint": {"description": "Hint text for timezone input"},
+  "searchTimezone": "Search locale...",
+  "@searchTimezone": {"description": "Hint text for searching timezones"},
   "tagHint": "Type a tag",
   "@tagHint": {"description": "Hint text for tag input"},
 

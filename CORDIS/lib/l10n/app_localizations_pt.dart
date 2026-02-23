@@ -738,6 +738,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get chooseLanguage => 'Escolher Idioma';
 
   @override
+  String get chooseTimezone => 'Escolher Fuso Horário';
+
+  @override
   String get selectAppLanguage => 'Selecione o idioma do aplicativo:';
 
   @override
@@ -871,6 +874,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get languageHint => 'Escolha um idioma';
+
+  @override
+  String get timezoneHint => 'Selecione seu fuso horário';
+
+  @override
+  String get searchTimezone => 'Pesquisar localidade...';
 
   @override
   String get tagHint => 'Digite uma tag';

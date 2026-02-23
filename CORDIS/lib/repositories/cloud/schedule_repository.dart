@@ -3,6 +3,7 @@ import 'package:cordis/helpers/guard.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:cordis/services/cache_service.dart';
 import 'package:cordis/services/firestore_service.dart';
+import 'package:cordis/utils/timezone_utils.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 
@@ -23,7 +24,10 @@ class CloudScheduleRepository {
 
       final docId = await _firestoreService.createDocument(
         collectionPath: 'schedules',
-        data: scheduleDto.toFirestore()..['createdAt'] = DateTime.now(),
+        data: scheduleDto.toFirestore()
+          ..['createdAt'] = TimezoneUtils.dateTimeToTimestamp(
+            DateTime.now().toUtc(),
+          ),
       );
 
       await FirebaseAnalytics.instance.logEvent(
@@ -43,7 +47,7 @@ class CloudScheduleRepository {
     String firebaseUserId, {
     bool forceFetch = false,
   }) async {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
 
     final (lastLoad, cachedSchedules) = await getCache(firebaseUserId);
 

@@ -50,6 +50,13 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Set timezone and persist
+  Future<void> setTimeZone(String timeZone) async {
+    _timeZone = timeZone;
+    await SettingsService.setTimeZone(timeZone);
+    notifyListeners();
+  }
+
   /// Toggle notifications and persist
   Future<void> toggleNotifications() async {
     _notificationsEnabled = !_notificationsEnabled;

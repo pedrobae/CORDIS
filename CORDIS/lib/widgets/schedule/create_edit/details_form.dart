@@ -1,7 +1,9 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
+import 'package:cordis/providers/settings_provider.dart';
 import 'package:cordis/utils/date_time_theme.dart';
+import 'package:cordis/utils/timezone_utils.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -205,7 +207,11 @@ class _ScheduleFormState extends State<ScheduleForm> {
     BuildContext context,
     TextEditingController controller,
   ) async {
-    DateTime initialDate = DateTime.now();
+    final settingsProvider = context.read<SettingsProvider>();
+    
+    // Get current time in user's timezone
+    final tzNow = TimezoneUtils.now(settingsProvider.timeZone);
+    DateTime initialDate = tzNow;
 
     // Parse existing date if available
     if (controller.text.isNotEmpty) {
@@ -220,6 +226,7 @@ class _ScheduleFormState extends State<ScheduleForm> {
         }
       } catch (_) {
         // If parsing fails, use current date
+        initialDate = tzNow;
       }
     }
 
@@ -227,7 +234,7 @@ class _ScheduleFormState extends State<ScheduleForm> {
       context: context,
       initialDate: initialDate.isAfter(DateTime(2020))
           ? initialDate
-          : DateTime.now(),
+          : tzNow,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
       builder: (context, child) {

@@ -132,7 +132,9 @@ class MainScreenState extends State<MainScreen> {
                           },
                           child: KeyedSubtree(
                             key: ValueKey(navigationProvider.currentRoute),
-                            child: navigationProvider.currentScreen,
+                            child: navigationProvider.buildCurrentScreen(
+                              context,
+                            ),
                           ),
                         );
                       },

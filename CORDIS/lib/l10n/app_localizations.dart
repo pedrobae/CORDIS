@@ -1400,6 +1400,12 @@ abstract class AppLocalizations {
   /// **'Escolher Idioma'**
   String get chooseLanguage;
 
+  /// Choose timezone prompt
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher Fuso Horário'**
+  String get chooseTimezone;
+
   /// Language selection instruction
   ///
   /// In pt, this message translates to:
@@ -1633,6 +1639,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Escolha um idioma'**
   String get languageHint;
+
+  /// Hint text for timezone selection
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione seu fuso horário'**
+  String get timezoneHint;
+
+  /// Hint text for searching timezones
+  ///
+  /// In pt, this message translates to:
+  /// **'Pesquisar localidade...'**
+  String get searchTimezone;
 
   /// Hint text for tag input
   ///

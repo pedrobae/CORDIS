@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/admin_provider.dart';
@@ -32,6 +33,9 @@ import 'package:cordis/services/settings_service.dart';
 void main() async {
   // Ensure Flutter is initialized before database operations
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize timezone database
+  tz.initializeTimeZones();
 
   await FirebaseService.initialize();
 

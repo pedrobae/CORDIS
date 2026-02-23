@@ -32,9 +32,36 @@ class NavigationProvider extends ChangeNotifier {
       _screenStack.isNotEmpty
           ? _screenStack.last
           : _getScreenForRoute(_currentRoute),
-      if (_screenOnForeground != null) _screenOnForeground!,
+      if (_screenOnForeground != null)
+        Positioned(bottom: 0, left: 0, right: 0, child: _screenOnForeground!),
     ],
   );
+
+  Widget buildCurrentScreen(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final appBarHeight = showAppBar ? kToolbarHeight : 0;
+    final bottomNavHeight = showBottomNavBar ? 120 : 0;
+    final maxHeight = screenHeight - appBarHeight - bottomNavHeight;
+
+    return Stack(
+      children: [
+        _screenStack.isNotEmpty
+            ? _screenStack.last
+            : _getScreenForRoute(_currentRoute),
+        if (_screenOnForeground != null)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              child: _screenOnForeground!,
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget? get screenOnForeground => _screenOnForeground;
   bool get showAppBar =>
       _showAppBarStack.isNotEmpty ? _showAppBarStack.last : true;
