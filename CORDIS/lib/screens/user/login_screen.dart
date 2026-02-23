@@ -244,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (authProvider.isAuthenticated) {
       // Load users after successful login
       await userProvider.loadUsers();
-      await userProvider.ensureUsersExist([authProvider.id!]);
+      await userProvider.ensureUserExists(authProvider.id!);
 
       authProvider.setUserData(
         userProvider.getUserByFirebaseId(authProvider.id!)!,
@@ -264,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (authProvider.isAuthenticated) {
       // Load users after successful login
       await userProvider.loadUsers();
-      await userProvider.ensureUsersExist([authProvider.id!]);
+      await userProvider.ensureUserExists(authProvider.id!);
 
       authProvider.setUserData(
         userProvider.getUserByFirebaseId(authProvider.id!)!,

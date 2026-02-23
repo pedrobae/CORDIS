@@ -19,22 +19,17 @@ class EditPlaylistScreen extends StatefulWidget {
 
 class _EditPlaylistScreenState extends State<EditPlaylistScreen> {
   TextEditingController playlistNameController = TextEditingController();
-  late bool isEditing;
 
   @override
   void initState() {
     super.initState();
     if (widget.playlistId != null) {
-      isEditing = true;
-
       final playlistProvider = Provider.of<PlaylistProvider>(
         context,
         listen: false,
       );
       final playlist = playlistProvider.getPlaylistById(widget.playlistId!)!;
       playlistNameController.text = playlist.name;
-    } else {
-      isEditing = false;
     }
   }
 
@@ -77,7 +72,7 @@ class _EditPlaylistScreenState extends State<EditPlaylistScreen> {
                         AppLocalizations.of(context)!.namePlaylistPrompt,
                         style: theme.textTheme.titleMedium,
                       ),
-                      if (!isEditing)
+                      if (widget.playlistId == null)
                         Text(
                           AppLocalizations.of(
                             context,
@@ -99,10 +94,12 @@ class _EditPlaylistScreenState extends State<EditPlaylistScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       FilledTextButton(
-                        text: AppLocalizations.of(context)!.create,
+                        text: widget.playlistId != null
+                            ? AppLocalizations.of(context)!.save
+                            : AppLocalizations.of(context)!.create,
                         isDark: true,
                         onPressed: () async {
-                          isEditing
+                          widget.playlistId != null
                               ? await playlistProvider.updateName(
                                   widget.playlistId!,
                                   playlistNameController.text,

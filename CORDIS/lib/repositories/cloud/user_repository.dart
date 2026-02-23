@@ -11,23 +11,15 @@ class CloudUserRepository {
 
   // ===== READ =====
   /// Fetches a user by their Firebase ID from Firestore
-  Future<List<UserDto>> fetchUsersByIds(List<String> userIds) async {
-    List<UserDto> users = [];
-    for (var userId in userIds) {
-      final docSnapshot = await _firestoreService.fetchDocumentById(
-        collectionPath: 'users',
-        documentId: userId,
-      );
-      if (docSnapshot != null) {
-        users.add(
-          UserDto.fromFirestore(
-            docSnapshot.data() as Map<String, dynamic>,
-            docSnapshot.id,
-          ),
-        );
-      }
+  Future<UserDto?> fetchUserById(String userId) async {
+    final docSnapshot = await _firestoreService.fetchDocumentById(
+      collectionPath: 'users',
+      documentId: userId,
+    );
+    if (docSnapshot != null) {
+      return UserDto.fromFirestore(docSnapshot.data() as Map<String, dynamic>);
     }
-    return users;
+    return null;
   }
 
   Future<UserDto?> fetchUserByEmail(String email) async {
@@ -40,7 +32,7 @@ class CloudUserRepository {
 
     if (querySnapshot.isNotEmpty) {
       final doc = querySnapshot.first;
-      return UserDto.fromFirestore(doc.data() as Map<String, dynamic>, doc.id);
+      return UserDto.fromFirestore(doc.data() as Map<String, dynamic>);
     }
     return null;
   }

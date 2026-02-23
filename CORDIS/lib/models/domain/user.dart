@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cordis/models/dtos/user_dto.dart';
 import 'package:cordis/utils/date_utils.dart';
 
@@ -7,7 +8,6 @@ class User {
   final String username;
   final String email;
   final String? profilePhoto;
-  final String? googleId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final bool isActive;
@@ -18,7 +18,6 @@ class User {
     required this.username,
     required this.email,
     this.profilePhoto,
-    this.googleId,
     this.createdAt,
     this.updatedAt,
     this.isActive = true,
@@ -29,9 +28,8 @@ class User {
       id: json['id'] as int,
       firebaseId: json['firebase_id'] as String?,
       username: json['username'] as String,
-      email: json['mail'] as String,
+      email: json['email'] as String,
       profilePhoto: json['profile_photo'] as String?,
-      googleId: json['google_id'] as String?,
       createdAt: DateTimeUtils.parseDateTime(json['created_at']),
       updatedAt: DateTimeUtils.parseDateTime(json['updated_at']),
       isActive: (json['is_active'] as int? ?? 1) == 1,
@@ -41,9 +39,8 @@ class User {
   Map<String, dynamic> toSQLite() {
     return {
       'username': username,
-      'mail': email,
+      'email': email,
       'profile_photo': profilePhoto,
-      'google_id': googleId,
       'firebase_id': firebaseId,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
@@ -57,9 +54,8 @@ class User {
       username: username,
       email: email,
       profilePhoto: profilePhoto,
-      googleId: googleId,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
+      createdAt: Timestamp.fromDate(createdAt ?? DateTime.now()),
+      updatedAt: Timestamp.fromDate(updatedAt ?? DateTime.now()),
       isActive: isActive,
     );
   }
@@ -71,7 +67,6 @@ class User {
       username: username.isNotEmpty ? username : other.username,
       email: email.isNotEmpty ? email : other.email,
       profilePhoto: profilePhoto ?? other.profilePhoto,
-      googleId: googleId ?? other.googleId,
       createdAt: createdAt ?? other.createdAt,
       updatedAt: updatedAt ?? other.updatedAt,
       isActive: isActive,
@@ -84,7 +79,6 @@ class User {
     String? username,
     String? email,
     String? profilePhoto,
-    String? googleId,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isActive,
@@ -95,7 +89,6 @@ class User {
       username: username ?? this.username,
       email: email ?? this.email,
       profilePhoto: profilePhoto ?? this.profilePhoto,
-      googleId: googleId ?? this.googleId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isActive: isActive ?? this.isActive,

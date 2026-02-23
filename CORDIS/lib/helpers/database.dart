@@ -21,7 +21,7 @@ class DatabaseHelper {
 
       final db = await openDatabase(
         path,
-        version: 14,
+        version: 15,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade, // Handle migrations
       );
@@ -108,9 +108,8 @@ class DatabaseHelper {
       CREATE TABLE user (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
-        mail TEXT UNIQUE NOT NULL,
+        email TEXT UNIQUE NOT NULL,
         profile_photo TEXT,
-        google_id TEXT UNIQUE,
         firebase_id TEXT UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -380,6 +379,10 @@ class DatabaseHelper {
       await db.execute(
         'ALTER TABLE schedule ADD COLUMN is_public BOOLEAN DEFAULT 0',
       );
+    }
+    if (oldVersion < 15) {
+      // RENAMED mail TO email IN USER TABLE
+      await db.execute('ALTER TABLE user RENAME COLUMN mail TO email');
     }
   }
 

@@ -200,7 +200,7 @@ class _SectionsTabState extends State<SectionsTab> {
                                 ],
                               ),
                               child: Icon(
-                                paletteIsOpen ? Icons.close : Icons.palette,
+                                paletteIsOpen ? Icons.close : Icons.music_note,
                                 size: 28,
                                 color: colorScheme.surface,
                               ),

@@ -146,9 +146,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await cacheService.clearAllCaches();
 
       if (mounted) {
-        await context.read<UserProvider>().ensureUsersExist([
+        await context.read<UserProvider>().ensureUserExists(
           context.read<MyAuthProvider>().id!,
-        ]);
+        );
       }
 
       // Check mounted again after async operations

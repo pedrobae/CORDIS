@@ -1,15 +1,13 @@
 import 'package:cordis/models/domain/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cordis/utils/date_utils.dart';
 
 class UserDto {
   final String? firebaseId;
   final String username;
   final String email;
   final String? profilePhoto;
-  final String? googleId;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final Timestamp? createdAt;
+  final Timestamp? updatedAt;
   final bool isActive;
 
   const UserDto({
@@ -17,32 +15,31 @@ class UserDto {
     required this.username,
     required this.email,
     this.profilePhoto,
-    this.googleId,
     this.createdAt,
     this.updatedAt,
     this.isActive = true,
   });
 
-  factory UserDto.fromFirestore(Map<String, dynamic> json, String id) {
+  factory UserDto.fromFirestore(Map<String, dynamic> json) {
     return UserDto(
-      firebaseId: id,
+      firebaseId: json['uid'] as String,
       username: json['username'] as String,
       email: json['email'] as String,
       profilePhoto: json['profilePhoto'] as String?,
-      googleId: json['googleId'] as String?,
-      createdAt: DateTimeUtils.parseDateTime(json['createdAt']),
-      updatedAt: DateTimeUtils.parseDateTime(json['updatedAt']),
-      isActive: (json['isActive'] as bool?) ?? true,
+      createdAt: json['createdAt'] as Timestamp?,
+      updatedAt: json['updatedAt'] as Timestamp?,
     );
   }
 
   Map<String, dynamic> toFirestore() {
     return {
+      'uid': firebaseId,
       'username': username,
-      'mail': email,
+      'email': email,
       'profilePhoto': profilePhoto,
-      'googleId': googleId,
-      'createdAt': DateTimeUtils.formatDate(createdAt ?? DateTime.now()),
+      'createdAt':
+          createdAt ??
+          Timestamp.fromDate(DateTime.now()), // Use current time if not set
       'updatedAt':
           FieldValue.serverTimestamp(), // Server timestamp to avoid client clock issues
       'isActive': isActive,
@@ -67,9 +64,8 @@ class UserDto {
       username: username,
       email: email,
       profilePhoto: profilePhoto,
-      googleId: googleId,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
+      createdAt: createdAt?.toDate(),
+      updatedAt: updatedAt?.toDate(),
       isActive: isActive,
     );
   }
@@ -79,9 +75,8 @@ class UserDto {
     String? username,
     String? email,
     String? profilePhoto,
-    String? googleId,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    Timestamp? createdAt,
+    Timestamp? updatedAt,
     bool? isActive,
   }) {
     return UserDto(
@@ -89,7 +84,6 @@ class UserDto {
       username: username ?? this.username,
       email: email ?? this.email,
       profilePhoto: profilePhoto ?? this.profilePhoto,
-      googleId: googleId ?? this.googleId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isActive: isActive ?? this.isActive,

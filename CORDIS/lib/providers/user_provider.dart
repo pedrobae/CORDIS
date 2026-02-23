@@ -27,7 +27,7 @@ class UserProvider extends ChangeNotifier {
   // ===== CREATE =====
   /// Downloads users from Firebase
   /// Saves them to local SQLite db
-  Future<void> downloadUsersFromCloud(List<String> firebaseUserIds) async {
+  Future<void> downloadUserFromCloud(String firebaseUserId) async {
     if (_isLoadingCloud) return;
 
     _isLoadingCloud = true;
@@ -35,9 +35,9 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final users = await _cloudUserRepository.fetchUsersByIds(firebaseUserIds);
+      final userDto = await _cloudUserRepository.fetchUserById(firebaseUserId);
 
-      for (final userDto in users) {
+      if (userDto != null) {
         final user = userDto.toDomain();
         final userId = await _localUserRepository.createUser(user);
         _knownUsers.add(user.copyWith(id: userId));
@@ -59,18 +59,11 @@ class UserProvider extends ChangeNotifier {
 
   /// Ensures that all users in the provided list of Firebase IDs exist locally
   /// Downloads any missing users from the cloud
-  Future<void> ensureUsersExist(List<String> firebaseUserIds) async {
-    final missingIds = <String>[];
+  Future<void> ensureUserExists(String firebaseUserId) async {
+    final user = await _localUserRepository.getUserByFirebaseId(firebaseUserId);
 
-    for (final firebaseId in firebaseUserIds) {
-      final user = await _localUserRepository.getUserByFirebaseId(firebaseId);
-      if (user == null) {
-        missingIds.add(firebaseId);
-      }
-    }
-
-    if (missingIds.isNotEmpty) {
-      await downloadUsersFromCloud(missingIds);
+    if (user == null) {
+      await downloadUserFromCloud(firebaseUserId);
     }
   }
 

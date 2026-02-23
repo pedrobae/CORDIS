@@ -148,6 +148,7 @@ class CloudScheduleProvider extends ChangeNotifier {
         }
       }
     } catch (e) {
+      debugPrint('Error loading schedules: $e');
       _error = e.toString();
     } finally {
       _isLoading = false;
