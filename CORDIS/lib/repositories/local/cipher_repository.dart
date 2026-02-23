@@ -71,11 +71,7 @@ class CipherRepository {
   /// Used for lazy loading versions
   Future<List<Cipher>> getAllCiphersPruned() async {
     final db = await _databaseHelper.database;
-    final results = await db.query(
-      'cipher',
-      where: 'is_deleted = 0',
-      orderBy: 'created_at DESC',
-    );
+    final results = await db.query('cipher', where: 'is_deleted = 0');
 
     return Future.wait(results.map((row) => _buildPrunedCipher(row)));
   }
@@ -205,10 +201,7 @@ class CipherRepository {
 
       int tagId;
       if (tags.isEmpty) {
-        tagId = await txn.insert('tag', {
-          'title': tagTitle,
-          'created_at': DateTime.now().toIso8601String(),
-        });
+        tagId = await txn.insert('tag', {'title': tagTitle});
       } else {
         tagId = tags.first['id'] as int;
       }
@@ -217,7 +210,6 @@ class CipherRepository {
       await txn.insert('cipher_tags', {
         'tag_id': tagId,
         'cipher_id': cipherId,
-        'created_at': DateTime.now().toIso8601String(),
       }, conflictAlgorithm: ConflictAlgorithm.ignore);
     });
   }
@@ -266,10 +258,7 @@ class CipherRepository {
 
     int tagId;
     if (tags.isEmpty) {
-      tagId = await txn.insert('tag', {
-        'title': tagTitle,
-        'created_at': DateTime.now().toIso8601String(),
-      });
+      tagId = await txn.insert('tag', {'title': tagTitle});
     } else {
       tagId = tags.first['id'] as int;
     }
@@ -278,7 +267,6 @@ class CipherRepository {
     await txn.insert('cipher_tags', {
       'tag_id': tagId,
       'cipher_id': cipherId,
-      'created_at': DateTime.now().toIso8601String(),
     }, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 

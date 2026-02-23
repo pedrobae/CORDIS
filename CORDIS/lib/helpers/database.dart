@@ -21,7 +21,7 @@ class DatabaseHelper {
 
       final db = await openDatabase(
         path,
-        version: 15,
+        version: 16,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade, // Handle migrations
       );
@@ -41,7 +41,6 @@ class DatabaseHelper {
       CREATE TABLE tag (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     ''');
 
@@ -55,8 +54,8 @@ class DatabaseHelper {
         language TEXT DEFAULT 'por',
         firebase_id TEXT,
         is_deleted BOOLEAN DEFAULT 0,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        updated_at INTEGER DEFAULT (strftime('%s','now')),
+        created_at INTEGER DEFAULT (strftime('%s','now'))
       )
     ''');
 
@@ -66,7 +65,6 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         tag_id INTEGER NOT NULL,
         cipher_id INTEGER NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (tag_id) REFERENCES tag (id) ON DELETE CASCADE,
         FOREIGN KEY (cipher_id) REFERENCES cipher (id) ON DELETE CASCADE,
         UNIQUE(tag_id, cipher_id)
@@ -85,7 +83,7 @@ class DatabaseHelper {
         version_name TEXT,
         firebase_cipher_id TEXT,
         firebase_id TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_at INTEGER DEFAULT (strftime('%s','now')),
         FOREIGN KEY (cipher_id) REFERENCES cipher (id) ON DELETE CASCADE
       )
     ''');
@@ -111,8 +109,8 @@ class DatabaseHelper {
         email TEXT UNIQUE NOT NULL,
         profile_photo TEXT,
         firebase_id TEXT UNIQUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_at INTEGER DEFAULT (strftime('%s','now')),
+        updated_at INTEGER DEFAULT (strftime('%s','now')),
         is_active BOOLEAN DEFAULT 1
       )
     ''');
@@ -136,7 +134,6 @@ class DatabaseHelper {
         playlist_id INTEGER NOT NULL,
         firebase_content_id TEXT,
         position INTEGER NOT NULL,
-        included_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (version_id) REFERENCES version (id) ON DELETE CASCADE,
         FOREIGN KEY (playlist_id) REFERENCES playlist (id) ON DELETE CASCADE,
         UNIQUE(playlist_id, position)
@@ -150,7 +147,6 @@ class DatabaseHelper {
         user_id INTEGER NOT NULL,
         playlist_id INTEGER NOT NULL,
         role TEXT NOT NULL DEFAULT 'collaborator',
-        added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         added_by INTEGER NOT NULL,
         FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE,
         FOREIGN KEY (playlist_id) REFERENCES playlist (id) ON DELETE CASCADE,
@@ -169,7 +165,6 @@ class DatabaseHelper {
         firebase_id TEXT,
         position INTEGER NOT NULL DEFAULT 0,
         duration INTEGER DEFAULT 0,
-        added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (playlist_id) REFERENCES playlist (id) ON DELETE CASCADE
       )
     ''');
@@ -383,6 +378,15 @@ class DatabaseHelper {
     if (oldVersion < 15) {
       // RENAMED mail TO email IN USER TABLE
       await db.execute('ALTER TABLE user RENAME COLUMN mail TO email');
+    }
+    if (oldVersion < 16) {
+      // REMOVED TIMESTAMP TYPE AND ADDED INTEGER (milliseconds since epoch) FOR created_at and updated_at in user table
+
+      // for simplicity, we'll drop and recreate the whole database, since we don't have critical data yet.
+      await db.close();
+      String path = join(await getDatabasesPath(), 'cipher_app.db');
+      await databaseFactory.deleteDatabase(path);
+      await _initDatabase();
     }
   }
 

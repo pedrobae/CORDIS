@@ -90,6 +90,23 @@ class LocalVersionRepository {
     return versions;
   }
 
+  Future<Version> getOldestVersionOfCipher(int cipherId) async {
+    final db = await _databaseHelper.database;
+    final result = await db.query(
+      'version',
+      where: 'created_at = ?',
+      whereArgs: [cipherId],
+      orderBy: 'ASC',
+      limit: 1,
+    );
+
+    if (result.isEmpty) {
+      throw Exception('No versions found for cipher with ID $cipherId');
+    }
+
+    return _buildVersion(result[0]);
+  }
+
   // ===== UPDATE =====
   /// Updates entire version
   Future<void> updateVersion(Version version) async {

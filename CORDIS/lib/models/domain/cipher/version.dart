@@ -48,7 +48,7 @@ class Version {
           ? Duration(seconds: row['duration'])
           : Duration.zero,
       createdAt: row['created_at'] != null
-          ? DateTime.parse(row['created_at'])
+          ? DateTime.fromMillisecondsSinceEpoch(int.parse(row['created_at']))
           : DateTime.now(),
       sections: versionContentMap,
     );
@@ -78,7 +78,7 @@ class Version {
       transposedKey: row['transposed_key'] as String?,
       versionName: row['version_name'] as String,
       createdAt: row['created_at'] != null
-          ? DateTime.parse(row['created_at'])
+          ? DateTime.fromMillisecondsSinceEpoch(int.parse(row['created_at']))
           : DateTime.now(),
       sections: null, // Will be populated separately by repository
     );
@@ -93,7 +93,7 @@ class Version {
       'bpm': bpm,
       'transposed_key': transposedKey,
       'version_name': versionName,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt.millisecondsSinceEpoch.toString(),
     };
     if (firebaseId != null && firebaseId!.isNotEmpty) {
       row['firebase_id'] = firebaseId;

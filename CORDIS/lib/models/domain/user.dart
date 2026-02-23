@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cordis/models/dtos/user_dto.dart';
-import 'package:cordis/utils/date_utils.dart';
 
 class User {
   final int? id;
@@ -30,8 +29,12 @@ class User {
       username: json['username'] as String,
       email: json['email'] as String,
       profilePhoto: json['profile_photo'] as String?,
-      createdAt: DateTimeUtils.parseDateTime(json['created_at']),
-      updatedAt: DateTimeUtils.parseDateTime(json['updated_at']),
+      createdAt: json['created_at'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['created_at'] as int)
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['updated_at'] as int)
+          : null,
       isActive: (json['is_active'] as int? ?? 1) == 1,
     );
   }
@@ -42,8 +45,8 @@ class User {
       'email': email,
       'profile_photo': profilePhoto,
       'firebase_id': firebaseId,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'created_at': createdAt?.millisecondsSinceEpoch,
+      'updated_at': updatedAt?.millisecondsSinceEpoch,
       'is_active': isActive ? 1 : 0,
     };
   }

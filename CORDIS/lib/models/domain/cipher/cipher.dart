@@ -1,6 +1,5 @@
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
-import 'package:cordis/utils/date_utils.dart';
 
 class Cipher {
   final int id;
@@ -33,16 +32,15 @@ class Cipher {
       id: json['id'] as int,
       title: json['title'] as String? ?? '',
       author: json['author'] as String? ?? '',
-      tags: json['tags'] != null ? List<String>.from(json['tags']) : const [],
       musicKey: json['music_key'] as String? ?? '',
-      language: json['language'] as String? ?? 'por',
-      createdAt:
-          DateTimeUtils.parseDateTime(json['created_at']) ?? DateTime.now(),
-      updatedAt: DateTimeUtils.parseDateTime(json['updated_at']),
-      isLocal: json['isLocal'] as bool? ?? true, // Default to true for local DB
-      versions: json['maps'] != null
-          ? (json['maps'] as List).map((m) => Version.fromSqLite(m)).toList()
-          : const [],
+      language: json['language'] as String? ?? 'Portugues',
+      createdAt: json['created_at'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['created_at'] as int)
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['updated_at'] as int)
+          : null,
+      isLocal: true,
     );
   }
 
@@ -84,8 +82,8 @@ class Cipher {
       'author': author,
       'music_key': musicKey,
       'language': language,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'created_at': createdAt.millisecondsSinceEpoch,
+      'updated_at': updatedAt?.millisecondsSinceEpoch,
     };
   }
 
@@ -97,8 +95,8 @@ class Cipher {
       'author': author,
       'music_key': musicKey,
       'language': language,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'created_at': createdAt.millisecondsSinceEpoch,
+      'updated_at': updatedAt?.millisecondsSinceEpoch,
       'isLocal': false,
       'tags': tags,
       'versions': versions,
@@ -111,7 +109,7 @@ class Cipher {
       'author': author,
       'originalKey': musicKey,
       'language': language,
-      'updatedAt': updatedAt,
+      'updatedAt': updatedAt?.millisecondsSinceEpoch,
       'tags': tags,
     };
   }
