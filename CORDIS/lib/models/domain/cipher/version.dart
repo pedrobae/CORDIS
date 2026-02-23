@@ -48,7 +48,7 @@ class Version {
           ? Duration(seconds: row['duration'])
           : Duration.zero,
       createdAt: row['created_at'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(int.parse(row['created_at']))
+          ? DateTime.fromMillisecondsSinceEpoch(row['created_at'])
           : DateTime.now(),
       sections: versionContentMap,
     );
@@ -78,7 +78,7 @@ class Version {
       transposedKey: row['transposed_key'] as String?,
       versionName: row['version_name'] as String,
       createdAt: row['created_at'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(int.parse(row['created_at']))
+          ? DateTime.fromMillisecondsSinceEpoch(row['created_at'])
           : DateTime.now(),
       sections: null, // Will be populated separately by repository
     );

@@ -1,16 +1,18 @@
 import 'dart:async';
+import 'package:cordis/services/key_recognizer_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/repositories/local/cipher_repository.dart';
 
 class CipherProvider extends ChangeNotifier {
   final CipherRepository _cipherRepository = CipherRepository();
+  final KeyRecognizerService _recognizer = KeyRecognizerService();
 
   CipherProvider() {
     clearSearch();
   }
 
-  Map<int, Cipher> _ciphers = {};
+  final Map<int, Cipher> _ciphers = {};
 
   String _searchTerm = '';
 
@@ -107,11 +109,16 @@ class CipherProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _ciphers = Map.fromEntries(
-        (await _cipherRepository.getAllCiphersPruned()).map(
-          (cipher) => MapEntry(cipher.id, cipher),
-        ),
-      );
+      final prunedCiphers = await _cipherRepository.getAllCiphersPruned();
+
+      for (var cipher in prunedCiphers) {
+        if (cipher.musicKey.isEmpty) {
+          final recognizedKey = await _recognizer.recognizeKeyLocal(cipher.id);
+          cipher = cipher.copyWith(musicKey: recognizedKey);
+          await _cipherRepository.updateCipher(cipher);
+        }
+        _ciphers[cipher.id] = cipher;
+      }
 
       if (kDebugMode) {
         print('Loaded ${_ciphers.length} ciphers from SQLite');
@@ -137,7 +144,14 @@ class CipherProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _ciphers[cipherId] = (await _cipherRepository.getCipherById(cipherId))!;
+      Cipher loadedCipher = (await _cipherRepository.getCipherById(cipherId))!;
+      if (loadedCipher.musicKey.isEmpty) {
+        final recognizedKey = await _recognizer.recognizeKeyLocal(cipherId);
+        loadedCipher = loadedCipher.copyWith(musicKey: recognizedKey);
+        await _cipherRepository.updateCipher(loadedCipher);
+      }
+
+      _ciphers[cipherId] = loadedCipher;
     } catch (e) {
       if (kDebugMode) {
         print('Error loading cipher: $e');
@@ -157,9 +171,14 @@ class CipherProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final cipher = (await _cipherRepository.getCipherWithVersionId(
+      Cipher cipher = (await _cipherRepository.getCipherWithVersionId(
         versionId,
       ))!;
+      if (cipher.musicKey.isEmpty) {
+        final recognizedKey = await _recognizer.recognizeKeyLocal(cipher.id);
+        cipher = cipher.copyWith(musicKey: recognizedKey);
+        await _cipherRepository.updateCipher(cipher);
+      }
       _ciphers[cipher.id] = cipher;
     } catch (e) {
       _error = e.toString();

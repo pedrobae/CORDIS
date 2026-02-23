@@ -39,7 +39,6 @@ class PlaylistRepository {
               'version_id': item.contentId,
               'playlist_id': playlistId,
               'position': item.position,
-              'included_at': DateTime.now().toIso8601String(),
             });
             break;
           case PlaylistItemType.flowItem:
@@ -199,7 +198,6 @@ class PlaylistRepository {
         'version_id': versionID,
         'playlist_id': playlistId,
         'position': nextPosition,
-        'included_at': DateTime.now().toIso8601String(),
       });
     });
   }
@@ -218,7 +216,6 @@ class PlaylistRepository {
         'version_id': versionID,
         'playlist_id': playlistId,
         'position': position,
-        'included_at': DateTime.now().toIso8601String(),
       });
     });
   }
@@ -261,7 +258,6 @@ class PlaylistRepository {
       'user_id': userId,
       'playlist_id': playlistId,
       'role': role,
-      'added_at': DateTime.now().toIso8601String(),
     });
   }
 
@@ -544,7 +540,6 @@ class PlaylistRepository {
             'title': item['title'],
             'content': item['content'],
             'position': item['position'],
-            'added_at': DateTime.now().toIso8601String(),
           });
         }
       }
@@ -573,7 +568,6 @@ class PlaylistRepository {
             'version_id': item['contentId'],
             'playlist_id': playlistId,
             'position': item['position'],
-            'included_at': DateTime.now().toIso8601String(),
           });
         }
       }

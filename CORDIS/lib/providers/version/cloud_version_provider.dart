@@ -1,10 +1,12 @@
 import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/repositories/cloud/version_repository.dart';
+import 'package:cordis/services/key_recognizer_service.dart';
 import 'package:flutter/foundation.dart';
 
 class CloudVersionProvider extends ChangeNotifier {
   final CloudVersionRepository _repo = CloudVersionRepository();
+  final _recognizer = KeyRecognizerService();
 
   final Map<String, VersionDto> _versions =
       {}; // Cached cloud versions firebaseID -> Version
@@ -90,7 +92,11 @@ class CloudVersionProvider extends ChangeNotifier {
         forceReload: forceReload,
       );
 
-      for (final version in cloudVersions) {
+      for (var version in cloudVersions) {
+        if (version.originalKey.isEmpty) {
+          final recognizedKey = await _recognizer.recognizeKeyCloud(version);
+          version = version.copyWith(originalKey: recognizedKey);
+        }
         if (localCiphers.any(
           (cipher) =>
               cipher.title == version.title && cipher.author == version.author,
@@ -120,40 +126,18 @@ class CloudVersionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final version = await _repo.getUserVersionById(firebaseId);
+      VersionDto? version = await _repo.getUserVersionById(firebaseId);
       if (version != null) {
+        if (version.originalKey.isEmpty) {
+          final recognizedKey = await _recognizer.recognizeKeyCloud(version);
+          version = version.copyWith(originalKey: recognizedKey);
+        }
         _versions[firebaseId] = version;
         notifyListeners();
       }
     } catch (e) {
       if (kDebugMode) {
         print('Error ensuring cloud version in cache: $e');
-      }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  /// Load a version into cache by its Firebase ID
-  Future<void> loadUserVersionsByFirebaseId(String firebaseId) async {
-    if (_isLoading) return;
-
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      final version = await _repo.getUserVersionById(firebaseId);
-      if (version == null) {
-        throw Exception('Version with id $firebaseId not found in cloud');
-      }
-
-      _versions[firebaseId] = version;
-    } catch (e) {
-      _error = e.toString();
-      if (kDebugMode) {
-        print('Error loading cloud cipher version by id: $e');
       }
     } finally {
       _isLoading = false;

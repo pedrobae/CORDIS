@@ -40,7 +40,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE tag (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
+        title TEXT NOT NULL
       )
     ''');
 
@@ -238,8 +238,7 @@ class DatabaseHelper {
       'CREATE INDEX idx_user_playlist_playlist_id ON user_playlist(playlist_id)',
     );
     // For user lookups
-    await db.execute('CREATE INDEX idx_user_google_id ON user(google_id)');
-    await db.execute('CREATE INDEX idx_user_mail ON user(mail)');
+    await db.execute('CREATE INDEX idx_user_email ON user(email)');
     await db.execute(
       'CREATE UNIQUE INDEX idx_user_firebase_id ON user(firebase_id)',
     );

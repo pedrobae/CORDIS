@@ -54,17 +54,8 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
       // Ensure the specific version is loaded
       if (widget.versionId is String &&
           !cloudVersionProvider.versions.containsKey(widget.versionId)) {
-        await cloudVersionProvider.loadUserVersionsByFirebaseId(
-          widget.versionId,
-        );
-        sectionProvider.setNewSectionsInCache(
-          widget.versionId,
-          cloudVersionProvider
-              .getVersion(widget.versionId)!
-              .sections
-              .map(
-                (key, section) => MapEntry(key, Section.fromFirestore(section)),
-              ),
+        throw Exception(
+          'Cloud version with id ${widget.versionId} not found in cache',
         );
       } else {
         await versionProvider.loadVersion(widget.versionId);
