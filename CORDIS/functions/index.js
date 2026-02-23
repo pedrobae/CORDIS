@@ -130,7 +130,7 @@ exports.createUserDocument = beforeUserCreated(async (event) => {
     await admin.firestore().collection("users").doc(uid).set({
       uid: uid,
       email: email || "",
-      userName: displayName || "",
+      username: displayName || "",
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
