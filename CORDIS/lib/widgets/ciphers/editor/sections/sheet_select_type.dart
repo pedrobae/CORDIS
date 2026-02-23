@@ -172,7 +172,8 @@ class SelectType extends StatelessWidget {
       );
       return newCode;
     } else {
-      sectionProvider.cacheUpdate(
+      final newCode = sectionProvider.cacheUpdate(
+        context.read<LocalVersionProvider>(),
         versionID!,
         sectionCode!,
         newContentCode: section.code,
@@ -185,16 +186,16 @@ class SelectType extends StatelessWidget {
         context.read<LocalVersionProvider>().updateSectionCodeInStruct(
           versionID!,
           oldCode: sectionCode!,
-          newCode: section.code,
+          newCode: newCode,
         );
 
         context.read<SectionProvider>().renameSectionKey(
           versionID!,
           oldCode: sectionCode!,
-          newCode: section.code,
+          newCode: newCode,
         );
       }
-      return section.code;
+      return newCode;
     }
   }
 }

@@ -3,7 +3,7 @@ import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
-import 'package:cordis/widgets/ciphers/editor/sections/select_type.dart';
+import 'package:cordis/widgets/ciphers/editor/sections/sheet_select_type.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
@@ -71,7 +71,14 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
             children: [
               BackButton(
                 color: colorScheme.onSurface,
-                onPressed: () => context.read<NavigationProvider>().pop(),
+                onPressed: () {
+                  if (widget.isNewSection) {
+                    // If it's a new section,
+                    // Delete the cached section that was created when selecting type
+                    _deleteSection();
+                  }
+                  context.read<NavigationProvider>().pop();
+                },
               ),
               Text(
                 AppLocalizations.of(
@@ -196,7 +203,8 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
   void _upsertSection() {
     // New section was added when selecting type, so just update it
     // Update the section with new values
-    context.read<SectionProvider>().cacheUpdate(
+    final newCode = context.read<SectionProvider>().cacheUpdate(
+      context.read<LocalVersionProvider>(),
       widget.versionID,
       widget.sectionCode!,
       newContentCode: contentCodeController.text,
@@ -209,23 +217,21 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     if (widget.isNewSection) {
       context.read<LocalVersionProvider>().addSectionToStruct(
         widget.versionID!,
-        widget.sectionCode ?? contentCodeController.text,
+        newCode,
       );
     }
 
     // If the content code has changed, update the song structure accordingly
-    if (contentCodeController.text.isNotEmpty &&
-        contentCodeController.text != widget.sectionCode) {
+    if (newCode != widget.sectionCode) {
       context.read<LocalVersionProvider>().updateSectionCodeInStruct(
         widget.versionID!,
         oldCode: widget.sectionCode!,
-        newCode: contentCodeController.text,
+        newCode: newCode,
       );
-
       context.read<SectionProvider>().renameSectionKey(
         widget.versionID!,
         oldCode: widget.sectionCode!,
-        newCode: contentCodeController.text,
+        newCode: newCode,
       );
     }
   }

@@ -1,3 +1,4 @@
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/repositories/local/section_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -45,38 +46,14 @@ class SectionProvider extends ChangeNotifier {
     Color color,
     String sectionType,
   ) {
+    final code = _assignNumbering(versionKey, '', contentCode);
     final newSection = Section(
       versionId: versionKey is String ? -1 : versionKey,
-      contentCode: contentCode,
+      contentCode: code,
       contentColor: color,
       contentType: sectionType,
       contentText: '',
     );
-    // CHECK IF ALREADY EXISTS
-    bool exists = false;
-    for (String key in _sections[newSection.versionId]?.keys ?? []) {
-      // Strip numbering suffixes for comparison, remove numbers
-      final strippedKey = key.toString().replaceAll(RegExp(r'\d+$'), '');
-      if (strippedKey == contentCode) {
-        exists = true;
-        break;
-      }
-    }
-    if (exists) {
-      debugPrint(
-        'Section with code ${newSection.contentCode} already exists in version ${newSection.versionId}.',
-      );
-      int suffix = 1;
-      String newCode;
-      do {
-        newCode = '${newSection.contentCode}$suffix';
-        suffix++;
-      } while (_sections[newSection.versionId] != null &&
-          _sections[newSection.versionId]!.containsKey(newCode));
-
-      debugPrint('Renaming new section to $newCode to avoid conflict.');
-      newSection.contentCode = newCode;
-    }
 
     _sections[newSection.versionId] ??= {};
     _sections[newSection.versionId]![newSection.contentCode] = newSection;
@@ -143,20 +120,26 @@ class SectionProvider extends ChangeNotifier {
 
   /// ===== UPDATE =====
   // Modify a section (content_text)
-  void cacheUpdate(
-    dynamic versionKey,
+  String cacheUpdate(
+    LocalVersionProvider localVersionProvider,
+    dynamic versionID,
     String contentCode, {
     String? newContentCode,
     String? newContentType,
     String? newContentText,
     Color? newColor,
   }) {
-    final section = _sections[versionKey]![contentCode];
+    String newCode = contentCode;
+    if (newContentCode != null) {
+      newCode = _assignNumbering(versionID, contentCode, newContentCode);
+    }
+
+    final section = _sections[versionID]![contentCode];
     if (section == null) {
       // Create a new section if it doesn't exist
       final newSection = Section(
-        versionId: versionKey is String ? -1 : versionKey,
-        contentCode: newContentCode ?? contentCode,
+        versionId: versionID is String ? -1 : versionID,
+        contentCode: newCode,
         contentType: newContentType ?? 'default',
         contentText: newContentText ?? '',
         contentColor: newColor ?? Colors.grey,
@@ -166,25 +149,26 @@ class SectionProvider extends ChangeNotifier {
       _sections[newSection.versionId]![newSection.contentCode] = newSection;
     } else {
       // Update existing section
-      section.contentCode = newContentCode ?? section.contentCode;
+      section.contentCode = newCode;
       section.contentType = newContentType ?? section.contentType;
       section.contentText = newContentText ?? section.contentText;
       section.contentColor = newColor ?? section.contentColor;
     }
     notifyListeners();
+    return newCode;
   }
 
   void renameSectionKey(
-    dynamic versionKey, {
+    dynamic versionID, {
     required String oldCode,
     required String newCode,
   }) {
-    final section = _sections[versionKey]![oldCode];
+    final section = _sections[versionID]![oldCode];
     if (section == null) return;
 
     // Remove the old entry and add a new one with the updated code
-    _sections[versionKey]!.remove(oldCode);
-    _sections[versionKey]![newCode] = section;
+    _sections[versionID]!.remove(oldCode);
+    _sections[versionID]![newCode] = section;
 
     notifyListeners();
   }
@@ -225,6 +209,58 @@ class SectionProvider extends ChangeNotifier {
       _isSaving = false;
       notifyListeners();
     }
+  }
+
+  String _assignNumbering(
+    dynamic versionID,
+    String originalCode,
+    String newBaseCode,
+  ) {
+    // CHECK IF ALREADY EXISTS
+    final matchingCodes = <String>[];
+    for (String code in _sections[versionID]?.keys ?? []) {
+      if (code == originalCode) {
+        continue; // Skip the original code when renaming
+      }
+      // Strip numbering suffixes for comparison
+      final strippedCode = code.toString().replaceAll(RegExp(r'\d+$'), '');
+      if (strippedCode == newBaseCode) {
+        matchingCodes.add(code);
+      }
+    }
+    // If there are more than 1 matching codes, it means there is a possible conflict
+    if (matchingCodes.isNotEmpty && originalCode != newBaseCode) {
+      // // CHECK IF THERE IS A CODE WITH NO NUMBERING
+      // if (matchingCodes.contains(newBaseCode)) {
+      //   // And add 1 suffixes to all other matching codes
+      //   // Return the following available number suffix for the new section
+
+      //   // Sort matching codes by their numerical suffix to avoid conflicts when renaming
+      //   matchingCodes.sort((a, b) {
+      //     final aSuffix =
+      //         int.tryParse(a.toString().substring(newBaseCode.length)) ?? 0;
+      //     final bSuffix =
+      //         int.tryParse(b.toString().substring(newBaseCode.length)) ?? 0;
+      //     return -aSuffix.compareTo(-bSuffix);
+      //   });
+
+      //   for (String code in matchingCodes) {
+      //     final existingSuffix =
+      //         int.tryParse(code.toString().substring(newBaseCode.length)) ?? 0;
+
+      //     renameSectionKey(
+      //       versionID,
+      //       oldCode: code,
+      //       newCode: '$newBaseCode${existingSuffix + 1}',
+      //     );
+      //   }
+      // }
+      debugPrint(
+        'Section with code $newBaseCode already exists in version $versionID.',
+      );
+      return '$newBaseCode${matchingCodes.length + 1}'; // New section gets the next available suffix
+    }
+    return newBaseCode; // No conflicts, return just the base code
   }
 
   /// Clear all sections from cache

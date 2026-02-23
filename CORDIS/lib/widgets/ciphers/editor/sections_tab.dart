@@ -3,8 +3,8 @@ import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_palette.dart';
-import 'package:cordis/widgets/ciphers/editor/new_section_sheet.dart';
-import 'package:cordis/widgets/common/filled_text_button.dart';
+import 'package:cordis/widgets/ciphers/editor/sections/sheet_new_section.dart';
+import 'package:cordis/widgets/ciphers/editor/sections/sheet_repeat_section.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/section_provider.dart';
@@ -113,14 +113,7 @@ class _SectionsTabState extends State<SectionsTab> {
                                             .isNotEmpty))
                                   // MANAGE SECTION BUTTON
                                   GestureDetector(
-                                    onTap: () {
-                                      _showRepeatSectionSheet(
-                                        context,
-                                        sectionProvider,
-                                        localVersionProvider,
-                                        cloudVersionProvider,
-                                      );
-                                    },
+                                    onTap: _openRepeatSectionSheet(),
                                     child: Text(
                                       AppLocalizations.of(
                                         context,
@@ -251,161 +244,17 @@ class _SectionsTabState extends State<SectionsTab> {
     };
   }
 
-  void _showRepeatSectionSheet(
-    BuildContext context,
-    SectionProvider sectionProvider,
-    LocalVersionProvider localVersionProvider,
-    CloudVersionProvider cloudVersionProvider,
-  ) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    final List<String> songStructure;
-
-    if (widget.versionID is int) {
-      songStructure = localVersionProvider
-          .cachedVersion(widget.versionID ?? -1)!
-          .songStructure;
-    } else {
-      songStructure = cloudVersionProvider
-          .getVersion(widget.versionID ?? -1)!
-          .songStructure;
-    }
-
-    showModalBottomSheet(
-      context: context,
-      barrierColor: colorScheme.onSurface.withAlpha(85),
-      isScrollControlled: true,
-      builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(0),
-          ),
-          padding: const EdgeInsets.only(
-            bottom: 24,
-            left: 16,
-            right: 16,
-            top: 16,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              spacing: 16,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // HEADER
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 8),
-                        Text(
-                          AppLocalizations.of(context)!.duplicatePlaceholder(
-                            AppLocalizations.of(context)!.section,
-                          ),
-                          style: textTheme.titleMedium,
-                        ),
-                        Text(
-                          AppLocalizations.of(
-                            context,
-                          )!.duplicateSectionInstruction,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.shadow,
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      alignment: Alignment.topRight,
-                      visualDensity: VisualDensity.compact,
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-
-                // EXISTING SECTIONS
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: 8,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (var sectionCode in songStructure.toSet())
-                      Builder(
-                        builder: (context) {
-                          final section = sectionProvider.getSection(
-                            widget.versionID,
-                            sectionCode,
-                          )!;
-                          return GestureDetector(
-                            onTap: () {
-                              localVersionProvider.addSectionToStruct(
-                                widget.versionID ?? -1,
-                                sectionCode,
-                              );
-                              Navigator.of(context).pop();
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: colorScheme.surfaceContainerHigh,
-                                  width: 1,
-                                ),
-                              ),
-                              padding: EdgeInsets.all(16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                spacing: 8,
-                                children: [
-                                  Container(
-                                    height: 32,
-                                    width: 32,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: section.contentColor,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      section.contentCode,
-                                      style: textTheme.bodyLarge,
-                                    ),
-                                  ),
-                                  Icon(
-                                    Icons.chevron_right,
-                                    color: colorScheme.shadow,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                  ],
-                ),
-
-                FilledTextButton(
-                  text: AppLocalizations.of(context)!.cancel,
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                SizedBox(),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  VoidCallback _openRepeatSectionSheet() {
+    return () {
+      showModalBottomSheet(
+        context: context,
+        barrierColor: Theme.of(context).colorScheme.onSurface.withAlpha(85),
+        isScrollControlled: true,
+        builder: (context) {
+          return RepeatSectionSheet(versionID: widget.versionID ?? -1);
+        },
+      );
+    };
   }
 
   void _togglePalette() {
