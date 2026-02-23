@@ -6,7 +6,6 @@ class LayoutSettingsProvider extends ChangeNotifier {
   String fontFamily = 'OpenSans';
   Color chordColor = const Color.fromARGB(255, 0, 0, 0);
   int columnCount = 1;
-  int transposeAmount = 0;
   bool showChords = true;
   bool showLyrics = true;
   bool showAnnotations = true;
@@ -84,38 +83,36 @@ class LayoutSettingsProvider extends ChangeNotifier {
 
   // Transposition Logic
   String originalKey = 'C';
-  String currentKey = 'C';
+  String transposedKey = 'C';
 
   void setOriginalKey(String key) {
     originalKey = key;
-    currentKey = key;
+    transposedKey = key;
   }
 
   void resetToOriginalKey() {
-    currentKey = originalKey;
-    transposeAmount = 0;
+    transposedKey = originalKey;
+    transposedKey = originalKey;
     notifyListeners();
   }
 
   void transposeUp() {
-    final currentIndex = keys.indexOf(currentKey);
+    final currentIndex = keys.indexOf(transposedKey);
     final newIndex = (currentIndex + 1) % keys.length;
-    currentKey = keys[newIndex];
-    transposeAmount = newIndex - keys.indexOf(originalKey);
+    transposedKey = keys[newIndex];
+    transposedKey = keys[newIndex];
     notifyListeners();
   }
 
   void transposeDown() {
-    final currentIndex = keys.indexOf(currentKey);
+    final currentIndex = keys.indexOf(transposedKey);
     final newIndex = (currentIndex - 1 + keys.length) % keys.length;
-    currentKey = keys[newIndex];
-    transposeAmount = newIndex - keys.indexOf(originalKey);
+    transposedKey = keys[newIndex];
     notifyListeners();
   }
 
   void selectKey(String key) {
-    currentKey = key;
-    transposeAmount = keys.indexOf(currentKey) - keys.indexOf(originalKey);
+    transposedKey = key;
     notifyListeners();
   }
 

@@ -1,14 +1,12 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
-import 'package:cordis/providers/version/cloud_version_provider.dart';
-import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 
-class SelectKeySheet extends StatelessWidget {
+class SelectKeySheet extends StatefulWidget {
   final TextEditingController controller;
   final int? cipherID;
   final dynamic versionID;
@@ -23,13 +21,29 @@ class SelectKeySheet extends StatelessWidget {
   });
 
   @override
+  State<SelectKeySheet> createState() => _SelectKeySheetState();
+}
+
+class _SelectKeySheetState extends State<SelectKeySheet> {
+  late String selectedKey;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedKey = widget.controller.text;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
     final keys = context.read<LayoutSettingsProvider>().keys;
-
-    final selectedKey = controller.text;
 
     return Container(
       padding: EdgeInsets.all(16),
@@ -71,7 +85,9 @@ class SelectKeySheet extends StatelessWidget {
                 final key = keys[index];
                 return GestureDetector(
                   onTap: () {
-                    controller.text = key;
+                    setState(() {
+                      selectedKey = key;
+                    });
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -105,15 +121,7 @@ class SelectKeySheet extends StatelessWidget {
             text: AppLocalizations.of(context)!.save,
             isDark: true,
             onPressed: () {
-              versionID is int
-                  ? context.read<LocalVersionProvider>().cacheUpdates(
-                      versionID,
-                      transposedKey: controller.text,
-                    )
-                  : context.read<CloudVersionProvider>().cacheUpdates(
-                      versionID,
-                      transposedKey: controller.text,
-                    );
+              widget.controller.text = selectedKey;
               Navigator.of(context).pop();
             },
           ),

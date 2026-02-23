@@ -1,3 +1,4 @@
+import 'package:cordis/helpers/chords/chord_transposer.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -243,11 +244,14 @@ class _ChordPaletteState extends State<ChordPalette> {
     final token = ContentToken(text: chord, type: TokenType.chord);
     final colorScheme = Theme.of(context).colorScheme;
 
+    final transposer = ChordTransposer(useFlats: false, transposeValue: 0);
+
     return Draggable<ContentToken>(
       data: token,
       feedback: Material(
         color: Colors.transparent,
         child: ChordToken(
+          transposer: transposer,
           token: token,
           sectionColor: colorScheme.onSurface.withValues(alpha: .7),
           textStyle: TextStyle(fontSize: _fontSize, color: colorScheme.surface),
@@ -256,6 +260,7 @@ class _ChordPaletteState extends State<ChordPalette> {
       childWhenDragging: Opacity(
         opacity: 0.3,
         child: ChordToken(
+          transposer: transposer,
           token: token,
           sectionColor: colorScheme.onSurface.withValues(alpha: .4),
           textStyle: TextStyle(
@@ -265,6 +270,7 @@ class _ChordPaletteState extends State<ChordPalette> {
         ),
       ),
       child: ChordToken(
+        transposer: transposer,
         token: token,
         sectionColor: colorScheme.onSurface,
         textStyle: TextStyle(fontSize: _fontSize, color: colorScheme.surface),

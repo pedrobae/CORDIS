@@ -29,9 +29,9 @@ class LineView extends StatelessWidget {
 
         final ls = context.watch<LayoutSettingsProvider>();
 
-        final transposer = ChordTransposer(
+        final transposer = ChordTransposer.fromKeys(
           originalKey: ls.originalKey,
-          transposeValue: ls.transposeAmount,
+          transposedKey: ls.transposedKey,
         );
 
         final chordPositions = <Widget>[];

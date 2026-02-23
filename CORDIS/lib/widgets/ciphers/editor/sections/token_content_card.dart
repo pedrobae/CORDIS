@@ -1,8 +1,11 @@
+import 'package:cordis/helpers/chords/chord_transposer.dart';
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/edit_section.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
@@ -172,7 +175,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                               section.contentCode,
                               textAlign: TextAlign.center,
                               style: textTheme.labelLarge?.copyWith(
-                                color: colorScheme.surface,
+                                color: Colors.white,
                               ),
                             ),
                           ),
@@ -226,15 +229,63 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   ),
 
                   /// CONTENT
-                  Builder(
-                    builder: (context) {
+                  FutureBuilder<ChordTransposer>(
+                    future: () async {
+                      String originalKey;
+                      String? transposedKey;
+
+                      if (widget.versionID is int) {
+                        final version = (await context
+                            .read<LocalVersionProvider>()
+                            .getVersion(widget.versionID))!;
+
+                        if (context.mounted) {
+                          final cipher = (context
+                              .read<CipherProvider>()
+                              .getCipherById(version.cipherId))!;
+
+                          originalKey = cipher.musicKey;
+                          transposedKey = version.transposedKey;
+                        } else {
+                          throw Exception('Context is not mounted');
+                        }
+                      } else {
+                        final version = (context
+                            .read<CloudVersionProvider>()
+                            .getVersion(widget.versionID))!;
+                        originalKey = version.originalKey;
+                        transposedKey = version.transposedKey;
+                      }
+
+                      return ChordTransposer.fromKeys(
+                        originalKey: originalKey,
+                        transposedKey: transposedKey ?? originalKey,
+                      );
+                    }(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      }
+
+                      if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      }
+
+                      final transposer = snapshot.data!;
+
+                      context.read<LocalVersionProvider>().getVersion(
+                        widget.versionID,
+                      );
+
                       final contentTokens = _tokenizer.organize(tokens);
 
                       final contentWidgets = _tokenizer.buildContentWidgets(
+                        transposer,
                         contentTokens,
                         tokens,
                         layoutSettingsProvider.fontFamily,
                         section.contentColor,
+                        colorScheme.onSurface,
                         _toggleDrag,
                         _addChord,
                         _addPrecedingChord,

@@ -17,9 +17,9 @@ class ChordProView extends StatelessWidget {
       builder: (context, ls, child) {
         final parsedSong = Song.fromChordPro(chordPro);
 
-        final transposer = ChordTransposer(
+        final transposer = ChordTransposer.fromKeys(
           originalKey: ls.originalKey,
-          transposeValue: ls.transposeAmount,
+          transposedKey: ls.transposedKey,
         );
 
         List<Widget> sectionChildren = [];

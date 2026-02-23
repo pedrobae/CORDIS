@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cordis/helpers/chords/chord_transposer.dart';
 import 'package:cordis/models/ui/content_token.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_token.dart';
 import 'package:flutter/material.dart';
@@ -145,10 +146,12 @@ class TokenizationService {
 
   /// Builds token widgets with drag-and-drop capabilities, with their sizes pre-calculated.
   List<List<List<WidgetWithSize>>> buildContentWidgets(
+    ChordTransposer transposer,
     List<List<List<ContentToken>>> contentTokens,
     List<ContentToken> tokens,
     String fontFamily,
     Color contentColor,
+    Color lyricColor,
     VoidCallback toggleDrag,
     Function(List<ContentToken>, ContentToken, int) onAddChord,
     Function(List<ContentToken>, ContentToken, int) onAddPrecedingChord,
@@ -170,6 +173,7 @@ class TokenizationService {
               wordWidgets.add(
                 WidgetWithSize(
                   widget: _buildPrecedingChordDragTarget(
+                    transposer,
                     line,
                     tokens,
                     token,
@@ -193,6 +197,7 @@ class TokenizationService {
               wordWidgets.add(
                 WidgetWithSize(
                   widget: _buildDraggableChord(
+                    transposer,
                     token,
                     position,
                     contentColor,
@@ -215,11 +220,13 @@ class TokenizationService {
               wordWidgets.add(
                 WidgetWithSize(
                   widget: _buildLyricDragTarget(
+                    transposer,
                     line,
                     tokens,
                     token,
                     position,
                     contentColor,
+                    lyricColor,
                     fontFamily,
                     onAddChord,
                     onRemoveChord,
@@ -241,6 +248,7 @@ class TokenizationService {
               wordWidgets.add(
                 WidgetWithSize(
                   widget: _buildSpaceDragTarget(
+                    transposer,
                     line,
                     tokens,
                     token,
@@ -555,6 +563,7 @@ class TokenizationService {
 
   // ====== Widget Builders ======
   Widget _buildDraggableChord(
+    ChordTransposer transposer,
     ContentToken token,
     int position,
     Color contentColor,
@@ -567,6 +576,7 @@ class TokenizationService {
 
     // ChordTokens
     final chordWidget = ChordToken(
+      transposer: transposer,
       token: token,
       sectionColor: contentColor,
       textStyle: TextStyle(
@@ -577,6 +587,7 @@ class TokenizationService {
     );
 
     final dimChordWidget = ChordToken(
+      transposer: transposer,
       token: token,
       sectionColor: contentColor.withValues(alpha: .5),
       textStyle: TextStyle(
@@ -603,6 +614,7 @@ class TokenizationService {
   }
 
   Widget _buildPrecedingChordDragTarget(
+    ChordTransposer transposer,
     List<List<ContentToken>> lineTokens,
     List<ContentToken> tokens,
     ContentToken token,
@@ -639,6 +651,7 @@ class TokenizationService {
               if (candidateData.isNotEmpty) {
                 return _buildDragTargetFeedback(
                   context,
+                  transposer,
                   dragTargetChild,
                   candidateData.first!,
                   token,
@@ -654,11 +667,13 @@ class TokenizationService {
   }
 
   Widget _buildLyricDragTarget(
+    ChordTransposer transposer,
     List<List<ContentToken>> lineTokens,
     List<ContentToken> tokens,
     ContentToken token,
     int position,
     Color contentColor,
+    Color lyricColor,
     String fontFamily,
     Function(List<ContentToken>, ContentToken, int) onAddChord,
     Function(List<ContentToken>, int) onRemoveChord,
@@ -668,7 +683,7 @@ class TokenizationService {
       token.text,
       style: TextStyle(
         fontSize: _fontSize,
-        color: Colors.black87,
+        color: lyricColor,
         fontFamily: fontFamily,
       ),
     );
@@ -689,6 +704,7 @@ class TokenizationService {
               if (candidateData.isNotEmpty) {
                 return _buildDragTargetFeedback(
                   context,
+                  transposer,
                   dragTargetChild,
                   candidateData.first!,
                   token,
@@ -704,6 +720,7 @@ class TokenizationService {
   }
 
   Widget _buildSpaceDragTarget(
+    ChordTransposer transposer,
     List<List<ContentToken>> lineTokens,
     List<ContentToken> tokens,
     ContentToken token,
@@ -733,6 +750,7 @@ class TokenizationService {
               if (candidateData.isNotEmpty) {
                 return _buildDragTargetFeedback(
                   context,
+                  transposer,
                   dragTargetChild,
                   candidateData.first!,
                   token,
@@ -752,6 +770,7 @@ class TokenizationService {
   /// Similar to what is shown when selecting text in a text editor, to give better context of where the chord will be dropped.
   Widget _buildDragTargetFeedback(
     BuildContext context,
+    ChordTransposer transposer,
     Widget dragTargetChild,
     ContentToken draggedChord,
     ContentToken draggedToToken,
@@ -791,6 +810,7 @@ class TokenizationService {
             left: xOffset,
             top: 4,
             child: ChordToken(
+              transposer: transposer,
               token: draggedChord,
               sectionColor: contentColor,
               textStyle: TextStyle(

@@ -127,7 +127,7 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
                                   child: Text(
                                     sectionCode,
                                     style: TextStyle(
-                                      color: colorScheme.surface,
+                                      color: Colors.white,
                                       fontWeight: FontWeight.w500,
                                       fontSize: 16,
                                     ),
@@ -153,7 +153,7 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
                                     ),
                                     child: Icon(
                                       Icons.close,
-                                      color: colorScheme.surface,
+                                      color: Colors.white,
                                       size: 12,
                                     ),
                                   ),

@@ -26,20 +26,28 @@ class ChordTransposer extends ChordHelper {
     'C', 'D', 'E', 'F', 'G', 'A', 'B', // 1-char roots second
   ];
 
-  final String originalKey;
+  final bool useFlats;
   final int transposeValue;
 
-  ChordTransposer({required this.originalKey, required this.transposeValue});
+  ChordTransposer({required this.useFlats, required this.transposeValue});
 
-  // Calculate the transposed key first, then determine if we should use flats
-  String get transposedKey {
-    String tempKey = transpose(originalKey, transposeValue, useFlats: true);
-    String key = '';
-    tempKey == 'Gb' ? key = 'F#' : key = tempKey;
-    return key;
+  factory ChordTransposer.fromKeys({
+    required String originalKey,
+    required String transposedKey,
+  }) {
+    int indexOriginal = allChordRoots.indexOf(originalKey);
+    int indexTransposed = allChordRoots.indexOf(transposedKey);
+
+    if (indexOriginal == -1 || indexTransposed == -1) {
+      throw ArgumentError('Invalid keys provided for transposition');
+    }
+    int transposeValue = (indexTransposed - indexOriginal) % 12;
+
+    return ChordTransposer(
+      useFlats: flatKeys.contains(transposedKey),
+      transposeValue: transposeValue,
+    );
   }
-
-  bool get useFlats => flatKeys.contains(transposedKey);
 
   String transposeChord(String chord) {
     // Parse chord root first
