@@ -356,7 +356,11 @@ class PlaylistRepository {
       final position = row['position'] as int;
       final duration = Duration(seconds: row['duration'] as int);
 
-      return PlaylistItem.flowItem(contentId, position, duration);
+      return PlaylistItem.flowItem(
+        flowItemId: contentId,
+        position: position,
+        duration: duration,
+      );
     }).toList();
   }
 
@@ -380,20 +384,30 @@ class PlaylistRepository {
       final position = row['position'] as int;
       final duration = Duration(seconds: row['duration'] as int);
 
-      return PlaylistItem.version(contentId, position, id, duration);
+      return PlaylistItem.version(
+        versionId: contentId,
+        position: position,
+        id: id,
+        duration: duration,
+      );
     }).toList();
   }
 
   /// Gets version item ID in a playlist by playlist and version IDs
   /// Returns null if not found
-  Future<int?> getPlaylistVersionId(int playlistId, int versionId) async {
+  Future<int?> getPlaylistVersionId(
+    int playlistId,
+    int versionId, {
+    int? position,
+  }) async {
     final db = await _databaseHelper.database;
 
     final result = await db.query(
       'playlist_version',
       columns: ['id'],
-      where: 'playlist_id = ? AND version_id = ?',
-      whereArgs: [playlistId, versionId],
+      where:
+          'playlist_id = ? AND version_id = ?${position != null ? ' AND position = ?' : ''}',
+      whereArgs: [playlistId, versionId, if (position != null) position],
     );
 
     if (result.isNotEmpty) {

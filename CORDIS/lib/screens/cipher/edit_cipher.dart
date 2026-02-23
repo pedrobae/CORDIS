@@ -355,7 +355,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
         // Create Section entries for the new version
         await sectionProvider.createSections(versionId);
         await sectionProvider.loadLocalSections(versionId);
-        playlistProvider.addVersionToPlaylist(
+        playlistProvider.cacheAddVersion(
           selectionProvider.targetId!,
           versionId,
         );

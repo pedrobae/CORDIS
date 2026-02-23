@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cordis/models/domain/playlist/playlist.dart';
 import 'package:cordis/repositories/local/playlist_repository.dart';
@@ -145,86 +146,55 @@ class PlaylistProvider extends ChangeNotifier {
   // Update a Playlist with new data (name/description)
   Future<void> updateName(int id, String name) async {
     await _playlistRepository.updatePlaylist(id, {'name': name});
-
     await loadPlaylist(id); // Reload just this playlist
   }
 
-  Future<int> upsertPlaylist(Playlist playlist) async {
-    final playlistId = await _playlistRepository.upsertPlaylist(playlist);
-    await loadPlaylist(playlistId);
+  Future<void> updatePlaylistFromCache(int playlistId) async {
+    if (_isSaving) return;
 
-    return playlistId;
-  }
+    _isSaving = true;
+    _error = null;
+    notifyListeners();
 
-  // Update a Playlist with a version
-  Future<void> addVersionToPlaylist(int playlistId, int versionId) async {
-    await _playlistRepository.addVersionToPlaylist(playlistId, versionId);
-
-    await loadPlaylist(playlistId);
-  }
-
-  Future<void> upsertVersionOnPlaylist(
-    int playlistId,
-    int versionId,
-    int position,
-    int? addedBy,
-  ) async {
-    // Check if the version already exists in the playlist
-    final playlistVersionId = await _playlistRepository.getPlaylistVersionId(
-      playlistId,
-      versionId,
-    );
-
-    if (playlistVersionId == null) {
-      // Version isn't in the playlist, add it
-      await _playlistRepository.addVersionToPlaylistAtPosition(
-        playlistId,
-        versionId,
-        position,
-      );
-    } else {
-      // Version exists, just update its position
-      await _playlistRepository.updatePlaylistVersionPosition(
-        playlistVersionId,
-        position,
-      );
-    }
-
-    await loadPlaylist(playlistId);
-  }
-
-  // Reorder playlist items with optimistic updates
-  Future<void> reorderItems(
-    int oldIndex,
-    int newIndex,
-    Playlist playlist,
-  ) async {
     try {
-      final items = playlist.items;
+      final playlist = _playlists[playlistId];
+      if (playlist != null) {
+        await _playlistRepository.updatePlaylist(
+          playlist.id,
+          playlist.toDatabaseJson(),
+        );
 
-      final movedItem = items.removeAt(oldIndex);
-      items.insert(newIndex, movedItem);
+        // UPSERT ITEM ORDER
+        int position = 0;
+        for (var item in playlist.items) {
+          if (!item.isFlowItem) {
+            final existingId = await _playlistRepository.getPlaylistVersionId(
+              playlistId,
+              item.contentId!,
+              position: item.position,
+            );
 
-      for (int i = 0; i < items.length; i++) {
-        items[i].position = i;
+            if (existingId == null) {
+              await _playlistRepository.addVersionToPlaylist(
+                playlistId,
+                item.contentId!,
+              );
+            } else {
+              await _playlistRepository.updatePlaylistVersionPosition(
+                existingId,
+                position,
+              );
+            }
+          }
+          position++;
+        }
       }
-      notifyListeners();
-
-      await _playlistRepository.savePlaylistOrder(playlist.id, playlist.items);
     } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isSaving = false;
       notifyListeners();
-      _error = 'Erro ao reordenar itens: $e';
-      rethrow;
     }
-  }
-
-  Future<void> duplicateVersion(
-    int playlistId,
-    int versionId,
-    int currentUserId,
-  ) async {
-    await _playlistRepository.addVersionToPlaylist(playlistId, versionId);
-    await loadPlaylist(playlistId);
   }
 
   // ===== DELETE =====
@@ -247,13 +217,63 @@ class PlaylistProvider extends ChangeNotifier {
     }
   }
 
-  // Remove a Cipher Map from a Playlist
-  Future<void> removeVersionFromPlaylist(int itemId, int playlistId) async {
-    await _playlistRepository.removeVersionFromPlaylist(itemId);
-
-    await loadPlaylist(playlistId);
+  // ===== CACHE =====
+  /// Cache a version addition to a playlist (used for optimistic UI updates)
+  void cacheAddVersion(int playlistId, int versionId) {
+    final playlist = _playlists[playlistId];
+    if (playlist != null) {
+      final newItem = PlaylistItem.version(
+        versionId: versionId,
+        position: playlist.items.length,
+      );
+      playlist.items.add(newItem);
+      notifyListeners();
+    }
   }
 
+  void cacheReposition(int playlistId, int oldPosition, int newPosition) {
+    final playlist = _playlists[playlistId];
+    if (playlist != null) {
+      final items = playlist.items;
+      if (oldPosition < items.length && newPosition < items.length) {
+        final item = items.removeAt(oldPosition);
+        items.insert(newPosition, item);
+        notifyListeners();
+      }
+    }
+  }
+
+  void cacheDuplicateVersion(int playlistId, int versionId, int userLocalId) {
+    final playlist = _playlists[playlistId];
+    if (playlist != null) {
+      final newItem = PlaylistItem.version(
+        versionId: versionId,
+        position: playlist.items.length,
+      );
+      playlist.items.add(newItem);
+      notifyListeners();
+    }
+  }
+
+  void cacheRemoveVersion(int itemID, int playlistID) {
+    final playlist = _playlists[playlistID];
+    if (playlist != null) {
+      playlist.items.removeWhere((item) => item.id == itemID);
+      notifyListeners();
+    }
+  }
+
+  /// Clears cached data and reset state
+  void clearCache() {
+    _playlists.clear();
+    _error = null;
+    _isLoading = false;
+    _isSaving = false;
+    _isDeleting = false;
+    notifyListeners();
+  }
+
+  // ===== UTILITY =====
   /// Check if a version is still in the passed playlist (used to determine if it should be deleted entirely or not)
   bool versionIsInPlaylist(int versionId, int playlistId) {
     final playlist = _playlists[playlistId];
@@ -263,17 +283,6 @@ class PlaylistProvider extends ChangeNotifier {
       }
     }
     return false;
-  }
-
-  // ===== UTILITY =====
-  // Clear cached data and reset state
-  void clearCache() {
-    _playlists.clear();
-    _error = null;
-    _isLoading = false;
-    _isSaving = false;
-    _isDeleting = false;
-    notifyListeners();
   }
 
   // ===== SEARCH =====

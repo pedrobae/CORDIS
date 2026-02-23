@@ -40,26 +40,31 @@ class PlaylistItem {
     this.firebaseContentId,
   });
   // Helper constructors
-  PlaylistItem.version(
-    int cipherVersionId,
-    int position,
-    int id,
-    Duration duration,
-  ) : this(
-        id: id,
-        type: PlaylistItemType.version,
-        contentId: cipherVersionId,
-        position: position,
-        duration: duration,
-      );
+  PlaylistItem.version({
+    required int versionId,
+    required int position,
+    int? id,
+    Duration? duration,
+  }) : this(
+         id: id,
+         type: PlaylistItemType.version,
+         contentId: versionId,
+         position: position,
+         duration: duration ?? Duration.zero,
+       );
 
-  PlaylistItem.flowItem(int flowItemId, int position, Duration duration)
-    : this(
-        type: PlaylistItemType.flowItem,
-        contentId: flowItemId,
-        position: position,
-        duration: duration,
-      );
+  PlaylistItem.flowItem({
+    required int flowItemId,
+    required int position,
+    int? id,
+    Duration? duration,
+  }) : this(
+         id: id,
+         type: PlaylistItemType.flowItem,
+         contentId: flowItemId,
+         position: position,
+         duration: duration ?? Duration.zero,
+       );
 
   // Type checking helpers
   bool get isFlowItem => type == PlaylistItemType.flowItem;

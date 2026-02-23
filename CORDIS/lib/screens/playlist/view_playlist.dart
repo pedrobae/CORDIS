@@ -68,6 +68,13 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
           appBar: AppBar(
             leading: BackButton(color: colorScheme.onSurface),
             title: Text(playlist.name, style: theme.textTheme.titleMedium),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.save, color: colorScheme.onSurface),
+                onPressed: () =>
+                    playlistProvider.updatePlaylistFromCache(widget.playlistId),
+              ),
+            ],
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
@@ -170,10 +177,10 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
     }
 
     try {
-      await context.read<PlaylistProvider>().reorderItems(
+      context.read<PlaylistProvider>().cacheReposition(
+        playlist.id,
         oldIndex,
         newIndex,
-        playlist,
       );
     } catch (e) {
       if (context.mounted) {

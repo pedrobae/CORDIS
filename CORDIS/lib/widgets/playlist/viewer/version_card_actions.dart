@@ -106,7 +106,7 @@ class VersionCardActionsSheet extends StatelessWidget {
                     isDiscrete: true,
                     trailingIcon: Icons.chevron_right,
                     onPressed: () {
-                      playlistProvider.duplicateVersion(
+                      playlistProvider.cacheDuplicateVersion(
                         playlistID,
                         versionID,
                         userProvider.getLocalIdByFirebaseId(authProvider.id!)!,
@@ -131,11 +131,10 @@ class VersionCardActionsSheet extends StatelessWidget {
                                 itemType: AppLocalizations.of(context)!.version,
                                 isDangerous: true,
                                 onConfirm: () async {
-                                  await playlistProvider
-                                      .removeVersionFromPlaylist(
-                                        itemID,
-                                        playlistID,
-                                      );
+                                  playlistProvider.cacheRemoveVersion(
+                                    itemID,
+                                    playlistID,
+                                  );
                                   // Check if version is has a duplicate in this playlist, if not, delete it entirely
                                   if (!playlistProvider.versionIsInPlaylist(
                                     versionID,

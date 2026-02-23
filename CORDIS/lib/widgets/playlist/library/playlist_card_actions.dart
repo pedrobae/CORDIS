@@ -209,7 +209,7 @@ class PlaylistCardActionsSheet extends StatelessWidget {
           );
           final newId = (await localVersionProvider.createVersion())!;
 
-          await playlistProvider.addVersionToPlaylist(playlistId, newId);
+          playlistProvider.cacheAddVersion(playlistId, newId);
 
         case PlaylistItemType.flowItem:
           final flowItem = (await flowItemProvider.fetchFlowItem(
