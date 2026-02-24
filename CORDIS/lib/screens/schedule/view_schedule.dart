@@ -375,9 +375,6 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                       playlistId: playlist!.id,
                                     ),
                                     showBottomNavBar: true,
-
-                                    onPopCallback: () => selectionProvider
-                                        .disableSelectionMode(),
                                   );
                                 },
                                 isDark: true,

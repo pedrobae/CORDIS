@@ -2,10 +2,15 @@ import 'package:cordis/l10n/app_localizations.dart';
 
 import 'package:cordis/models/domain/playlist/playlist.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
+import 'package:cordis/models/domain/schedule.dart';
+import 'package:cordis/providers/my_auth_provider.dart';
+import 'package:cordis/providers/navigation_provider.dart';
 
 import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
+import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
+import 'package:cordis/services/sync_schedule.dart';
 
 import 'package:cordis/widgets/playlist/viewer/add_to_playlist_sheet.dart';
 
@@ -54,99 +59,144 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Consumer<PlaylistProvider>(
-      builder: (context, playlistProvider, child) {
-        final playlist = playlistProvider.getPlaylistById(widget.playlistId);
-        // Handle loading state
-        if (playlist == null) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
+    return Consumer4<
+      PlaylistProvider,
+      NavigationProvider,
+      LocalScheduleProvider,
+      MyAuthProvider
+    >(
+      builder:
+          (
+            context,
+            playlistProvider,
+            navigationProvider,
+            localScheduleProvider,
+            authProvider,
+            child,
+          ) {
+            final playlist = playlistProvider.getPlaylistById(
+              widget.playlistId,
+            );
+            // Handle loading state
+            if (playlist == null) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
 
-        return Scaffold(
-          appBar: AppBar(
-            leading: BackButton(color: colorScheme.onSurface),
-            title: Text(playlist.name, style: theme.textTheme.titleMedium),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.save, color: colorScheme.onSurface),
-                onPressed: () =>
-                    playlistProvider.updatePlaylistFromCache(widget.playlistId),
-              ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              _openPlaylistEditSheet(context);
-            },
-            backgroundColor: colorScheme.onSurface,
-            shape: const CircleBorder(),
-            child: Icon(Icons.add, color: colorScheme.onPrimary),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(16),
-            child: playlist.items.isEmpty
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.emptyPlaylist,
-                        style: theme.textTheme.titleMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        AppLocalizations.of(context)!.emptyPlaylistInstructions,
-                        style: theme.textTheme.bodyLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  )
-                // ITEMS LIST
-                : Builder(
-                    builder: (context) {
-                      return ReorderableListView.builder(
-                        shrinkWrap: true,
-                        proxyDecorator: (child, index, animation) => Material(
-                          type: MaterialType.transparency,
-                          child: child,
-                        ),
-                        buildDefaultDragHandles: false,
-                        physics: const ClampingScrollPhysics(),
-                        scrollDirection: Axis.vertical,
-                        onReorder: (oldIndex, newIndex) =>
-                            _onReorder(context, playlist, oldIndex, newIndex),
-                        itemCount: playlist.items.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          final playlistItem = playlist.items[index];
-
-                          switch (playlistItem.type) {
-                            case PlaylistItemType.version:
-                              return PlaylistVersionCard(
-                                key: ValueKey(
-                                  'playlist_version_${playlistItem.id}',
-                                ),
-                                index: index,
-                                versionId: playlistItem.contentId,
-                                playlistId: widget.playlistId,
-                                itemId: playlistItem.id!,
-                              );
-                            case PlaylistItemType.flowItem:
-                              return FlowItemCard(
-                                key: ValueKey('flow_item_${playlistItem.id}'),
-                                index: index,
-                                flowItemId:
-                                    playlistItem.contentId ?? playlistItem.id!,
-                                playlistId: widget.playlistId,
-                              );
-                          }
-                        },
+            return Scaffold(
+              appBar: AppBar(
+                leading: BackButton(
+                  color: colorScheme.onSurface,
+                  onPressed: () {
+                    navigationProvider.pop();
+                  },
+                ),
+                title: Text(playlist.name, style: theme.textTheme.titleMedium),
+                actions: [
+                  IconButton(
+                    icon: Icon(Icons.save, color: colorScheme.onSurface),
+                    onPressed: () async {
+                      playlistProvider.updatePlaylistFromCache(
+                        widget.playlistId,
                       );
+                      // CHECK IF THE PLAYLIST IS ASSOSSIATED WITH A PUBLISHED SCHEDULE
+                      final schedule = await localScheduleProvider
+                          .getScheduleWithPlaylistId(widget.playlistId);
+                      if (schedule != null &&
+                          schedule.scheduleState == ScheduleState.published) {
+                        // If so, update the cloud version
+                        ScheduleSyncService().syncToCloud(
+                          schedule,
+                          authProvider.id!,
+                        );
+                      }
+                      navigationProvider.pop();
                     },
                   ),
-          ),
-        );
-      },
+                ],
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  _openPlaylistEditSheet(context);
+                },
+                backgroundColor: colorScheme.onSurface,
+                shape: const CircleBorder(),
+                child: Icon(Icons.add, color: colorScheme.onPrimary),
+              ),
+              body: Padding(
+                padding: const EdgeInsets.all(16),
+                child: playlist.items.isEmpty
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.emptyPlaylist,
+                            style: theme.textTheme.titleMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.emptyPlaylistInstructions,
+                            style: theme.textTheme.bodyLarge,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      )
+                    // ITEMS LIST
+                    : Builder(
+                        builder: (context) {
+                          return ReorderableListView.builder(
+                            shrinkWrap: true,
+                            proxyDecorator: (child, index, animation) =>
+                                Material(
+                                  type: MaterialType.transparency,
+                                  child: child,
+                                ),
+                            buildDefaultDragHandles: false,
+                            physics: const ClampingScrollPhysics(),
+                            scrollDirection: Axis.vertical,
+                            onReorder: (oldIndex, newIndex) => _onReorder(
+                              context,
+                              playlist,
+                              oldIndex,
+                              newIndex,
+                            ),
+                            itemCount: playlist.items.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              final playlistItem = playlist.items[index];
+
+                              switch (playlistItem.type) {
+                                case PlaylistItemType.version:
+                                  return PlaylistVersionCard(
+                                    key: ValueKey(
+                                      'playlist_version_${playlistItem.id}',
+                                    ),
+                                    index: index,
+                                    versionId: playlistItem.contentId,
+                                    playlistId: widget.playlistId,
+                                    itemId: playlistItem.id!,
+                                  );
+                                case PlaylistItemType.flowItem:
+                                  return FlowItemCard(
+                                    key: ValueKey(
+                                      'flow_item_${playlistItem.id}',
+                                    ),
+                                    index: index,
+                                    flowItemId:
+                                        playlistItem.contentId ??
+                                        playlistItem.id!,
+                                    playlistId: widget.playlistId,
+                                  );
+                              }
+                            },
+                          );
+                        },
+                      ),
+              ),
+            );
+          },
     );
   }
 

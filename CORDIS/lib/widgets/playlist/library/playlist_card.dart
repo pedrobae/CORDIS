@@ -1,10 +1,8 @@
-import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/screens/playlist/view_playlist.dart';
-import 'package:cordis/services/sync_schedule.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/playlist/library/playlist_card_actions.dart';
@@ -138,21 +136,6 @@ class PlaylistCard extends StatelessWidget {
                           navigationProvider.push(
                             ViewPlaylistScreen(playlistId: playlistId),
                             showBottomNavBar: true,
-                            onPopCallback: () async {
-                              // CHECK IF THE PLAYLIST IS ASSOSSIATED WITH A PUBLISHED SCHEDULE
-                              final schedule = await localScheduleProvider
-                                  .getScheduleWithPlaylistId(playlistId);
-
-                              if (schedule != null &&
-                                  schedule.scheduleState ==
-                                      ScheduleState.published) {
-                                // If so, update the cloud version
-                                ScheduleSyncService().syncToCloud(
-                                  schedule,
-                                  authProvider.id!,
-                                );
-                              }
-                            },
                           );
                         },
                       ),
