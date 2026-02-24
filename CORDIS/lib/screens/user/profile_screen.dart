@@ -6,6 +6,7 @@ import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/screens/user/new_password_screen.dart';
 import 'package:cordis/utils/locale.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
+import 'package:cordis/widgets/common/labeled_country_picker.dart';
 import 'package:cordis/widgets/common/labeled_language_picker.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:cordis/widgets/common/labeled_timezone_picker.dart';
@@ -23,7 +24,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final emailController = TextEditingController();
   final userNameController = TextEditingController();
-  final countryController = TextEditingController();
   final timezoneController = TextEditingController();
 
   @override
@@ -32,13 +32,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<MyAuthProvider>();
-      final settingsProvider = context.read<SettingsProvider>();
 
       emailController.text = authProvider.userEmail ?? '';
       userNameController.text =
           authProvider.userName ?? AppLocalizations.of(context)!.guest;
-      countryController.text = settingsProvider.locale.countryCode ?? '';
-      timezoneController.text = settingsProvider.timeZone;
+      timezoneController.text = authProvider.userTimeZone ?? '';
     });
   }
 
@@ -46,7 +44,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void dispose() {
     emailController.dispose();
     userNameController.dispose();
-    countryController.dispose();
     timezoneController.dispose();
     super.dispose();
   }
@@ -121,26 +118,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       label: AppLocalizations.of(context)!.username,
                       controller: userNameController,
                     ),
-                    LabeledTextField(
-                      label: AppLocalizations.of(context)!.country,
-                      controller: countryController,
+                    LabeledCountryPicker(
+                      countryCode:
+                          authProvider.userCountry ?? settingsProvider.country,
+                      onCountryChanged: (value) {
+                        settingsProvider.setCountry(value.countryCode);
+                        userProvider.cacheUserCountry(
+                          authProvider.id!,
+                          value.countryCode,
+                        );
+                      },
                     ),
                     LabeledLanguagePicker(
-                      language: LocaleUtils.getLanguageName(
-                        settingsProvider.locale,
-                        context,
-                      ),
+                      language:
+                          authProvider.userLanguage ??
+                          LocaleUtils.getLanguageName(
+                            settingsProvider.locale,
+                            context,
+                          ),
                       onLanguageChanged: (value) {
                         settingsProvider.setLocale(
                           LocaleUtils.getLocaleFromLanguageName(value, context),
                         );
+                        userProvider.cacheUserLanguage(
+                          authProvider.id!,
+                          LocaleUtils.getLocaleFromLanguageName(
+                            value,
+                            context,
+                          ).languageCode,
+                        );
                       },
                     ),
                     LabeledTimezonePicker(
+                      timezone:
+                          authProvider.userTimeZone ??
+                          settingsProvider.timeZone,
                       onTimezoneChanged: (value) {
                         settingsProvider.setTimeZone(value);
+                        userProvider.cacheUserTimeZone(authProvider.id!, value);
                       },
-                      timezone: settingsProvider.timeZone,
                     ),
                     Spacer(),
                     FilledTextButton(

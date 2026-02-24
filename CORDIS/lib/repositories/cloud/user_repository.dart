@@ -38,6 +38,14 @@ class CloudUserRepository {
   }
 
   // ===== UPDATE =====
+  /// Updates the user's data in Firestore. Only fields provided in the [data] map will be updated.
+  Future<void> update(String userId, Map<String, dynamic> data) async {
+    await _firestoreService.updateDocument(
+      collectionPath: 'users',
+      documentId: userId,
+      data: data,
+    );
+  }
 
   // ===== DELETE =====
   /// Deletes the user document from Firestore

@@ -159,10 +159,6 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  List<User> getUsersByIds(List<int> ids) {
-    return _knownUsers.where((user) => ids.contains(user.id)).toList();
-  }
-
   User? getUserById(int id) {
     try {
       return _knownUsers.firstWhere((user) => user.id == id);
@@ -171,17 +167,50 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  List<User> getUsersByFirebaseIds(List<String> firebaseIds) {
-    return _knownUsers
-        .where((user) => firebaseIds.contains(user.firebaseId))
-        .toList();
-  }
-
   User? getUserByFirebaseId(String firebaseId) {
     try {
       return _knownUsers.firstWhere((user) => user.firebaseId == firebaseId);
     } catch (e) {
       return null;
+    }
+  }
+
+  // ==== UPDATE =====
+  void cacheUserLanguage(String firebaseId, String languageCode) {
+    final userIndex = _knownUsers.indexWhere(
+      (user) => user.firebaseId == firebaseId,
+    );
+
+    if (userIndex != -1) {
+      final updatedUser = _knownUsers[userIndex].copyWith(
+        language: languageCode,
+      );
+      _knownUsers[userIndex] = updatedUser;
+      notifyListeners();
+    }
+  }
+
+  void cacheUserTimeZone(String firebaseId, String timeZone) {
+    final userIndex = _knownUsers.indexWhere(
+      (user) => user.firebaseId == firebaseId,
+    );
+
+    if (userIndex != -1) {
+      final updatedUser = _knownUsers[userIndex].copyWith(timeZone: timeZone);
+      _knownUsers[userIndex] = updatedUser;
+      notifyListeners();
+    }
+  }
+
+  void cacheUserCountry(String firebaseId, String country) {
+    final userIndex = _knownUsers.indexWhere(
+      (user) => user.firebaseId == firebaseId,
+    );
+
+    if (userIndex != -1) {
+      final updatedUser = _knownUsers[userIndex].copyWith(country: country);
+      _knownUsers[userIndex] = updatedUser;
+      notifyListeners();
     }
   }
 

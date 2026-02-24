@@ -6,6 +6,9 @@ class UserDto {
   final String username;
   final String email;
   final String? profilePhoto;
+  final String? language;
+  final String? timeZone;
+  final String? country;
   final Timestamp? createdAt;
   final Timestamp? updatedAt;
   final bool isActive;
@@ -15,6 +18,9 @@ class UserDto {
     required this.username,
     required this.email,
     this.profilePhoto,
+    this.language,
+    this.timeZone,
+    this.country,
     this.createdAt,
     this.updatedAt,
     this.isActive = true,
@@ -26,6 +32,9 @@ class UserDto {
       username: json['username'] as String,
       email: json['email'] as String,
       profilePhoto: json['profilePhoto'] as String?,
+      language: json['language'] as String?,
+      timeZone: json['timeZone'] as String?,
+      country: json['country'] as String?,
       createdAt: json['createdAt'] as Timestamp?,
       updatedAt: json['updatedAt'] as Timestamp?,
     );
@@ -37,6 +46,9 @@ class UserDto {
       'username': username,
       'email': email,
       'profilePhoto': profilePhoto,
+      'language': language,
+      'timeZone': timeZone,
+      'country': country,
       'createdAt':
           createdAt ??
           Timestamp.fromDate(DateTime.now()), // Use current time if not set
@@ -64,6 +76,7 @@ class UserDto {
       username: username,
       email: email,
       profilePhoto: profilePhoto,
+
       createdAt: createdAt?.toDate(),
       updatedAt: updatedAt?.toDate(),
       isActive: isActive,

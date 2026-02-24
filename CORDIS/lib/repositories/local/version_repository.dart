@@ -94,9 +94,9 @@ class LocalVersionRepository {
     final db = await _databaseHelper.database;
     final result = await db.query(
       'version',
-      where: 'created_at = ?',
+      where: 'cipher_id = ?',
       whereArgs: [cipherId],
-      orderBy: 'ASC',
+      orderBy: 'created_at ASC',
       limit: 1,
     );
 

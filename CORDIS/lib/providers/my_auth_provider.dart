@@ -19,6 +19,9 @@ class MyAuthProvider extends ChangeNotifier {
   String? get error => _error;
   String? get userName => _userData?.username;
   String? get userEmail => _userData?.email;
+  String? get userCountry => _userData?.country;
+  String? get userLanguage => _userData?.language;
+  String? get userTimeZone => _userData?.timeZone;
   String? get photoURL => _userData?.profilePhoto;
 
   MyAuthProvider() {

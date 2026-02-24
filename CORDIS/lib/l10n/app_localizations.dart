@@ -1406,6 +1406,12 @@ abstract class AppLocalizations {
   /// **'Escolher Fuso Horário'**
   String get chooseTimezone;
 
+  /// Choose country prompt
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher País'**
+  String get chooseCountry;
+
   /// Language selection instruction
   ///
   /// In pt, this message translates to:
@@ -1646,11 +1652,23 @@ abstract class AppLocalizations {
   /// **'Selecione seu fuso horário'**
   String get timezoneHint;
 
+  /// Hint text for country selection
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione seu país'**
+  String get countryHint;
+
   /// Hint text for searching timezones
   ///
   /// In pt, this message translates to:
   /// **'Pesquisar localidade...'**
   String get searchTimezone;
+
+  /// Hint text for searching countries
+  ///
+  /// In pt, this message translates to:
+  /// **'Pesquisar país...'**
+  String get searchCountry;
 
   /// Hint text for tag input
   ///

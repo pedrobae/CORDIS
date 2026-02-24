@@ -21,7 +21,7 @@ class DatabaseHelper {
 
       final db = await openDatabase(
         path,
-        version: 16,
+        version: 17,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade, // Handle migrations
       );
@@ -109,6 +109,9 @@ class DatabaseHelper {
         email TEXT UNIQUE NOT NULL,
         profile_photo TEXT,
         firebase_id TEXT UNIQUE,
+        country TEXT,
+        language TEXT,
+        time_zone TEXT,
         created_at INTEGER DEFAULT (strftime('%s','now')),
         updated_at INTEGER DEFAULT (strftime('%s','now')),
         is_active BOOLEAN DEFAULT 1
@@ -386,6 +389,12 @@ class DatabaseHelper {
       String path = join(await getDatabasesPath(), 'cipher_app.db');
       await databaseFactory.deleteDatabase(path);
       await _initDatabase();
+    }
+    if (oldVersion < 17) {
+      // ADD COUNTRY, LANGUAGE AND TIMEZONE TO USER TABLE
+      await db.execute('ALTER TABLE user ADD COLUMN country TEXT');
+      await db.execute('ALTER TABLE user ADD COLUMN language TEXT');
+      await db.execute('ALTER TABLE user ADD COLUMN time_zone TEXT');
     }
   }
 

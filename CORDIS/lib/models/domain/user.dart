@@ -7,6 +7,9 @@ class User {
   final String username;
   final String email;
   final String? profilePhoto;
+  final String? language;
+  final String? timeZone;
+  final String? country;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final bool isActive;
@@ -17,6 +20,9 @@ class User {
     required this.username,
     required this.email,
     this.profilePhoto,
+    this.language,
+    this.timeZone,
+    this.country,
     this.createdAt,
     this.updatedAt,
     this.isActive = true,
@@ -29,6 +35,9 @@ class User {
       username: json['username'] as String,
       email: json['email'] as String,
       profilePhoto: json['profile_photo'] as String?,
+      language: json['language'] as String?,
+      timeZone: json['time_zone'] as String?,
+      country: json['country'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.fromMillisecondsSinceEpoch(json['created_at'] as int)
           : DateTime.now(),
@@ -45,6 +54,9 @@ class User {
       'email': email,
       'profile_photo': profilePhoto,
       'firebase_id': firebaseId,
+      'language': language,
+      'time_zone': timeZone,
+      'country': country,
       'created_at': createdAt?.millisecondsSinceEpoch,
       'updated_at': updatedAt?.millisecondsSinceEpoch,
       'is_active': isActive ? 1 : 0,
@@ -57,6 +69,9 @@ class User {
       username: username,
       email: email,
       profilePhoto: profilePhoto,
+      language: language,
+      timeZone: timeZone,
+      country: country,
       createdAt: Timestamp.fromDate(createdAt ?? DateTime.now()),
       updatedAt: Timestamp.fromDate(updatedAt ?? DateTime.now()),
       isActive: isActive,
@@ -82,6 +97,9 @@ class User {
     String? username,
     String? email,
     String? profilePhoto,
+    String? language,
+    String? timeZone,
+    String? country,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isActive,
@@ -92,6 +110,9 @@ class User {
       username: username ?? this.username,
       email: email ?? this.email,
       profilePhoto: profilePhoto ?? this.profilePhoto,
+      language: language ?? this.language,
+      timeZone: timeZone ?? this.timeZone,
+      country: country ?? this.country,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isActive: isActive ?? this.isActive,

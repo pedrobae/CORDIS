@@ -8,6 +8,7 @@ class SettingsService {
   static const String _keyThemeColor = 'theme_color';
   static const String _keyLocale = 'locale';
   static const String _keyTimeZone = 'time_zone';
+  static const String _keyCountry = 'country';
 
   // Layout Settings Keys
   static const String _keyFontSize = 'layout_font_size';
@@ -92,6 +93,16 @@ class SettingsService {
   /// Get time zone
   static String getTimeZone() {
     return _preferences.getString(_keyTimeZone) ?? 'UTC';
+  }
+
+  /// Save country
+  static Future<void> setCountry(String country) async {
+    await _preferences.setString(_keyCountry, country);
+  }
+
+  /// Get country
+  static String getCountry() {
+    return _preferences.getString(_keyCountry) ?? '';
   }
 
   // === LAYOUT SETTINGS ===

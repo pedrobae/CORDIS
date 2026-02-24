@@ -741,6 +741,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get chooseTimezone => 'Escolher Fuso Horário';
 
   @override
+  String get chooseCountry => 'Escolher País';
+
+  @override
   String get selectAppLanguage => 'Selecione o idioma do aplicativo:';
 
   @override
@@ -879,7 +882,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get timezoneHint => 'Selecione seu fuso horário';
 
   @override
+  String get countryHint => 'Selecione seu país';
+
+  @override
   String get searchTimezone => 'Pesquisar localidade...';
+
+  @override
+  String get searchCountry => 'Pesquisar país...';
 
   @override
   String get tagHint => 'Digite uma tag';
