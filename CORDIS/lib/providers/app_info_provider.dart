@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AppInfoProvider extends ChangeNotifier {
-  String _appVersion = 'Unknown';
+  PackageInfo? _packageInfo;
   bool _isLoading = false;
 
-  String get appVersion => _appVersion;
+  String get appVersion => _packageInfo?.version ?? 'Unknown';
   bool get isLoading => _isLoading;
 
   AppInfoProvider() {
@@ -15,10 +15,9 @@ class AppInfoProvider extends ChangeNotifier {
   Future<void> _loadAppVersion() async {
     _isLoading = true;
     try {
-      final packageInfo = await PackageInfo.fromPlatform();
-      _appVersion = packageInfo.version;
+      _packageInfo = await PackageInfo.fromPlatform();
     } catch (e) {
-      _appVersion = 'Unknown';
+      _packageInfo = null;
     } finally {
       _isLoading = false;
       notifyListeners();
