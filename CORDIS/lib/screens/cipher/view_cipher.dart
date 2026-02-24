@@ -257,7 +257,9 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                               Text(
                                 AppLocalizations.of(
                                   context,
-                                )!.keyWithPlaceholder(tp.transposedKey),
+                                )!.keyWithPlaceholder(
+                                  tp.transposedKey ?? tp.originalKey,
+                                ),
                                 style: textTheme.bodySmall,
                               ),
                               version.bpm != 0

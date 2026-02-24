@@ -3,7 +3,6 @@ import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/transposition_provider.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 
 class SelectKeySheet extends StatefulWidget {
@@ -23,7 +22,7 @@ class SelectKeySheet extends StatefulWidget {
 }
 
 class _SelectKeySheetState extends State<SelectKeySheet> {
-  late String selectedKey;
+  String? selectedKey;
 
   @override
   void initState() {
@@ -59,7 +58,6 @@ class _SelectKeySheetState extends State<SelectKeySheet> {
               // HEADER
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     AppLocalizations.of(context)!.keyHint,
@@ -73,42 +71,47 @@ class _SelectKeySheetState extends State<SelectKeySheet> {
                 ],
               ),
               Expanded(
-                child: MasonryGridView.builder(
+                child: GridView.builder(
                   itemCount: 12,
-                  gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4,
+                    childAspectRatio: 2,
                   ),
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
                   itemBuilder: (BuildContext context, int index) {
                     final key = tp.keyList[index];
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          selectedKey = key;
+                          if (selectedKey == key) {
+                            selectedKey = null;
+                          } else {
+                            selectedKey = key;
+                          }
                         });
                       },
                       child: Container(
+                        margin: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           color: key == selectedKey
                               ? colorScheme.onSurface
                               : colorScheme.surface,
                           border: Border.all(
-                            color: colorScheme.onSurface,
-                            width: 1.2,
+                            color: colorScheme.shadow,
+                            width: 1,
                           ),
                           borderRadius: BorderRadius.circular(0),
                         ),
                         padding: const EdgeInsets.all(8),
-                        child: Text(
-                          key,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: key == selectedKey
-                                ? colorScheme.surface
-                                : colorScheme.onSurface,
-                            fontWeight: FontWeight.w600,
+                        child: Center(
+                          child: Text(
+                            key,
+                            style: textTheme.titleMedium?.copyWith(
+                              color: key == selectedKey
+                                  ? colorScheme.surface
+                                  : colorScheme.onSurface,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ),
                     );

@@ -378,7 +378,7 @@ class _MetadataTabState extends State<MetadataTab> {
                 Consumer<TranspositionProvider>(
                   builder: (context, tp, child) {
                     return Text(
-                      tp.transposedKey,
+                      tp.transposedKey ?? AppLocalizations.of(context)!.keyHint,
                       style: TextStyle(
                         color: colorScheme.onSurface,
                         fontSize: 16,

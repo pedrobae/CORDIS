@@ -62,7 +62,8 @@ class TranspositionProvider extends ChangeNotifier {
     return (indexTransposed - indexOriginal) % 12;
   }
 
-  String get transposedKey => _transposedKey ?? _originalKey;
+  String get originalKey => _originalKey;
+  String? get transposedKey => _transposedKey;
 
   void setTransposedKey(String? newKey) {
     _transposedKey = newKey;
@@ -82,7 +83,7 @@ class TranspositionProvider extends ChangeNotifier {
   }
 
   void transposeUp() {
-    int index = chordRoots.indexOf(transposedKey);
+    int index = chordRoots.indexOf(_transposedKey ?? _originalKey);
     if (index == -1) return;
     int newIndex = (index + 1) % chordRoots.length;
     _transposedKey = chordRoots[newIndex];
@@ -90,7 +91,7 @@ class TranspositionProvider extends ChangeNotifier {
   }
 
   void transposeDown() {
-    int index = chordRoots.indexOf(transposedKey);
+    int index = chordRoots.indexOf(_transposedKey ?? _originalKey);
     if (index == -1) return;
     int newIndex = index - 1;
     if (newIndex < 0) newIndex += chordRoots.length;

@@ -59,7 +59,9 @@ class _ChordPaletteState extends State<ChordPalette> {
         final textTheme = Theme.of(context).textTheme;
         final colorScheme = Theme.of(context).colorScheme;
 
-        final chords = ChordHelper().getChordsForKey(tp.transposedKey);
+        final chords = ChordHelper().getChordsForKey(
+          tp.transposedKey ?? tp.originalKey,
+        );
 
         return Container(
           width: MediaQuery.of(context).size.width,

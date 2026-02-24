@@ -67,7 +67,7 @@ class Transposer extends StatelessWidget {
                 );
               },
               child: Text(
-                tp.transposedKey,
+                tp.transposedKey ?? '-',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
