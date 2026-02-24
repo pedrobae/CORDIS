@@ -25,6 +25,7 @@ import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
+import 'package:cordis/providers/app_info_provider.dart';
 
 import 'package:cordis/routes/app_routes.dart';
 
@@ -78,6 +79,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CloudVersionProvider()),
         ChangeNotifierProvider(create: (_) => LocalVersionProvider()),
         ChangeNotifierProvider(create: (_) => TranspositionProvider()),
+        ChangeNotifierProvider(create: (_) => AppInfoProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {

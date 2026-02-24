@@ -3,6 +3,7 @@ import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/settings_provider.dart';
 import 'package:cordis/providers/user_provider.dart';
+import 'package:cordis/providers/app_info_provider.dart';
 import 'package:cordis/screens/user/new_password_screen.dart';
 import 'package:cordis/utils/locale.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
@@ -61,11 +62,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Consumer4<
+    return Consumer5<
       NavigationProvider,
       MyAuthProvider,
       UserProvider,
-      SettingsProvider
+      SettingsProvider,
+      AppInfoProvider
     >(
       builder:
           (
@@ -74,6 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             authProvider,
             userProvider,
             settingsProvider,
+            appInfoProvider,
             child,
           ) {
             if (authProvider.error != null &&
@@ -205,8 +208,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     Text(
-                      // TODO:appVersion - Show app version and other info
-                      AppLocalizations.of(context)!.appVersion('TODO'),
+                      AppLocalizations.of(context)!.appVersion(appInfoProvider.appVersion),
                       textAlign: TextAlign.center,
                       style: textTheme.bodyMedium?.copyWith(
                         color: colorScheme.surfaceContainerLow,
