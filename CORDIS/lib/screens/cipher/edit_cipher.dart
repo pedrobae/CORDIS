@@ -7,6 +7,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/cipher/parser_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
+import 'package:cordis/providers/transposition_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
@@ -334,6 +335,16 @@ class _EditCipherScreenState extends State<EditCipherScreen>
     PlaylistProvider playlistProvider,
     NavigationProvider navigationProvider,
   ) async {
+    // Cache the transposed key to the version
+    final key = context.read<TranspositionProvider>().transposedKey;
+    if (widget.versionID is int) {
+      versionProvider.cacheUpdates(widget.versionID!, transposedKey: key);
+    } else if (widget.versionID is String) {
+      context.read<CloudVersionProvider>().cacheUpdates(
+        widget.versionID!,
+        transposedKey: key,
+      );
+    }
     if (selectionProvider.isSelectionMode) {
       for (dynamic versionId in selectionProvider.selectedItemIds) {
         if (versionId.runtimeType == int) {

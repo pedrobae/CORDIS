@@ -1,5 +1,5 @@
 class ContentToken {
-  final String text;
+  String text;
   final TokenType type;
   int? position;
 

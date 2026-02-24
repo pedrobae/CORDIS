@@ -1,3 +1,4 @@
+import 'package:cordis/providers/transposition_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -76,6 +77,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()..loadUsers()),
         ChangeNotifierProvider(create: (_) => CloudVersionProvider()),
         ChangeNotifierProvider(create: (_) => LocalVersionProvider()),
+        ChangeNotifierProvider(create: (_) => TranspositionProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {

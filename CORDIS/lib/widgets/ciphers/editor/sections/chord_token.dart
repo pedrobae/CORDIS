@@ -1,16 +1,13 @@
-import 'package:cordis/helpers/chords/chord_transposer.dart';
 import 'package:cordis/models/ui/content_token.dart';
 import 'package:flutter/material.dart';
 
 class ChordToken extends StatelessWidget {
-  final ChordTransposer transposer;
   final ContentToken token;
   final Color sectionColor;
   final TextStyle textStyle;
 
   const ChordToken({
     super.key,
-    required this.transposer,
     required this.token,
     required this.sectionColor,
     required this.textStyle,
@@ -18,8 +15,6 @@ class ChordToken extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String chordToShow = transposer.transposeChord(token.text);
-
     return IntrinsicWidth(
       child: Container(
         constraints: const BoxConstraints(minWidth: 36),
@@ -30,7 +25,7 @@ class ChordToken extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            chordToShow,
+            token.text,
             textAlign: TextAlign.center,
             style: textStyle.copyWith(
               fontSize: textStyle.fontSize! * 0.8,

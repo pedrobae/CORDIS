@@ -1,5 +1,6 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
+import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_palette.dart';
@@ -35,11 +36,12 @@ class _SectionsTabState extends State<SectionsTab> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    return Consumer4<
+    return Consumer5<
       SectionProvider,
       LocalVersionProvider,
       CloudVersionProvider,
-      SelectionProvider
+      SelectionProvider,
+      CipherProvider
     >(
       builder:
           (
@@ -48,6 +50,7 @@ class _SectionsTabState extends State<SectionsTab> {
             localVersionProvider,
             cloudVersionProvider,
             selectionProvider,
+            cipherProvider,
             child,
           ) {
             List<String> uniqueSections;

@@ -1,6 +1,5 @@
-import 'package:cordis/helpers/chords/chord_transposer.dart';
 import 'package:cordis/models/ui/chord.dart';
-import 'package:cordis/providers/layout_settings_provider.dart';
+import 'package:cordis/providers/transposition_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -27,17 +26,12 @@ class LineView extends StatelessWidget {
         double endOfChord = 0.0;
         int lineNumber = 0;
 
-        final ls = context.watch<LayoutSettingsProvider>();
-
-        final transposer = ChordTransposer.fromKeys(
-          originalKey: ls.originalKey,
-          transposedKey: ls.transposedKey,
-        );
+        final tp = context.watch<TranspositionProvider>();
 
         final chordPositions = <Widget>[];
 
         for (final chord in chords) {
-          final String chordToShow = transposer.transposeChord(chord.name);
+          final String chordToShow = tp.transposeChord(chord.name);
           (xOffset, yOffset, endOfChord, lineNumber) = chord
               .calculateOffsetForChord(
                 lyricStyle,

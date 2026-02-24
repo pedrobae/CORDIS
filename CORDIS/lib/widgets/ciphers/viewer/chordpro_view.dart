@@ -1,6 +1,6 @@
-import 'package:cordis/helpers/chords/chord_transposer.dart';
 import 'package:cordis/models/ui/song.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
+import 'package:cordis/providers/transposition_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'line_view.dart';
@@ -13,14 +13,9 @@ class ChordProView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LayoutSettingsProvider>(
-      builder: (context, ls, child) {
+    return Consumer2<LayoutSettingsProvider, TranspositionProvider>(
+      builder: (context, ls, tp, child) {
         final parsedSong = Song.fromChordPro(chordPro);
-
-        final transposer = ChordTransposer.fromKeys(
-          originalKey: ls.originalKey,
-          transposedKey: ls.transposedKey,
-        );
 
         List<Widget> sectionChildren = [];
 
@@ -34,10 +29,7 @@ class ChordProView extends StatelessWidget {
               List<Text> rowChildren = [];
               for (var chord in parsedSong.chordsMap[i] ?? []) {
                 rowChildren.add(
-                  Text(
-                    transposer.transposeChord(chord.name),
-                    style: ls.chordTextStyle,
-                  ),
+                  Text(tp.transposeChord(chord.name), style: ls.chordTextStyle),
                 );
               }
               sectionChildren.add(Row(spacing: 5, children: rowChildren));
@@ -54,7 +46,7 @@ class ChordProView extends StatelessWidget {
                   if (chord.lyricsBefore.isEmpty) {
                     precedingChords.add(
                       Text(
-                        transposer.transposeChord(chord.name),
+                        tp.transposeChord(chord.name),
                         style: ls.chordTextStyle,
                       ),
                     );
@@ -126,10 +118,7 @@ class ChordProView extends StatelessWidget {
           for (int i = 0; i < parsedSong.chordsMap.length; i++) {
             for (var chord in parsedSong.chordsMap[i]!) {
               rowChildren.add(
-                Text(
-                  transposer.transposeChord(chord.name),
-                  style: ls.chordTextStyle,
-                ),
+                Text(tp.transposeChord(chord.name), style: ls.chordTextStyle),
               );
             }
           }

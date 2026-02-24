@@ -113,7 +113,7 @@ class _CipherCardState extends State<CipherCard> {
                                 spacing: 16.0,
                                 children: [
                                   Text(
-                                    '${AppLocalizations.of(context)!.musicKey}: ${cipher.musicKey}',
+                                    '${AppLocalizations.of(context)!.musicKey}: ${version.transposedKey ?? cipher.musicKey}',
                                     style: textTheme.bodyMedium,
                                   ),
                                   version.bpm != 0

@@ -81,57 +81,6 @@ class LayoutSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Transposition Logic
-  String originalKey = 'C';
-  String transposedKey = 'C';
-
-  void setOriginalKey(String key) {
-    originalKey = key;
-    transposedKey = key;
-  }
-
-  void resetToOriginalKey() {
-    transposedKey = originalKey;
-    transposedKey = originalKey;
-    notifyListeners();
-  }
-
-  void transposeUp() {
-    final currentIndex = keys.indexOf(transposedKey);
-    final newIndex = (currentIndex + 1) % keys.length;
-    transposedKey = keys[newIndex];
-    transposedKey = keys[newIndex];
-    notifyListeners();
-  }
-
-  void transposeDown() {
-    final currentIndex = keys.indexOf(transposedKey);
-    final newIndex = (currentIndex - 1 + keys.length) % keys.length;
-    transposedKey = keys[newIndex];
-    notifyListeners();
-  }
-
-  void selectKey(String key) {
-    transposedKey = key;
-    notifyListeners();
-  }
-
-  // Getter for keys
-  List<String> get keys => [
-    'C',
-    'Db',
-    'D',
-    'Eb',
-    'E',
-    'F',
-    'F#',
-    'G',
-    'Ab',
-    'A',
-    'Bb',
-    'B',
-  ];
-
   TextStyle get chordTextStyle => TextStyle(
     fontFamily: fontFamily,
     fontSize: fontSize.toDouble(),

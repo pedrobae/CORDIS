@@ -1,11 +1,9 @@
-import 'package:cordis/helpers/chords/chord_transposer.dart';
 import 'package:cordis/l10n/app_localizations.dart';
-import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
-import 'package:cordis/providers/version/cloud_version_provider.dart';
+import 'package:cordis/providers/transposition_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/edit_section.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
@@ -91,10 +89,11 @@ class _TokenContentCardState extends State<TokenContentCard> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Consumer3<
+    return Consumer4<
       LayoutSettingsProvider,
       SectionProvider,
-      SelectionProvider
+      SelectionProvider,
+      TranspositionProvider
     >(
       builder:
           (
@@ -102,6 +101,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
             layoutSettingsProvider,
             sectionProvider,
             selectionProvider,
+            tp,
             child,
           ) {
             final section = sectionProvider.getSection(
@@ -229,58 +229,21 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   ),
 
                   /// CONTENT
-                  FutureBuilder<ChordTransposer>(
-                    future: () async {
-                      String originalKey;
-                      String? transposedKey;
-
-                      if (widget.versionID is int) {
-                        final version = (await context
-                            .read<LocalVersionProvider>()
-                            .getVersion(widget.versionID))!;
-
-                        if (context.mounted) {
-                          final cipher = (context
-                              .read<CipherProvider>()
-                              .getCipherById(version.cipherId))!;
-
-                          originalKey = cipher.musicKey;
-                          transposedKey = version.transposedKey;
-                        } else {
-                          throw Exception('Context is not mounted');
-                        }
-                      } else {
-                        final version = (context
-                            .read<CloudVersionProvider>()
-                            .getVersion(widget.versionID))!;
-                        originalKey = version.originalKey;
-                        transposedKey = version.transposedKey;
-                      }
-
-                      return ChordTransposer.fromKeys(
-                        originalKey: originalKey,
-                        transposedKey: transposedKey ?? originalKey,
-                      );
-                    }(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
-                      }
-
-                      if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      }
-
-                      final transposer = snapshot.data!;
-
-                      context.read<LocalVersionProvider>().getVersion(
-                        widget.versionID,
-                      );
-
+                  Builder(
+                    builder: (context) {
                       final contentTokens = _tokenizer.organize(tokens);
 
+                      for (var line in contentTokens) {
+                        for (var word in line) {
+                          for (var token in word) {
+                            if (token.type == TokenType.chord) {
+                              token.text = tp.transposeChord(token.text);
+                            }
+                          }
+                        }
+                      }
+
                       final contentWidgets = _tokenizer.buildContentWidgets(
-                        transposer,
                         contentTokens,
                         tokens,
                         layoutSettingsProvider.fontFamily,
