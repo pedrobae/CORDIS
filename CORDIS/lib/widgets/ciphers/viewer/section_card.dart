@@ -1,5 +1,4 @@
-import 'dart:math';
-
+import 'package:cordis/widgets/ciphers/section_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/widgets/ciphers/viewer/chordpro_view.dart';
@@ -26,22 +25,6 @@ class SectionCard extends StatelessWidget {
         final textTheme = Theme.of(context).textTheme;
         final colorScheme = Theme.of(context).colorScheme;
 
-        // Measure section code width on the correct style
-        final textPainter = TextPainter(
-          text: TextSpan(
-            text: sectionCode,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.surface,
-              fontSize: layoutSettingsProvider.fontSize,
-            ),
-          ),
-          maxLines: 1,
-          textDirection: TextDirection.ltr,
-        )..layout();
-        final sectionCodeWidth =
-            textPainter.size.width + 16; // 8 padding each side
-
         if (sectionText.trim().isEmpty) {
           return SizedBox.shrink();
         }
@@ -59,23 +42,9 @@ class SectionCard extends StatelessWidget {
               Row(
                 spacing: 8,
                 children: [
-                  Container(
-                    width: max(28, sectionCodeWidth),
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: sectionColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      sectionCode,
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.surface,
-                        fontSize: layoutSettingsProvider.fontSize - 4,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                  SectionBadge(
+                    sectionCode: sectionCode,
+                    sectionColor: sectionColor,
                   ),
                   Text(
                     sectionType.isNotEmpty

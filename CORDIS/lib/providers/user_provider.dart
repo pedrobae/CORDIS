@@ -12,10 +12,15 @@ class UserProvider extends ChangeNotifier {
   UserProvider();
 
   List<User> _knownUsers = [];
+
   String? _error;
+
   bool _hasInitialized = false;
+
   bool _isLoading = false;
   bool _isLoadingCloud = false;
+
+  bool _isSaving = false;
 
   // Getters
   List<User> get knownUsers => _knownUsers;
@@ -23,6 +28,7 @@ class UserProvider extends ChangeNotifier {
   bool get hasInitialized => _hasInitialized;
   bool get isLoading => _isLoading;
   bool get isLoadingCloud => _isLoadingCloud;
+  bool get isSaving => _isSaving;
 
   // ===== CREATE =====
   /// Downloads users from Firebase
@@ -176,6 +182,51 @@ class UserProvider extends ChangeNotifier {
   }
 
   // ==== UPDATE =====
+  Future<void> save(String firebaseId) async {
+    if (_isSaving) return;
+
+    _isSaving = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final user = getUserByFirebaseId(firebaseId);
+
+      if (user == null) {
+        throw Exception('User with Firebase ID $firebaseId not found locally.');
+      }
+
+      final userDto = user.toDto();
+      await _cloudUserRepository.update(userDto);
+
+      await _localUserRepository.updateUser(user);
+
+      if (kDebugMode) {
+        print('Saved user ${user.username} to cloud');
+      }
+    } catch (e) {
+      _error = e.toString();
+      if (kDebugMode) {
+        print('Error saving user data to cloud: $e');
+      }
+    } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  void cacheUsername(String firebaseId, String username) {
+    final userIndex = _knownUsers.indexWhere(
+      (user) => user.firebaseId == firebaseId,
+    );
+
+    if (userIndex != -1) {
+      final updatedUser = _knownUsers[userIndex].copyWith(username: username);
+      _knownUsers[userIndex] = updatedUser;
+      notifyListeners();
+    }
+  }
+
   void cacheUserLanguage(String firebaseId, String languageCode) {
     final userIndex = _knownUsers.indexWhere(
       (user) => user.firebaseId == firebaseId,
@@ -219,6 +270,7 @@ class UserProvider extends ChangeNotifier {
   Future<void> deleteUserData(String userId) async {
     try {
       await _cloudUserRepository.deleteUserById(userId);
+      await _localUserRepository.deleteUser(userId);
     } catch (e) {
       if (kDebugMode) {
         print('Error deleting user data from cloud: $e');

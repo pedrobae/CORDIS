@@ -90,10 +90,10 @@ class UserRepository {
   }
 
   // ===== DELETE =====
-  /// Deletes a user by ID
-  Future<void> deleteUser(int userId) async {
+  /// Deletes a user by Firebase ID
+  Future<void> deleteUser(String firebaseId) async {
     final db = await _databaseHelper.database;
 
-    await db.delete('user', where: 'id = ?', whereArgs: [userId]);
+    await db.delete('user', where: 'firebase_id = ?', whereArgs: [firebaseId]);
   }
 }

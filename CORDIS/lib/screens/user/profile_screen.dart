@@ -23,8 +23,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final emailController = TextEditingController();
-  final userNameController = TextEditingController();
-  final timezoneController = TextEditingController();
+  final usernameController = TextEditingController();
 
   @override
   void initState() {
@@ -34,17 +33,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final authProvider = context.read<MyAuthProvider>();
 
       emailController.text = authProvider.userEmail ?? '';
-      userNameController.text =
+      usernameController.text =
           authProvider.userName ?? AppLocalizations.of(context)!.guest;
-      timezoneController.text = authProvider.userTimeZone ?? '';
+
+      usernameController.addListener(_usernameListener());
     });
+  }
+
+  VoidCallback _usernameListener() {
+    return () {
+      final userProvider = context.read<UserProvider>();
+      final authProvider = context.read<MyAuthProvider>();
+      userProvider.cacheUsername(authProvider.id!, usernameController.text);
+    };
   }
 
   @override
   void dispose() {
+    usernameController.removeListener(_usernameListener());
     emailController.dispose();
-    userNameController.dispose();
-    timezoneController.dispose();
+    usernameController.dispose();
     super.dispose();
   }
 
@@ -116,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     LabeledTextField(
                       label: AppLocalizations.of(context)!.username,
-                      controller: userNameController,
+                      controller: usernameController,
                     ),
                     LabeledCountryPicker(
                       countryCode:
@@ -163,7 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       text: AppLocalizations.of(context)!.save,
                       isDark: true,
                       onPressed: () {
-                        // TODO:user - Handle save action
+                        userProvider.save(authProvider.id!);
                       },
                     ),
                     FilledTextButton(
@@ -178,7 +186,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     TextButton(
                       onPressed: () {
                         authProvider.deleteAccount();
-                        userProvider.deleteUserData(authProvider.id!);
+                        if (authProvider.error == null) {
+                          userProvider.deleteUserData(authProvider.id!);
+                        }
                       },
                       child: Container(
                         decoration: BoxDecoration(

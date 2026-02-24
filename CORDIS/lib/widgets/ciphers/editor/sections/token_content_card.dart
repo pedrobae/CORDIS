@@ -6,6 +6,7 @@ import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/transposition_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/edit_section.dart';
+import 'package:cordis/widgets/ciphers/section_badge.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
@@ -163,22 +164,9 @@ class _TokenContentCardState extends State<TokenContentCard> {
                         ),
 
                         /// Section Code badge
-                        Container(
-                          height: 28,
-                          width: 28,
-                          decoration: BoxDecoration(
-                            color: section.contentColor,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Center(
-                            child: Text(
-                              section.contentCode,
-                              textAlign: TextAlign.center,
-                              style: textTheme.labelLarge?.copyWith(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
+                        SectionBadge(
+                          sectionCode: section.contentCode,
+                          sectionColor: section.contentColor,
                         ),
 
                         /// Section Type label

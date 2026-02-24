@@ -266,13 +266,12 @@ class _LoginScreenState extends State<LoginScreen> {
       await userProvider.loadUsers();
       await userProvider.ensureUserExists(authProvider.id!);
 
-      authProvider.setUserData(
-        userProvider.getUserByFirebaseId(authProvider.id!)!,
-      );
-
       if (mounted) {
         Navigator.of(context).pushReplacementNamed(AppRoutes.main);
       }
+      authProvider.setUserData(
+        userProvider.getUserByFirebaseId(authProvider.id!)!,
+      );
     }
   }
 }
