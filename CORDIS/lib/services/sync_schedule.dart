@@ -4,6 +4,7 @@ import 'package:cordis/models/domain/playlist/flow_item.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/models/domain/user.dart';
+import 'package:cordis/models/dtos/playlist_dto.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/repositories/cloud/schedule_repository.dart';
@@ -30,93 +31,19 @@ class ScheduleSyncService {
   /// Priority is given to the local version, so cloud diff are discarded,
   /// But if the schedule doesn't exist locally, or there are empty fields, it will be created/updated with the cloud version
   Future<void> syncToLocal(ScheduleDto scheduleDto) async {
-    final localUser = await _userRepo.getUserByFirebaseId(
+    final ownerUser = await _userRepo.getUserByFirebaseId(
       scheduleDto.ownerFirebaseId,
     );
 
-    if (localUser == null) {
+    if (ownerUser == null) {
       throw Exception(
         'Owner user not found locally for schedule ${scheduleDto.firebaseId}',
       );
     }
 
-    final playlistId = await _playlistRepo.upsertPlaylist(
-      scheduleDto.playlist.toDomain(localUser.id!),
-    );
+    final playlistID = await syncPlaylist(scheduleDto.playlist, ownerUser);
 
-    // Upsert each playlist Item in the playlist
-    for (var item in scheduleDto.playlist.getPlaylistItems()) {
-      switch (item.type) {
-        case PlaylistItemType.flowItem:
-          final flowItem =
-              scheduleDto.playlist.flowItems[item.firebaseContentId]!;
-          await _flowRepo.upsertFlowItem(
-            FlowItem.fromFirestore(
-              flowItem,
-              firebaseId: item.firebaseContentId,
-              playlistId: playlistId,
-            ),
-          );
-          break;
-        case PlaylistItemType.version:
-          final versionDto =
-              scheduleDto.playlist.versions[item.firebaseContentId]!;
-
-          /// Ensure cipher exists and is up to date
-          int? cipherId = await _cipherRepo.getCipherIdByTitleAuthor(
-            title: versionDto.title,
-            author: versionDto.author,
-          );
-
-          if (cipherId == null) {
-            // Cipher doesn't exist locally, insert it
-            cipherId = await _cipherRepo.insertPrunedCipher(
-              Cipher.fromVersionDto(versionDto),
-            );
-          } else {
-            // Cipher exists, merge it
-            final existingCipher = await _cipherRepo.getCipherById(cipherId);
-            final mergedCipher = existingCipher!.mergeWith(
-              Cipher.fromVersionDto(versionDto).copyWith(id: cipherId),
-            );
-            await _cipherRepo.updateCipher(mergedCipher);
-          }
-
-          // Ensure version exists on SQLite and is up to date
-          final existingVersion = await _versionRepo.getVersionWithFirebaseId(
-            versionDto.firebaseId!,
-          );
-
-          if (existingVersion != null) {
-            // Version exists, merge it
-            final mergedVersion = existingVersion.mergeWith(
-              versionDto.toDomain(cipherId: cipherId),
-            );
-            await _versionRepo.updateVersion(mergedVersion);
-
-            // Sync sections (upsert)
-            for (final section in (mergedVersion.sections ?? {}).values) {
-              await _sectionRepo.upsertSection(
-                section.copyWith(versionId: existingVersion.id!),
-              );
-            }
-          } else {
-            // Version doesn't exist locally, insert it and add it to the playlist
-            final versionId = await _versionRepo.insertVersion(
-              versionDto.toDomain(cipherId: cipherId),
-            );
-
-            for (final section in versionDto.sections.values) {
-              await _sectionRepo.insertSection(
-                Section.fromFirestore(section).copyWith(versionId: versionId),
-              );
-            }
-            await _playlistRepo.addVersionToPlaylist(playlistId, versionId);
-          }
-      }
-    }
-
-    final schedule = scheduleDto.toDomain(playlistLocalId: playlistId);
+    final schedule = scheduleDto.toDomain(playlistLocalId: playlistID);
 
     final existing = await _localRepo.getScheduleByFirebaseIdOrShareCode(
       scheduleDto.firebaseId!,
@@ -154,6 +81,91 @@ class ScheduleSyncService {
         // Role exists locally, update it
         await _localRepo.upsertRole(merged.id, role.copyWith(users: users));
       }
+    }
+  }
+
+  Future<int> syncPlaylist(PlaylistDto playlistDto, User ownerUser) async {
+    final playlistID = await _playlistRepo.upsertPlaylist(
+      playlistDto.toDomain(ownerUser.id!),
+    );
+
+    // Upsert each playlist Item in the playlist
+    for (var item in playlistDto.getPlaylistItems()) {
+      switch (item.type) {
+        case PlaylistItemType.flowItem:
+          final flowItem = playlistDto.flowItems[item.firebaseContentId]!;
+          await _flowRepo.upsertFlowItem(
+            FlowItem.fromFirestore(
+              flowItem,
+              firebaseId: item.firebaseContentId,
+              playlistId: playlistID,
+            ),
+          );
+          break;
+        case PlaylistItemType.version:
+          final versionDto = playlistDto.versions[item.firebaseContentId]!;
+
+          await upsertPlaylistVersion(versionDto, playlistID);
+          break;
+      }
+    }
+    return playlistID;
+  }
+
+  Future<void> upsertPlaylistVersion(
+    VersionDto versionDto,
+    int playlistID,
+  ) async {
+    /// Ensure cipher exists and is up to date
+    int? cipherId = await _cipherRepo.getCipherIdByTitleAuthor(
+      title: versionDto.title,
+      author: versionDto.author,
+    );
+
+    if (cipherId == null) {
+      // Cipher doesn't exist locally, insert it
+      cipherId = await _cipherRepo.insertPrunedCipher(
+        Cipher.fromVersionDto(versionDto),
+      );
+    } else {
+      // Cipher exists, merge it
+      final existingCipher = await _cipherRepo.getCipherById(cipherId);
+      final mergedCipher = existingCipher!.mergeWith(
+        Cipher.fromVersionDto(versionDto).copyWith(id: cipherId),
+      );
+      await _cipherRepo.updateCipher(mergedCipher);
+    }
+
+    // Ensure version exists on SQLite and is up to date
+    final existingVersion = await _versionRepo.getVersionWithFirebaseId(
+      versionDto.firebaseId!,
+    );
+
+    if (existingVersion != null) {
+      // Version exists, merge it
+      final mergedVersion = existingVersion.mergeWith(
+        versionDto.toDomain(cipherId: cipherId),
+      );
+      await _versionRepo.updateVersion(mergedVersion);
+
+      // Sync sections (upsert)
+      for (final section in (mergedVersion.sections ?? {}).values) {
+        await _sectionRepo.upsertSection(
+          section.copyWith(versionId: existingVersion.id!),
+        );
+      }
+    } else {
+      // Version doesn't exist locally, insert it and add it to the playlist
+      final versionId = await _versionRepo.insertVersion(
+        versionDto.toDomain(cipherId: cipherId),
+      );
+
+      for (final section in versionDto.sections.values) {
+        await _sectionRepo.insertSection(
+          Section.fromFirestore(section).copyWith(versionId: versionId),
+        );
+      }
+      await _playlistRepo.addVersionToPlaylist(playlistID, versionId);
     }
   }
 

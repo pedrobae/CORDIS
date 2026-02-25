@@ -24,10 +24,10 @@
   "current": "Current",
   "@current": {"description": "Label for current selection"},
   
-  "theme": "Theme",
+  "theme": "Theme Mode",
   "@theme": {"description": "Theme field label"},
-  "themeSubtitle": "Customize the appearance of the app",
-  "@themeSubtitle": {"description": "Subtitle for theme settings"},
+  "colorVariant": "Alternative Color",
+  "@colorVariant": {"description": "Color variant field label"},
   "changeLanguage": "Change Language",
   "@changeLanguage": {"description": "Change language field label"},
   "changeLanguageSubtitle": "Change the application language",

@@ -4,7 +4,7 @@ import 'package:cordis/services/settings_service.dart';
 
 class SettingsProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
-  ThemeColor _themeColor = ThemeColor.green;
+  bool _isColorVariant = false;
   Locale _locale = const Locale('pt', 'BR');
   String _timeZone = 'UTC';
   String _country = '';
@@ -13,7 +13,7 @@ class SettingsProvider extends ChangeNotifier {
 
   // Getters
   ThemeMode get themeMode => _themeMode;
-  ThemeColor get themeColor => _themeColor;
+  bool get isColorVariant => _isColorVariant;
   Locale get locale => _locale;
   String get timeZone => _timeZone;
   String get country => _country;
@@ -23,7 +23,7 @@ class SettingsProvider extends ChangeNotifier {
   /// Initialize with stored settings
   Future<void> loadSettings() async {
     _themeMode = SettingsService.getThemeMode();
-    _themeColor = SettingsService.getThemeColor();
+    _isColorVariant = SettingsService.isColorVariant();
     _locale = SettingsService.getLocale();
     _timeZone = SettingsService.getTimeZone();
     _country = SettingsService.getCountry();
@@ -40,9 +40,9 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   /// Set theme color and persist
-  Future<void> setThemeColor(ThemeColor color) async {
-    _themeColor = color;
-    await SettingsService.setThemeColor(color);
+  Future<void> toggleColorVariant() async {
+    _isColorVariant = !_isColorVariant;
+    await SettingsService.setColorVariant(_isColorVariant);
     notifyListeners();
   }
 
@@ -95,24 +95,8 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   // Theme getters
-  ThemeData get lightTheme =>
-      AppTheme.getTheme(_getColorString(_themeColor), false);
-  ThemeData get darkTheme =>
-      AppTheme.getTheme(_getColorString(_themeColor), true);
-
-  /// Convert ThemeColor enum to string for AppTheme
-  String _getColorString(ThemeColor color) {
-    switch (color) {
-      case ThemeColor.green:
-        return 'green';
-      case ThemeColor.gold:
-        return 'gold';
-      case ThemeColor.orange:
-        return 'orange';
-      case ThemeColor.burgundy:
-        return 'burgundy';
-    }
-  }
+  ThemeData get lightTheme => AppTheme.getTheme(_isColorVariant, false);
+  ThemeData get darkTheme => AppTheme.getTheme(_isColorVariant, true);
 
   /// Reset all settings to defaults
   Future<void> resetToDefaults() async {

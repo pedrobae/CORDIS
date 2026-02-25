@@ -155,14 +155,14 @@ abstract class AppLocalizations {
   /// Theme field label
   ///
   /// In pt, this message translates to:
-  /// **'Tema'**
+  /// **'Modo de Tema'**
   String get theme;
 
-  /// Subtitle for theme settings
+  /// Color variant field label
   ///
   /// In pt, this message translates to:
-  /// **'Customize a aparência do aplicativo'**
-  String get themeSubtitle;
+  /// **'Cor Alternativa'**
+  String get colorVariant;
 
   /// Change language field label
   ///

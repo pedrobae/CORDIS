@@ -38,10 +38,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get current => 'Current';
 
   @override
-  String get theme => 'Theme';
+  String get theme => 'Theme Mode';
 
   @override
-  String get themeSubtitle => 'Customize the appearance of the app';
+  String get colorVariant => 'Alternative Color';
 
   @override
   String get changeLanguage => 'Change Language';

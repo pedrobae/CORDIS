@@ -4,8 +4,6 @@ import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/services/cache_service.dart';
 
-import 'package:cordis/utils/app_theme.dart';
-
 import 'package:cordis/l10n/app_localizations.dart';
 
 import 'package:cordis/providers/cipher/cipher_provider.dart';
@@ -36,87 +34,133 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        spacing: 8,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // App Settings Section
-          _buildSectionHeader(
-            AppLocalizations.of(context)!.settings,
-            Icons.settings,
-          ),
-          FilledTextButton(
-            icon: Icons.palette,
-            text: AppLocalizations.of(context)!.theme,
-            tooltip: AppLocalizations.of(context)!.themeSubtitle,
-            trailingIcon: Icons.chevron_right,
-            onPressed: () {
-              _showThemeDialog(context);
-            },
-            isDiscrete: true,
-          ),
-          FilledTextButton(
-            icon: Icons.language,
-            text: AppLocalizations.of(context)!.changeLanguage,
-            tooltip: AppLocalizations.of(context)!.changeLanguageSubtitle,
-            trailingIcon: Icons.chevron_right,
-            onPressed: () {
-              _showLanguageDialog(context);
-            },
-            isDiscrete: true,
-          ),
+    final textTheme = Theme.of(context).textTheme;
 
-          const SizedBox(height: 32),
-
-          // Development Tools Section (only in debug mode)
-          if (kDebugMode) ...[
+    return Consumer<SettingsProvider>(
+      builder: (context, settingsProvider, child) => SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          spacing: 8,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // App Settings Section
             _buildSectionHeader(
-              AppLocalizations.of(context)!.developmentTools,
-              Icons.build,
+              AppLocalizations.of(context)!.settings,
+              Icons.settings,
             ),
 
-            FilledTextButton(
-              icon: Icons.refresh,
-              text: AppLocalizations.of(context)!.resetDatabase,
-              tooltip: AppLocalizations.of(context)!.resetDatabaseSubtitle,
-              trailingIcon: Icons.chevron_right,
-              onPressed: () => showModalBottomSheet(
-                context: context,
-                builder: (context) {
-                  return DeleteConfirmationSheet(
-                    itemType: AppLocalizations.of(context)!.database,
-                    onConfirm: () {
-                      _resetDatabase();
-                    },
-                  );
-                },
-              ),
-              isDangerous: true,
-              isDiscrete: true,
-            ),
-            FilledTextButton(
-              icon: Icons.cached,
-              text: AppLocalizations.of(context)!.reloadInterface,
-              tooltip: AppLocalizations.of(context)!.reloadInterfaceSubtitle,
-              trailingIcon: Icons.chevron_right,
-              onPressed: _reloadAllData,
-              isDiscrete: true,
+            /// theme mode toggle
+            Row(
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.theme,
+                  style: textTheme.titleMedium,
+                ),
+                const Spacer(),
+
+                Icon(
+                  settingsProvider.themeMode == ThemeMode.dark
+                      ? Icons.dark_mode
+                      : Icons.light_mode,
+                ),
+                SizedBox(width: 8),
+                Switch(
+                  value: settingsProvider.themeMode == ThemeMode.dark,
+                  onChanged: (value) {
+                    context.read<SettingsProvider>().setThemeMode(
+                      value ? ThemeMode.dark : ThemeMode.light,
+                    );
+                  },
+                ),
+              ],
             ),
 
+            /// variant color toggle
+            Row(
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.colorVariant,
+                  style: textTheme.titleMedium,
+                ),
+                const Spacer(),
+
+                Icon(
+                  settingsProvider.isColorVariant
+                      ? Icons.palette
+                      : Icons.palette_outlined,
+                ),
+                SizedBox(width: 8),
+                Switch(
+                  value: settingsProvider.isColorVariant,
+                  onChanged: (value) {
+                    context.read<SettingsProvider>().toggleColorVariant();
+                  },
+                ),
+              ],
+            ),
+
+            /// language
             FilledTextButton(
-              icon: Icons.storage,
-              text: AppLocalizations.of(context)!.databaseInformation,
-              tooltip: AppLocalizations.of(context)!.databaseInfoSubtitle,
-              onPressed: () => _showDatabaseInfo(),
+              icon: Icons.language,
+              text: AppLocalizations.of(context)!.changeLanguage,
+              tooltip: AppLocalizations.of(context)!.changeLanguageSubtitle,
               trailingIcon: Icons.chevron_right,
+              onPressed: () {
+                _showLanguageDialog(context);
+              },
               isDiscrete: true,
             ),
 
             const SizedBox(height: 32),
+
+            // Development Tools Section (only in debug mode)
+            if (kDebugMode) ...[
+              _buildSectionHeader(
+                AppLocalizations.of(context)!.developmentTools,
+                Icons.build,
+              ),
+
+              FilledTextButton(
+                icon: Icons.refresh,
+                text: AppLocalizations.of(context)!.resetDatabase,
+                tooltip: AppLocalizations.of(context)!.resetDatabaseSubtitle,
+                trailingIcon: Icons.chevron_right,
+                onPressed: () => showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+                    return DeleteConfirmationSheet(
+                      itemType: AppLocalizations.of(context)!.database,
+                      onConfirm: () {
+                        _resetDatabase();
+                      },
+                    );
+                  },
+                ),
+                isDangerous: true,
+                isDiscrete: true,
+              ),
+              FilledTextButton(
+                icon: Icons.cached,
+                text: AppLocalizations.of(context)!.reloadInterface,
+                tooltip: AppLocalizations.of(context)!.reloadInterfaceSubtitle,
+                trailingIcon: Icons.chevron_right,
+                onPressed: _reloadAllData,
+                isDiscrete: true,
+              ),
+
+              FilledTextButton(
+                icon: Icons.storage,
+                text: AppLocalizations.of(context)!.databaseInformation,
+                tooltip: AppLocalizations.of(context)!.databaseInfoSubtitle,
+                onPressed: () => _showDatabaseInfo(),
+                trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
+              ),
+
+              const SizedBox(height: 32),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -457,52 +501,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _showThemeDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Consumer<SettingsProvider>(
-        builder: (context, settingsProvider, child) => AlertDialog.adaptive(
-          title: const Text('Escolher Tema'),
-          content: SizedBox(
-            width: 300,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Color palette selection
-                const Text(
-                  'Cor do Tema:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                _buildColorPalette(settingsProvider),
-                const SizedBox(height: 24),
-
-                // Theme mode selection
-                const Text(
-                  'Modo:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                _buildThemeModeSelection(settingsProvider),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Concluído'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showLanguageDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -543,140 +541,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildColorPalette(SettingsProvider settingsProvider) {
-    final colors = [
-      {
-        'name': 'Verde',
-        'value': ThemeColor.green,
-        'preview': const Color(0xFF145550),
-      },
-      {
-        'name': 'Dourado',
-        'value': ThemeColor.gold,
-        'preview': const Color(0xFFE6B428),
-      },
-      {
-        'name': 'Laranja',
-        'value': ThemeColor.orange,
-        'preview': const Color(0xFFE66423),
-      },
-      {
-        'name': 'Vinho',
-        'value': ThemeColor.burgundy,
-        'preview': const Color(0xFF5A002D),
-      },
-    ];
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: colors.map((colorData) {
-        final isSelected = settingsProvider.themeColor == colorData['value'];
-
-        return GestureDetector(
-          onTap: () =>
-              settingsProvider.setThemeColor(colorData['value'] as ThemeColor),
-          child: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: colorData['preview'] as Color,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.secondary
-                    : Colors.transparent,
-                width: 3,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 4,
-              children: [
-                if (isSelected)
-                  Icon(Icons.check, color: Colors.white, size: 20)
-                else
-                  Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                Text(
-                  colorData['name'] as String,
-                  style: isSelected
-                      ? const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                        )
-                      : const TextStyle(color: Colors.white70, fontSize: 10),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildThemeModeSelection(SettingsProvider settingsProvider) {
-    final modes = [
-      {'name': 'Claro', 'value': ThemeMode.light, 'icon': Icons.light_mode},
-      {'name': 'Escuro', 'value': ThemeMode.dark, 'icon': Icons.dark_mode},
-      {
-        'name': 'Sistema',
-        'value': ThemeMode.system,
-        'icon': Icons.brightness_auto,
-      },
-    ];
-
-    return RadioGroup<ThemeMode>(
-      onChanged: (value) => settingsProvider.setThemeMode(value!),
-      groupValue: settingsProvider.themeMode,
-      child: Column(
-        children: modes.map((modeData) {
-          final isSelected = settingsProvider.themeMode == modeData['value'];
-
-          return RadioListTile<ThemeMode>(
-            value: modeData['value'] as ThemeMode,
-            title: Row(
-              children: [
-                Icon(
-                  modeData['icon'] as IconData,
-                  size: 20,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-                const SizedBox(width: 12),
-                Text(modeData['name'] as String),
-              ],
-            ),
-            contentPadding: EdgeInsets.zero,
-            visualDensity: VisualDensity.compact,
-          );
-        }).toList(),
       ),
     );
   }

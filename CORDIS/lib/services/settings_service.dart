@@ -1,11 +1,10 @@
-import 'package:cordis/utils/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsService {
   // App Settings Keys
   static const String _keyThemeMode = 'theme_mode';
-  static const String _keyThemeColor = 'theme_color';
+  static const String _keyIsColorVariant = 'is_color_variant';
   static const String _keyLocale = 'locale';
   static const String _keyTimeZone = 'time_zone';
   static const String _keyCountry = 'country';
@@ -56,17 +55,14 @@ class SettingsService {
   }
 
   /// Save theme color
-  static Future<void> setThemeColor(ThemeColor color) async {
-    await _preferences.setString(_keyThemeColor, color.name);
+  static Future<void> setColorVariant(bool isVariant) async {
+    await _preferences.setBool(_keyIsColorVariant, isVariant);
   }
 
   /// Get theme color
-  static ThemeColor getThemeColor() {
-    final value = _preferences.getString(_keyThemeColor) ?? 'green';
-    return ThemeColor.values.firstWhere(
-      (mode) => mode.name == value,
-      orElse: () => ThemeColor.green,
-    );
+  static bool isColorVariant() {
+    final value = _preferences.getBool(_keyIsColorVariant) ?? false;
+    return value;
   }
 
   /// Save locale

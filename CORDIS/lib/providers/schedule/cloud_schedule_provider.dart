@@ -18,6 +18,7 @@ class CloudScheduleProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   bool _isSaving = false;
+  bool _isSyncing = false;
 
   // ===== GETTERS =====
   Map<String, ScheduleDto> get schedules => _schedules;
@@ -26,6 +27,7 @@ class CloudScheduleProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
+  bool get isSyncing => _isSyncing;
 
   List<String> get filteredScheduleIds {
     if (_searchTerm.isEmpty) {
@@ -130,6 +132,7 @@ class CloudScheduleProvider extends ChangeNotifier {
 
     _isLoading = true;
     _error = null;
+    _isSyncing = true;
     notifyListeners();
 
     try {
@@ -138,13 +141,17 @@ class CloudScheduleProvider extends ChangeNotifier {
         forceFetch: forceFetch,
       );
 
+      _isLoading = false;
+      notifyListeners();
+
+      for (var schedule in schedules) {
+        _schedules[schedule.firebaseId!] = schedule;
+      }
+
       for (var schedule in schedules) {
         if (schedule.ownerFirebaseId == userId) {
-          // If the user is the owner, we want to make sure we have the latest version from the cloud
-          // (in case they made changes on another device)
           await _syncService.syncToLocal(schedule);
-        } else {
-          _schedules[schedule.firebaseId!] = schedule;
+          _schedules.remove(schedule.firebaseId!);
         }
       }
     } catch (e) {
@@ -152,6 +159,7 @@ class CloudScheduleProvider extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      _isSyncing = false;
       notifyListeners();
     }
   }

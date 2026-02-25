@@ -73,38 +73,35 @@ class CloudScheduleCard extends StatelessWidget {
               }
             }
 
-            return Stack(
-              children: [
-                // CLOUD WATERMARK
-                Positioned(
-                  right: -20,
-                  bottom: -50,
-                  child: Opacity(
-                    opacity: 0.08,
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Stack(
+                children: [
+                  // CLOUD WATERMARK
+                  Positioned(
+                    right: -20,
+                    bottom: -50,
                     child: Icon(
                       Icons.cloud,
                       size: 250,
-                      color: colorScheme.primary,
+                      color: colorScheme.surfaceTint,
                     ),
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  margin: const EdgeInsets.symmetric(vertical: 4.0),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: colorScheme.surfaceContainerLowest,
-                      width: 1,
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: colorScheme.surfaceContainerLowest,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(0),
                     ),
-                    borderRadius: BorderRadius.circular(0),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // SCHEDULE NAME
@@ -159,34 +156,69 @@ class CloudScheduleCard extends StatelessWidget {
                                 ),
                               ],
                             ),
-                          ),
-                          if (showActions) ...[
-                            IconButton(
-                              onPressed: () => _openScheduleActionsSheet(
-                                context,
-                                scheduleId,
-                                cloudScheduleProvider,
+                            Spacer(),
+                            if (cloudScheduleProvider.isSyncing) ...[
+                              SizedBox(
+                                height: 35,
+                                width: 35,
+                                child: Stack(
+                                  children: [
+                                    SizedBox(
+                                      height: 25,
+                                      width: 25,
+                                      child: CircularProgressIndicator(
+                                        color: colorScheme.onSurface,
+                                        strokeWidth: 5,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 2,
+                                      right: 0,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.surfaceTint,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        padding: const EdgeInsets.only(left: 6),
+                                        child: Icon(
+                                          Icons.cloud_download,
+                                          size: 25,
+                                          color: colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              icon: Icon(Icons.more_vert),
-                            ),
+                            ],
+                            if (showActions) ...[
+                              IconButton(
+                                onPressed: () => _openScheduleActionsSheet(
+                                  context,
+                                  scheduleId,
+                                  cloudScheduleProvider,
+                                ),
+                                icon: Icon(Icons.more_vert),
+                              ),
+                            ],
                           ],
-                        ],
-                      ),
-                      // BOTTOM BUTTONS
-                      FilledTextButton(
-                        isDark: true,
-                        isDense: true,
-                        onPressed: () {
-                          navigationProvider.push(
-                            PlayScheduleScreen(scheduleId: scheduleId),
-                          );
-                        },
-                        text: AppLocalizations.of(context)!.play,
-                      ),
-                    ],
+                        ),
+                        // BOTTOM BUTTONS
+                        FilledTextButton(
+                          isDark: true,
+                          isDense: true,
+                          onPressed: () {
+                            navigationProvider.push(
+                              PlayScheduleScreen(scheduleId: scheduleId),
+                            );
+                          },
+                          text: AppLocalizations.of(context)!.play,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
     );
