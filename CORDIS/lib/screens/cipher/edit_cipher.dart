@@ -199,7 +199,9 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           ) {
             return Scaffold(
               appBar: AppBar(
-                leading: BackButton(onPressed: () => navigationProvider.pop()),
+                leading: BackButton(
+                  onPressed: () => navigationProvider.attemptPop(context),
+                ),
                 title: Text(
                   AppLocalizations.of(
                     context,

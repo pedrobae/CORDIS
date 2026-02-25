@@ -221,6 +221,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get about => 'Sobre';
 
   @override
+  String get unsavedChangesTitle => 'Alterações Não Salvas';
+
+  @override
+  String get unsavedChangesMessage =>
+      'Você tem alterações não salvas. Tem certeza de que deseja sair sem salvar?';
+
+  @override
+  String get leaveWithoutSaving => 'Sair sem Salvar';
+
+  @override
+  String get stayOnPage => 'Permanecer na Página';
+
+  @override
   String get cipher => 'Cifra';
 
   @override

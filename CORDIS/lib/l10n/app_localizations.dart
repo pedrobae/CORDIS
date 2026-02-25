@@ -494,6 +494,30 @@ abstract class AppLocalizations {
   /// **'Sobre'**
   String get about;
 
+  /// Title for unsaved changes warning
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterações Não Salvas'**
+  String get unsavedChangesTitle;
+
+  /// Message for unsaved changes warning
+  ///
+  /// In pt, this message translates to:
+  /// **'Você tem alterações não salvas. Tem certeza de que deseja sair sem salvar?'**
+  String get unsavedChangesMessage;
+
+  /// Button label for leaving without saving
+  ///
+  /// In pt, this message translates to:
+  /// **'Sair sem Salvar'**
+  String get leaveWithoutSaving;
+
+  /// Button label for staying on the page
+  ///
+  /// In pt, this message translates to:
+  /// **'Permanecer na Página'**
+  String get stayOnPage;
+
   /// Cipher/Song label
   ///
   /// In pt, this message translates to:

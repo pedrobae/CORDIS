@@ -88,7 +88,9 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
 
             return Scaffold(
               appBar: AppBar(
-                leading: BackButton(onPressed: () => navigationProvider.pop()),
+                leading: BackButton(
+                  onPressed: () => navigationProvider.attemptPop(context),
+                ),
                 title: Text(
                   AppLocalizations.of(context)!.schedulePlaylist,
                   style: textTheme.titleMedium,
@@ -201,9 +203,10 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
                             scheduleProvider
                                 .createFromCache(myAuthProvider.id!)
                                 .then((success) {
-                                  if (success) {
-                                    navigationProvider.navigateToRoute(
-                                      NavigationRoute.schedule,
+                                  if (success && context.mounted) {
+                                    navigationProvider.attemptPop(
+                                      context,
+                                      route: NavigationRoute.schedule,
                                     );
                                   }
                                 });

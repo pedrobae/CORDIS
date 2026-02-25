@@ -68,7 +68,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
               padding: const EdgeInsets.all(4.0),
               child: BackButton(
                 color: colorScheme.onSurface,
-                onPressed: () => navProvider.pop(),
+                onPressed: () => navProvider.attemptPop(context),
               ),
             ),
             Padding(

@@ -187,7 +187,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                   top: 8,
                   right: 8,
                   child: GestureDetector(
-                    onTap: () => navigationProvider.pop(),
+                    onTap: () => navigationProvider.attemptPop(context),
                     child: SizedBox(
                       width: 48,
                       height: 48,

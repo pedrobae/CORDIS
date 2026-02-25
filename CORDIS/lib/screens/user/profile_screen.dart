@@ -110,7 +110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               appBar: AppBar(
                 leading: BackButton(
                   onPressed: () {
-                    navProvider.pop();
+                    navProvider.attemptPop(context);
                   },
                 ),
               ),
@@ -208,7 +208,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     Text(
-                      AppLocalizations.of(context)!.appVersion(appInfoProvider.appVersion),
+                      AppLocalizations.of(
+                        context,
+                      )!.appVersion(appInfoProvider.appVersion),
                       textAlign: TextAlign.center,
                       style: textTheme.bodyMedium?.copyWith(
                         color: colorScheme.surfaceContainerLow,

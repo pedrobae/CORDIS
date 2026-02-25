@@ -130,7 +130,8 @@ class _TimezoneSheetState extends State<TimezoneSheet> {
                   style: textTheme.titleMedium,
                 ),
                 IconButton(
-                  onPressed: () => context.read<NavigationProvider>().pop(),
+                  onPressed: () =>
+                      context.read<NavigationProvider>().attemptPop(context),
                   icon: const Icon(Icons.close),
                 ),
               ],

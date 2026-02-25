@@ -77,7 +77,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                     // Delete the cached section that was created when selecting type
                     _deleteSection();
                   }
-                  context.read<NavigationProvider>().pop();
+                  context.read<NavigationProvider>().attemptPop(context);
                 },
               ),
               Text(

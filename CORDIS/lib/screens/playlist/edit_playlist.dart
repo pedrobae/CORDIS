@@ -116,7 +116,7 @@ class _EditPlaylistScreenState extends State<EditPlaylistScreen> {
                       FilledTextButton(
                         text: AppLocalizations.of(context)!.cancel,
                         onPressed: () {
-                          navigationProvider.pop();
+                          navigationProvider.attemptPop(context);
                         },
                       ),
                     ],

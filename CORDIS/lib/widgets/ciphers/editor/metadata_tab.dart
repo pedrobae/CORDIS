@@ -8,7 +8,7 @@ import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/ciphers/editor/metadata.dart/add_tag_sheet.dart';
 import 'package:cordis/widgets/ciphers/editor/metadata.dart/select_key_sheet.dart';
-import 'package:cordis/widgets/common/duration_picker.dart';
+import 'package:cordis/widgets/common/labeled_duration_picker.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:cordis/widgets/common/labeled_language_picker.dart';

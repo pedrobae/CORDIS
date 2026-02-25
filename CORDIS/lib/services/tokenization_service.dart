@@ -555,6 +555,46 @@ class TokenizationService {
     );
   }
 
+  ContentTokenized checkHumongousWords(
+    BuildContext context,
+    ContentTokenized positionedWidgets, {
+    double lineSpacing = 8,
+  }) {
+    // Check for humongous words that exceed maxWidth and split them into multiple lines if necessary
+    final double maxWidth = MediaQuery.of(context).size.width - 80;
+
+    final double chordHeight = _fontSize + 7;
+    final double lineHeight = chordHeight + lineSpacing + _fontSize;
+
+    final adjustedWidgets = <Positioned>[];
+    int lineOffset = 0;
+    double currentX = 0;
+    for (int i = 0; i < positionedWidgets.tokens.length - 1; i++) {
+      final widget = positionedWidgets.tokens[i];
+      final nextWidget = positionedWidgets.tokens[i + 1];
+
+      final widgetWidth = nextWidget.left! - widget.left!;
+
+      if (currentX + widgetWidth > maxWidth) {
+        // Move to next line
+        lineOffset++;
+        currentX = 0;
+      }
+
+      adjustedWidgets.add(
+        Positioned(
+          left: currentX,
+          top: lineOffset * lineHeight,
+          child: widget.child,
+        ),
+      );
+
+      currentX += widgetWidth;
+    }
+
+    return ContentTokenized(adjustedWidgets, (lineOffset + 1) * lineHeight);
+  }
+
   // ====== Widget Builders ======
   Widget _buildDraggableChord(
     ContentToken token,

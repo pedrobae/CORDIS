@@ -44,7 +44,7 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
                 title: Text(AppLocalizations.of(context)!.importFromText),
                 leading: BackButton(
                   onPressed: () {
-                    navigationProvider.pop();
+                    navigationProvider.attemptPop(context);
                   },
                 ),
               ),

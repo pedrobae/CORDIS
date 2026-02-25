@@ -64,9 +64,9 @@ class MainScreenState extends State<MainScreen> {
           (context, authProvider, navigationProvider, cipherProvider, child) {
             return PopScope(
               canPop: false,
-              onPopInvokedWithResult: (didPop, _) {
+              onPopInvokedWithResult: (didPop, _) async {
                 if (didPop) return;
-                navigationProvider.pop();
+                await navigationProvider.attemptPop(context);
               },
               child: Scaffold(
                 appBar: navigationProvider.showAppBar
@@ -86,7 +86,7 @@ class MainScreenState extends State<MainScreen> {
                     onHorizontalDragEnd: (details) {
                       // iOS back gesture (swipe from left edge)
                       if (details.velocity.pixelsPerSecond.dx > 300) {
-                        navigationProvider.pop();
+                        navigationProvider.attemptPop(context);
                       }
                     },
                     child: Builder(
@@ -185,7 +185,10 @@ class MainScreenState extends State<MainScreen> {
         elevation: 2,
         onTap: (index) {
           if (mounted) {
-            navProvider.navigateToRoute(NavigationRoute.values[index]);
+            navProvider.attemptPop(
+              context,
+              route: NavigationRoute.values[index],
+            );
           }
         },
         items: navProvider

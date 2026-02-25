@@ -116,7 +116,9 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
 
             return Scaffold(
               appBar: AppBar(
-                leading: BackButton(onPressed: () => navigationProvider.pop()),
+                leading: BackButton(
+                  onPressed: () => navigationProvider.attemptPop(context),
+                ),
                 title: Text(
                   AppLocalizations.of(context)!.editPlaceholder(
                     AppLocalizations.of(context)!.scheduleDetails,
@@ -180,7 +182,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
                     // CANCEL BUTTON
                     FilledTextButton(
                       text: AppLocalizations.of(context)!.cancel,
-                      onPressed: () => navigationProvider.pop(),
+                      onPressed: () => navigationProvider.attemptPop(context),
                     ),
                   ],
                 ),

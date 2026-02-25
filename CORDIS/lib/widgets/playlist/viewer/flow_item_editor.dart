@@ -3,7 +3,7 @@ import 'package:cordis/models/domain/playlist/flow_item.dart';
 import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
-import 'package:cordis/widgets/common/duration_picker.dart';
+import 'package:cordis/widgets/common/labeled_duration_picker.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -95,7 +95,7 @@ class _FlowItemEditorState extends State<FlowItemEditor> {
                 ),
                 leading: BackButton(
                   onPressed: () {
-                    navigationProvider.pop();
+                    navigationProvider.attemptPop(context);
                   },
                 ),
                 actions: [

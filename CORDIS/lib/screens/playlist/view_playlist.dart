@@ -89,7 +89,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
                 leading: BackButton(
                   color: colorScheme.onSurface,
                   onPressed: () {
-                    navigationProvider.pop();
+                    navigationProvider.attemptPop(context);
                   },
                 ),
                 title: Text(playlist.name, style: theme.textTheme.titleMedium),

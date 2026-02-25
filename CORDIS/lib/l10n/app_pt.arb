@@ -146,6 +146,16 @@
   "@about": {"description": "About navigation tab"},
 
 
+  "unsavedChangesTitle": "Alterações Não Salvas",
+  "@unsavedChangesTitle": {"description": "Title for unsaved changes warning"},
+  "unsavedChangesMessage": "Você tem alterações não salvas. Tem certeza de que deseja sair sem salvar?",
+  "@unsavedChangesMessage": {"description": "Message for unsaved changes warning"},
+  "leaveWithoutSaving": "Sair sem Salvar",
+  "@leaveWithoutSaving": {"description": "Button label for leaving without saving"},
+  "stayOnPage": "Permanecer na Página",
+  "@stayOnPage": {"description": "Button label for staying on the page"},
+
+
   "cipher": "Cifra",
   "@cipher": {"description": "Cipher/Song label"},
   "title": "Título",

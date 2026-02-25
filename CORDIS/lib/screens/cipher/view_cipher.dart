@@ -223,7 +223,9 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close),
-                  onPressed: context.read<NavigationProvider>().pop,
+                  onPressed: () {
+                    context.read<NavigationProvider>().attemptPop(context);
+                  },
                 ),
               ],
             ),

@@ -217,8 +217,8 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   ),
 
                   /// CONTENT
-                  Builder(
-                    builder: (context) {
+                  LayoutBuilder(
+                    builder: (context, constraints) {
                       final contentTokens = _tokenizer.organize(tokens);
 
                       for (var line in contentTokens) {
@@ -244,11 +244,16 @@ class _TokenContentCardState extends State<TokenContentCard> {
                         _isEnabled(selectionProvider),
                       );
 
-                      final content = _tokenizer.positionWidgets(
+                      final positionedWidgets = _tokenizer.positionWidgets(
                         context,
                         contentWidgets,
                         lineSpacing: 15,
                         letterSpacing: 0,
+                      );
+
+                      final content = _tokenizer.checkHumongousWords(
+                        context,
+                        positionedWidgets,
                       );
 
                       return Padding(

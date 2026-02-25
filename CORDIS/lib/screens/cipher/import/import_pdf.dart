@@ -78,7 +78,7 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                 ),
                 leading: BackButton(
                   onPressed: () {
-                    navigationProvider.pop();
+                    navigationProvider.attemptPop(context);
                   },
                 ),
               ),
@@ -293,7 +293,7 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                           text: AppLocalizations.of(context)!.cancel,
                           onPressed: () {
                             importProvider.clearCache();
-                            navigationProvider.pop();
+                            navigationProvider.attemptPop(context);
                           },
                         ),
                       ],

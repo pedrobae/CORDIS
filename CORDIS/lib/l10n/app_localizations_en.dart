@@ -219,6 +219,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about => 'About';
 
   @override
+  String get unsavedChangesTitle => 'Unsaved Changes';
+
+  @override
+  String get unsavedChangesMessage =>
+      'You have unsaved changes. Are you sure you want to leave without saving?';
+
+  @override
+  String get leaveWithoutSaving => 'Leave without Saving';
+
+  @override
+  String get stayOnPage => 'Stay on Page';
+
+  @override
   String get cipher => 'Song';
 
   @override

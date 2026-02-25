@@ -1,12 +1,12 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/Users/andre/Documents/DEV/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/andre/Documents/CORDIS/CORDIS"
+export "FLUTTER_ROOT=C:\Users\ester\dev\flutter"
+export "FLUTTER_APPLICATION_PATH=C:\Users\ester\cipherApp\CORDIS"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
-export "FLUTTER_TARGET=lib/main.dart"
+export "FLUTTER_TARGET=lib\main.dart"
 export "FLUTTER_BUILD_DIR=build"
-export "FLUTTER_BUILD_NAME=1.0.0"
-export "FLUTTER_BUILD_NUMBER=4"
+export "FLUTTER_BUILD_NAME=1.1.0"
+export "FLUTTER_BUILD_NUMBER=5"
 export "DART_OBFUSCATION=false"
 export "TRACK_WIDGET_CREATION=true"
 export "TREE_SHAKE_ICONS=false"

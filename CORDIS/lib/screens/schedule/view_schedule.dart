@@ -97,7 +97,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                   title: Text(AppLocalizations.of(context)!.loading),
                   leading: BackButton(
                     onPressed: () {
-                      navigationProvider.pop();
+                      navigationProvider.attemptPop(context);
                     },
                   ),
                 ),
@@ -113,7 +113,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                   title: Text(AppLocalizations.of(context)!.error),
                   leading: BackButton(
                     onPressed: () {
-                      navigationProvider.pop();
+                      navigationProvider.attemptPop(context);
                     },
                   ),
                 ),
@@ -165,7 +165,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                   title: Text(AppLocalizations.of(context)!.scheduleNotFound),
                   leading: BackButton(
                     onPressed: () {
-                      navigationProvider.pop();
+                      navigationProvider.attemptPop(context);
                     },
                   ),
                 ),
@@ -200,7 +200,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                 ),
                 leading: BackButton(
                   onPressed: () {
-                    navigationProvider.pop();
+                    navigationProvider.attemptPop(context);
                   },
                 ),
                 actions: [

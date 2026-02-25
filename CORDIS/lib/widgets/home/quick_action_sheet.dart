@@ -47,6 +47,7 @@ class QuickActionSheet extends StatelessWidget {
 
               // ACTIONS
               // DIRECT CREATION BUTTONS
+              /// create playlist
               FilledTextButton(
                 trailingIcon: Icons.chevron_right,
                 isDiscrete: true,
@@ -55,7 +56,10 @@ class QuickActionSheet extends StatelessWidget {
                 )!.createPlaceholder(AppLocalizations.of(context)!.playlist),
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the bottom sheet
-                  navigationProvider.navigateToRoute(NavigationRoute.playlists);
+                  navigationProvider.attemptPop(
+                    context,
+                    route: NavigationRoute.playlists,
+                  );
                   navigationProvider.push(
                     EditPlaylistScreen(),
                     showBottomNavBar: true,
@@ -70,7 +74,10 @@ class QuickActionSheet extends StatelessWidget {
                 )!.addPlaceholder(AppLocalizations.of(context)!.cipher),
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the bottom sheet
-                  navigationProvider.navigateToRoute(NavigationRoute.library);
+                  navigationProvider.attemptPop(
+                    context,
+                    route: NavigationRoute.library,
+                  );
                   navigationProvider.push(
                     EditCipherScreen(
                       cipherID: -1,
@@ -87,11 +94,15 @@ class QuickActionSheet extends StatelessWidget {
                 text: AppLocalizations.of(context)!.assignSchedule,
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the bottom sheet
-                  navigationProvider.navigateToRoute(NavigationRoute.schedule);
+                  navigationProvider.attemptPop(
+                    context,
+                    route: NavigationRoute.schedule,
+                  );
                   selectionProvider.enableSelectionMode();
                   navigationProvider.push(
                     CreateScheduleScreen(creationStep: 1),
                     showBottomNavBar: true,
+                    interceptPop: true,
                     onPopCallback: () {
                       selectionProvider.disableSelectionMode();
                     },
@@ -107,7 +118,9 @@ class QuickActionSheet extends StatelessWidget {
                   navigationProvider.push(
                     ShareCodeScreen(
                       onBack: (_) {
-                        navigationProvider.pop(); // Close the share code screen
+                        navigationProvider.attemptPop(
+                          context,
+                        ); // Close the share code screen
                       },
                       onSuccess: (_) {
                         navigationProvider.pop(); // Close the share code screen

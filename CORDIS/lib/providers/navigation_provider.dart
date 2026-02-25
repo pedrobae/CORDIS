@@ -3,6 +3,7 @@ import 'package:cordis/screens/home_screen.dart';
 import 'package:cordis/screens/cipher/cipher_library.dart';
 import 'package:cordis/screens/playlist/playlist_library.dart';
 import 'package:cordis/screens/schedule/schedule_library.dart';
+import 'package:cordis/widgets/common/unsaved_changes_warning.dart';
 import 'package:flutter/material.dart';
 
 enum NavigationRoute { home, library, playlists, schedule }
@@ -15,6 +16,7 @@ class NavigationProvider extends ChangeNotifier {
   static final List<bool> _showDrawerIconStack = [];
   static final List<bool> _showBottomNavBarStack = [];
   static final List<bool> _showFABStack = [];
+  static final List<bool> _popInterceptorStack = [];
 
   static final List<VoidCallback> _onPopCallbacks = [];
 
@@ -73,10 +75,46 @@ class NavigationProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  /// USED BY THE MAIN SCREEN TO NAVIGATE BETWEEN CONTENT TABS
+  ///
+  Future<void> attemptPop(
+    BuildContext context, {
+    NavigationRoute? route,
+  }) async {
+    if (_popInterceptorStack.isNotEmpty && _popInterceptorStack.last) {
+      // If the top of the pop interceptor stack is true, show the unsaved changes warning
+      showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(),
+            child: UnsavedChangesWarning(
+              onDiscard: () {
+                Navigator.of(context).pop(); // Close the warning
+                if (route != null) {
+                  _navigateToRoute(route);
+                } else {
+                  pop();
+                }
+              },
+              onCancel: () {
+                Navigator.of(context).pop(); // Just close the warning
+              },
+            ),
+          ),
+        ),
+      );
+    } else {
+      if (route != null) {
+        _navigateToRoute(route);
+      } else {
+        pop();
+      }
+    }
+  }
 
+  /// USED BY THE MAIN SCREEN TO NAVIGATE BETWEEN CONTENT TABS
   // Navigation methods following your provider pattern
-  void navigateToRoute(NavigationRoute route) {
+  void _navigateToRoute(NavigationRoute route) {
     _currentRoute = route;
     _screenOnForeground =
         null; // Clear any foreground screen when navigating to a new route
@@ -85,6 +123,7 @@ class NavigationProvider extends ChangeNotifier {
     _showDrawerIconStack.clear();
     _showBottomNavBarStack.clear();
     _showFABStack.clear();
+    _popInterceptorStack.clear();
 
     // Clear onPop callbacks
     while (_onPopCallbacks.isNotEmpty) {
@@ -103,6 +142,7 @@ class NavigationProvider extends ChangeNotifier {
     bool showBottomNavBar = false,
     bool showFAB = false,
     VoidCallback? onPopCallback,
+    bool interceptPop = false,
   }) {
     _screenStack.add(screen);
     _showAppBarStack.add(showAppBar);
@@ -110,6 +150,7 @@ class NavigationProvider extends ChangeNotifier {
     _showBottomNavBarStack.add(showBottomNavBar);
     _showFABStack.add(showFAB);
     _onPopCallbacks.add(onPopCallback ?? () {});
+    _popInterceptorStack.add(interceptPop);
     notifyListeners();
   }
 
@@ -125,14 +166,10 @@ class NavigationProvider extends ChangeNotifier {
     bool showBottomNavBar = false,
     bool showFAB = false,
     VoidCallback? onPopCallback,
+    bool interceptPop = false,
   }) {
     if (_screenStack.isNotEmpty) {
-      _screenStack.removeLast();
-      _showAppBarStack.removeLast();
-      _showDrawerIconStack.removeLast();
-      _showBottomNavBarStack.removeLast();
-      _showFABStack.removeLast();
-      _onPopCallbacks.removeLast();
+      pop();
     }
     push(
       screen,
@@ -140,6 +177,7 @@ class NavigationProvider extends ChangeNotifier {
       showDrawerIcon: showDrawerIcon,
       showBottomNavBar: showBottomNavBar,
       onPopCallback: onPopCallback,
+      interceptPop: interceptPop,
     );
   }
 
@@ -162,8 +200,11 @@ class NavigationProvider extends ChangeNotifier {
       _showDrawerIconStack.removeLast();
       _showBottomNavBarStack.removeLast();
       _showFABStack.removeLast();
+      _popInterceptorStack.removeLast();
       notifyListeners();
+      return;
     }
+    return;
   }
 
   // Error handling following your provider pattern

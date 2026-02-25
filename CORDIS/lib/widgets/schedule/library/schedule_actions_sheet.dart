@@ -61,7 +61,7 @@ class ScheduleActionsSheet extends StatelessWidget {
                       navigationProvider.push(
                         CreateScheduleScreen(creationStep: 1),
                         showBottomNavBar: true,
-
+                        interceptPop: true,
                         onPopCallback: () {
                           selectionProvider.disableSelectionMode();
                         },
@@ -78,7 +78,7 @@ class ScheduleActionsSheet extends StatelessWidget {
                       navigationProvider.push(
                         ShareCodeScreen(
                           onBack: (_) {
-                            navigationProvider.pop();
+                            navigationProvider.attemptPop(context);
                           },
                           onSuccess: (_) {
                             navigationProvider
