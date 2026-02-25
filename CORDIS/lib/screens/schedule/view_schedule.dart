@@ -92,7 +92,8 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
             // LOADING STATE
             if (localScheduleProvider.isLoading ||
                 cloudScheduleProvider.isLoading ||
-                cloudScheduleProvider.isSyncing) {
+                (isCloud &&
+                    cloudScheduleProvider.isSyncing(widget.scheduleId))) {
               return Scaffold(
                 appBar: AppBar(
                   title: Text(AppLocalizations.of(context)!.loading),

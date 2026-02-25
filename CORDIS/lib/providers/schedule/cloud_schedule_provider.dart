@@ -18,7 +18,7 @@ class CloudScheduleProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   bool _isSaving = false;
-  Map<String, bool> _isSyncing = {};
+  final Map<String, bool> _isSyncing = {};
 
   // ===== GETTERS =====
   Map<String, ScheduleDto> get schedules => _schedules;
