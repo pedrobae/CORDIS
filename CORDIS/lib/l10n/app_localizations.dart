@@ -338,6 +338,30 @@ abstract class AppLocalizations {
   /// **'Por favor, tente novamente ou solicite uma nova.'**
   String get forgotPasswordSuffix;
 
+  /// Title for password reset screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Redefinição de Senha'**
+  String get passwordResetTitle;
+
+  /// Instructions for resetting password
+  ///
+  /// In pt, this message translates to:
+  /// **'Insira seu endereço de e-mail para receber um e-mail de redefinição de senha, depois siga as instruções para redefinir sua senha.'**
+  String get passwordResetInstructions;
+
+  /// Confirmation message when password reset email is sent
+  ///
+  /// In pt, this message translates to:
+  /// **'Um e-mail de redefinição de senha foi enviado para {email}.'**
+  String passwordResetEmailSent(Object email);
+
+  /// Instruction to check spam folder for password reset email
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, verifique sua pasta de spam se você não encontrar o e-mail na sua caixa de entrada.'**
+  String get checkSpamFolder;
+
   /// Tooltip for show password action
   ///
   /// In pt, this message translates to:
@@ -949,6 +973,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Selecionar {object}'**
   String selectPlaceholder(Object object);
+
+  /// Send object button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar {object}'**
+  String sendPlaceholder(Object object);
 
   /// Tooltip for duplicate action
   ///

@@ -135,6 +135,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotPasswordSuffix => 'Please try again or Request a new one.';
 
   @override
+  String get passwordResetTitle => 'Password Reset';
+
+  @override
+  String get passwordResetInstructions =>
+      'Enter your email address to receive a password reset email, then follow the instructions to reset your password.';
+
+  @override
+  String passwordResetEmailSent(Object email) {
+    return 'A password reset email has been sent to $email.';
+  }
+
+  @override
+  String get checkSpamFolder =>
+      'Please check your spam folder if you don\'t see the email in your inbox.';
+
+  @override
   String get showPassword => 'Show Password';
 
   @override
@@ -483,6 +499,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String selectPlaceholder(Object object) {
     return 'Select $object';
+  }
+
+  @override
+  String sendPlaceholder(Object object) {
+    return 'Send $object';
   }
 
   @override

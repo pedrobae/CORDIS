@@ -137,6 +137,22 @@ class AppLocalizationsPt extends AppLocalizations {
       'Por favor, tente novamente ou solicite uma nova.';
 
   @override
+  String get passwordResetTitle => 'Redefinição de Senha';
+
+  @override
+  String get passwordResetInstructions =>
+      'Insira seu endereço de e-mail para receber um e-mail de redefinição de senha, depois siga as instruções para redefinir sua senha.';
+
+  @override
+  String passwordResetEmailSent(Object email) {
+    return 'Um e-mail de redefinição de senha foi enviado para $email.';
+  }
+
+  @override
+  String get checkSpamFolder =>
+      'Por favor, verifique sua pasta de spam se você não encontrar o e-mail na sua caixa de entrada.';
+
+  @override
   String get showPassword => 'Mostrar Senha';
 
   @override
@@ -485,6 +501,11 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String selectPlaceholder(Object object) {
     return 'Selecionar $object';
+  }
+
+  @override
+  String sendPlaceholder(Object object) {
+    return 'Enviar $object';
   }
 
   @override

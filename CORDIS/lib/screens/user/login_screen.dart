@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/routes/app_routes.dart';
+import 'package:cordis/screens/user/password_reset_screen.dart';
 import 'package:cordis/screens/user/register_screen.dart';
 import 'package:cordis/screens/user/share_code_screen.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
@@ -93,25 +94,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          // TODO:auth - ResetPassword
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              backgroundColor: Colors.amberAccent,
-                              content: Text(
-                                'Funcionalidade em desenvolvimento,',
-                                style: TextStyle(color: Colors.black),
-                              ),
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return PasswordResetScreen(
+                                  loginEmail: _emailController.text,
+                                );
+                              },
                             ),
                           );
-                          // Navigator.of(context).push(
-                          //   MaterialPageRoute(
-                          //     builder: (context) {
-                          //       return PasswordResetScreen(
-                          //         loginEmail: _emailController.text,
-                          //       );
-                          //     },
-                          //   ),
-                          // );
                         },
                         child: Text(
                           AppLocalizations.of(context)!.forgotPassword,
