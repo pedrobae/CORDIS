@@ -23,10 +23,16 @@ class _CipherScrollViewState extends State<CipherScrollView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData(context));
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _loadData(context, isInitiating: true),
+    );
   }
 
-  void _loadData(BuildContext context, {bool forceReload = false}) async {
+  void _loadData(
+    BuildContext context, {
+    bool forceReload = false,
+    bool isInitiating = false,
+  }) async {
     final cipherProvider = context.read<CipherProvider>();
     final cloudVersionProvider = context.read<CloudVersionProvider>();
     final localVersionProvider = context.read<LocalVersionProvider>();
@@ -38,10 +44,17 @@ class _CipherScrollViewState extends State<CipherScrollView> {
       localCiphers: cipherProvider.ciphers.values.toList(),
     );
 
-    setState(() {
+    // On initial load, set localIds and cloudIds directly to avoid unnecessary setState calls
+    if (isInitiating) {
       localIds = cipherProvider.filteredCipherIds;
       cloudIds = cloudVersionProvider.filteredCloudVersionIds;
-    });
+    } else {
+      setState(() {
+        localIds = cipherProvider.filteredCipherIds;
+        cloudIds = cloudVersionProvider.filteredCloudVersionIds;
+      });
+
+    }
 
     for (var cipherId in localIds) {
       await localVersionProvider.loadVersionsOfCipher(cipherId);
