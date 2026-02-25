@@ -171,6 +171,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get profileSavedSuccessfully => 'Profile saved successfully!';
+
+  @override
   String get user => 'User';
 
   @override
@@ -223,7 +226,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unsavedChangesMessage =>
-      'You have unsaved changes. Are you sure you want to leave without saving?';
+      'Any changes you made will be lost. Are you sure you want to leave without saving?';
 
   @override
   String get leaveWithoutSaving => 'Leave without Saving';

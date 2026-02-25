@@ -398,6 +398,12 @@ abstract class AppLocalizations {
   /// **'A senha deve ter pelo menos {minLength} caracteres.'**
   String passwordTooShort(Object minLength);
 
+  /// Success message when profile is saved
+  ///
+  /// In pt, this message translates to:
+  /// **'Perfil salvo com sucesso!'**
+  String get profileSavedSuccessfully;
+
   /// User related messages
   ///
   /// In pt, this message translates to:
@@ -503,7 +509,7 @@ abstract class AppLocalizations {
   /// Message for unsaved changes warning
   ///
   /// In pt, this message translates to:
-  /// **'Você tem alterações não salvas. Tem certeza de que deseja sair sem salvar?'**
+  /// **'Qualquer alteração feita será perdida. Tem certeza de que deseja sair sem salvar?'**
   String get unsavedChangesMessage;
 
   /// Button label for leaving without saving

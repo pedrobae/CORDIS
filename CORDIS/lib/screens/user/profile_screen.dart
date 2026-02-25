@@ -173,8 +173,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     FilledTextButton(
                       text: AppLocalizations.of(context)!.save,
                       isDark: true,
-                      onPressed: () {
-                        userProvider.save(authProvider.id!);
+                      onPressed: () async {
+                        await userProvider.save(authProvider.id!);
+                        if ((userProvider.error == null ||
+                                userProvider.error!.isEmpty) &&
+                            context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.profileSavedSuccessfully,
+                              ),
+                            ),
+                          );
+                        }
                       },
                     ),
                     FilledTextButton(
@@ -187,9 +200,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     TextButton(
-                      onPressed: () {
-                        authProvider.deleteAccount();
-                        if (authProvider.error == null) {
+                      onPressed: () async {
+                        await authProvider.deleteAccount();
+                        if (authProvider.error == null && context.mounted) {
                           userProvider.deleteUserData(authProvider.id!);
                         }
                       },

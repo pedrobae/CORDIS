@@ -173,6 +173,9 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get profileSavedSuccessfully => 'Perfil salvo com sucesso!';
+
+  @override
   String get user => 'Usuário';
 
   @override
@@ -225,7 +228,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get unsavedChangesMessage =>
-      'Você tem alterações não salvas. Tem certeza de que deseja sair sem salvar?';
+      'Qualquer alteração feita será perdida. Tem certeza de que deseja sair sem salvar?';
 
   @override
   String get leaveWithoutSaving => 'Sair sem Salvar';

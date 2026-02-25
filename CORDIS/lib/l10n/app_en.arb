@@ -108,6 +108,9 @@
   "passwordTooShort": "Password must be at least {minLength} characters.",
   "@passwordTooShort": {"description": "Validation message for short password", "placeholders": {"minLength": {}}},
 
+  "profileSavedSuccessfully": "Profile saved successfully!",
+  "@profileSavedSuccessfully": {"description": "Success message when profile is saved"},
+
   "user": "User",
   "@user": {"description": "User related messages"},
   "username": "Username",
@@ -146,7 +149,7 @@
 
   "unsavedChangesTitle": "Unsaved Changes",
   "@unsavedChangesTitle": {"description": "Title for unsaved changes warning"},
-  "unsavedChangesMessage": "You have unsaved changes. Are you sure you want to leave without saving?",
+  "unsavedChangesMessage": "Any changes you made will be lost. Are you sure you want to leave without saving?",
   "@unsavedChangesMessage": {"description": "Message for unsaved changes warning"},
   "leaveWithoutSaving": "Leave without Saving",
   "@leaveWithoutSaving": {"description": "Button label for leaving without saving"},
