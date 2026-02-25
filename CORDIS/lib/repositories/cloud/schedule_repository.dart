@@ -47,19 +47,20 @@ class CloudScheduleRepository {
     String firebaseUserId, {
     bool forceFetch = false,
   }) async {
-    final now = DateTime.now().toUtc();
+    /// DISABLED CACHE FOR NOW, DUE TO SYNCING ISSUES, REFACTOR IF NEEDED IN THE FUTURE
+    // final now = DateTime.now().toUtc();
 
-    final (lastLoad, cachedSchedules) = await getCache(firebaseUserId);
+    // final (lastLoad, cachedSchedules) = await getCache(firebaseUserId);
 
-    if (!forceFetch &&
-        now.isBefore(
-          (lastLoad).add(Duration(days: 7)), // CHECK FOR NEW SCHEDULES WEEKLY
-        )) {
-      if (cachedSchedules.isNotEmpty) {
-        debugPrint('LOADING CACHED SCHEDULES FOR USER $firebaseUserId.');
-        return cachedSchedules;
-      }
-    }
+    // if (!forceFetch &&
+    //     now.isBefore(
+    //       (lastLoad).add(Duration(days: 7)), // CHECK FOR NEW SCHEDULES WEEKLY
+    //     )) {
+    //   if (cachedSchedules.isNotEmpty) {
+    //     debugPrint('LOADING CACHED SCHEDULES FOR USER $firebaseUserId.');
+    //     return cachedSchedules;
+    //   }
+    // }
     return await _withErrorHandling('fetch_user_schedules', () async {
       final querySnapshot = await _firestoreService
           .fetchDocumentsContainingValue(
@@ -77,11 +78,11 @@ class CloudScheduleRepository {
       }
 
       debugPrint(
-        'FETCHED ${schedules.length} SCHEDULES FOR USER $firebaseUserId FROM CLOUD.',
+        'FIRESTORE - fetched ${schedules.length} schedules - USER $firebaseUserId',
       );
 
-      await _cacheService.saveCloudSchedules(schedules, firebaseUserId);
-      await _cacheService.saveLastScheduleLoad(now);
+      // await _cacheService.saveCloudSchedules(schedules, firebaseUserId);
+      // await _cacheService.saveLastScheduleLoad(now);
 
       return schedules;
     });
