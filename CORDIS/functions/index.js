@@ -8,9 +8,26 @@ const {beforeUserCreated} = require("firebase-functions/v2/identity");
 setGlobalOptions({maxInstances: 5});
 
 const functions = require("firebase-functions");
+const nodemailer = require("nodemailer");
 const admin = require("firebase-admin");
+const {SecretManagerServiceClient} = require("@google-cloud/secret-manager");
 
 admin.initializeApp();
+
+// Helper function to retrieve secrets from Secret Manager
+async function getSecret(secretName) {
+  const client = new SecretManagerServiceClient();
+  const projectId = process.env.GCLOUD_PROJECT;
+  const name = `projects/${projectId}/secrets/${secretName}/versions/latest`;
+
+  try {
+    const [version] = await client.accessSecretVersion({name});
+    return version.payload.data.toString("utf8");
+  } catch (error) {
+    console.error(`Error accessing secret ${secretName}:`, error);
+    throw error;
+  }
+}
 
 
 // === ADMIN FUNCTIONS ===
@@ -223,6 +240,74 @@ exports.joinScheduleWithCode = onCall(async (request) => {
         "internal",
         "Failed to join schedule",
         error,
+    );
+  }
+});
+
+// === EMAIL INVITATIONS ===
+// Send invitation emails to users for a schedule
+exports.sendInviteEmail = onCall(async (request) => {
+  // Authentication required
+  if (!request.auth) {
+    throw new functions.https.HttpsError(
+        "unauthenticated",
+        "Must be authenticated to send invites.",
+    );
+  }
+
+  const {email, userName, roleName, scheduleTitle} = request.data;
+
+  // Validate input
+  if (!email || !roleName || !scheduleTitle) {
+    throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Email, role name, and schedule title are required.",
+    );
+  }
+
+  try {
+    // Retrieve secrets from Google Cloud Secret Manager
+    const emailUser = await getSecret("EMAIL_USER");
+    const emailPassword = await getSecret("EMAIL_PASSWORD");
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: emailUser,
+        pass: emailPassword,
+      },
+    });
+
+    // Build the email content
+    const emailHtml = `
+      <p>Hi ${userName || "there"},</p>
+      <h2>${scheduleTitle}</h2>
+      <p>You have been invited to perform as <strong>${roleName}</strong></p>
+      <p>Please log in to our app to accept this invitation.</p>
+    `;
+
+    const mailOptions = {
+      from: emailUser,
+      to: email,
+      subject: `Invitation: ${scheduleTitle} - ${roleName}`,
+      html: emailHtml,
+    };
+
+    // Send the email
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Email sent to ${email}: ${info.response}`);
+
+    return {
+      success: true,
+      message: `Invitation sent to ${email}`,
+    };
+  } catch (error) {
+    console.error("Error sending invite email:", error);
+
+    throw new functions.https.HttpsError(
+        "internal",
+        "Failed to send invitation email",
+        error.message,
     );
   }
 });
