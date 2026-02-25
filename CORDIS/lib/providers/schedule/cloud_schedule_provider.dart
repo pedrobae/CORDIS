@@ -18,7 +18,7 @@ class CloudScheduleProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   bool _isSaving = false;
-  bool _isSyncing = false;
+  Map<String, bool> _isSyncing = {};
 
   // ===== GETTERS =====
   Map<String, ScheduleDto> get schedules => _schedules;
@@ -27,7 +27,7 @@ class CloudScheduleProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
-  bool get isSyncing => _isSyncing;
+  bool isSyncing(String scheduleID) => _isSyncing[scheduleID] ?? false;
 
   List<String> get filteredScheduleIds {
     if (_searchTerm.isEmpty) {
@@ -132,7 +132,6 @@ class CloudScheduleProvider extends ChangeNotifier {
 
     _isLoading = true;
     _error = null;
-    _isSyncing = true;
     notifyListeners();
 
     try {
@@ -150,8 +149,12 @@ class CloudScheduleProvider extends ChangeNotifier {
 
       for (var schedule in schedules) {
         if (schedule.ownerFirebaseId == userId) {
+          _isSyncing[schedule.firebaseId!] = true;
+          notifyListeners();
           await _syncService.syncToLocal(schedule);
           _schedules.remove(schedule.firebaseId!);
+          _isSyncing[schedule.firebaseId!] = false;
+          notifyListeners();
         }
       }
     } catch (e) {
@@ -159,7 +162,6 @@ class CloudScheduleProvider extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
-      _isSyncing = false;
       notifyListeners();
     }
   }
