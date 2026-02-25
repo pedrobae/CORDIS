@@ -92,6 +92,7 @@ class VersionCardActionsSheet extends StatelessWidget {
                           playlistID: playlistID,
                           isEnabled: false,
                         ),
+                        interceptPop: true,
                         showBottomNavBar: true,
                       );
                       Navigator.of(context).pop();

@@ -79,6 +79,7 @@ class CipherCardActionsSheet extends StatelessWidget {
                           versionID: versionProvider
                               .getIdOfOldestVersionOfCipher(cipherId),
                         ),
+                        interceptPop: true,
                         showBottomNavBar: true,
                       );
                     },

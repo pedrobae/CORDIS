@@ -294,6 +294,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                       mode: EditScheduleMode.details,
                                       scheduleId: widget.scheduleId,
                                     ),
+                                    interceptPop: true,
                                     showBottomNavBar: true,
                                   );
                                 },
@@ -374,6 +375,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                     ViewPlaylistScreen(
                                       playlistId: playlist!.id,
                                     ),
+                                    interceptPop: true,
                                     showBottomNavBar: true,
                                   );
                                 },
@@ -439,6 +441,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                       mode: EditScheduleMode.roleMember,
                                       scheduleId: widget.scheduleId,
                                     ),
+                                    interceptPop: true,
                                     showBottomNavBar: true,
                                   );
                                 },

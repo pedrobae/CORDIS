@@ -229,7 +229,7 @@ class _CipherCardState extends State<CipherCard> {
                               isEnabled: false,
                             ),
                             showBottomNavBar: true,
-
+                            interceptPop: true,
                             onPopCallback: () {
                               selectionProvider.deselect(versionId);
                               selectionProvider.enableSelectionMode();
@@ -256,6 +256,7 @@ class _CipherCardState extends State<CipherCard> {
                               versionID: versionId,
                               versionType: VersionType.local,
                             ),
+                            interceptPop: true,
                             showBottomNavBar: true,
                           );
                         }

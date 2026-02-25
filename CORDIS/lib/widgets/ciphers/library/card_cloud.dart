@@ -130,6 +130,7 @@ class CloudCipherCard extends StatelessWidget {
                             isEnabled: false,
                             versionID: versionId,
                           ),
+                          interceptPop: true,
                           showBottomNavBar: true,
                         );
                       } else {

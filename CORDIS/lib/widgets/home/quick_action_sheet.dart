@@ -61,6 +61,7 @@ class QuickActionSheet extends StatelessWidget {
                     route: NavigationRoute.playlists,
                   );
                   navigationProvider.push(
+                    interceptPop: true,
                     EditPlaylistScreen(),
                     showBottomNavBar: true,
                   );
@@ -84,6 +85,7 @@ class QuickActionSheet extends StatelessWidget {
                       versionID: -1,
                       versionType: VersionType.brandNew,
                     ),
+                    interceptPop: true,
                     showBottomNavBar: true,
                   );
                 },

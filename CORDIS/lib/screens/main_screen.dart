@@ -237,12 +237,17 @@ class MainScreenState extends State<MainScreen> {
                 cipherID: -1,
                 versionType: VersionType.brandNew,
               ),
+              interceptPop: true,
               showBottomNavBar: true,
               onPopCallback: () => cipherProvider.clearNewCipherFromCache(),
             );
             break;
           case NavigationRoute.playlists:
-            navProvider.push(EditPlaylistScreen(), showBottomNavBar: true);
+            navProvider.push(
+              EditPlaylistScreen(),
+              interceptPop: true,
+              showBottomNavBar: true,
+            );
             break;
           case NavigationRoute.home:
           case NavigationRoute.schedule:

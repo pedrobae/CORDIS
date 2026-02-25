@@ -51,6 +51,7 @@ class PlaylistCard extends StatelessWidget {
                     ? null
                     : navigationProvider.push(
                         ViewPlaylistScreen(playlistId: playlistId),
+                        interceptPop: true,
                         showBottomNavBar: true,
                       );
               },
@@ -135,6 +136,7 @@ class PlaylistCard extends StatelessWidget {
                         onPressed: () {
                           navigationProvider.push(
                             ViewPlaylistScreen(playlistId: playlistId),
+                            interceptPop: true,
                             showBottomNavBar: true,
                           );
                         },

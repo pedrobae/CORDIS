@@ -280,6 +280,7 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                                   versionType: VersionType.import,
                                   versionID: -1,
                                 ),
+                                interceptPop: true,
                                 showBottomNavBar: true,
                               );
                             },
