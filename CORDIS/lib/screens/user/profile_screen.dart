@@ -6,6 +6,7 @@ import 'package:cordis/providers/user_provider.dart';
 import 'package:cordis/providers/app_info_provider.dart';
 import 'package:cordis/screens/user/new_password_screen.dart';
 import 'package:cordis/utils/locale.dart';
+import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/common/labeled_country_picker.dart';
 import 'package:cordis/widgets/common/labeled_language_picker.dart';
@@ -200,11 +201,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     TextButton(
-                      onPressed: () async {
-                        await authProvider.deleteAccount();
-                        if (authProvider.error == null && context.mounted) {
-                          userProvider.deleteUserData(authProvider.id!);
-                        }
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            return DeleteConfirmationSheet(
+                              itemType: AppLocalizations.of(context)!.account,
+                              onConfirm: () async {
+                                await authProvider.deleteAccount();
+                                if (authProvider.error == null &&
+                                    context.mounted) {
+                                  userProvider.deleteUserData(authProvider.id!);
+                                }
+                              },
+                            );
+                          },
+                        );
                       },
                       child: Container(
                         decoration: BoxDecoration(
