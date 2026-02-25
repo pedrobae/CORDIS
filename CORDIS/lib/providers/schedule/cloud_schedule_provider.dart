@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:cordis/repositories/cloud/schedule_repository.dart';
-import 'package:cordis/services/sync_schedule.dart';
+import 'package:cordis/services/sync_service.dart';
 import 'package:flutter/material.dart';
 
 class CloudScheduleProvider extends ChangeNotifier {
@@ -27,7 +27,7 @@ class CloudScheduleProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
-  bool isSyncing(String scheduleID) => _isSyncing[scheduleID] ?? false;
+  Map<String, bool> get syncingStatus => _isSyncing;
 
   List<String> get filteredScheduleIds {
     if (_searchTerm.isEmpty) {
@@ -149,9 +149,9 @@ class CloudScheduleProvider extends ChangeNotifier {
 
       for (var schedule in schedules) {
         if (schedule.ownerFirebaseId == userId) {
-          _isSyncing[schedule.firebaseId!] = true;
+          _isSyncing.addEntries([MapEntry(schedule.firebaseId!, true)]);
           notifyListeners();
-          await _syncService.syncToLocal(schedule);
+          await _syncService.scheduleToLocal(schedule);
           _schedules.remove(schedule.firebaseId!);
           _isSyncing[schedule.firebaseId!] = false;
           notifyListeners();

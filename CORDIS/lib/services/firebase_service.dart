@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:cordis/firebase_options.dart';
+import 'package:cordis/config/firebase_debug_config.dart';
 
 /// Central service for Firebase initialization and global access.
 class FirebaseService {
@@ -19,6 +21,26 @@ class FirebaseService {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+
+      // Initialize Firebase App Check
+      if (kDebugMode) {
+        // Use debug provider in development
+        await FirebaseAppCheck.instance.activate(
+          providerAndroid: AndroidDebugProvider(
+            debugToken: FirebaseDebugConfig.androidDebugToken,
+          ),
+          providerApple: AppleDebugProvider(
+            debugToken: FirebaseDebugConfig.iosDebugToken,
+          ),
+        );
+      } else {
+        // Use production providers in release
+        await FirebaseAppCheck.instance.activate(
+          providerAndroid: AndroidPlayIntegrityProvider(),
+          providerApple: AppleAppAttestProvider(),
+        );
+      }
+
       _initialized = true;
     }
   }

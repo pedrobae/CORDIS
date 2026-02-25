@@ -123,9 +123,9 @@ class PlaylistRepository {
     );
   }
 
-  /// Upserts playlist
+  /// Upserts playlist metadata
   /// Used for syncing playlists from cloud to local database
-  Future<int> upsertPlaylist(Playlist playlist) async {
+  Future<int> upsertPlaylistMetadata(Playlist playlist) async {
     final db = await _databaseHelper.database;
 
     // First, try to find existing playlist by name
@@ -339,7 +339,7 @@ class PlaylistRepository {
 
     final flowItemResults = await db.rawQuery(
       '''
-        SELECT id as content_id, position, duration
+        SELECT id as content_id, position, duration, firebase_id as firebase_id
         FROM flow_item
         WHERE playlist_id = ? 
         ORDER BY position ASC
@@ -351,11 +351,13 @@ class PlaylistRepository {
       final contentId = row['content_id'] as int;
       final position = row['position'] as int;
       final duration = Duration(seconds: row['duration'] as int);
+      final firebaseId = row['firebase_id'] as String;
 
       return PlaylistItem.flowItem(
         flowItemId: contentId,
         position: position,
         duration: duration,
+        flowItemFirebaseId: firebaseId,
       );
     }).toList();
   }
@@ -366,7 +368,7 @@ class PlaylistRepository {
 
     final versionResults = await db.rawQuery(
       '''
-        SELECT v.id as content_id, position, v.duration, pv.id
+        SELECT v.id as content_id, position, v.duration, pv.id, v.firebase_id as firebase_id
         FROM playlist_version AS pv JOIN version AS v ON pv.version_id = v.id
         WHERE playlist_id = ? 
         ORDER BY position ASC
@@ -377,6 +379,7 @@ class PlaylistRepository {
     return versionResults.map((row) {
       final id = row['id'] as int;
       final contentId = row['content_id'] as int;
+      final firebaseId = row['firebase_id'] as String?;
       final position = row['position'] as int;
       final duration = Duration(seconds: row['duration'] as int);
 
@@ -385,6 +388,7 @@ class PlaylistRepository {
         position: position,
         id: id,
         duration: duration,
+        versionFirebaseId: firebaseId,
       );
     }).toList();
   }

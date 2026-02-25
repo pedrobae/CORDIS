@@ -149,6 +149,25 @@ class PlaylistProvider extends ChangeNotifier {
     await loadPlaylist(id); // Reload just this playlist
   }
 
+  Future<void> addVersion(int playlistID, int versionId) async {
+    if (_isSaving) return;
+
+    _isSaving = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _playlistRepository.addVersionToPlaylist(playlistID, versionId);
+      // Update cache
+      await loadPlaylist(playlistID);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> updatePlaylistFromCache(int playlistId) async {
     if (_isSaving) return;
 

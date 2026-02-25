@@ -124,7 +124,6 @@ class ScheduleDto {
           true, // All schedules on firestore are considered published, access is controlled by share code and collaborators list
     );
 
-    // Adiciona os papéis ao agendamento
     for (var roleDto in roles) {
       final role = roleDto.toDomain();
       schedule.roles.add(role);

@@ -163,7 +163,7 @@ class FirestoreService {
       await _firestore
           .collection(collectionPath)
           .doc(documentId)
-          .set(data, SetOptions(merge: true));
+          .set(data, SetOptions(merge: merge));
     } catch (e) {
       FirebaseService.logError('Failed to set document', e);
       rethrow;

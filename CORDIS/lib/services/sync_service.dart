@@ -1,3 +1,4 @@
+import 'package:cordis/helpers/codes.dart';
 import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/models/domain/playlist/flow_item.dart';
@@ -30,7 +31,7 @@ class ScheduleSyncService {
   /// Sync owner's schedule to SQLite, so it can be accessed offline and edited
   /// Priority is given to the local version, so cloud diff are discarded,
   /// But if the schedule doesn't exist locally, or there are empty fields, it will be created/updated with the cloud version
-  Future<void> syncToLocal(ScheduleDto scheduleDto) async {
+  Future<void> scheduleToLocal(ScheduleDto scheduleDto) async {
     final ownerUser = await _userRepo.getUserByFirebaseId(
       scheduleDto.ownerFirebaseId,
     );
@@ -85,9 +86,13 @@ class ScheduleSyncService {
   }
 
   Future<int> syncPlaylist(PlaylistDto playlistDto, User ownerUser) async {
-    final playlistID = await _playlistRepo.upsertPlaylist(
+    final playlistID = await _playlistRepo.upsertPlaylistMetadata(
       playlistDto.toDomain(ownerUser.id!),
     );
+
+    final existingItems = (await _playlistRepo.getPlaylistById(
+      playlistID,
+    ))!.items;
 
     // Upsert each playlist Item in the playlist
     for (var item in playlistDto.getPlaylistItems()) {
@@ -101,14 +106,51 @@ class ScheduleSyncService {
               playlistId: playlistID,
             ),
           );
+          existingItems.remove(
+            existingItems.firstWhere(
+              (i) =>
+                  i.type == PlaylistItemType.flowItem &&
+                  i.firebaseContentId == item.firebaseContentId,
+              orElse: () => PlaylistItem(
+                type: PlaylistItemType.flowItem,
+                position: 0,
+                duration: Duration.zero,
+              ),
+            ),
+          );
           break;
         case PlaylistItemType.version:
           final versionDto = playlistDto.versions[item.firebaseContentId]!;
 
           await upsertPlaylistVersion(versionDto, playlistID);
+          existingItems.remove(
+            existingItems.firstWhere(
+              (i) =>
+                  i.type == PlaylistItemType.version &&
+                  i.firebaseContentId == item.firebaseContentId,
+              orElse: () => PlaylistItem(
+                type: PlaylistItemType.version,
+                position: 0,
+                duration: Duration.zero,
+              ),
+            ),
+          );
           break;
       }
     }
+
+    // Remove any versions from the playlist that are not in the cloud version
+    for (var item in existingItems) {
+      switch (item.type) {
+        case PlaylistItemType.flowItem:
+          await _flowRepo.deleteFlowItem(item.contentId!);
+          break;
+        case PlaylistItemType.version:
+          await _versionRepo.deleteVersion(item.contentId!);
+          break;
+      }
+    }
+
     return playlistID;
   }
 
@@ -169,8 +211,12 @@ class ScheduleSyncService {
     }
   }
 
+  /// =========================================================================
   /// Syncs changes to a published playlist into firestore
-  Future<void> syncToCloud(Schedule schedule, String ownerFirebaseID) async {
+  Future<void> scheduleToCloud(
+    Schedule schedule,
+    String ownerFirebaseID,
+  ) async {
     debugPrint(
       'Syncing schedule ${schedule.id} to cloud for owner $ownerFirebaseID',
     );
@@ -180,6 +226,7 @@ class ScheduleSyncService {
     ))!;
 
     // Build Item DTOs
+    final itemOrder = <String>[];
     final flowItems = <String, FlowItem>{};
     final versions = <String, VersionDto>{};
     for (var item in domainPlaylist.items) {
@@ -193,13 +240,18 @@ class ScheduleSyncService {
           final cipher = (await _cipherRepo.getCipherById(version.cipherId));
 
           if (cipher == null) break;
-          versions[item.contentId!.toString()] = version.toDto(cipher);
+
+          final firebaseID = version.firebaseId ?? generateFirebaseId();
+          versions[firebaseID] = version.toDto(cipher);
+          itemOrder.add('v:$firebaseID');
+
           break;
         case PlaylistItemType.flowItem:
           final flowItem = await (_flowRepo.getFlowItem(item.contentId!));
-          if (flowItem != null) {
-            flowItems[item.contentId!.toString()] = flowItem;
-          }
+
+          if (flowItem == null) break;
+          flowItems[flowItem.firebaseId] = flowItem;
+          itemOrder.add('f:${flowItem.firebaseId}');
           break;
       }
     }
@@ -207,7 +259,11 @@ class ScheduleSyncService {
     await _cloudRepo.updateSchedule(
       ownerFirebaseID,
       schedule.toDto(
-        domainPlaylist.toDto(flowItems: flowItems, versions: versions),
+        domainPlaylist.toDto(
+          itemOrder: itemOrder,
+          flowItems: flowItems,
+          versions: versions,
+        ),
       ),
     );
   }

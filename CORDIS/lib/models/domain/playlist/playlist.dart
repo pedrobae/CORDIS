@@ -1,7 +1,6 @@
 import 'package:cordis/models/domain/playlist/flow_item.dart';
 import 'package:cordis/models/dtos/playlist_dto.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
-import 'package:flutter/foundation.dart';
 import 'playlist_item.dart';
 
 class Playlist {
@@ -35,17 +34,13 @@ class Playlist {
   }
 
   PlaylistDto toDto({
+    required List<String> itemOrder,
     required Map<String, VersionDto> versions,
     required Map<String, FlowItem> flowItems,
   }) {
     return PlaylistDto(
       name: name,
-      itemOrder: items
-          .map(
-            (item) =>
-                '${item.type == PlaylistItemType.version ? 'v' : 't'}:${item.id}',
-          )
-          .toList(),
+      itemOrder: itemOrder,
       versions: versions,
       flowItems: flowItems.map(
         (key, item) => MapEntry(key, item.toFirestore()),
@@ -56,14 +51,8 @@ class Playlist {
   Playlist copyWith({
     int? id,
     String? name,
-    Duration? duration,
     int? createdBy,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    List<String>? collaborators,
-    String? shareCode,
     List<PlaylistItem>? items,
-    bool? isPublic,
   }) {
     return Playlist(
       id: id ?? this.id,
@@ -71,48 +60,5 @@ class Playlist {
       createdBy: createdBy ?? this.createdBy,
       items: items ?? this.items,
     );
-  }
-
-  Playlist removeItem(PlaylistItemType type, int contentId) {
-    final updatedItems = items
-        .where((item) => !(item.type == type && item.contentId == contentId))
-        .toList();
-
-    // Reorder remaining items
-    final reorderedItems = updatedItems
-        .asMap()
-        .entries
-        .map((entry) => entry.value.copyWith(position: entry.key))
-        .toList();
-
-    return copyWith(items: reorderedItems, updatedAt: DateTime.now());
-  }
-
-  // Helper to get text section IDs from items
-  List<int?> get textSectionIdsFromItems => items
-      .where((item) => item.isFlowItem)
-      .map((item) => item.contentId)
-      .toList();
-
-  List<PlaylistItem> get orderedItems {
-    final ordered = List<PlaylistItem>.from(items)
-      ..sort((a, b) => a.position.compareTo(b.position));
-    return ordered;
-  }
-
-  // Debug method for quick playlist inspection
-  void debugPrint() {
-    if (kDebugMode) {
-      print('=== Playlist Debug ===');
-      print('ID: $id | Name: $name');
-      print('Items: ${items.length}');
-      for (int i = 0; i < items.length; i++) {
-        final item = items[i];
-        print(
-          '  [$i] ${item.type} - ID: ${item.contentId} (order: ${item.position})',
-        );
-      }
-      print('======================');
-    }
   }
 }

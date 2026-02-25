@@ -1,3 +1,4 @@
+import 'package:cordis/helpers/codes.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/playlist/flow_item.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
@@ -93,7 +94,8 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
             if (localScheduleProvider.isLoading ||
                 cloudScheduleProvider.isLoading ||
                 (isCloud &&
-                    cloudScheduleProvider.isSyncing(widget.scheduleId))) {
+                    cloudScheduleProvider.syncingStatus[widget.scheduleId] ==
+                        true)) {
               return Scaffold(
                 appBar: AppBar(
                   title: Text(AppLocalizations.of(context)!.loading),
@@ -561,6 +563,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
     )!;
 
     // Build Item DTOs
+    final itemOrder = <String>[];
     final flowItems = <String, FlowItem>{};
     final versions = <String, VersionDto>{};
     for (var item in domainPlaylist.items) {
@@ -569,23 +572,43 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
           final version = localVersionProvider.cachedVersion(item.contentId!);
 
           if (version == null) break;
+          String firebaseId;
+          if (version.firebaseId == null) {
+            firebaseId = generateFirebaseId();
+            localVersionProvider.updateVersion(
+              version.copyWith(firebaseId: firebaseId),
+            );
+          } else {
+            firebaseId = version.firebaseId!;
+          }
+
           final cipher = cipherProvider.getCipherById(version.cipherId);
 
           if (cipher == null) break;
-          versions[item.id.toString()] = version.toDto(cipher);
+          versions['v:$firebaseId'] = version.toDto(cipher);
           break;
         case PlaylistItemType.flowItem:
           final flowItem = flowItemProvider.getFlowItem(item.contentId!);
-          if (flowItem != null) {
-            flowItems[item.id.toString()] = flowItem;
+          if (flowItem == null) break;
+
+          String firebaseId;
+          if (flowItem.firebaseId.isEmpty) {
+            firebaseId = generateFirebaseId();
+          } else {
+            firebaseId = flowItem.firebaseId;
           }
+          flowItems['f:$firebaseId'] = flowItem;
           break;
       }
     }
 
     cloudScheduleProvider.publishSchedule(
       domainSchedule.toDto(
-        domainPlaylist.toDto(flowItems: flowItems, versions: versions),
+        domainPlaylist.toDto(
+          itemOrder: itemOrder,
+          flowItems: flowItems,
+          versions: versions,
+        ),
       ),
     );
 

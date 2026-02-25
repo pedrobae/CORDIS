@@ -157,9 +157,9 @@ class CloudScheduleCard extends StatelessWidget {
                               ],
                             ),
                             Spacer(),
-                            if (cloudScheduleProvider.isSyncing(
-                              scheduleId,
-                            )) ...[
+                            if (cloudScheduleProvider
+                                    .syncingStatus[scheduleId] ==
+                                true) ...[
                               SizedBox(
                                 height: 35,
                                 width: 35,

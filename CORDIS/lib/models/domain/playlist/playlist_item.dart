@@ -45,12 +45,14 @@ class PlaylistItem {
     required int position,
     int? id,
     Duration? duration,
+    String? versionFirebaseId,
   }) : this(
          id: id,
          type: PlaylistItemType.version,
          contentId: versionId,
          position: position,
          duration: duration ?? Duration.zero,
+         firebaseContentId: versionFirebaseId,
        );
 
   PlaylistItem.flowItem({
@@ -58,12 +60,14 @@ class PlaylistItem {
     required int position,
     int? id,
     Duration? duration,
+    String? flowItemFirebaseId,
   }) : this(
          id: id,
          type: PlaylistItemType.flowItem,
          contentId: flowItemId,
          position: position,
          duration: duration ?? Duration.zero,
+         firebaseContentId: flowItemFirebaseId,
        );
 
   // Type checking helpers
@@ -72,6 +76,7 @@ class PlaylistItem {
   PlaylistItem copyWith({
     PlaylistItemType? type,
     int? contentId,
+    String? firebaseContentId,
     int? position,
     Duration? duration,
   }) {
@@ -79,6 +84,7 @@ class PlaylistItem {
       id: id,
       type: type ?? this.type,
       contentId: contentId ?? this.contentId,
+      firebaseContentId: firebaseContentId ?? this.firebaseContentId,
       position: position ?? this.position,
       duration: duration ?? this.duration,
     );

@@ -352,6 +352,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
         if (versionId.runtimeType == int) {
           // LOCAL VERSION: Create a copy of the version in the database
           versionId = await versionProvider.createVersion();
+          playlistProvider.addVersion(selectionProvider.targetId!, versionId);
         } else if (versionId.runtimeType == String) {
           // CLOUD VERSION: Upsert the version in the database
           int? localCipherID = widget.cipherID;

@@ -6,7 +6,7 @@ import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/screens/playlist/playlist_library.dart';
-import 'package:cordis/services/sync_schedule.dart';
+import 'package:cordis/services/sync_service.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/create_edit/details_form.dart';
@@ -208,7 +208,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
     await scheduleProvider.saveSchedule(widget.scheduleId);
     final schedule = scheduleProvider.getSchedule(widget.scheduleId)!;
     if (schedule.isPublic && mounted) {
-      await ScheduleSyncService().syncToCloud(
+      await ScheduleSyncService().scheduleToCloud(
         schedule,
         context.read<MyAuthProvider>().id!,
       );
@@ -238,7 +238,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
 
     final schedule = scheduleProvider.getSchedule(widget.scheduleId)!;
     if (schedule.isPublic && mounted) {
-      await ScheduleSyncService().syncToCloud(
+      await ScheduleSyncService().scheduleToCloud(
         schedule,
         context.read<MyAuthProvider>().id!,
       );
@@ -252,7 +252,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
     await scheduleProvider.saveSchedule(widget.scheduleId);
     final schedule = scheduleProvider.getSchedule(widget.scheduleId)!;
     if (schedule.isPublic && mounted) {
-      await ScheduleSyncService().syncToCloud(
+      await ScheduleSyncService().scheduleToCloud(
         schedule,
         context.read<MyAuthProvider>().id!,
       );

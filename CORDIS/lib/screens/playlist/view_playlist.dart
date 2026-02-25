@@ -10,7 +10,7 @@ import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
-import 'package:cordis/services/sync_schedule.dart';
+import 'package:cordis/services/sync_service.dart';
 
 import 'package:cordis/widgets/playlist/viewer/add_to_playlist_sheet.dart';
 
@@ -106,7 +106,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
                       if (schedule != null &&
                           schedule.scheduleState == ScheduleState.published) {
                         // If so, update the cloud version
-                        ScheduleSyncService().syncToCloud(
+                        ScheduleSyncService().scheduleToCloud(
                           schedule,
                           authProvider.id!,
                         );
