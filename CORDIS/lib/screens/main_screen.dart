@@ -21,7 +21,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
-  int _previousIndex = 0;
   late MyAuthProvider _authProvider;
 
   @override
@@ -56,8 +55,8 @@ class MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer3<MyAuthProvider, NavigationProvider, CipherProvider>(
       builder:
@@ -76,7 +75,7 @@ class MainScreenState extends State<MainScreen> {
                     ? SideMenu() //
                     : null,
                 bottomNavigationBar: navigationProvider.showBottomNavBar
-                    ? _buildBottomNavigationBar(colorScheme, navigationProvider)
+                    ? _buildBottomNavigationBar(colorScheme, textTheme, navigationProvider)
                     : null,
                 floatingActionButton: navigationProvider.showFAB
                     ? _buildFAB(colorScheme, navigationProvider, cipherProvider)
@@ -84,55 +83,30 @@ class MainScreenState extends State<MainScreen> {
                 body: SafeArea(
                   child: Builder(
                     builder: (context) {
-                      final currentIndex =
-                          navigationProvider.currentRoute.index;
-                      final direction = currentIndex > _previousIndex
-                          ? -1.0
-                          : 1.0;
-                      _previousIndex = currentIndex;
-
                       return AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 400),
-                          transitionBuilder: (child, animation) {
-                            final isNewScreen =
-                                child.key ==
-                                ValueKey(navigationProvider.currentRoute);
-                            final slideDirection = isNewScreen
-                                ? -direction
-                                : direction;
-
-                            return SlideTransition(
-                              position:
-                                  Tween<Offset>(
-                                    begin: Offset(slideDirection, 0),
-                                    end: Offset.zero,
-                                  ).animate(
-                                    CurvedAnimation(
-                                      parent: animation,
-                                      curve: Curves.easeInOutCubic,
-                                    ),
-                                  ),
-                              child: child,
-                            );
-                          },
-                          layoutBuilder: (currentChild, previousChildren) {
-                            return Stack(
-                              children: <Widget>[
-                                ...previousChildren,
-                                currentChild ?? const SizedBox.shrink(),
-                              ],
-                            );
-                          },
-                          child: KeyedSubtree(
-                            key: ValueKey(navigationProvider.currentRoute),
-                            child: navigationProvider.buildCurrentScreen(
-                              context,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                        duration: const Duration(milliseconds: 400),
+                        transitionBuilder: (child, animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        },
+                        layoutBuilder: (currentChild, previousChildren) {
+                          return Stack(
+                            children: <Widget>[
+                              ...previousChildren,
+                              currentChild ?? const SizedBox.shrink(),
+                            ],
+                          );
+                        },
+                        child: KeyedSubtree(
+                          key: ValueKey(navigationProvider.currentRoute),
+                          child: navigationProvider.buildCurrentScreen(context),
+                        ),
+                      );
+                    },
                   ),
+                ),
               ),
             );
           },
@@ -149,6 +123,7 @@ class MainScreenState extends State<MainScreen> {
 
   Container _buildBottomNavigationBar(
     ColorScheme colorScheme,
+    TextTheme textTheme,
     NavigationProvider navProvider,
   ) {
     return Container(
@@ -162,19 +137,8 @@ class MainScreenState extends State<MainScreen> {
       ),
       child: BottomNavigationBar(
         currentIndex: navProvider.currentRoute.index,
-        selectedLabelStyle: TextStyle(
-          color: colorScheme.primary,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-        unselectedLabelStyle: TextStyle(
-          color: colorScheme.onSurface,
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        elevation: 2,
+        type: BottomNavigationBarType.shifting,
+        selectedItemColor: colorScheme.primary,
         onTap: (index) {
           if (mounted) {
             navProvider.attemptPop(

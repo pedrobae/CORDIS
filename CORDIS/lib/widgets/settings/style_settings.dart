@@ -1,7 +1,6 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 
 class StyleSettings extends StatelessWidget {
@@ -72,73 +71,6 @@ class StyleSettings extends StatelessWidget {
                         tooltip: '$i coluna${i > 1 ? 's' : ''}',
                         onPressed: () => settings.setColumnCount(i),
                       ),
-                  ],
-                ),
-              ),
-              // CHORD COLOR SETTINGS
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(0),
-                  border: Border.all(
-                    color: colorScheme.surfaceContainerLowest,
-                    width: 1,
-                  ),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        AppLocalizations.of(context)!.chordColor,
-                        style: textTheme.labelLarge,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Color tempColor = settings.chordColor;
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Selecione a cor dos acordes'),
-                              content: SingleChildScrollView(
-                                child: ColorPicker(
-                                  pickerColor: settings.chordColor,
-                                  onColorChanged: (color) {
-                                    settings.setChordColor(color);
-                                  },
-                                  pickerAreaHeightPercent: 0.8,
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('Cancelar'),
-                                  onPressed: () {
-                                    settings.setChordColor(tempColor);
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: settings.chordColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
