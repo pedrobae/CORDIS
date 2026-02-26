@@ -227,6 +227,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about => 'About';
 
   @override
+  String get styleSettings => 'Style Settings';
+
+  @override
+  String get numberOfColumns => 'Number of Columns:';
+
+  @override
+  String get chordColor => 'Chord Color:';
+
+  @override
+  String get contentFilters => 'Content Filters';
+
+  @override
   String get unsavedChangesTitle => 'Unsaved Changes';
 
   @override
@@ -250,6 +262,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get musicKey => 'Key';
+
+  @override
+  String get originalKey => 'Original Key';
 
   @override
   String get bpm => 'Tempo (BPM)';
@@ -299,6 +314,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lyrics => 'Lyrics';
+
+  @override
+  String get chords => 'Chords';
+
+  @override
+  String get transitions => 'Transitions';
 
   @override
   String get sectionCode => 'Section Code';

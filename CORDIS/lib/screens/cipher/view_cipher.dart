@@ -7,9 +7,12 @@ import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/transposition_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/utils/section_constants.dart';
+import 'package:cordis/widgets/ciphers/transposer.dart';
 import 'package:cordis/widgets/ciphers/viewer/annotation_card.dart';
 import 'package:cordis/widgets/ciphers/viewer/section_card.dart';
 import 'package:cordis/widgets/ciphers/viewer/structure_list.dart';
+import 'package:cordis/widgets/settings/content/content_filters.dart';
+import 'package:cordis/widgets/settings/content/style_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +21,6 @@ import 'package:cordis/providers/layout_settings_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
-import 'package:cordis/widgets/settings/layout_settings.dart';
 
 class ViewCipherScreen extends StatefulWidget {
   final int? cipherID;
@@ -202,10 +204,6 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
             // ACTIONS
             Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.tune),
-                  onPressed: _showLayoutSettings,
-                ),
                 if (widget.versionType == VersionType.local)
                   IconButton(
                     icon: const Icon(Icons.edit),
@@ -221,6 +219,17 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                       );
                     },
                   ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.text_fields),
+                  onPressed: _showStyleSettings(),
+                ),
+                IconButton(
+                  icon: Icon(Icons.filter_alt),
+                  onPressed: _showFilters(),
+                ),
+                const Spacer(),
+                Transposer(),
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -355,26 +364,37 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
     }
   }
 
-  void _showLayoutSettings() {
-    showModalBottomSheet(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: LayoutSettings(
-              includeTransposer: true,
-              includeFilters: true,
-            ),
-          ),
-        ],
-      ),
-    );
+  VoidCallback _showStyleSettings() {
+    return () {
+      showModalBottomSheet(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return BottomSheet(
+            onClosing: () {},
+            builder: (context) => const StyleSettings(),
+          );
+        },
+      );
+    };
+  }
+
+  VoidCallback _showFilters() {
+    return () {
+      showModalBottomSheet(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return BottomSheet(
+            onClosing: () {},
+            builder: (context) {
+              return const ContentFilters();
+            },
+          );
+        },
+      );
+    };
   }
 }

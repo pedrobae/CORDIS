@@ -66,16 +66,10 @@
   "login": "Log In",
   "@login": {"description": "Login button label"},
   "signInTitle": "Sign in to CORDIS",
-  "@signInTitle": {
-    "description": "Title for sign in screen"
-  },
+  "@signInTitle": {"description": "Title for sign in screen"},
   "signInWithPlaceholder": "Sign in with {method}",
-  "@signInWithPlaceholder": {
-    "description": "Sign in with method placeholder",
-    "placeholders": {
-      "method": {}
-    }
-  },
+  "@signInWithPlaceholder": {"description": "Sign in with method placeholder", "placeholders": {"method": {}}},
+
   "logOut": "Sign Out",
   "@logOut": {"description": "Logout button label"},
   "deleteAccountRequest": "Request account deletion",
@@ -156,6 +150,16 @@
   "about": "About",
   "@about": {"description": "About navigation tab"},
 
+  "styleSettings": "Style Settings",
+  "@styleSettings": {"description": "Title for style settings section"},
+  "numberOfColumns": "Number of Columns:",
+  "@numberOfColumns": {"description": "Label for number of columns setting"},
+  "chordColor": "Chord Color:",
+  "@chordColor": {"description": "Label for chord color setting"},
+  "contentFilters": "Content Filters",
+  "@contentFilters": {"description": "Title for content filters settings section"},
+
+  
   "unsavedChangesTitle": "Unsaved Changes",
   "@unsavedChangesTitle": {"description": "Title for unsaved changes warning"},
   "unsavedChangesMessage": "Any changes you made will be lost. Are you sure you want to leave without saving?",
@@ -174,6 +178,8 @@
   "@author": {"description": "Song author field label"},
   "musicKey": "Key",
   "@musicKey": {"description": "Musical key field label"},
+  "originalKey": "Original Key",
+  "@originalKey": {"description": "Original musical key field label"},
   "bpm": "Tempo (BPM)",
   "@bpm": {"description": "Beats per minute field label"},
   "duration": "Duration",
@@ -183,7 +189,6 @@
   "tag": "Tag",
   "@tag": {"description": "Single tag label"},
   
-
 
   "version": "Version",
   "@version": {"description": "Version label"},
@@ -213,6 +218,10 @@
   "@noLyrics": {"description": "Prompt displayed when there are no lyrics in the section"},
   "lyrics": "Lyrics",
   "@lyrics": {"description": "Lyrics field label"},
+  "chords": "Chords",
+  "@chords": {"description": "Chords field label"},
+  "transitions": "Transitions",
+  "@transitions": {"description": "Transitions field label"},
   "sectionCode": "Section Code",
   "@sectionCode": {"description": "Section code field label"},  
   "sectionCodeHint": "e.g. V1, C, I, ...",

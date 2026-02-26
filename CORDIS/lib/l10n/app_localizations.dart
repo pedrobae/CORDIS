@@ -506,6 +506,30 @@ abstract class AppLocalizations {
   /// **'Sobre'**
   String get about;
 
+  /// Title for style settings section
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurações de Estilo'**
+  String get styleSettings;
+
+  /// Number of columns field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Número de Colunas:'**
+  String get numberOfColumns;
+
+  /// Label for chord color setting
+  ///
+  /// In pt, this message translates to:
+  /// **'Cor do Acorde:'**
+  String get chordColor;
+
+  /// Title for content filters settings section
+  ///
+  /// In pt, this message translates to:
+  /// **'Filtros de Conteúdo'**
+  String get contentFilters;
+
   /// Title for unsaved changes warning
   ///
   /// In pt, this message translates to:
@@ -553,6 +577,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Tom'**
   String get musicKey;
+
+  /// Original musical key field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Tom Original'**
+  String get originalKey;
 
   /// Beats per minute field label
   ///
@@ -649,6 +679,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Letra'**
   String get lyrics;
+
+  /// Chords field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Acordes'**
+  String get chords;
+
+  /// Transitions field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Transições'**
+  String get transitions;
 
   /// Section code field label
   ///

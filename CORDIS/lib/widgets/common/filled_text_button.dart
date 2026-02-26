@@ -31,6 +31,8 @@ class FilledTextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: isDisabled ? null : onPressed,
       onLongPress: isDisabled ? null : onLongPress,
@@ -79,7 +81,7 @@ class FilledTextButton extends StatelessWidget {
               ),
 
             // Text content
-            _buildTextContent(colorScheme),
+            _buildTextContent(colorScheme, textTheme),
 
             // Trailing icon
             if (trailingIcon != null)
@@ -103,7 +105,7 @@ class FilledTextButton extends StatelessWidget {
     );
   }
 
-  Widget _buildTextContent(ColorScheme colorScheme) {
+  Widget _buildTextContent(ColorScheme colorScheme, TextTheme textTheme) {
     final textWidget = Column(
       crossAxisAlignment: trailingIcon == null
           ? CrossAxisAlignment.center
@@ -111,9 +113,7 @@ class FilledTextButton extends StatelessWidget {
       children: [
         Text(
           text,
-          style: TextStyle(
-            fontSize: isDense ? 13 : 16,
-            fontWeight: isDense ? FontWeight.w500 : FontWeight.w400,
+          style: textTheme.labelMedium?.copyWith(
             color: isDisabled
                 ? colorScheme.shadow
                 : (isDangerous
@@ -126,9 +126,7 @@ class FilledTextButton extends StatelessWidget {
             softWrap: true,
             text: TextSpan(
               text: tooltip,
-              style: TextStyle(
-                fontSize: isDense ? 10 : 12,
-                fontWeight: FontWeight.w400,
+              style: textTheme.bodyMedium?.copyWith(
                 color: isDisabled
                     ? colorScheme.shadow
                     : (isDangerous

@@ -1,20 +1,15 @@
 import 'package:cordis/l10n/app_localizations.dart';
-import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/transposition_provider.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SelectKeySheet extends StatefulWidget {
-  final int? cipherID;
-  final dynamic versionID;
-  final VersionType versionType;
+  final bool needsSave;
 
   const SelectKeySheet({
     super.key,
-    this.cipherID,
-    this.versionID,
-    required this.versionType,
+    this.needsSave = true,
   });
 
   @override
@@ -82,10 +77,15 @@ class _SelectKeySheetState extends State<SelectKeySheet> {
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          if (selectedKey == key) {
-                            selectedKey = null;
+                          if (widget.needsSave) {
+                            if (selectedKey == key) {
+                              selectedKey = null;
+                            } else {
+                              selectedKey = key;
+                            }
                           } else {
-                            selectedKey = key;
+                            tp.setTransposedKey(key);
+                            Navigator.of(context).pop();
                           }
                         });
                       },
@@ -118,7 +118,7 @@ class _SelectKeySheetState extends State<SelectKeySheet> {
                   },
                 ),
               ),
-
+              if (widget.needsSave) ...[
               FilledTextButton(
                 text: AppLocalizations.of(context)!.save,
                 isDark: true,
@@ -126,7 +126,17 @@ class _SelectKeySheetState extends State<SelectKeySheet> {
                   tp.setTransposedKey(selectedKey);
                   Navigator.of(context).pop();
                 },
-              ),
+                ),
+              ] else ...[
+                FilledTextButton(
+                  text: AppLocalizations.of(context)!.originalKey,
+                  isDark: true,
+                  onPressed: () {
+                    tp.setTransposedKey(null);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
               SizedBox(),
             ],
           ),

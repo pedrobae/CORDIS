@@ -159,6 +159,16 @@
   "@about": {"description": "About navigation tab"},
 
 
+  "styleSettings": "Configurações de Estilo",
+  "@styleSettings": {"description": "Title for style settings section"},
+  "numberOfColumns": "Número de Colunas:",
+  "@numberOfColumns": {"description": "Number of columns field label"},
+  "chordColor": "Cor do Acorde:",
+  "@chordColor": {"description": "Label for chord color setting"},
+  "contentFilters": "Filtros de Conteúdo",
+  "@contentFilters": {"description": "Title for content filters settings section"},
+
+
   "unsavedChangesTitle": "Alterações Não Salvas",
   "@unsavedChangesTitle": {"description": "Title for unsaved changes warning"},
   "unsavedChangesMessage": "Qualquer alteração feita será perdida. Tem certeza de que deseja sair sem salvar?",
@@ -177,6 +187,8 @@
   "@author": {"description": "Song author field label"},
   "musicKey": "Tom",
   "@musicKey": {"description": "Musical key field label"},
+  "originalKey": "Tom Original",
+  "@originalKey": {"description": "Original musical key field label"},
   "bpm": "Tempo (BPM)",
   "@bpm": {"description": "Beats per minute field label"},
   "duration": "Duração",
@@ -213,6 +225,10 @@
   "@noLyrics": {"description": "Prompt displayed when there are no lyrics in the section"},
   "lyrics": "Letra",
   "@lyrics": {"description": "Lyrics field label"},
+  "chords": "Acordes",
+  "@chords": {"description": "Chords field label"},
+  "transitions": "Transições",
+  "@transitions": {"description": "Transitions field label"},
   "sectionCode": "Código da Seção",
   "@sectionCode": {"description": "Section code field label"},
   "sectionCodeHint": "ex.: V1, C, I, ...",

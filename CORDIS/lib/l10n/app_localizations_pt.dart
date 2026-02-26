@@ -229,6 +229,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get about => 'Sobre';
 
   @override
+  String get styleSettings => 'Configurações de Estilo';
+
+  @override
+  String get numberOfColumns => 'Número de Colunas:';
+
+  @override
+  String get chordColor => 'Cor do Acorde:';
+
+  @override
+  String get contentFilters => 'Filtros de Conteúdo';
+
+  @override
   String get unsavedChangesTitle => 'Alterações Não Salvas';
 
   @override
@@ -252,6 +264,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get musicKey => 'Tom';
+
+  @override
+  String get originalKey => 'Tom Original';
 
   @override
   String get bpm => 'Tempo (BPM)';
@@ -301,6 +316,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get lyrics => 'Letra';
+
+  @override
+  String get chords => 'Acordes';
+
+  @override
+  String get transitions => 'Transições';
 
   @override
   String get sectionCode => 'Código da Seção';

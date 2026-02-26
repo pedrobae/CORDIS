@@ -359,9 +359,6 @@ class _MetadataTabState extends State<MetadataTab> {
               isScrollControlled: true,
               builder: (context) {
                 return SelectKeySheet(
-                  versionType: widget.versionType,
-                  cipherID: widget.cipherID,
-                  versionID: widget.versionID,
                 );
               },
             );
