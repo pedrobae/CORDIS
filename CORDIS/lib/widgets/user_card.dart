@@ -32,7 +32,7 @@ class UserCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: colorScheme.primaryContainer,
+                  backgroundColor: colorScheme.primary,
                   // photoURL, Initials fallback, Person Icon fallback
                   child: authProvider.photoURL != null
                       ? ClipOval(
@@ -53,7 +53,9 @@ class UserCard extends StatelessWidget {
                               .take(2)
                               .join()
                               .toUpperCase(),
-                          style: theme.textTheme.labelLarge,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: colorScheme.onPrimary,
+                          ),
                         )
                       : Icon(
                           Icons.person,

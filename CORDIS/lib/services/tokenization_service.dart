@@ -580,14 +580,23 @@ class TokenizationService {
         lineOffset++;
         currentX = 0;
       }
-
-      adjustedWidgets.add(
+      if (widget.child is Draggable) {
+        adjustedWidgets.add(
         Positioned(
           left: currentX,
-          top: lineOffset * lineHeight,
+            top: lineOffset * lineHeight,
           child: widget.child,
         ),
       );
+      } else {
+        adjustedWidgets.add(
+          Positioned(
+            left: currentX,
+            top: lineOffset * lineHeight + chordHeight,
+            child: widget.child,
+          ),
+        );
+      }
 
       currentX += widgetWidth;
     }
