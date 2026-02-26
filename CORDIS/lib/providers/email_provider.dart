@@ -31,6 +31,9 @@ class EmailProvider extends ChangeNotifier {
         if (selectedRoles.contains(role.name)) {
           for (var user in role.users) {
             try {
+              debugPrint(
+                '[EmailProvider] Sending invite to ${user.email} for role ${role.name}',
+              );
               await sendInviteEmail.call({
                 'email': user.email,
                 'userName': user.username,
@@ -39,11 +42,26 @@ class EmailProvider extends ChangeNotifier {
               });
               successCount++;
               debugPrint(
-                'Invitation sent to ${user.email} for role ${role.name}',
+                '[EmailProvider] Successfully sent invitation to ${user.email} for role ${role.name}',
               );
             } catch (e) {
               failureCount++;
-              debugPrint('Failed to send email to ${user.email}: $e');
+              debugPrint(
+                '[EmailProvider] FAILED to send email to ${user.email}',
+              );
+              debugPrint('[EmailProvider] Error type: ${e.runtimeType}');
+              debugPrint('[EmailProvider] Error message: $e');
+              if (e is FirebaseFunctionsException) {
+                debugPrint(
+                  '[EmailProvider] Firebase error code: ${e.code}',
+                );
+                debugPrint(
+                  '[EmailProvider] Firebase error details: ${e.details}',
+                );
+                debugPrint(
+                  '[EmailProvider] Firebase error message: ${e.message}',
+                );
+              }
             }
           }
         }

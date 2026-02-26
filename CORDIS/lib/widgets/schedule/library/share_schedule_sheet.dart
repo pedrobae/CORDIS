@@ -185,79 +185,46 @@ class _ShareScheduleSheetState extends State<ShareScheduleSheet> {
                       text: AppLocalizations.of(context)!.sendInvites,
                       isDark: true,
                       onPressed: () async {
-                        await emailProvider
-                            .sendInvites(schedule, selectedRoles)
-                            .then((bool success) {
-                              if (success && context.mounted) {
-                                showModalBottomSheet(
-                                  context: context,
-                                  builder: (context) {
-                                    return Container(
-                                      padding: EdgeInsets.all(16),
+                        final scaffoldMessenger = ScaffoldMessenger.of(context);
+                        final successfulMessage = AppLocalizations.of(
+                          context,
+                        )!.inviteSentSuccessfully;
+                        final failureMessage = AppLocalizations.of(context)!
+                            .errorMessage(
+                              AppLocalizations.of(context)!.sendInvites,
+                              emailProvider.error ?? 'Unknown error',
+                            );
+                        Navigator.of(context).pop();
 
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              IconButton(
-                                                icon: Icon(Icons.close),
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                          Icon(
-                                            Icons.check_circle,
-                                            color: Colors.green,
-                                            size: 64,
-                                          ),
-                                          Text(
-                                            AppLocalizations.of(
-                                              context,
-                                            )!.inviteSentSuccessfully,
-                                            style: textTheme.titleMedium,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          Text(
-                                            AppLocalizations.of(
-                                              context,
-                                            )!.emailInviteDescription,
-                                            style: textTheme.bodyMedium,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
-                              } else if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
+                        final bool success = await emailProvider.sendInvites(
+                          schedule,
+                          selectedRoles,
+                        );
+                        if (success) {
+                          scaffoldMessenger.showSnackBar(
+                            SnackBar(
+                              backgroundColor: colorScheme.primary,
+                              content: Text(
+                                successfulMessage,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onPrimary,
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          scaffoldMessenger.showSnackBar(
                                   SnackBar(
                                     backgroundColor: Colors.amber,
                                     content: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.errorMessage(
-                                        AppLocalizations.of(
-                                          context,
-                                        )!.sendInvites,
-                                        emailProvider.error!,
-                                      ),
-                                      style: textTheme.bodyMedium,
-                                    ),
-                                  ),
-                                );
-                              }
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                            });
+                                failureMessage,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurface,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
                       },
                     ),
                     SizedBox(height: 16),

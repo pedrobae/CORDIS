@@ -283,7 +283,7 @@ exports.sendInviteEmail = onCall(async (request) => {
       <p>Hi ${userName || "there"},</p>
       <h2>${scheduleTitle}</h2>
       <p>You have been invited to perform as <strong>${roleName}</strong></p>
-      <p>Please log in to our app to accept this invitation.</p>
+      <p>Please log in to our app or create an account with this email to accept this invitation.</p>
     `;
 
     const mailOptions = {
