@@ -19,16 +19,16 @@ class TranspositionProvider extends ChangeNotifier {
 
   List<String> get chordRoots => [
     'C',
-    useSharp ? 'C#' : 'Db',
+    useFlats ? 'Db' : 'C#',
     'D',
-    useSharp ? 'D#' : 'Eb',
+    useFlats ? 'Eb' : 'D#',
     'E',
     'F',
-    useSharp ? 'F#' : 'Gb',
+    useFlats ? 'Gb' : 'F#',
     'G',
-    useSharp ? 'G#' : 'Ab',
+    useFlats ? 'Ab' : 'G#',
     'A',
-    useSharp ? 'A#' : 'Bb',
+    useFlats ? 'Bb' : 'A#',
     'B',
   ];
 
@@ -49,7 +49,9 @@ class TranspositionProvider extends ChangeNotifier {
   String _originalKey = '';
   String? _transposedKey;
 
-  bool get useSharp => _transposedKey != null && _transposedKey! == 'F#';
+  bool get useFlats =>
+      _transposedKey != null && _transposedKey!.contains('b') ||
+      _transposedKey == 'F';
 
   int get _transposeValue {
     if (_transposedKey == null) return 0;
@@ -83,19 +85,19 @@ class TranspositionProvider extends ChangeNotifier {
   }
 
   void transposeUp() {
-    int index = chordRoots.indexOf(_transposedKey ?? _originalKey);
+    int index = keyList.indexOf(_transposedKey ?? _originalKey);
     if (index == -1) return;
-    int newIndex = (index + 1) % chordRoots.length;
-    _transposedKey = chordRoots[newIndex];
+    int newIndex = (index + 1) % keyList.length;
+    _transposedKey = keyList[newIndex];
     notifyListeners();
   }
 
   void transposeDown() {
-    int index = chordRoots.indexOf(_transposedKey ?? _originalKey);
+    int index = keyList.indexOf(_transposedKey ?? _originalKey);
     if (index == -1) return;
     int newIndex = index - 1;
-    if (newIndex < 0) newIndex += chordRoots.length;
-    _transposedKey = chordRoots[newIndex];
+    if (newIndex < 0) newIndex += keyList.length;
+    _transposedKey = keyList[newIndex];
     notifyListeners();
   }
 
@@ -105,7 +107,7 @@ class TranspositionProvider extends ChangeNotifier {
     String remainingSuffix = '';
 
     // Find the longest matching root (handles both C# and C correctly)
-    for (final r in chordRoots) {
+    for (final r in _allRoots) {
       if (chord.startsWith(r)) {
         root = r;
         remainingSuffix = chord.substring(r.length);
@@ -136,7 +138,7 @@ class TranspositionProvider extends ChangeNotifier {
     String transposedRoot = ChordHelper().transpose(
       root,
       _transposeValue,
-      useFlats: !useSharp,
+      useFlats: useFlats,
     );
     String result = transposedRoot + chordSuffix;
 
@@ -144,7 +146,7 @@ class TranspositionProvider extends ChangeNotifier {
       String transposedBass = ChordHelper().transpose(
         bass,
         _transposeValue,
-        useFlats: !useSharp,
+        useFlats: useFlats,
       );
       result += '/$transposedBass';
     }
