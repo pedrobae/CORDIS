@@ -82,23 +82,16 @@ class MainScreenState extends State<MainScreen> {
                     ? _buildFAB(colorScheme, navigationProvider, cipherProvider)
                     : null,
                 body: SafeArea(
-                  child: GestureDetector(
-                    onHorizontalDragEnd: (details) {
-                      // iOS back gesture (swipe from left edge)
-                      if (details.velocity.pixelsPerSecond.dx > 300) {
-                        navigationProvider.attemptPop(context);
-                      }
-                    },
-                    child: Builder(
-                      builder: (context) {
-                        final currentIndex =
-                            navigationProvider.currentRoute.index;
-                        final direction = currentIndex > _previousIndex
-                            ? -1.0
-                            : 1.0;
-                        _previousIndex = currentIndex;
+                  child: Builder(
+                    builder: (context) {
+                      final currentIndex =
+                          navigationProvider.currentRoute.index;
+                      final direction = currentIndex > _previousIndex
+                          ? -1.0
+                          : 1.0;
+                      _previousIndex = currentIndex;
 
-                        return AnimatedSwitcher(
+                      return AnimatedSwitcher(
                           duration: const Duration(milliseconds: 400),
                           transitionBuilder: (child, animation) {
                             final isNewScreen =
@@ -140,7 +133,6 @@ class MainScreenState extends State<MainScreen> {
                       },
                     ),
                   ),
-                ),
               ),
             );
           },
