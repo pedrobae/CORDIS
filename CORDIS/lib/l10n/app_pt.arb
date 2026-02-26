@@ -66,8 +66,17 @@
   "@password": {"description": "Password field label"},
   "login": "Entrar",
   "@login": {"description": "Login button label"},
-  "logInTitlePrefix": "Login no ",
-  "@logInTitlePrefix": {"description": "Prefix to use in conjunction with appName"},
+  "signInTitle": "Login no CORDIS",
+  "@signInTitle": {
+    "description": "Title for sign in screen"
+  },
+  "signInWithPlaceholder": "Entrar com {method}",
+  "@signInWithPlaceholder": {
+    "description": "Login button label for different sign in methods",
+    "placeholders": {
+      "method": {}
+    }
+  },
   "logOut": "Sair",
   "@logOut": {"description": "Logout button label"},
   "deleteAccountRequest": "Solicitar exclusão de conta",

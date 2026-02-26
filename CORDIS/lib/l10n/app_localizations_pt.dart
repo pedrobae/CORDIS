@@ -102,7 +102,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get login => 'Entrar';
 
   @override
-  String get logInTitlePrefix => 'Login no ';
+  String get signInTitle => 'Login no CORDIS';
+
+  @override
+  String signInWithPlaceholder(Object method) {
+    return 'Entrar com $method';
+  }
 
   @override
   String get logOut => 'Sair';

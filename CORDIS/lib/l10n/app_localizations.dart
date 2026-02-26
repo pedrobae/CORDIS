@@ -272,11 +272,17 @@ abstract class AppLocalizations {
   /// **'Entrar'**
   String get login;
 
-  /// Prefix to use in conjunction with appName
+  /// Title for sign in screen
   ///
   /// In pt, this message translates to:
-  /// **'Login no '**
-  String get logInTitlePrefix;
+  /// **'Login no CORDIS'**
+  String get signInTitle;
+
+  /// Login button label for different sign in methods
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar com {method}'**
+  String signInWithPlaceholder(Object method);
 
   /// Logout button label
   ///

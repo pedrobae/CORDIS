@@ -11,6 +11,7 @@ import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:cordis/providers/my_auth_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -53,13 +54,12 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 SizedBox(height: 40),
                 Image.asset(
-                  'assets/logos/app_icon_rounded.png',
+                  'assets/logos/app_icon_transparent.png',
                   width: 150,
                   height: 150,
                 ),
                 Text(
-                  AppLocalizations.of(context)!.logInTitlePrefix +
-                      AppLocalizations.of(context)!.appName,
+                  AppLocalizations.of(context)!.signInTitle,
                   style: textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -137,12 +137,58 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: 8,
                   children: [
+                    // MAIL LOGIN BUTTON
                     FilledTextButton(
                       text: AppLocalizations.of(context)!.login,
                       isDark: true,
                       isDisabled: authProvider.isLoading,
                       onPressed: () => _emailSignIn(),
                     ),
+
+                    // GOOGLE LOGIN BUTTON (HIDDEN ON IOS)
+                    if (!Platform.isIOS)
+                      GestureDetector(
+                        onTap: () => _googleSignIn(),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: colorScheme.primary),
+                            borderRadius: BorderRadius.circular(0),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: FaIcon(
+                                  FontAwesomeIcons.google,
+                                  size: 24,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 9,
+                                    horizontal: 24,
+                                  ),
+                                  color: colorScheme.primary,
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.signInWithPlaceholder('Google'),
+                                    style: textTheme.labelLarge!.copyWith(
+                                      color: colorScheme.onPrimary,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                    // SHARE CODE LOGIN BUTTON
                     FilledTextButton(
                       text: AppLocalizations.of(context)!.enterShareCode,
                       onPressed: () async {
@@ -194,27 +240,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                // Google Sign-In Button - remove on iOS
-                if (!Platform.isIOS)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.g_mobiledata, size: 24),
-                      label: Text(
-                        'Entrar com Google',
-                        style: textTheme.labelLarge,
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.secondaryContainer,
-                        foregroundColor: colorScheme.onSecondaryContainer,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 2,
-                      ),
-                      onPressed: _googleSignIn,
-                    ),
-                  ),
               ],
             ),
           ),

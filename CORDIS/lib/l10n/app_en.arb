@@ -65,8 +65,17 @@
   "@password": {"description": "Password field label"},
   "login": "Log In",
   "@login": {"description": "Login button label"},
-  "logInTitlePrefix": "Sign in to ",
-  "@logInTitlePrefix": {"description": "Prefix to use in conjunction with appName"},
+  "signInTitle": "Sign in to CORDIS",
+  "@signInTitle": {
+    "description": "Title for sign in screen"
+  },
+  "signInWithPlaceholder": "Sign in with {method}",
+  "@signInWithPlaceholder": {
+    "description": "Sign in with method placeholder",
+    "placeholders": {
+      "method": {}
+    }
+  },
   "logOut": "Sign Out",
   "@logOut": {"description": "Logout button label"},
   "deleteAccountRequest": "Request account deletion",

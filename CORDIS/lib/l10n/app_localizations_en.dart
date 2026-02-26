@@ -101,7 +101,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login => 'Log In';
 
   @override
-  String get logInTitlePrefix => 'Sign in to ';
+  String get signInTitle => 'Sign in to CORDIS';
+
+  @override
+  String signInWithPlaceholder(Object method) {
+    return 'Sign in with $method';
+  }
 
   @override
   String get logOut => 'Sign Out';
