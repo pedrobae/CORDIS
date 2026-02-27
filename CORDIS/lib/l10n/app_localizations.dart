@@ -1472,11 +1472,11 @@ abstract class AppLocalizations {
   /// **'Formatação PDF'**
   String get pdfFormatting;
 
-  /// Title for import variation selection
+  /// Label for whether the PDF has columns
   ///
   /// In pt, this message translates to:
-  /// **'Variação de Importação'**
-  String get importVariation;
+  /// **'Tem Colunas'**
+  String get hasColumns;
 
   /// Import variation option for PDF with columns
   ///

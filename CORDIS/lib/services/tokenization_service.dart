@@ -569,11 +569,11 @@ class TokenizationService {
     final adjustedWidgets = <Positioned>[];
     int lineOffset = 0;
     double currentX = 0;
-    for (int i = 0; i < positionedWidgets.tokens.length - 1; i++) {
+    for (int i = 0; i < positionedWidgets.tokens.length; i++) {
       final widget = positionedWidgets.tokens[i];
-      final nextWidget = positionedWidgets.tokens[i + 1];
+      final nextWidget = i < positionedWidgets.tokens.length - 1 ? positionedWidgets.tokens[i + 1] : null;
 
-      final widgetWidth = nextWidget.left! - widget.left!;
+      final widgetWidth = nextWidget != null ? nextWidget.left! - widget.left! : 8;
 
       if (currentX + widgetWidth > maxWidth) {
         // Move to next line
@@ -584,7 +584,7 @@ class TokenizationService {
         adjustedWidgets.add(
         Positioned(
           left: currentX,
-            top: lineOffset * lineHeight,
+            top: lineOffset * lineHeight + widget.top!,
           child: widget.child,
         ),
       );
@@ -592,7 +592,7 @@ class TokenizationService {
         adjustedWidgets.add(
           Positioned(
             left: currentX,
-            top: lineOffset * lineHeight + chordHeight,
+            top: lineOffset * lineHeight + widget.top!,
             child: widget.child,
           ),
         );
@@ -601,7 +601,7 @@ class TokenizationService {
       currentX += widgetWidth;
     }
 
-    return ContentTokenized(adjustedWidgets, (lineOffset + 1) * lineHeight);
+    return ContentTokenized(adjustedWidgets, (positionedWidgets.contentHeight) + (lineOffset * lineHeight));
   }
 
   // ====== Widget Builders ======

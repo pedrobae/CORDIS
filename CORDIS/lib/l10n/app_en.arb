@@ -512,8 +512,8 @@
   "pdfFormatting": "PDF Formatting",
   "@pdfFormatting": {"description": "Parsing strategy option for PDF formatting"},
 
-  "importVariation": "Import Variation",
-  "@importVariation": {"description": "Title for import variation selection"},
+  "hasColumns": "Has Columns",
+  "@hasColumns": {"description": "Label for indicating whether the PDF has columns"},
   "pdfWithColumns": "PDF with Columns",
   "@pdfWithColumns": {"description": "Import variation option for PDFs with columns"},
   "pdfNoColumns": "PDF without Columns",

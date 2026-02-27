@@ -167,28 +167,20 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
 
                     const SizedBox(height: 16),
 
-                    // Import Variation Dropdown
+                    /// HAS COLUMNS TOGGLE
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          AppLocalizations.of(context)!.importVariation,
+                          AppLocalizations.of(context)!.hasColumns,
                           style: textTheme.titleMedium,
                         ),
-                        DropdownButton<ImportVariation>(
-                          value: importProvider.importVariation,
-                          items: importTypeToVariations[ImportType.pdf]!.map((
-                            ImportVariation variation,
-                          ) {
-                            return DropdownMenuItem<ImportVariation>(
-                              value: variation,
-                              child: Text(variation.getName(context)),
+                        Switch(
+                          value: importProvider.importVariation == ImportVariation.pdfWithColumns,
+                          onChanged: (value) {
+                            importProvider.setImportVariation(
+                              value ? ImportVariation.pdfWithColumns : ImportVariation.pdfNoColumns,
                             );
-                          }).toList(),
-                          onChanged: (ImportVariation? newVariation) {
-                            if (newVariation != null) {
-                              importProvider.setImportVariation(newVariation);
-                            }
                           },
                         ),
                       ],

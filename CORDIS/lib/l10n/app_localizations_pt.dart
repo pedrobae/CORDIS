@@ -783,7 +783,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get pdfFormatting => 'Formatação PDF';
 
   @override
-  String get importVariation => 'Variação de Importação';
+  String get hasColumns => 'Tem Colunas';
 
   @override
   String get pdfWithColumns => 'PDF com Colunas';

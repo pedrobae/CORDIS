@@ -36,6 +36,9 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Consumer3<ImportProvider, NavigationProvider, ParserProvider>(
       builder:
           (context, importProvider, navigationProvider, parserProvider, child) {
@@ -103,53 +106,50 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(0),
                                     borderSide: BorderSide(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
+                                      color: colorScheme.primary,
                                       width: 2,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            /// Parsing method switch
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   AppLocalizations.of(context)!.parsingStrategy,
-                                  style: TextStyle(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
+                                  style: textTheme.titleMedium,
+                                ),
+                                Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context)!.doubleNewLine,
+                                  style: textTheme.labelLarge,
                                   textAlign: TextAlign.center,
                                 ),
-                                DropdownButton<ParsingStrategy>(
-                                  value: importProvider.parsingStrategy,
-                                  items:
-                                      importTypeToParsingStrategies[ImportType
-                                              .text]!
-                                          .map((ParsingStrategy strategy) {
-                                            return DropdownMenuItem<
-                                              ParsingStrategy
-                                            >(
-                                              value: strategy,
-                                              child: Text(
-                                                strategy.getName(context),
-                                              ),
-                                            );
-                                          })
-                                          .toList(),
-                                  onChanged: (ParsingStrategy? newStrategy) {
-                                    if (newStrategy != null) {
-                                      importProvider.setParsingStrategy(
-                                        newStrategy,
-                                      );
-                                    }
-                                  },
+                                Switch(
+                                  trackOutlineColor: WidgetStateColor.resolveWith(
+                                    (states) => colorScheme.primary,
+                                  ),
+                                  value: importProvider.parsingStrategy == ParsingStrategy.doubleNewLine, 
+                                  onChanged: (value) {
+                                    importProvider.setParsingStrategy(
+                                      value ? ParsingStrategy.doubleNewLine : ParsingStrategy.sectionLabels,
+                                    );
+                                  }
+                                ),
+                                Text(
+                                  AppLocalizations.of(context)!.sectionLabels,
+                                  style: textTheme.labelLarge,
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             ),
+                              ],
+                            ),
+                            
                             FilledTextButton(
                               text: AppLocalizations.of(context)!.import,
                               isDark: true,
