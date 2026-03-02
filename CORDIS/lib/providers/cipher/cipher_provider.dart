@@ -341,7 +341,7 @@ class CipherProvider extends ChangeNotifier {
 
   // ===== CIPHER CACHING =====
   /// Get cipher from cache
-  Cipher? getCipherById(int cipherId) {
+  Cipher? getCipher(int cipherId) {
     return _ciphers[cipherId];
   }
 

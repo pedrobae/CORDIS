@@ -27,7 +27,7 @@ class SelectVersionSheet extends StatelessWidget {
             versionProvider,
             child,
           ) {
-            final title = cipherProvider.getCipherById(cipherId)?.title;
+            final title = cipherProvider.getCipher(cipherId)?.title;
 
             if (title == null) {
               return CircularProgressIndicator();

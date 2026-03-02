@@ -97,14 +97,14 @@ class _MetadataTabState extends State<MetadataTab> {
 
         case VersionType.local:
         case VersionType.import:
-          final cipher = cipherProvider.getCipherById(widget.cipherID ?? -1)!;
+          final cipher = cipherProvider.getCipher(widget.cipherID ?? -1)!;
           final version = versionProvider.cachedVersion(
             (widget.versionID is int) ? widget.versionID : -1,
           )!;
           _syncLocalVersion(cipher, version);
           break;
         case VersionType.playlist:
-          final cipher = cipherProvider.getCipherById(widget.cipherID ?? -1)!;
+          final cipher = cipherProvider.getCipher(widget.cipherID ?? -1)!;
           final version = versionProvider.cachedVersion(-1)!;
           _syncLocalVersion(cipher, version);
           break;
@@ -404,7 +404,7 @@ class _MetadataTabState extends State<MetadataTab> {
 
     final tags = widget.versionType == VersionType.cloud
         ? cloudVersionProvider.getVersion(widget.versionID!)?.tags ?? []
-        : cipherProvider.getCipherById(widget.cipherID ?? -1)?.tags ?? [];
+        : cipherProvider.getCipher(widget.cipherID ?? -1)?.tags ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

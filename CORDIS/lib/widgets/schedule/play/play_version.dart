@@ -1,9 +1,9 @@
 import 'package:cordis/l10n/app_localizations.dart';
-import 'package:cordis/models/domain/cipher/cipher.dart';
-import 'package:cordis/models/domain/cipher/version.dart';
+import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/utils/section_constants.dart';
@@ -14,19 +14,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 
-class PlayLocalVersion extends StatefulWidget {
-  final int versionId;
+class PlayVersion extends StatefulWidget {
+  final int? localVersionID;
+  final String? cloudVersionID;
 
-  const PlayLocalVersion({super.key, required this.versionId});
+  const PlayVersion({super.key, this.localVersionID, this.cloudVersionID});
 
   @override
-  State<PlayLocalVersion> createState() => _PlayLocalVersionState();
+  State<PlayVersion> createState() => _PlayVersionState();
 }
 
-class _PlayLocalVersionState extends State<PlayLocalVersion> {
+class _PlayVersionState extends State<PlayVersion> {
   late final ScrollController _scrollController;
   late final List<GlobalKey> sectionKeys = [];
   final _headerSectionKey = GlobalKey();
+  bool isCloud = false;
   bool showTopBar = false;
   double _headerHeight = 0;
 
@@ -34,6 +36,8 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+
+    isCloud = widget.cloudVersionID != null;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _initializeSectionKeys();
@@ -48,14 +52,15 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
   }
 
   void _initializeSectionKeys() {
-    final versionProvider = context.read<LocalVersionProvider>();
+    final lvp = context.read<LocalVersionProvider>();
+    final cvp = context.read<CloudVersionProvider>();
     final layoutProvider = context.read<LayoutSettingsProvider>();
 
-    final version = versionProvider.cachedVersion(widget.versionId);
+    final songStructure = isCloud
+        ? cvp.getVersion(widget.cloudVersionID!)!.songStructure
+        : lvp.cachedVersion(widget.localVersionID!)!.songStructure;
 
-    if (version == null) return;
-
-    final filteredStructure = version.songStructure
+    final filteredStructure = songStructure
         .where(
           (sectionCode) =>
               ((layoutProvider.showAnnotations || !isAnnotation(sectionCode)) &&
@@ -102,9 +107,10 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Consumer4<
+    return Consumer5<
       CipherProvider,
       LocalVersionProvider,
+      CloudVersionProvider,
       SectionProvider,
       LayoutSettingsProvider
     >(
@@ -112,7 +118,8 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
           (
             context,
             cipherProvider,
-            versionProvider,
+            localVersionProvider,
+            cloudVersionProvider,
             sectionProvider,
             layoutProvider,
             child,
@@ -121,25 +128,27 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
               _initializeSectionKeys();
             }
 
-            final version = versionProvider.cachedVersion(widget.versionId);
-
             // LOADING STATE
-            if (versionProvider.isLoading ||
+            if (localVersionProvider.isLoading ||
+                cloudVersionProvider.isLoading ||
                 sectionProvider.isLoading ||
-                version == null) {
-              return Center(
-                child: CircularProgressIndicator(color: colorScheme.primary),
-              );
-            }
-            final cipher = cipherProvider.getCipherById(version.cipherId);
-
-            if (cipher == null) {
+                (isCloud
+                    ? widget.cloudVersionID == null
+                    : widget.localVersionID == null)) {
               return Center(
                 child: CircularProgressIndicator(color: colorScheme.primary),
               );
             }
 
-            final filteredStructure = version.songStructure
+            final songStructure = isCloud
+                ? cloudVersionProvider
+                      .getVersion(widget.cloudVersionID!)!
+                      .songStructure
+                : localVersionProvider
+                      .cachedVersion(widget.localVersionID!)!
+                      .songStructure;
+
+            final filteredStructure = songStructure
                 .where(
                   (sectionCode) =>
                       ((layoutProvider.showAnnotations ||
@@ -148,7 +157,6 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
                           !isTransition(sectionCode))),
                 )
                 .toList();
-
             return Stack(
               children: [
                 // MAIN SCROLLABLE CONTENT - Wrapped in RepaintBoundary for isolation
@@ -167,7 +175,7 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             spacing: 16,
                             children: [
-                              _buildHeader(cipher, version, textTheme),
+                              _buildHeader(textTheme),
                               // SONG STRUCTURE
                               Column(
                                 spacing: 4,
@@ -196,7 +204,9 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
                                       ),
                                     ),
                                     child: StructureList(
-                                      versionId: widget.versionId,
+                                      versionId:
+                                          widget.localVersionID ??
+                                          widget.cloudVersionID!,
                                       filteredStructure: filteredStructure,
                                       scrollController: _scrollController,
                                       sectionKeys: sectionKeys,
@@ -210,6 +220,7 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
                           _buildSectionGrid(
                             sectionProvider,
                             layoutProvider,
+                            cloudVersionProvider,
                             filteredStructure,
                           ),
                           const SizedBox(height: 200),
@@ -239,39 +250,62 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
     );
   }
 
-  Widget _buildHeader(Cipher cipher, Version version, TextTheme textTheme) {
+  Widget _buildHeader(TextTheme textTheme) {
+    final cipherProvider = context.read<CipherProvider>();
+    final localVersionProvider = context.read<LocalVersionProvider>();
+    final cloudVersionProvider = context.read<CloudVersionProvider>();
+
+    String title;
+    String key;
+    int bpm;
+    Duration duration;
+
+    (title, key, bpm, duration) = isCloud
+        ? () {
+            final version = cloudVersionProvider.getVersion(
+              widget.cloudVersionID!,
+            )!;
+            return (
+              version.title,
+              version.transposedKey ?? version.originalKey,
+              version.bpm,
+              Duration(milliseconds: version.duration),
+            );
+          }()
+        : () {
+            final version = localVersionProvider.cachedVersion(
+              widget.localVersionID!,
+            )!;
+            final cipher = cipherProvider.getCipher(version.cipherId)!;
+            return (
+              cipher.title,
+              version.transposedKey ?? cipher.musicKey,
+              version.bpm,
+              version.duration,
+            );
+          }();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 4,
       children: [
-        Text(cipher.title, style: textTheme.titleMedium),
-        _buildMetadataRow(version, cipher, textTheme),
-      ],
-    );
-  }
-
-  Widget _buildMetadataRow(
-    Version version,
-    Cipher cipher,
-    TextTheme textTheme,
-  ) {
-    final bodyStyle = textTheme.bodyMedium;
-    return Row(
-      spacing: 16.0,
-      children: [
-        Text(
-          AppLocalizations.of(
-            context,
-          )!.keyWithPlaceholder(version.transposedKey ?? cipher.musicKey),
-          style: bodyStyle,
-        ),
-        Text(
-          AppLocalizations.of(context)!.bpmWithPlaceholder(version.bpm),
-          style: bodyStyle,
-        ),
-        Text(
-          '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(version.duration)}',
-          style: bodyStyle,
+        Text(title, style: textTheme.titleMedium),
+        Row(
+          spacing: 16.0,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.keyWithPlaceholder(key),
+              style: textTheme.bodyMedium,
+            ),
+            Text(
+              AppLocalizations.of(context)!.bpmWithPlaceholder(bpm),
+              style: textTheme.bodyMedium,
+            ),
+            Text(
+              '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(duration)}',
+              style: textTheme.bodyMedium,
+            ),
+          ],
         ),
       ],
     );
@@ -280,6 +314,7 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
   Widget _buildSectionGrid(
     SectionProvider sectionProvider,
     LayoutSettingsProvider layoutProvider,
+    CloudVersionProvider cloudVersionProvider,
     List<String> filteredStructure,
   ) {
     return MasonryGridView.count(
@@ -291,10 +326,14 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
       shrinkWrap: true,
       itemBuilder: (context, index) {
         final trimmedCode = filteredStructure[index].trim();
-        final section = sectionProvider.getSection(
-          widget.versionId,
-          trimmedCode,
-        );
+        final section = isCloud
+            ? () {
+                final sectionMap = cloudVersionProvider
+                    .getVersion(widget.cloudVersionID!)!
+                    .sections[trimmedCode]!;
+                return Section.fromFirestore(sectionMap);
+              }()
+            : sectionProvider.getSection(widget.localVersionID!, trimmedCode);
 
         if (section == null) {
           return const SizedBox.shrink();
@@ -347,7 +386,7 @@ class _PlayLocalVersionState extends State<PlayLocalVersion> {
               maxWidth: MediaQuery.of(context).size.width - 66,
             ),
             child: StructureList(
-              versionId: widget.versionId,
+              versionId: widget.localVersionID ?? widget.cloudVersionID!,
               filteredStructure: filteredStructure,
               scrollController: _scrollController,
               sectionKeys: sectionKeys,

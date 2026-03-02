@@ -121,7 +121,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
 
             Cipher? cipher = isCloud
                 ? null
-                : cipherProvider.getCipherById(version.cipherId);
+                : cipherProvider.getCipher(version.cipherId);
 
             if (!isCloud && cipher == null) {
               return Center(child: CircularProgressIndicator());

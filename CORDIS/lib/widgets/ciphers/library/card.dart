@@ -62,7 +62,7 @@ class _CipherCardState extends State<CipherCard> {
               );
             }
 
-            final cipher = cipherProvider.getCipherById(widget.cipherId);
+            final cipher = cipherProvider.getCipher(widget.cipherId);
 
             final versionId = versionProvider.getIdOfOldestVersionOfCipher(
               widget.cipherId,

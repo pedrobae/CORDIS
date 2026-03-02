@@ -67,7 +67,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
       originalKey = version.originalKey;
       transposedKey = version.transposedKey;
     } else {
-      final cipher = cipherProvider.getCipherById(widget.cipherID!);
+      final cipher = cipherProvider.getCipher(widget.cipherID!);
 
       final version = localVersionProvider.cachedVersion(widget.versionID);
       originalKey = cipher!.musicKey;
@@ -128,7 +128,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
 
         Cipher? cipher;
         if (widget.cipherID != null) {
-          cipher = cp.getCipherById(widget.cipherID!);
+          cipher = cp.getCipher(widget.cipherID!);
         }
 
         dynamic version;

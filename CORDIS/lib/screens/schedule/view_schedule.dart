@@ -582,7 +582,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
             firebaseId = version.firebaseId!;
           }
 
-          final cipher = cipherProvider.getCipherById(version.cipherId);
+          final cipher = cipherProvider.getCipher(version.cipherId);
 
           if (cipher == null) break;
           versions['v:$firebaseId'] = version.toDto(cipher);

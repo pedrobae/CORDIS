@@ -10,9 +10,8 @@ import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
-import 'package:cordis/widgets/schedule/play/play_cloud_version.dart';
 import 'package:cordis/widgets/schedule/play/play_flow_item.dart';
-import 'package:cordis/widgets/schedule/play/play_local_version.dart';
+import 'package:cordis/widgets/schedule/play/play_version.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -135,18 +134,12 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
                           switch (item.type) {
                             case PlaylistItemType.version:
                               if (isCloud) {
-                                return PlayCloudVersion(
-                                  versionDTO:
-                                      (cloudScheduleProvider.schedules[widget
-                                                  .scheduleId]
-                                              as ScheduleDto)
-                                          .playlist
-                                          .versions[item.firebaseContentId]!,
+                                return PlayVersion(
+                                  cloudVersionID:item.firebaseContentId!,
                                 );
                               } else {
-                                // Local version play
-                                return PlayLocalVersion(
-                                  versionId: item.contentId!,
+                                return PlayVersion(
+                                  localVersionID: item.contentId!,
                                 );
                               }
                             case PlaylistItemType.flowItem:
@@ -270,7 +263,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
 
                                       nextTitle =
                                           cipherProvider
-                                              .getCipherById(version.cipherId)
+                                              .getCipher(version.cipherId)
                                               ?.title ??
                                           '';
                                     }
