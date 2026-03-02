@@ -50,9 +50,9 @@ class AutoScrollSettings extends StatelessWidget {
                       WidgetState.selected: colorScheme.primary,
                       WidgetState.any: colorScheme.shadow,
                     }),
-                    value: autoScroll.isAutoScrolling,
+                    value: autoScroll.scrollModeEnabled,
                     onChanged: (value) {
-                      autoScroll.toggleAutoScroll();
+                      autoScroll.toggleScrollMode();
                     },
                   ),
                 ],

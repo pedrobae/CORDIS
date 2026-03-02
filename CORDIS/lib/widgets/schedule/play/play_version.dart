@@ -82,12 +82,17 @@ class _PlayVersionState extends State<PlayVersion> {
     final now = DateTime.now();
     if (now.difference(_lastScrollUpdate).inMilliseconds < 50) {
       // Update scroll index and disable auto-scroll if user scrolls manually during auto-scroll
-      final scrollProvider = Provider.of<AutoScrollProvider>(context, listen: false);
-      final sectionIndex = scrollProvider.calculateVisibleSectionIndex(_scrollController.position.viewportDimension);
+      final scrollProvider = Provider.of<AutoScrollProvider>(
+        context,
+        listen: false,
+      );
+      final sectionIndex = scrollProvider.calculateVisibleSectionIndex(
+        _scrollController.position.viewportDimension,
+      );
       if (sectionIndex != scrollProvider.currentSectionIndex.value) {
         scrollProvider.currentSectionIndex.value = sectionIndex;
       }
-        scrollProvider.stopAutoScroll();
+      scrollProvider.stopAutoScroll();
       return;
     }
     _lastScrollUpdate = now;
@@ -115,11 +120,6 @@ class _PlayVersionState extends State<PlayVersion> {
             layoutProvider,
             child,
           ) {
-            final scrollProvider = Provider.of<AutoScrollProvider>(
-              context,
-              listen: false,
-            );
-
             // LOADING STATE
             if (localVersionProvider.isLoading ||
                 cloudVersionProvider.isLoading ||
@@ -210,7 +210,6 @@ class _PlayVersionState extends State<PlayVersion> {
                           sectionProvider,
                           layoutProvider,
                           cloudVersionProvider,
-                          scrollProvider,
                           filteredStructure,
                         ),
                         const SizedBox(height: 200),
@@ -242,7 +241,19 @@ class _PlayVersionState extends State<PlayVersion> {
                 ),
 
                 // AUTO SCROLL INDICATOR
-                Positioned(bottom: 66, right: 16, child: AutoScrollIndicator()),
+                Positioned(
+                  bottom: 66,
+                  right: 16,
+                  child: Consumer<AutoScrollProvider>(
+                    builder: (context, scrollProvider, _) {
+                      return Visibility(
+                        visible: scrollProvider.scrollModeEnabled,
+                        maintainState: true,
+                        child: AutoScrollIndicator(),
+                      );
+                    },
+                  ),
+                ),
               ],
             );
           },
@@ -314,7 +325,6 @@ class _PlayVersionState extends State<PlayVersion> {
     SectionProvider sectionProvider,
     LayoutSettingsProvider layoutProvider,
     CloudVersionProvider cloudVersionProvider,
-    AutoScrollProvider scrollProvider,
     List<String> filteredStructure,
   ) {
     return MasonryGridView.count(
@@ -346,6 +356,10 @@ class _PlayVersionState extends State<PlayVersion> {
           );
         }
         // Create key if it doesn't exist
+        final scrollProvider = Provider.of<AutoScrollProvider>(
+          context,
+          listen: false,
+        );
         if (scrollProvider.sectionKeys[index] == null) {
           scrollProvider.sectionKeys[index] = GlobalKey();
         }
