@@ -43,17 +43,17 @@ class BrandPalette extends Palette {
   // ORANGE THEME
   // PRIMARIES (Orange)
   static final Color orange = Palette._orange;
-  static final Color orangeTint = Color.fromARGB(255, 65, 52, 48);
+  static final Color orangeTint = Color.fromARGB(255, 58, 24, 13);
 
   // =============================================================================
   // GOLD THEME
   // PRIMARIES (Gold)
   static final Color gold = Palette._gold;
-  static final Color goldTint = const Color.fromARGB(255, 39, 35, 24);
+  static final Color goldTint = const Color.fromARGB(255, 54, 42, 10);
 
   // =============================================================================
   //  BURGUNDY THEME
-  //  PRIMARIES (burgundy)
+  //  PRIMARIES (burgundy)d
   static final Color burgundy = Palette._burgundy;
   static final Color burgundyTint = const Color.fromARGB(255, 233, 211, 222);
 }
