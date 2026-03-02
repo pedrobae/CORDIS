@@ -85,7 +85,6 @@ class AutoScrollProvider extends ChangeNotifier {
 
     // Scroll to first section immediately
     _timerStartTime = DateTime.now();
-    scrollToSection(0);
 
     // Start update timer to refresh UI with new progress value (60fps)
     _updateTimer?.cancel();
