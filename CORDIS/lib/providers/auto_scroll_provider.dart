@@ -8,34 +8,18 @@ class AutoScrollProvider extends ChangeNotifier {
     _loadSettings();
   }
   bool isAutoScrolling = false;
+  bool scrollModeEnabled = false;
   double scrollSpeed = 1.0; // 0.5 = slow, 1 = normal, 1.5 = fast
 
-  late final ValueNotifier<int> currentSectionIndex =
-      ValueNotifier(0); // 0-based index of current section
+  late final ValueNotifier<int> currentSectionIndex = ValueNotifier(
+    0,
+  ); // 0-based index of current section
 
   int get _totalSections => sectionKeys.length;
 
   Timer? autoScrollTimer;
   Timer? _updateTimer; // Separate timer for UI updates
   DateTime? _timerStartTime;
-  // Returns a value between 0.0 and 1.0 representing progress to next section scroll
-  double get timerProgress {
-    if (autoScrollTimer == null || !autoScrollTimer!.isActive || _timerStartTime == null) {
-      return 0.0;
-    }
-    
-    final durationPerSection = Duration(
-      milliseconds: (3000 / scrollSpeed).toInt(),
-    );
-    
-    // Calculate elapsed time since timer started
-    final elapsed = DateTime.now().difference(_timerStartTime!);
-    final elapsedMs = elapsed.inMilliseconds;
-    
-    // Return progress within current interval (0.0 to 1.0)
-    return (elapsedMs % durationPerSection.inMilliseconds) / 
-           durationPerSection.inMilliseconds;
-  }
 
   Map<int, GlobalKey> sectionKeys = {}; // Maps section index to its GlobalKey
 
@@ -43,7 +27,7 @@ class AutoScrollProvider extends ChangeNotifier {
   /// Gets settings from SettingsService and updates provider state
   Future<void> _loadSettings() async {
     currentSectionIndex.value = 0;
-    isAutoScrolling = SettingsService.getAutoScrollEnabled();
+    scrollModeEnabled = SettingsService.getAutoScrollEnabled();
     scrollSpeed = SettingsService.getAutoScrollSpeed();
     notifyListeners();
   }
@@ -55,26 +39,37 @@ class AutoScrollProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleScrollMode() {
+    scrollModeEnabled = !scrollModeEnabled;
+    SettingsService.setAutoScrollEnabled(scrollModeEnabled);
+    notifyListeners();
+  }
+
   // ===== AUTO SCROLL METHODS =====
   /// Toggles auto-scroll on/off and starts/stops timer accordingly
   void toggleAutoScroll() {
-    isAutoScrolling = !isAutoScrolling;
     if (isAutoScrolling) {
-      startAutoScroll();
+      stopAutoScroll();
     } else {
-      autoScrollTimer?.cancel();
-      autoScrollTimer = null;
-      _updateTimer?.cancel();
-      _updateTimer = null;
-      _timerStartTime = null;
+      startAutoScroll();
     }
-    SettingsService.setAutoScrollEnabled(isAutoScrolling);
+  }
+
+  void stopAutoScroll() {
+    autoScrollTimer?.cancel();
+    autoScrollTimer = null;
+    _updateTimer?.cancel();
+    _updateTimer = null;
+    _timerStartTime = null;
+    isAutoScrolling = false;
     notifyListeners();
   }
 
   /// Starts the auto-scroll timer
   /// Which scrolls through sections at intervals based on scrollSpeed
   void startAutoScroll() {
+    isAutoScrolling = true;
+    notifyListeners();
     if (sectionKeys.isEmpty) return; // No sections available
 
     // Duration per section: 3 seconds at speed 1.0
@@ -101,12 +96,7 @@ class AutoScrollProvider extends ChangeNotifier {
         scrollToSection(currentSectionIndex.value);
       } else {
         // Stop at the end
-        autoScrollTimer?.cancel();
-        autoScrollTimer = null;
-        _updateTimer?.cancel();
-        _updateTimer = null;
-        _timerStartTime = null;
-        isAutoScrolling = false;
+        stopAutoScroll();
       }
     });
   }
@@ -130,6 +120,49 @@ class AutoScrollProvider extends ChangeNotifier {
     currentSectionIndex.value = index;
   }
 
+  // ===== HELPER METHODS =====
+  /// Returns a value between 0.0 and 1.0 representing progress to next section scroll
+  double get timerProgress {
+    if (autoScrollTimer == null ||
+        !autoScrollTimer!.isActive ||
+        _timerStartTime == null) {
+      return 0.0;
+    }
+
+    final durationPerSection = Duration(
+      milliseconds: (3000 / scrollSpeed).toInt(),
+    );
+
+    // Calculate elapsed time since timer started
+    final elapsed = DateTime.now().difference(_timerStartTime!);
+    final elapsedMs = elapsed.inMilliseconds;
+
+    // Return progress within current interval (0.0 to 1.0)
+    return (elapsedMs % durationPerSection.inMilliseconds) /
+        durationPerSection.inMilliseconds;
+  }
+
+  /// Calculates the current section index based on the scroll offset
+int calculateVisibleSectionIndex(double viewportHeight) {
+  for (final entry in sectionKeys.entries) {
+    final sectionContext = entry.value.currentContext;
+    if (sectionContext == null) continue;
+
+    final box = sectionContext.findRenderObject() as RenderBox?;
+    if (box == null) continue;
+
+    // Get section's position relative to the scrollable
+    final sectionTop = box.localToGlobal(Offset.zero).dy;
+
+    // Check if section is in viewport (accounting for some buffer)
+    if (sectionTop > viewportHeight * 0.2 && sectionTop < viewportHeight * 0.3) {
+      return entry.key;
+    }
+  }
+  return currentSectionIndex.value; // Fallback to current
+}
+
+  // ===== CLEANUP =====
   @override
   void dispose() {
     autoScrollTimer?.cancel();

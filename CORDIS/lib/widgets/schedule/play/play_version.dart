@@ -71,27 +71,26 @@ class _PlayVersionState extends State<PlayVersion> {
   }
 
   void _scrollListener() {
+    // Always check critical boundaries even when throttled
+    final offset = _scrollController.offset;
+    final shouldShow = offset > _headerHeight && offset > 0;
+    if (shouldShow != _showTopBar.value) {
+      _showTopBar.value = shouldShow; // Update without expensive setState
+    }
+
     // Throttle to 50ms for smoother updates without jank
     final now = DateTime.now();
     if (now.difference(_lastScrollUpdate).inMilliseconds < 50) {
-      // Always check critical boundaries even when throttled
-      final offset = _scrollController.offset;
-      final shouldShow = offset > _headerHeight && offset > 0;
-      if (shouldShow != _showTopBar.value) {
-        _showTopBar.value = shouldShow; // Update without expensive setState
+      // Update scroll index and disable auto-scroll if user scrolls manually during auto-scroll
+      final scrollProvider = Provider.of<AutoScrollProvider>(context, listen: false);
+      final sectionIndex = scrollProvider.calculateVisibleSectionIndex(_scrollController.position.viewportDimension);
+      if (sectionIndex != scrollProvider.currentSectionIndex.value) {
+        scrollProvider.currentSectionIndex.value = sectionIndex;
       }
+        scrollProvider.stopAutoScroll();
       return;
     }
     _lastScrollUpdate = now;
-
-    final offset = _scrollController.offset;
-    // Hide bar when at top, show when past header height
-    final shouldShow = offset > _headerHeight && offset > 0;
-
-    if (shouldShow != _showTopBar.value) {
-      _showTopBar.value =
-          shouldShow; // Direct ValueNotifier update = no full rebuild
-    }
   }
 
   @override
@@ -116,7 +115,10 @@ class _PlayVersionState extends State<PlayVersion> {
             layoutProvider,
             child,
           ) {
-            final scrollProvider = Provider.of<AutoScrollProvider>(context, listen: false);
+            final scrollProvider = Provider.of<AutoScrollProvider>(
+              context,
+              listen: false,
+            );
 
             // LOADING STATE
             if (localVersionProvider.isLoading ||
@@ -218,22 +220,25 @@ class _PlayVersionState extends State<PlayVersion> {
                 ),
 
                 // SCROLL-CONDITIONAL TOP SONG STRUCTURE BAR
-                ValueListenableBuilder<bool>(
-                  valueListenable: _showTopBar,
-                  builder: (context, showBar, child) {
-                    return showBar
-                        ? Positioned(
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            child: _buildStickyBar(
-                              context,
-                              colorScheme,
-                              filteredStructure,
-                            ),
-                          )
-                        : const SizedBox.shrink();
-                  },
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: _showTopBar,
+                    builder: (context, showBar, child) {
+                      return Visibility(
+                        visible: showBar,
+                        maintainState: true,
+                        child: child!,
+                      );
+                    },
+                    child: _buildStickyBar(
+                      context,
+                      colorScheme,
+                      filteredStructure,
+                    ),
+                  ),
                 ),
 
                 // AUTO SCROLL INDICATOR
