@@ -12,9 +12,8 @@ class SettingsService {
   // Layout Settings Keys
   static const String _keyFontSize = 'layout_font_size';
   static const String _keyFontFamily = 'layout_font_family';
-  static const String _keyChordColor = 'layout_chord_color';
-  static const String _keyLyricColor = 'layout_lyric_color';
   static const String _keyColumnCount = 'layout_column_count';
+  static const String _keyShowSectionHeaders = 'layout_show_section_headers';
   static const String _keyShowChords = 'layout_show_chords';
   static const String _keyShowLyrics = 'layout_show_lyrics';
   static const String _keyShowNotes = 'layout_show_notes';
@@ -123,29 +122,6 @@ class SettingsService {
     return _preferences.getString(_keyFontFamily) ?? 'OpenSans';
   }
 
-  /// Save chord color
-  static Future<void> setChordColor(Color color) async {
-    await _preferences.setInt(_keyChordColor, color.toARGB32());
-  }
-
-  /// Get chord color
-  static Color getChordColor() {
-    final value = _preferences.getInt(_keyChordColor) ?? Colors.blue.toARGB32();
-    return Color(value);
-  }
-
-  /// Save lyric color
-  static Future<void> setLyricColor(Color color) async {
-    await _preferences.setInt(_keyLyricColor, color.toARGB32());
-  }
-
-  /// Get lyric color
-  static Color getLyricColor() {
-    final value =
-        _preferences.getInt(_keyLyricColor) ?? Colors.black.toARGB32();
-    return Color(value);
-  }
-
   /// Save column count
   static Future<void> setColumnCount(int count) async {
     await _preferences.setInt(_keyColumnCount, count);
@@ -154,6 +130,14 @@ class SettingsService {
   /// Get column count
   static int getColumnCount() {
     return _preferences.getInt(_keyColumnCount) ?? 1;
+  }
+
+  static Future<void> setShowSectionHeaders(bool show) async {
+    await _preferences.setBool(_keyShowSectionHeaders, show);
+  }
+
+  static bool getShowSectionHeaders() {
+    return _preferences.getBool(_keyShowSectionHeaders) ?? true;
   }
 
   /// Save show chords
@@ -242,9 +226,8 @@ class SettingsService {
       'locale': getLocale(),
       'font_size': getFontSize(),
       'font_family': getFontFamily(),
-      'chord_color': getChordColor().toARGB32(),
-      'lyric_color': getLyricColor().toARGB32(),
       'column_count': getColumnCount(),
+      'show_section_headers': getShowSectionHeaders(),
       'show_chords': getShowChords(),
       'show_lyrics': getShowLyrics(),
       'show_notes': getShowNotes(),

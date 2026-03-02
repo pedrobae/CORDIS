@@ -30,7 +30,13 @@ class SectionCard extends StatelessWidget {
         }
         return Container(
           decoration: BoxDecoration(
-            border: Border.all(color: colorScheme.surfaceContainerHigh),
+            color: layoutSettingsProvider.showSectionHeaders
+                ? sectionColor.withAlpha(30)
+                : colorScheme.surface,
+            border: Border.all(color: 
+            layoutSettingsProvider.showSectionHeaders
+                ? sectionColor
+                : colorScheme.surfaceContainerHigh),
             borderRadius: BorderRadius.circular(0),
           ),
           padding: const EdgeInsets.all(8),
@@ -39,22 +45,23 @@ class SectionCard extends StatelessWidget {
             spacing: 16,
             children: [
               // LABEL
-              Row(
-                spacing: 8,
-                children: [
-                  SectionBadge(
-                    sectionCode: sectionCode,
-                    sectionColor: sectionColor,
-                  ),
-                  Text(
-                    sectionType.isNotEmpty
-                        ? sectionType[0].toUpperCase() +
-                              sectionType.substring(1)
-                        : sectionType,
-                    style: textTheme.labelLarge,
-                  ),
-                ],
-              ),
+              if (layoutSettingsProvider.showSectionHeaders)
+                Row(
+                  spacing: 8,
+                  children: [
+                    SectionBadge(
+                      sectionCode: sectionCode,
+                      sectionColor: sectionColor,
+                    ),
+                    Text(
+                      sectionType.isNotEmpty
+                          ? sectionType[0].toUpperCase() +
+                                sectionType.substring(1)
+                          : sectionType,
+                      style: textTheme.labelLarge,
+                    ),
+                  ],
+                ),
               ChordProView(
                 chordPro: sectionText,
                 isAnnotation: sectionCode == 'N',

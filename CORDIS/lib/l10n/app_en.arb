@@ -9,6 +9,9 @@
   "newHeart" : "New Heart Music Ministries",
   "@newHeart" : {"description": "Company name"},
 
+  "compactView": "Compact View",
+  "@compactView": {"description": "Compact view option label"},
+  
   "setup": "Setup",
   "@setup": {"description": "Setup related messages"},
   "hour": "Hour",

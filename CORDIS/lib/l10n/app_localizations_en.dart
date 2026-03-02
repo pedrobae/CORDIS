@@ -20,6 +20,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newHeart => 'New Heart Music Ministries';
 
   @override
+  String get compactView => 'Compact View';
+
+  @override
   String get setup => 'Setup';
 
   @override

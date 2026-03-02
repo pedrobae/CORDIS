@@ -20,6 +20,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get newHeart => 'New Heart Music Ministries';
 
   @override
+  String get compactView => 'Visualização Compacta';
+
+  @override
   String get setup => 'Configuração';
 
   @override

@@ -116,6 +116,12 @@ abstract class AppLocalizations {
   /// **'New Heart Music Ministries'**
   String get newHeart;
 
+  /// Compact view option label
+  ///
+  /// In pt, this message translates to:
+  /// **'Visualização Compacta'**
+  String get compactView;
+
   /// Setup related messages
   ///
   /// In pt, this message translates to:

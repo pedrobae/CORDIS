@@ -6,6 +6,7 @@ class LayoutSettingsProvider extends ChangeNotifier {
   String fontFamily = 'OpenSans';
   Color chordColor = const Color.fromARGB(255, 0, 0, 0);
   int columnCount = 1;
+  bool showSectionHeaders = true;
   bool showChords = true;
   bool showLyrics = true;
   bool showAnnotations = true;
@@ -16,13 +17,13 @@ class LayoutSettingsProvider extends ChangeNotifier {
   Future<void> loadSettings() async {
     fontSize = SettingsService.getFontSize();
     fontFamily = SettingsService.getFontFamily();
-    chordColor = SettingsService.getChordColor();
     columnCount = SettingsService.getColumnCount();
     showChords = SettingsService.getShowChords();
     showLyrics = SettingsService.getShowLyrics();
     showAnnotations = SettingsService.getShowNotes();
     showTransitions = SettingsService.getShowTransitions();
     showTextSections = SettingsService.getShowTextSections();
+    showSectionHeaders = SettingsService.getShowSectionHeaders();
     notifyListeners();
   }
 
@@ -39,15 +40,15 @@ class LayoutSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setChordColor(Color color) {
-    chordColor = color;
-    SettingsService.setChordColor(color);
-    notifyListeners();
-  }
-
   void setColumnCount(int count) {
     columnCount = count;
     SettingsService.setColumnCount(count);
+    notifyListeners();
+  }
+
+  void toggleSectionHeaders() {
+    showSectionHeaders = !showSectionHeaders;
+    SettingsService.setShowSectionHeaders(showSectionHeaders);
     notifyListeners();
   }
 

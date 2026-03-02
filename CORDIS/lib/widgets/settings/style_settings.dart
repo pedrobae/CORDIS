@@ -39,15 +39,8 @@ class StyleSettings extends StatelessWidget {
                 ],
               ),
               // COLUMN SETTINGS
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(0),
-                  border: Border.all(
-                    color: colorScheme.surfaceContainerLowest,
-                    width: 1,
-                  ),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              _buildOption(
+                context,
                 child: Row(
                   children: [
                     Expanded(
@@ -68,22 +61,14 @@ class StyleSettings extends StatelessWidget {
                         color: settings.columnCount == i
                             ? Theme.of(context).colorScheme.primary
                             : Theme.of(context).iconTheme.color,
-                        tooltip: '$i coluna${i > 1 ? 's' : ''}',
                         onPressed: () => settings.setColumnCount(i),
                       ),
                   ],
                 ),
               ),
               // FONT SETTINGS
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(0),
-                  border: Border.all(
-                    color: colorScheme.surfaceContainerLowest,
-                    width: 1,
-                  ),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              _buildOption(
+                context,
                 child: Row(
                   children: [
                     Expanded(
@@ -152,11 +137,39 @@ class StyleSettings extends StatelessWidget {
                   ],
                 ),
               ),
+              /// COMPACT VIEW
+              _buildOption(context, child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      AppLocalizations.of(context)!.compactView,
+                      style: textTheme.labelLarge,
+                    ),
+                  ),
+                  Switch(
+                    value: !settings.showSectionHeaders,
+                    onChanged: (_) => settings.toggleSectionHeaders(),
+                  ),
+                ],
+              )),
               SizedBox(),
             ],
           ),
         );
       },
+    );
+  }
+
+  Container _buildOption(BuildContext context, {required Widget child}) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(0),
+        border: Border.all(color: colorScheme.surfaceContainerLowest, width: 1),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: child,
     );
   }
 }
