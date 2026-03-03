@@ -1,4 +1,57 @@
-cipher_app/macos/Flutter/GeneratedPluginRegistrant.swift
-cipher_app/windows/flutter/generated_plugin_registrant.cc
-cipher_app/windows/flutter/generated_plugins.cmake
-cipher_app/debug_imports_local
+CORDIS/macos/Flutter/GeneratedPluginRegistrant.swift
+CORDIS/windows/flutter/generated_plugin_registrant.cc
+CORDIS/windows/flutter/generated_plugins.cmake
+CORDIS/debug_imports_local
+
+# Config files (contain sensitive/local data)
+CORDIS/lib/config/**/*_debug_config.dart
+CORDIS/lib/config/**/*_local_config.dart
+CORDIS/lib/firebase_options.dart
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+.lib/test
+.debug_imports_local/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+CORDIS/**/doc/api/
+CORDIS/ios/Flutter/.last_build_id
+CORDIS/.dart_tool/
+CORDIS/.flutter-plugins
+CORDIS/.flutter-plugins-dependencies
+CORDIS/.pub-cache/
+CORDIS/.pub/
+CORDIS/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+CORDIS/android/app/debug
+CORDIS/android/app/profile
+CORDIS/android/app/release
