@@ -68,6 +68,7 @@ class AutoScrollProvider extends ChangeNotifier {
   /// Starts the auto-scroll timer
   /// Which scrolls through sections at intervals based on scrollSpeed
   void startAutoScroll() {
+    if (isAutoScrolling) return; // Already scrolling
     isAutoScrolling = true;
     notifyListeners();
     if (sectionKeys.isEmpty) return; // No sections available
@@ -157,8 +158,8 @@ class AutoScrollProvider extends ChangeNotifier {
       final sectionTop = box.localToGlobal(Offset.zero).dy;
 
       // Check if section is in viewport (accounting for some buffer)
-      if (sectionTop > viewportHeight * 0.2 &&
-          sectionTop < viewportHeight * 0.22) {
+      if (sectionTop > viewportHeight * 0.15 &&
+          sectionTop < viewportHeight * 0.30) {
         return entry.key;
       }
     }

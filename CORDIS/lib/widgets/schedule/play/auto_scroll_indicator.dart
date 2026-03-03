@@ -15,7 +15,11 @@ class AutoScrollIndicator extends StatelessWidget {
           onTap: () {
             scrollProvider.toggleAutoScroll();
           },
-          child: SizedBox(
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceTint.withAlpha(204), // 0.8 * 255 = 204
+              shape: BoxShape.circle,
+            ),
             width: 40,
             height: 40,
             child: Stack(

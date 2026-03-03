@@ -39,13 +39,15 @@ class _PlayVersionState extends State<PlayVersion> {
   final _headerSectionKey = GlobalKey();
   double _headerHeight = 0;
   bool isCloud = false;
-  DateTime _lastScrollUpdate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _scrollProvider = context.read<AutoScrollProvider>();
+
+    // Initialize scroll provider state
+    _scrollProvider.currentSectionIndex.value = 0;
 
     isCloud = widget.cloudVersionID != null;
 
@@ -83,24 +85,18 @@ class _PlayVersionState extends State<PlayVersion> {
 
     final isManualScroll =
         _scrollController.position.userScrollDirection != ScrollDirection.idle;
-    
+
     if (isManualScroll && _scrollProvider.scrollModeEnabled) {
       _scrollProvider.stopAutoScroll();
     }
 
-    // Throttle to 50ms for smoother updates without jank
-    final now = DateTime.now();
-    if (now.difference(_lastScrollUpdate).inMilliseconds < 50) {
-      // Update scroll index
-      final sectionIndex = _scrollProvider.calcCurrentIndex(
-        _scrollController.position.viewportDimension,
-      );
-      if (sectionIndex != _scrollProvider.currentSectionIndex.value) {
-        _scrollProvider.currentSectionIndex.value = sectionIndex;
-      }
-      return;
+    // Update scroll index
+    final sectionIndex = _scrollProvider.calcCurrentIndex(
+      _scrollController.position.viewportDimension,
+    );
+    if (sectionIndex != _scrollProvider.currentSectionIndex.value) {
+      _scrollProvider.currentSectionIndex.value = sectionIndex;
     }
-    _lastScrollUpdate = now;
   }
 
   @override
