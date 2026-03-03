@@ -60,14 +60,14 @@ class QuickActionSheet extends StatelessWidget {
                   context,
                 )!.createPlaceholder(AppLocalizations.of(context)!.playlist),
                 onPressed: () {
+                  final playlistProvider = context.read<PlaylistProvider>();
                   Navigator.of(context).pop(); // Close the bottom sheet
                   navigationProvider.attemptPop(
                     context,
                     route: NavigationRoute.playlists,
                   );
                   navigationProvider.push(
-                    changeDetector: () =>
-                        context.read<PlaylistProvider>().hasUnsavedChanges,
+                    changeDetector: () => playlistProvider.hasUnsavedChanges,
                     EditPlaylistScreen(),
                     showBottomNavBar: true,
                   );
@@ -80,6 +80,11 @@ class QuickActionSheet extends StatelessWidget {
                   context,
                 )!.addPlaceholder(AppLocalizations.of(context)!.cipher),
                 onPressed: () {
+                  final cipherProvider = context.read<CipherProvider>();
+                  final localVersionProvider = context
+                      .read<LocalVersionProvider>();
+                  final sectionProvider = context.read<SectionProvider>();
+
                   Navigator.of(context).pop(); // Close the bottom sheet
                   navigationProvider.attemptPop(
                     context,
@@ -92,11 +97,9 @@ class QuickActionSheet extends StatelessWidget {
                       versionType: VersionType.brandNew,
                     ),
                     changeDetector: () =>
-                        (context.read<CipherProvider>().hasUnsavedChanges ||
-                        context
-                            .read<LocalVersionProvider>()
-                            .hasUnsavedChanges ||
-                        context.read<SectionProvider>().hasUnsavedChanges),
+                        (cipherProvider.hasUnsavedChanges ||
+                        localVersionProvider.hasUnsavedChanges ||
+                        sectionProvider.hasUnsavedChanges),
                     showBottomNavBar: true,
                   );
                 },
