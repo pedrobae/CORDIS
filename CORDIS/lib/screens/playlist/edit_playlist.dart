@@ -58,70 +58,76 @@ class _EditPlaylistScreenState extends State<EditPlaylistScreen> {
             authProvider,
             child,
           ) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                spacing: 32,
-                children: [
-                  // HEADER
-                  Column(
-                    spacing: 8,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.namePlaylistPrompt,
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      if (widget.playlistId == null)
-                        Text(
-                          AppLocalizations.of(
-                            context,
-                          )!.createPlaylistInstructions,
-                          style: theme.textTheme.bodyLarge,
-                        ),
-                    ],
-                  ),
-                  // FORM
-                  LabeledTextField(
-                    label: AppLocalizations.of(context)!.playlistNameLabel,
-                    controller: playlistNameController,
-                    hint: AppLocalizations.of(context)!.playlistNameHint,
-                  ),
+            return Scaffold(
+              appBar: AppBar(
+                leading: BackButton(
+                  onPressed: () => navigationProvider.attemptPop(context),
+                ),
+                title: Text(
+                  AppLocalizations.of(context)!.namePlaylistPrompt,
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              body: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  spacing: 32,
+                  children: [
+                    Column(
+                      spacing: 8,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (widget.playlistId == null)
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.createPlaylistInstructions,
+                            style: theme.textTheme.bodyLarge,
+                          ),
+                      ],
+                    ),
+                    // FORM
+                    LabeledTextField(
+                      label: AppLocalizations.of(context)!.playlistNameLabel,
+                      controller: playlistNameController,
+                      hint: AppLocalizations.of(context)!.playlistNameHint,
+                    ),
 
-                  // ACTIONS
-                  Column(
-                    spacing: 16,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      FilledTextButton(
-                        text: widget.playlistId != null
-                            ? AppLocalizations.of(context)!.save
-                            : AppLocalizations.of(context)!.create,
-                        isDark: true,
-                        onPressed: () async {
-                          widget.playlistId != null
-                              ? await playlistProvider.updateName(
-                                  widget.playlistId!,
-                                  playlistNameController.text,
-                                )
-                              : await playlistProvider.createPlaylist(
-                                  playlistNameController.text,
-                                  userProvider.getLocalIdByFirebaseId(
-                                    authProvider.id!,
-                                  )!,
-                                );
-                          navigationProvider.pop();
-                        },
-                      ),
-                      FilledTextButton(
-                        text: AppLocalizations.of(context)!.cancel,
-                        onPressed: () {
-                          navigationProvider.attemptPop(context);
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+                    // ACTIONS
+                    Column(
+                      spacing: 16,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        FilledTextButton(
+                          text: widget.playlistId != null
+                              ? AppLocalizations.of(context)!.save
+                              : AppLocalizations.of(context)!.create,
+                          isDark: true,
+                          onPressed: () async {
+                            widget.playlistId != null
+                                ? await playlistProvider.updateName(
+                                    widget.playlistId!,
+                                    playlistNameController.text,
+                                  )
+                                : await playlistProvider.createPlaylist(
+                                    playlistNameController.text,
+                                    userProvider.getLocalIdByFirebaseId(
+                                      authProvider.id!,
+                                    )!,
+                                  );
+                            navigationProvider.pop();
+                          },
+                        ),
+                        FilledTextButton(
+                          text: AppLocalizations.of(context)!.cancel,
+                          onPressed: () {
+                            navigationProvider.attemptPop(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           },
