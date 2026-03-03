@@ -191,6 +191,8 @@ class MainScreenState extends State<MainScreen> {
         }
       },
       onTap: () {
+        final sectionProvider = context.read<SectionProvider>();
+        final localVersionProvider = context.read<LocalVersionProvider>();
         switch (navProvider.currentRoute) {
           case NavigationRoute.library:
             navProvider.push(
@@ -201,8 +203,8 @@ class MainScreenState extends State<MainScreen> {
               ),
               changeDetector: () =>
                   cipherProvider.hasUnsavedChanges ||
-                  context.read<SectionProvider>().hasUnsavedChanges ||
-                  context.read<LocalVersionProvider>().hasUnsavedChanges,
+                  sectionProvider.hasUnsavedChanges ||
+                  localVersionProvider.hasUnsavedChanges,
               showBottomNavBar: true,
               onPopCallback: () => cipherProvider.clearNewCipherFromCache(),
             );
@@ -211,7 +213,7 @@ class MainScreenState extends State<MainScreen> {
             navProvider.push(
               EditPlaylistScreen(),
               changeDetector: () =>
-                  context.read<LocalVersionProvider>().hasUnsavedChanges,
+                  localVersionProvider.hasUnsavedChanges,
               showBottomNavBar: true,
             );
             break;

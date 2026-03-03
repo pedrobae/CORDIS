@@ -56,13 +56,15 @@ class ScheduleActionsSheet extends StatelessWidget {
                     trailingIcon: Icons.chevron_right,
                     isDark: true,
                     onPressed: () {
+                      final localScheduleProvider = context
+                          .read<LocalScheduleProvider>();
                       Navigator.of(context).pop(); // Close the bottom sheet
                       selectionProvider
                           .enableSelectionMode(); // For playlist assignment
                       navigationProvider.push(
                         CreateScheduleScreen(creationStep: 1),
                         showBottomNavBar: true,
-                        changeDetector: () => context.read<LocalScheduleProvider>().hasUnsavedChanges,
+                        changeDetector: () => localScheduleProvider.hasUnsavedChanges,
                         onPopCallback: () {
                           selectionProvider.disableSelectionMode();
                         },

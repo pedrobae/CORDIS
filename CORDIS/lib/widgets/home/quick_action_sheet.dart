@@ -106,6 +106,8 @@ class QuickActionSheet extends StatelessWidget {
                 isDiscrete: true,
                 text: AppLocalizations.of(context)!.assignSchedule,
                 onPressed: () {
+                  final localScheduleProvider = context
+                      .read<LocalScheduleProvider>();
                   Navigator.of(context).pop(); // Close the bottom sheet
                   navigationProvider.attemptPop(
                     context,
@@ -115,7 +117,8 @@ class QuickActionSheet extends StatelessWidget {
                   navigationProvider.push(
                     CreateScheduleScreen(creationStep: 1),
                     showBottomNavBar: true,
-                    changeDetector: () => context.read<LocalScheduleProvider>().hasUnsavedChanges,
+                    changeDetector: () =>
+                        localScheduleProvider.hasUnsavedChanges,
                     onPopCallback: () {
                       selectionProvider.disableSelectionMode();
                     },

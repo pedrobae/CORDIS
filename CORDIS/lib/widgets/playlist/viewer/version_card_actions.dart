@@ -92,7 +92,7 @@ class VersionCardActionsSheet extends StatelessWidget {
                           playlistID: playlistID,
                           isEnabled: false,
                         ),
-                        changeDetector: () => context.read<PlaylistProvider>().hasUnsavedChanges,
+                        changeDetector: () => playlistProvider.hasUnsavedChanges,
                         showBottomNavBar: true,
                       );
                       Navigator.of(context).pop();

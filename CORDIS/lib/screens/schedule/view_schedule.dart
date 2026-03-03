@@ -443,6 +443,9 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                   context,
                                 )!.editPlaceholder(''),
                                 onPressed: () {
+                                  final sectionProvider = context.read<SectionProvider>();
+                                  final cipherProvider = context.read<CipherProvider>();
+                                  
                                   navigationProvider.push(
                                     EditScheduleScreen(
                                       mode: EditScheduleMode.roleMember,
@@ -451,8 +454,8 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                                     changeDetector: () =>
                                         (localScheduleProvider
                                             .hasUnsavedChanges ||
-                                        context.read<SectionProvider>().hasUnsavedChanges ||
-                                        context.read<CipherProvider>().hasUnsavedChanges),
+                                        sectionProvider.hasUnsavedChanges ||
+                                        cipherProvider.hasUnsavedChanges),
                                     showBottomNavBar: true,
                                   );
                                 },
