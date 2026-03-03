@@ -283,4 +283,8 @@ class SectionProvider extends ChangeNotifier {
     _isSaving = false;
     notifyListeners();
   }
+
+  void clearUnsavedChanges() {
+    _hasUnsavedChanges = false;
+  }
 }

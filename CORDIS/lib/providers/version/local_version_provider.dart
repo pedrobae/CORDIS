@@ -452,4 +452,8 @@ class LocalVersionProvider extends ChangeNotifier {
     _hasUnsavedChanges = false;
     notifyListeners();
   }
+
+  void clearUnsavedChanges() {
+    _hasUnsavedChanges = false;
+  }
 }

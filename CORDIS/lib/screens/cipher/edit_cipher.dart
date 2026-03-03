@@ -339,6 +339,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
   ) async {
     // Cache the transposed key to the version
     final key = context.read<TranspositionProvider>().transposedKey;
+
     if (widget.versionID is int) {
       versionProvider.cacheUpdates(widget.versionID!, transposedKey: key);
     } else if (widget.versionID is String) {
@@ -347,6 +348,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
         transposedKey: key,
       );
     }
+
     if (selectionProvider.isSelectionMode) {
       for (dynamic versionId in selectionProvider.selectedItemIds) {
         if (versionId.runtimeType == int) {
@@ -415,5 +417,10 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           break;
       }
     }
+
+    // CLEAR HAS CHANGES FLAGS
+    versionProvider.clearUnsavedChanges();
+    cipherProvider.clearUnsavedChanges();
+    sectionProvider.clearUnsavedChanges();
   }
 }

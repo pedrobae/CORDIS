@@ -90,6 +90,8 @@ class AutoScrollProvider extends ChangeNotifier {
     autoScrollTimer = Timer.periodic(durationPerSection, (_) {
       if (sectionKeys.isEmpty) return;
 
+      debugPrint('Scrolling to ${currentSectionIndex.value + 1} / $_totalSections');
+
       // Move to next section
       if (currentSectionIndex.value < _totalSections - 1) {
         currentSectionIndex.value++;
@@ -143,24 +145,25 @@ class AutoScrollProvider extends ChangeNotifier {
   }
 
   /// Calculates the current section index based on the scroll offset
-int calculateVisibleSectionIndex(double viewportHeight) {
-  for (final entry in sectionKeys.entries) {
-    final sectionContext = entry.value.currentContext;
-    if (sectionContext == null) continue;
+  int calcCurrentIndex(double viewportHeight) {
+    for (final entry in sectionKeys.entries) {
+      final sectionContext = entry.value.currentContext;
+      if (sectionContext == null) continue;
 
-    final box = sectionContext.findRenderObject() as RenderBox?;
-    if (box == null) continue;
+      final box = sectionContext.findRenderObject() as RenderBox?;
+      if (box == null) continue;
 
-    // Get section's position relative to the scrollable
-    final sectionTop = box.localToGlobal(Offset.zero).dy;
+      // Get section's position relative to the scrollable
+      final sectionTop = box.localToGlobal(Offset.zero).dy;
 
-    // Check if section is in viewport (accounting for some buffer)
-    if (sectionTop > viewportHeight * 0.2 && sectionTop < viewportHeight * 0.3) {
-      return entry.key;
+      // Check if section is in viewport (accounting for some buffer)
+      if (sectionTop > viewportHeight * 0.2 &&
+          sectionTop < viewportHeight * 0.22) {
+        return entry.key;
+      }
     }
+    return currentSectionIndex.value; // Fallback to current
   }
-  return currentSectionIndex.value; // Fallback to current
-}
 
   // ===== CLEANUP =====
   @override

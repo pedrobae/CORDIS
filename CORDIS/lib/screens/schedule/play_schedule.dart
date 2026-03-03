@@ -83,19 +83,23 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
     }
   }
 
-  /// Lazy load data for current item ± 1 neighbors
+  /// Lazy load data for current
   /// This dramatically reduces initial load time and memory usage
   Future<void> _loadItemsAroundCurrent(int currentIndex) async {
+    if (isCloud) return; // Cloud items are loaded on with scheduleDTO
     final versionProvider = context.read<LocalVersionProvider>();
     final cipherProvider = context.read<CipherProvider>();
     final flowItemProvider = context.read<FlowItemProvider>();
     final sectionProvider = context.read<SectionProvider>();
 
     // Load current, previous, and next items
+    const int loadRadius = 1;
     final indicesToLoad = <int>{};
     indicesToLoad.add(currentIndex);
-    if (currentIndex > 0) indicesToLoad.add(currentIndex - 1);
-    if (currentIndex < items.length - 1) indicesToLoad.add(currentIndex + 1);
+    for (int i = 1; i <= loadRadius; i++) {
+      if (currentIndex - i >= 0) indicesToLoad.add(currentIndex - i);
+      if (currentIndex + i < items.length) indicesToLoad.add(currentIndex + i);
+    }
 
     for (final idx in indicesToLoad) {
       final item = items[idx];

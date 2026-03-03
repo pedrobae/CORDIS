@@ -60,9 +60,9 @@ class _MetadataTabState extends State<MetadataTab> {
           controllers[InfoField.values[i]] = TextEditingController();
       }
     }
-    _addListeners();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _syncWithProviderData();
+      _addListeners();
     });
   }
 
@@ -358,8 +358,7 @@ class _MetadataTabState extends State<MetadataTab> {
               context: context,
               isScrollControlled: true,
               builder: (context) {
-                return SelectKeySheet(
-                );
+                return SelectKeySheet();
               },
             );
           },

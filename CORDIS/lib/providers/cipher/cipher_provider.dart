@@ -336,6 +336,10 @@ class CipherProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearUnsavedChanges() {
+    _hasUnsavedChanges = false;
+  }
+
   void clearSearch() {
     _searchTerm = '';
   }

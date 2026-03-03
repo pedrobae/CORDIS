@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 
 import 'package:cordis/models/domain/cipher/section.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
@@ -33,6 +34,7 @@ class PlayVersion extends StatefulWidget {
 
 class _PlayVersionState extends State<PlayVersion> {
   late final ScrollController _scrollController;
+  late final AutoScrollProvider _scrollProvider;
   late final ValueNotifier<bool> _showTopBar = ValueNotifier(false);
   final _headerSectionKey = GlobalKey();
   double _headerHeight = 0;
@@ -43,13 +45,14 @@ class _PlayVersionState extends State<PlayVersion> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _scrollProvider = context.read<AutoScrollProvider>();
 
     isCloud = widget.cloudVersionID != null;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _calculateHeaderHeight();
       _scrollController.addListener(_scrollListener);
-      context.read<AutoScrollProvider>().startAutoScroll();
+      _scrollProvider.startAutoScroll();
     });
   }
 
@@ -78,21 +81,23 @@ class _PlayVersionState extends State<PlayVersion> {
       _showTopBar.value = shouldShow; // Update without expensive setState
     }
 
+    final isManualScroll =
+        _scrollController.position.userScrollDirection != ScrollDirection.idle;
+    
+    if (isManualScroll && _scrollProvider.scrollModeEnabled) {
+      _scrollProvider.stopAutoScroll();
+    }
+
     // Throttle to 50ms for smoother updates without jank
     final now = DateTime.now();
     if (now.difference(_lastScrollUpdate).inMilliseconds < 50) {
-      // Update scroll index and disable auto-scroll if user scrolls manually during auto-scroll
-      final scrollProvider = Provider.of<AutoScrollProvider>(
-        context,
-        listen: false,
-      );
-      final sectionIndex = scrollProvider.calculateVisibleSectionIndex(
+      // Update scroll index
+      final sectionIndex = _scrollProvider.calcCurrentIndex(
         _scrollController.position.viewportDimension,
       );
-      if (sectionIndex != scrollProvider.currentSectionIndex.value) {
-        scrollProvider.currentSectionIndex.value = sectionIndex;
+      if (sectionIndex != _scrollProvider.currentSectionIndex.value) {
+        _scrollProvider.currentSectionIndex.value = sectionIndex;
       }
-      scrollProvider.stopAutoScroll();
       return;
     }
     _lastScrollUpdate = now;
