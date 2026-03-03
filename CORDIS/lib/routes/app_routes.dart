@@ -4,9 +4,11 @@ import 'package:cordis/screens/user/login_screen.dart';
 import 'package:cordis/screens/settings_screen.dart';
 import 'package:cordis/screens/user/register_screen.dart';
 import 'package:cordis/screens/main_screen.dart';
+import 'package:cordis/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
+  static const String splash = '/splash';
   static const String main = '/';
   static const String register = '/register';
   static const String login = '/login';
@@ -15,6 +17,7 @@ class AppRoutes {
   static const String settings = '/settings';
 
   static Map<String, WidgetBuilder> routes = {
+    splash: (context) => const SplashScreen(),
     main: (context) => const MainScreen(),
     register: (context) => const RegisterScreen(),
     login: (context) => const LoginScreen(),

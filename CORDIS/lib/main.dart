@@ -58,28 +58,31 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AdminProvider()),
+        // Core providers - always loaded
         ChangeNotifierProvider(create: (_) => MyAuthProvider()),
-        ChangeNotifierProvider(create: (_) => AppInfoProvider()),
-        ChangeNotifierProvider(create: (_) => AutoScrollProvider()),
-        ChangeNotifierProvider(create: (_) => EmailProvider()),
-        ChangeNotifierProvider(create: (_) => CipherProvider()),
-        ChangeNotifierProvider(create: (_) => ImportProvider()),
-        ChangeNotifierProvider(
-          create: (_) => LayoutSettingsProvider()..loadSettings(),
-        ),
-        ChangeNotifierProvider(create: (_) => NavigationProvider()),
-        ChangeNotifierProvider(create: (_) => ParserProvider()),
-        ChangeNotifierProvider(create: (_) => PlaylistProvider()),
-        ChangeNotifierProvider(create: (_) => SectionProvider()),
-        ChangeNotifierProvider(create: (_) => SelectionProvider()),
         ChangeNotifierProvider(
           create: (_) => SettingsProvider()..loadSettings(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => LayoutSettingsProvider()..loadSettings(),
+        ),
+        // App structure providers - always loaded (needed for routing/navigation)
+        ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
+        // Data providers - created but not initialized until user authenticates
+        ChangeNotifierProvider(create: (_) => CipherProvider()),
+        ChangeNotifierProvider(create: (_) => PlaylistProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        // Specialized providers
+        ChangeNotifierProvider(create: (_) => AutoScrollProvider()),
+        ChangeNotifierProvider(create: (_) => EmailProvider()),
+        ChangeNotifierProvider(create: (_) => ImportProvider()),
+        ChangeNotifierProvider(create: (_) => ParserProvider()),
+        ChangeNotifierProvider(create: (_) => SectionProvider()),
+        ChangeNotifierProvider(create: (_) => SelectionProvider()),
         ChangeNotifierProvider(create: (_) => CloudScheduleProvider()),
         ChangeNotifierProvider(create: (_) => LocalScheduleProvider()),
         ChangeNotifierProvider(create: (_) => FlowItemProvider()),
-        ChangeNotifierProvider(create: (_) => UserProvider()..loadUsers()),
         ChangeNotifierProvider(create: (_) => CloudVersionProvider()),
         ChangeNotifierProvider(create: (_) => LocalVersionProvider()),
         ChangeNotifierProvider(create: (_) => TranspositionProvider()),
@@ -101,7 +104,7 @@ class MyApp extends StatelessWidget {
             theme: settingsProvider.lightTheme,
             darkTheme: settingsProvider.darkTheme,
             themeMode: settingsProvider.themeMode,
-            initialRoute: AppRoutes.main,
+            initialRoute: AppRoutes.splash,
             routes: AppRoutes.routes,
           );
         },

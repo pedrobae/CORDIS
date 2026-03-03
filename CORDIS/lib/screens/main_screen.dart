@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/user/my_auth_provider.dart';
 
 import 'package:cordis/widgets/side_menu.dart';
 
@@ -23,41 +22,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
-  late MyAuthProvider _auth;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _auth = Provider.of<MyAuthProvider>(context, listen: false);
-    _auth.addListener(_authListener);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _redirectIfNeeded();
-    });
-  }
-
-  void _authListener() {
-    if (mounted) {
-      _redirectIfNeeded();
-    }
-  }
-
-  void _redirectIfNeeded() {
-    if (!mounted || _auth.isAuthenticated) return;
-
-    Navigator.of(
-      context,
-    ).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
-  }
-
-  @override
-  void dispose() {
-    _auth.removeListener(_authListener);
-    _auth.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<NavigationProvider>(

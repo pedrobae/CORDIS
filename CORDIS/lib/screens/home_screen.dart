@@ -63,53 +63,11 @@ class _HomeScreenState extends State<HomeScreen> {
             CloudScheduleProvider
           >(
             builder: (context, auth, localSch, cloudSch, child) {
-              if (auth.isLoading) {
-                return _buildLoadingState();
-              }
-              if (auth.error != null) {
-                return _buildErrorState(auth);
-              }
 
               final nextSchedule = _getNextSchedule(localSch, cloudSch);
-              return _buildContent(auth, localSch, nextSchedule);
+              return _buildContent(auth, nextSchedule);
             },
           ),
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text(AppLocalizations.of(context)!.loading),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState(MyAuthProvider auth) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.errorMessage(
-              AppLocalizations.of(context)!.authentication,
-              auth.error!,
-            ),
-            style: const TextStyle(color: Colors.red),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => auth.signInAnonymously(),
-            child: Text(AppLocalizations.of(context)!.tryAgain),
-          ),
-        ],
-      ),
     );
   }
 
@@ -133,7 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildContent(
     MyAuthProvider auth,
-    LocalScheduleProvider localSch,
     dynamic nextSchedule,
   ) {
     final textTheme = Theme.of(context).textTheme;
@@ -148,13 +105,13 @@ class _HomeScreenState extends State<HomeScreen> {
           DateFormat('EEEE, MMM d', locale.languageCode).format(DateTime.now()),
           style: textTheme.bodyLarge,
         ),
-        _buildWelcomeMessage(auth, textTheme),
-        _buildNextSchedule(localSch, nextSchedule, textTheme, colorScheme),
+        _buildWelcomeMessage(textTheme, auth),
+        _buildNextSchedule(nextSchedule, textTheme, colorScheme),
       ],
     );
   }
 
-  Widget _buildWelcomeMessage(MyAuthProvider auth, TextTheme textTheme) {
+  Widget _buildWelcomeMessage(TextTheme textTheme, MyAuthProvider auth) {
     return Text(
       AppLocalizations.of(
         context,
@@ -164,15 +121,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNextSchedule(
-    LocalScheduleProvider localSch,
     dynamic nextSchedule,
     TextTheme textTheme,
     ColorScheme colorScheme,
   ) {
-    if (localSch.isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-
     if (nextSchedule == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
