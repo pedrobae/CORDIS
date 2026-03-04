@@ -1,7 +1,7 @@
 import 'package:cordis/widgets/ciphers/section_badge.dart';
+import 'package:cordis/widgets/ciphers/viewer/token_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cordis/widgets/ciphers/viewer/chordpro_view.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
 
 class SectionCard extends StatelessWidget {
@@ -20,21 +20,18 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LayoutSettingsProvider>(
-      builder: (context, layoutSettingsProvider, child) {
-        final textTheme = Theme.of(context).textTheme;
-        final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
-        if (sectionText.trim().isEmpty) {
-          return SizedBox.shrink();
-        }
+    return Consumer<LayoutSettingsProvider>(
+      builder: (context, laySet, child) {
         return Container(
           decoration: BoxDecoration(
-            color: layoutSettingsProvider.showSectionHeaders
+            color: laySet.showSectionHeaders
                 ? colorScheme.surface
                 : sectionColor.withAlpha(30),
             border: Border.all(
-              color: layoutSettingsProvider.showSectionHeaders
+              color: laySet.showSectionHeaders
                   ? colorScheme.surfaceContainerHigh
                   : sectionColor,
             ),
@@ -45,7 +42,7 @@ class SectionCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // LABEL
-              if (layoutSettingsProvider.showSectionHeaders)
+              if (laySet.showSectionHeaders)
                 Row(
                   spacing: 8,
                   children: [
@@ -62,13 +59,8 @@ class SectionCard extends StatelessWidget {
                     ),
                   ],
                 ),
-              SizedBox(
-                height: layoutSettingsProvider.showSectionHeaders ? 8 : 0,
-              ),
-              ChordProView(
-                chordPro: sectionText,
-                isAnnotation: sectionCode == 'N',
-              ),
+              SizedBox(height: laySet.showSectionHeaders ? 8 : 0),
+              TokenView(chordPro: sectionText),
             ],
           ),
         );

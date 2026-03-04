@@ -1,10 +1,9 @@
 import 'dart:math';
 
 import 'package:cordis/models/ui/content_token.dart';
+import 'package:cordis/providers/layout_settings_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_token.dart';
 import 'package:flutter/material.dart';
-
-final double _fontSize = 18;
 
 /// Helper class to track a widget along with its pre-calculated width
 class WidgetWithSize {
@@ -35,6 +34,8 @@ class ContentTokenized {
 }
 
 class TokenizationService {
+  const TokenizationService();
+
   /// Tokenizes the given content string into a list of ContentTokens.
   /// Creates preceding chord target tokens in lines where there are no spaces before lyrics.
   List<ContentToken> tokenize(String content) {
@@ -125,17 +126,14 @@ class TokenizationService {
   /// Measures text width with caching to avoid recalculating TextPainter
   double measureTextWidth(
     String text,
-    String fontFamily, {
+    TextStyle style, {
     Map<String, double>? cache,
   }) {
     cache ??= {};
-    final key = '$text|$fontFamily';
+    final key = '$text|${style.fontFamily}';
     return cache.putIfAbsent(key, () {
       final textPainter = TextPainter(
-        text: TextSpan(
-          text: text,
-          style: TextStyle(fontSize: _fontSize, fontFamily: fontFamily),
-        ),
+        text: TextSpan(text: text, style: style),
         maxLines: 1,
         textDirection: TextDirection.ltr,
       )..layout();
@@ -143,13 +141,104 @@ class TokenizationService {
     });
   }
 
-  /// Builds token widgets with drag-and-drop capabilities, with their sizes pre-calculated.
-  List<List<List<WidgetWithSize>>> buildContentWidgets(
+  /// Builds widgets for viewing, with their sizes pre-calculated.
+  List<List<List<WidgetWithSize>>> buildViewWidgets(
+    List<List<List<ContentToken>>> organizedTokens,
+    List<ContentToken> tokens,
+    TextStyle lyricStyle,
+    TextStyle chordStyle,
+  ) {
+    final viewWidgets = <List<List<WidgetWithSize>>>[];
+
+    final widthCache = <String, double>{};
+
+    for (var line in organizedTokens) {
+      final lineWidgets = <List<WidgetWithSize>>[];
+      for (var word in line) {
+        final wordWidgets = <WidgetWithSize>[];
+        for (var token in word) {
+          switch (token.type) {
+            case TokenType.chord:
+              final textWidth = measureTextWidth(
+                token.text,
+                chordStyle,
+                cache: widthCache,
+              );
+
+              wordWidgets.add(
+                WidgetWithSize(
+                  widget: Text(token.text, style: chordStyle),
+                  width: textWidth,
+                  type: TokenType.chord,
+                ),
+              );
+              break;
+            case TokenType.lyric:
+              final textWidth = measureTextWidth(
+                token.text,
+                lyricStyle,
+                cache: widthCache,
+              );
+
+              wordWidgets.add(
+                WidgetWithSize(
+                  widget: Text(token.text, style: lyricStyle),
+                  width: textWidth,
+                  type: TokenType.lyric,
+                ),
+              );
+              break;
+            case TokenType.space:
+              final textWidth = measureTextWidth(
+                ' ',
+                lyricStyle,
+                cache: widthCache,
+              );
+
+              wordWidgets.add(
+                WidgetWithSize(
+                  widget: Text(' ', style: lyricStyle),
+                  width: textWidth,
+                  type: TokenType.space,
+                ),
+              );
+              break;
+            case TokenType.newline:
+              // NEW LINE TOKENS INDICATE LINE BREAKS
+              wordWidgets.add(
+                WidgetWithSize(
+                  widget: SizedBox.shrink(),
+                  width: 0,
+                  type: TokenType.newline,
+                ),
+              );
+              break;
+            case TokenType.precedingChordTarget:
+              // PRECEDING CHORD TARGETS DONT EXIST ON VIEW MODE
+              break;
+          }
+        }
+        if (wordWidgets.isNotEmpty) {
+          lineWidgets.add(List.from(wordWidgets));
+          wordWidgets.clear();
+        }
+      }
+      if (lineWidgets.isNotEmpty) {
+        viewWidgets.add(List.from(lineWidgets));
+        lineWidgets.clear();
+      }
+    }
+
+    return viewWidgets;
+  }
+
+  /// Builds widgets with drag-and-drop capabilities, with their sizes pre-calculated.
+  List<List<List<WidgetWithSize>>> buildEditWidgets(
     List<List<List<ContentToken>>> contentTokens,
     List<ContentToken> tokens,
-    String fontFamily,
+    TextStyle chordStyle,
+    TextStyle lyricStyle,
     Color contentColor,
-    Color lyricColor,
     VoidCallback toggleDrag,
     Function(List<ContentToken>, ContentToken, int) onAddChord,
     Function(List<ContentToken>, ContentToken, int) onAddPrecedingChord,
@@ -175,7 +264,8 @@ class TokenizationService {
                     tokens,
                     token,
                     position,
-                    fontFamily,
+                    lyricStyle,
+                    chordStyle,
                     contentColor,
                     onAddPrecedingChord,
                     onRemoveChord,
@@ -188,8 +278,8 @@ class TokenizationService {
               break;
             case TokenType.chord:
               final chordWidth =
-                  measureTextWidth(token.text, fontFamily, cache: widthCache) +
-                  20; // Add ChordToken padding
+                  measureTextWidth(token.text, chordStyle, cache: widthCache) +
+                  20; // Add DraggableChordToken padding
 
               wordWidgets.add(
                 WidgetWithSize(
@@ -197,7 +287,7 @@ class TokenizationService {
                     token,
                     position,
                     contentColor,
-                    fontFamily,
+                    chordStyle,
                     toggleDrag,
                     isEnabled,
                   ),
@@ -209,7 +299,7 @@ class TokenizationService {
             case TokenType.lyric:
               final lyricWidth = measureTextWidth(
                 token.text,
-                fontFamily,
+                lyricStyle,
                 cache: widthCache,
               );
 
@@ -221,8 +311,8 @@ class TokenizationService {
                     token,
                     position,
                     contentColor,
-                    lyricColor,
-                    fontFamily,
+                    lyricStyle,
+                    chordStyle,
                     onAddChord,
                     onRemoveChord,
                     isEnabled,
@@ -236,7 +326,7 @@ class TokenizationService {
             case TokenType.space:
               final tokenWidth = measureTextWidth(
                 ' ',
-                fontFamily,
+                lyricStyle,
                 cache: widthCache,
               );
 
@@ -248,8 +338,10 @@ class TokenizationService {
                     token,
                     position,
                     tokenWidth,
-                    fontFamily,
+
                     contentColor,
+                    lyricStyle,
+                    chordStyle,
                     onAddChord,
                     onRemoveChord,
                     isEnabled,
@@ -284,6 +376,27 @@ class TokenizationService {
       }
     }
     return contentWidgets;
+  }
+
+  /// Filters the given list of ContentTokens based on the provided filter settings.
+  List<ContentToken> filterTokens(
+    List<ContentToken> tokens,
+    Map<ContentFilter, bool> contentFilters,
+  ) {
+    return tokens.where((token) {
+      switch (token.type) {
+        case TokenType.chord:
+          return contentFilters[ContentFilter.chords]!;
+        case TokenType.space:
+        case TokenType.lyric:
+          return contentFilters[ContentFilter.lyrics]!;
+        case TokenType.newline:
+        case TokenType.precedingChordTarget:
+          // Returns true if any content is shown
+          return contentFilters[ContentFilter.chords]! ||
+              contentFilters[ContentFilter.lyrics]!;
+      }
+    }).toList();
   }
 
   /// Organizes the given list of WidgetWithSize into lines and words based on TokenType.
@@ -370,7 +483,11 @@ class TokenizationService {
   /// handling line breaks and spacing.
   ContentTokenized positionWidgets(
     BuildContext context,
-    List<List<List<WidgetWithSize>>> contentWidgets, {
+    List<List<List<WidgetWithSize>>> contentWidgets,
+     {
+    bool isEditMode = false,
+    double chordHeight = 25,
+    double lyricHeight = 25,
     double lineSpacing = 8,
     double letterSpacing = 1,
   }) {
@@ -381,12 +498,15 @@ class TokenizationService {
       letterSpacing,
     );
 
-    // Account for vertical padding (3 + 4 top + bottom from ChordToken)
-    final double chordHeight = _fontSize + 7;
+    // Account for vertical padding (3 + 4 top + bottom from DraggableChordToken)
+    if (isEditMode) {
+      chordHeight += 7;
+    }
+    
     // Account for padding (16, 16, 8 left + 8, 16, 16 right)
     final double maxWidth = MediaQuery.of(context).size.width - 80;
 
-    final double lineHeight = chordHeight + lineSpacing + _fontSize;
+    final double lineHeight = chordHeight + lineSpacing + lyricHeight;
 
     int viewLineIndex = 0; // Last lyric line number
 
@@ -558,22 +678,29 @@ class TokenizationService {
   ContentTokenized checkHumongousWords(
     BuildContext context,
     ContentTokenized positionedWidgets, {
+    bool isEditMode = false,
+    double chordHeight = 25,
+    double lyricHeight = 25,
     double lineSpacing = 8,
   }) {
     // Check for humongous words that exceed maxWidth and split them into multiple lines if necessary
     final double maxWidth = MediaQuery.of(context).size.width - 80;
 
-    final double chordHeight = _fontSize + 7;
-    final double lineHeight = chordHeight + lineSpacing + _fontSize;
+    if (isEditMode) chordHeight += 7; // Account for DraggableChordToken extra padding
+    final double lineHeight = chordHeight + lineSpacing + lyricHeight;
 
     final adjustedWidgets = <Positioned>[];
     int lineOffset = 0;
     double currentX = 0;
     for (int i = 0; i < positionedWidgets.tokens.length; i++) {
       final widget = positionedWidgets.tokens[i];
-      final nextWidget = i < positionedWidgets.tokens.length - 1 ? positionedWidgets.tokens[i + 1] : null;
+      final nextWidget = i < positionedWidgets.tokens.length - 1
+          ? positionedWidgets.tokens[i + 1]
+          : null;
 
-      final widgetWidth = nextWidget != null ? nextWidget.left! - widget.left! : 8;
+      final widgetWidth = nextWidget != null
+          ? nextWidget.left! - widget.left!
+          : 8;
 
       if (currentX + widgetWidth > maxWidth) {
         // Move to next line
@@ -582,12 +709,12 @@ class TokenizationService {
       }
       if (widget.child is Draggable) {
         adjustedWidgets.add(
-        Positioned(
-          left: currentX,
+          Positioned(
+            left: currentX,
             top: lineOffset * lineHeight + widget.top!,
-          child: widget.child,
-        ),
-      );
+            child: widget.child,
+          ),
+        );
       } else {
         adjustedWidgets.add(
           Positioned(
@@ -601,7 +728,10 @@ class TokenizationService {
       currentX += widgetWidth;
     }
 
-    return ContentTokenized(adjustedWidgets, (positionedWidgets.contentHeight) + (lineOffset * lineHeight));
+    return ContentTokenized(
+      adjustedWidgets,
+      (positionedWidgets.contentHeight) + (lineOffset * lineHeight),
+    );
   }
 
   // ====== Widget Builders ======
@@ -609,7 +739,7 @@ class TokenizationService {
     ContentToken token,
     int position,
     Color contentColor,
-    String fontFamily,
+    TextStyle chordStyle,
     VoidCallback toggleDrag,
     bool isEnabled,
   ) {
@@ -620,21 +750,13 @@ class TokenizationService {
     final chordWidget = ChordToken(
       token: token,
       sectionColor: contentColor,
-      textStyle: TextStyle(
-        fontSize: _fontSize,
-        color: Colors.white,
-        fontFamily: fontFamily,
-      ),
+      textStyle: chordStyle,
     );
 
     final dimChordWidget = ChordToken(
       token: token,
       sectionColor: contentColor.withValues(alpha: .5),
-      textStyle: TextStyle(
-        fontSize: _fontSize,
-        color: Colors.white,
-        fontFamily: fontFamily,
-      ),
+      textStyle: chordStyle,
     );
 
     // GestureDetector to handle long press to drag transition
@@ -658,7 +780,8 @@ class TokenizationService {
     List<ContentToken> tokens,
     ContentToken token,
     int position,
-    String fontFamily,
+    TextStyle chordStyle,
+    TextStyle lyricStyle,
     Color contentColor,
     Function(List<ContentToken>, ContentToken, int) onAddPrecedingChord,
     Function(List<ContentToken>, int) onRemoveChord,
@@ -694,7 +817,8 @@ class TokenizationService {
                   candidateData.first!,
                   token,
                   lineTokens,
-                  fontFamily,
+                  chordStyle,
+                  lyricStyle,
                   contentColor,
                 );
               }
@@ -710,20 +834,13 @@ class TokenizationService {
     ContentToken token,
     int position,
     Color contentColor,
-    Color lyricColor,
-    String fontFamily,
+    TextStyle lyricStyle,
+    TextStyle chordStyle,
     Function(List<ContentToken>, ContentToken, int) onAddChord,
     Function(List<ContentToken>, int) onRemoveChord,
     bool isEnabled,
   ) {
-    final dragTargetChild = Text(
-      token.text,
-      style: TextStyle(
-        fontSize: _fontSize,
-        color: lyricColor,
-        fontFamily: fontFamily,
-      ),
-    );
+    final dragTargetChild = Text(token.text, style: lyricStyle);
 
     return isEnabled
         ? DragTarget<ContentToken>(
@@ -745,7 +862,8 @@ class TokenizationService {
                   candidateData.first!,
                   token,
                   lineTokens,
-                  fontFamily,
+                  chordStyle,
+                  lyricStyle,
                   contentColor,
                 );
               }
@@ -761,8 +879,9 @@ class TokenizationService {
     ContentToken token,
     int position,
     double width,
-    String fontFamily,
     Color contentColor,
+    TextStyle chordStyle,
+    TextStyle lyricStyle,
     Function(List<ContentToken>, ContentToken, int) onAddChord,
     Function(List<ContentToken>, int) onRemoveChord,
     bool isEnabled,
@@ -789,7 +908,8 @@ class TokenizationService {
                   candidateData.first!,
                   token,
                   lineTokens,
-                  fontFamily,
+                  chordStyle,
+                  lyricStyle,
                   contentColor,
                 );
               }
@@ -808,7 +928,8 @@ class TokenizationService {
     ContentToken draggedChord,
     ContentToken draggedToToken,
     List<List<ContentToken>> lineTokens,
-    String fontFamily,
+    TextStyle chordStyle,
+    TextStyle lyricStyle,
     Color contentColor,
   ) {
     final lyricTokens = lineTokens
@@ -845,11 +966,7 @@ class TokenizationService {
             child: ChordToken(
               token: draggedChord,
               sectionColor: contentColor,
-              textStyle: TextStyle(
-                fontSize: _fontSize,
-                color: Colors.white,
-                fontFamily: fontFamily,
-              ),
+              textStyle: chordStyle,
             ),
           ),
         );
@@ -857,19 +974,13 @@ class TokenizationService {
       positionedWidgets.add(
         Positioned(
           left: xOffset,
-          top: _fontSize + 10, // Chord Token offset
-          child: Text(
-            token.text,
-            style: TextStyle(
-              fontSize: _fontSize,
-              color: Colors.black87,
-              fontFamily: fontFamily,
-            ),
-          ),
+          top: chordStyle.fontSize! + 10, // Chord Token offset
+          child: Text(token.text, style: lyricStyle),
         ),
       );
       xOffset +=
-          measureTextWidth(token.text, fontFamily) + 1; // Add letter spacing
+          measureTextWidth(token.text, lyricStyle) +
+          1; // Add letter spacing to offset
     }
 
     // Calculate the offset to position the cutout around the dragged to token,
@@ -890,10 +1001,10 @@ class TokenizationService {
       children: [
         dragTargetChild,
         Positioned(
-          top: -(_fontSize * 3),
+          bottom: -(lyricStyle.fontSize!),
           left: leftOffset,
           child: Container(
-            height: 2 * (_fontSize + 8), // Height to fit the chord and lyrics
+            height: 2 * (lyricStyle.fontSize! + 8), // Height to fit the chord and lyrics
             width: 130,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),

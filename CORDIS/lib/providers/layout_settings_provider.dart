@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
 import '../services/settings_service.dart';
 
+enum ContentFilter { chords, lyrics }
+enum LayoutFilter { annotations, transitions }
+
 class LayoutSettingsProvider extends ChangeNotifier {
   double fontSize = 16;
   String fontFamily = 'OpenSans';
   int columnCount = 1;
   bool showSectionHeaders = true;
 
-  bool showChords = true;
-  bool showLyrics = true;
-  bool showAnnotations = true;
-  bool showTransitions = true;
-  bool showTextSections = true;
+  bool _showChords = true;
+  bool _showLyrics = true;
+  bool _showAnnotations = true;
+  bool _showTransitions = true;
+
+  Map<ContentFilter, bool> get contentFilters => {
+    ContentFilter.chords: _showChords,
+    ContentFilter.lyrics: _showLyrics,
+  };
+
+  Map<LayoutFilter, bool> get layoutFilters => {
+    LayoutFilter.annotations: _showAnnotations,
+    LayoutFilter.transitions: _showTransitions,
+  };
 
 
 
@@ -20,11 +32,10 @@ class LayoutSettingsProvider extends ChangeNotifier {
     fontSize = SettingsService.getFontSize();
     fontFamily = SettingsService.getFontFamily();
     columnCount = SettingsService.getColumnCount();
-    showChords = SettingsService.getShowChords();
-    showLyrics = SettingsService.getShowLyrics();
-    showAnnotations = SettingsService.getShowNotes();
-    showTransitions = SettingsService.getShowTransitions();
-    showTextSections = SettingsService.getShowTextSections();
+    _showChords = SettingsService.getShowChords();
+    _showLyrics = SettingsService.getShowLyrics();
+    _showAnnotations = SettingsService.getShowNotes();
+    _showTransitions = SettingsService.getShowTransitions();
     showSectionHeaders = SettingsService.getShowSectionHeaders();
     notifyListeners();
   }
@@ -55,39 +66,33 @@ class LayoutSettingsProvider extends ChangeNotifier {
   }
 
   void toggleChords() {
-    showChords = !showChords;
-    SettingsService.setShowChords(showChords);
+    _showChords = !_showChords;
+    SettingsService.setShowChords(_showChords);
     notifyListeners();
   }
 
   void toggleLyrics() {
-    showLyrics = !showLyrics;
-    SettingsService.setShowLyrics(showLyrics);
+    _showLyrics = !_showLyrics;
+    SettingsService.setShowLyrics(_showLyrics);
     notifyListeners();
   }
 
   void toggleNotes() {
-    showAnnotations = !showAnnotations;
-    SettingsService.setShowNotes(showAnnotations);
+    _showAnnotations = !_showAnnotations;
+    SettingsService.setShowNotes(_showAnnotations);
     notifyListeners();
   }
 
   void toggleTransitions() {
-    showTransitions = !showTransitions;
-    SettingsService.setShowTransitions(showTransitions);
+    _showTransitions = !_showTransitions;
+    SettingsService.setShowTransitions(_showTransitions);
     notifyListeners();
   }
 
-  void toggleTextSections() {
-    showTextSections = !showTextSections;
-    SettingsService.setShowTextSections(showTextSections);
-    notifyListeners();
-  }
-
-  TextStyle getChordTextStyle(Color primaryColor) => TextStyle(
+  TextStyle getChordTextStyle(Color color) => TextStyle(
     fontFamily: fontFamily,
     fontSize: fontSize.toDouble(),
-    color: primaryColor,
+    color: color,
     fontWeight: FontWeight.bold,
     height: 2,
     letterSpacing: 0,

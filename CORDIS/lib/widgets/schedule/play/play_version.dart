@@ -144,9 +144,9 @@ class _PlayVersionState extends State<PlayVersion> {
             final filteredStructure = songStructure
                 .where(
                   (sectionCode) =>
-                      ((layoutProvider.showAnnotations ||
+                      ((layoutProvider.layoutFilters[LayoutFilter.annotations]! ||
                           !isAnnotation(sectionCode)) &&
-                      (layoutProvider.showTransitions ||
+                      (layoutProvider.layoutFilters[LayoutFilter.transitions]! ||
                           !isTransition(sectionCode))),
                 )
                 .toList();

@@ -98,7 +98,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
       builder:
           (
             context,
-            layoutSettingsProvider,
+            laySet,
             sectionProvider,
             selectionProvider,
             tp,
@@ -230,12 +230,12 @@ class _TokenContentCardState extends State<TokenContentCard> {
                         }
                       }
 
-                      final contentWidgets = _tokenizer.buildContentWidgets(
+                      final contentWidgets = _tokenizer.buildEditWidgets(
                         contentTokens,
                         tokens,
-                        layoutSettingsProvider.fontFamily,
+                        laySet.getChordTextStyle(colorScheme.surface),
+                        laySet.lyricTextStyle,
                         section.contentColor,
-                        colorScheme.onSurface,
                         _toggleDrag,
                         _addChord,
                         _addPrecedingChord,

@@ -49,7 +49,7 @@ class AutoScrollProvider extends ChangeNotifier {
   // ===== AUTO SCROLL METHODS =====
   /// Toggles auto-scroll on/off and starts/stops timer accordingly
   void toggleAutoScroll() {
-    if (isAutoScrolling) {
+    if (!scrollModeEnabled || isAutoScrolling) {
       stopAutoScroll();
     } else {
       startAutoScroll();
@@ -69,6 +69,7 @@ class AutoScrollProvider extends ChangeNotifier {
   /// Starts the auto-scroll timer
   /// Which scrolls through sections at intervals based on scrollSpeed
   void startAutoScroll() {
+    if (!scrollModeEnabled) return; // Scroll mode must be enabled
     if (isAutoScrolling) return; // Already scrolling
     isAutoScrolling = true;
     notifyListeners();

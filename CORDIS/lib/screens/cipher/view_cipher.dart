@@ -231,8 +231,14 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
     final laySet = context.read<LayoutSettingsProvider>();
     final filtered = <String>[];
     for (var sectionCode in songStructure) {
-      if (!laySet.showAnnotations && isAnnotation(sectionCode)) continue;
-      if (!laySet.showTransitions && isTransition(sectionCode)) continue;
+      if (!laySet.layoutFilters[LayoutFilter.annotations]! &&
+          isAnnotation(sectionCode)) {
+        continue;
+      }
+      if (!laySet.layoutFilters[LayoutFilter.transitions]! &&
+          isTransition(sectionCode)) {
+        continue;
+      }
       filtered.add(sectionCode);
     }
     return filtered;
