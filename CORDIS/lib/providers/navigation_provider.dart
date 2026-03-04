@@ -118,6 +118,8 @@ class NavigationProvider extends ChangeNotifier {
   /// USED BY THE MAIN SCREEN TO NAVIGATE BETWEEN CONTENT TABS
   // Navigation methods following your provider pattern
   void _navigateToRoute(NavigationRoute route) {
+    debugPrint('NAVIGATION - Navigating to route: ${route.name}');
+
     _currentRoute = route;
     _screenOnForeground =
         null; // Clear any foreground screen when navigating to a new route
@@ -147,7 +149,7 @@ class NavigationProvider extends ChangeNotifier {
     VoidCallback? onPopCallback,
     bool Function()? changeDetector,
   }) {
-    debugPrint('Pushing screen: ${screen.runtimeType}, showAppBar: $showAppBar, showDrawerIcon: $showDrawerIcon, showBottomNavBar: $showBottomNavBar, showFAB: $showFAB');
+    debugPrint('NAVIGATION - Pushing screen: ${screen.runtimeType}');
     _screenStack.add(screen);
     _showAppBarStack.add(showAppBar);
     _showDrawerIconStack.add(showDrawerIcon);
@@ -159,6 +161,8 @@ class NavigationProvider extends ChangeNotifier {
   }
 
   void pushForeground(Widget screen) {
+    debugPrint('NAVIGATION - Pushing foreground screen: ${screen.runtimeType}');
+
     _screenOnForeground = screen;
     notifyListeners();
   }

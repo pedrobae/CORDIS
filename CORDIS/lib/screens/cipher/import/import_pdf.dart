@@ -23,7 +23,14 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ImportProvider>().setImportType(ImportType.pdf);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final imp = context.read<ImportProvider>();
+        imp.setImportType(ImportType.pdf);
+        imp.setImportVariation(ImportVariation.pdfNoColumns);
+      }
+    });
   }
 
   /// Opens file picker and allows user to select a PDF file
@@ -126,7 +133,11 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
       child: Row(
         spacing: 8,
         children: [
-          Icon(Icons.picture_as_pdf_rounded, size: 24, color: colorScheme.shadow),
+          Icon(
+            Icons.picture_as_pdf_rounded,
+            size: 24,
+            color: colorScheme.shadow,
+          ),
           Expanded(
             child: Column(
               spacing: 4,
@@ -138,14 +149,21 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(imp.fileSize ?? '', style: textTheme.bodySmall, maxLines: 1),
+                Text(
+                  imp.fileSize ?? '',
+                  style: textTheme.bodySmall,
+                  maxLines: 1,
+                ),
               ],
             ),
           ),
           GestureDetector(
             onTap: () => _clearSelectedFile(imp),
             child: Container(
-              decoration: BoxDecoration(shape: BoxShape.circle, color: colorScheme.shadow),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colorScheme.shadow,
+              ),
               width: 20,
               height: 20,
               child: Icon(
@@ -173,12 +191,17 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(AppLocalizations.of(context)!.hasColumns, style: textTheme.titleMedium),
+        Text(
+          AppLocalizations.of(context)!.hasColumns,
+          style: textTheme.titleMedium,
+        ),
         Switch(
           value: imp.importVariation == ImportVariation.pdfWithColumns,
           onChanged: (value) {
             imp.setImportVariation(
-              value ? ImportVariation.pdfWithColumns : ImportVariation.pdfNoColumns,
+              value
+                  ? ImportVariation.pdfWithColumns
+                  : ImportVariation.pdfNoColumns,
             );
           },
         ),
@@ -258,7 +281,8 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
         else
           FilledTextButton(
             isDark: true,
-            isDisabled: (imp.selectedFile == null ||
+            isDisabled:
+                (imp.selectedFile == null ||
                 imp.isImporting ||
                 imp.importVariation == null),
             onPressed: () => _processAndNavigate(imp, par, nav, localVer, ciph),
@@ -294,7 +318,8 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
         versionType: VersionType.import,
         versionID: -1,
       ),
-      changeDetector: () => localVer.hasUnsavedChanges || ciph.hasUnsavedChanges,
+      changeDetector: () =>
+          localVer.hasUnsavedChanges || ciph.hasUnsavedChanges,
       showBottomNavBar: true,
     );
   }
