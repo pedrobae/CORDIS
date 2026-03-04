@@ -89,7 +89,7 @@ class LayoutSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  TextStyle getChordTextStyle(Color color) => TextStyle(
+  TextStyle chordTextStyle(Color color) => TextStyle(
     fontFamily: fontFamily,
     fontSize: fontSize.toDouble(),
     color: color,

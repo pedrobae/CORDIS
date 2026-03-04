@@ -1,4 +1,4 @@
-import 'package:cordis/models/ui/content_token.dart';
+import 'package:cordis/services/tokenization_service.dart';
 import 'package:flutter/material.dart';
 
 class ChordToken extends StatelessWidget {

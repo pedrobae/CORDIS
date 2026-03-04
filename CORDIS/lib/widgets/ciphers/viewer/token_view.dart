@@ -13,54 +13,45 @@ class TokenView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<LayoutSettingsProvider, TranspositionProvider>(
-      builder: (context, laySet, trans, child) {
-        final content = _buildContentWidgets(context, laySet);
-        return SizedBox(
-          height: content.contentHeight,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: content.tokens,
-          ),
-        );
-
-      },
-    );
-  }
-
-  ContentTokenized _buildContentWidgets(
-    BuildContext context,
-    LayoutSettingsProvider laySet,
-  ) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final lyricStyle = TextStyle(
-      fontSize: laySet.fontSize,
-      color: colorScheme.onSurface,
-      fontFamily: laySet.fontFamily,
+    return Consumer2<LayoutSettingsProvider, TranspositionProvider>(
+      builder: (context, laySet, trans, child) {
+        final tokens = _tokenizer.tokenize(chordPro);
+
+        for (var token in tokens) {
+          if (token.type == TokenType.chord) {
+            token.text = trans.transposeChord(token.text);
+          }
+        }
+
+        final filteredTokens = _tokenizer.filterTokens(
+          tokens,
+          laySet.contentFilters,
+        );
+
+        final organizedTokens = _tokenizer.organize(filteredTokens);
+
+        final viewWidgets = _tokenizer.buildViewWidgets(
+          organizedTokens,
+          filteredTokens,
+          laySet.lyricTextStyle,
+          laySet.chordTextStyle(colorScheme.primary),
+        );
+
+        final content = _tokenizer.positionWidgets(
+          context,
+          viewWidgets,
+          underLineColor: colorScheme.onSurface,
+          chordStyle: laySet.chordTextStyle(colorScheme.primary),
+          lyricStyle: laySet.lyricTextStyle,
+        );
+
+        return SizedBox(
+          height: content.contentHeight,
+          child: Stack(clipBehavior: Clip.none, children: content.tokens),
+        );
+      },
     );
-    final chordStyle = TextStyle(
-      fontSize: laySet.fontSize,
-      color: colorScheme.primary,
-    );
-
-    final tokens = _tokenizer.tokenize(chordPro);
-
-    final filteredTokens = _tokenizer.filterTokens(
-      tokens,
-      laySet.contentFilters,
-    );
-
-    final organizedTokens = _tokenizer.organize(filteredTokens);
-
-    final viewWidgets = _tokenizer.buildViewWidgets(
-      organizedTokens,
-      filteredTokens,
-      lyricStyle,
-      chordStyle,
-    );
-
-    final content = _tokenizer.positionWidgets(context, viewWidgets);
-    return content;
   }
 }

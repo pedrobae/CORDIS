@@ -1,9 +1,9 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/transposition_provider.dart';
+import 'package:cordis/services/tokenization_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/helpers/chords/chords.dart';
-import 'package:cordis/models/ui/content_token.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_token.dart';
 
 double _fontSize = 20;

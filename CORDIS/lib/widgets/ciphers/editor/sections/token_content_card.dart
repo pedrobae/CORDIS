@@ -10,7 +10,6 @@ import 'package:cordis/widgets/ciphers/section_badge.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
-import 'package:cordis/models/ui/content_token.dart';
 import 'package:cordis/services/tokenization_service.dart';
 import 'package:provider/provider.dart';
 
@@ -218,22 +217,17 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   /// CONTENT
                   LayoutBuilder(
                     builder: (context, constraints) {
-                      final contentTokens = _tokenizer.organize(tokens);
-
-                      for (var line in contentTokens) {
-                        for (var word in line) {
-                          for (var token in word) {
-                            if (token.type == TokenType.chord) {
-                              token.text = tp.transposeChord(token.text);
-                            }
-                          }
+                      for (var token in tokens) {
+                        if (token.type == TokenType.chord) {
+                          token.text = tp.transposeChord(token.text);
                         }
                       }
+                      final contentTokens = _tokenizer.organize(tokens);
 
                       final contentWidgets = _tokenizer.buildEditWidgets(
                         contentTokens,
                         tokens,
-                        laySet.getChordTextStyle(colorScheme.surface),
+                        laySet.chordTextStyle(colorScheme.surface),
                         laySet.lyricTextStyle,
                         section.contentColor,
                         _toggleDrag,
@@ -246,8 +240,9 @@ class _TokenContentCardState extends State<TokenContentCard> {
                       final positionedWidgets = _tokenizer.positionWidgets(
                         context,
                         contentWidgets,
-                        lineSpacing: 15,
-                        letterSpacing: 0,
+                        underLineColor: colorScheme.onSurface,
+                        chordStyle: laySet.chordTextStyle(colorScheme.surface),
+                        lyricStyle: laySet.lyricTextStyle,
                       );
 
                       final content = _tokenizer.checkHumongousWords(
@@ -260,7 +255,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                         child: SizedBox(
                           width: double.infinity,
                           height: content.contentHeight,
-                          child: Stack(children: [...content.tokens]),
+                          child: Stack(clipBehavior: Clip.none, children: [...content.tokens]),
                         ),
                       );
                     },
