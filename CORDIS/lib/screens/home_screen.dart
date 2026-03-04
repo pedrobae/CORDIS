@@ -64,8 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
           >(
             builder: (context, auth, localSch, cloudSch, child) {
 
-              final nextSchedule = _getNextSchedule(localSch, cloudSch);
-              return _buildContent(auth, nextSchedule);
+              return _buildContent(auth, localSch, cloudSch);
             },
           ),
     );
@@ -91,7 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildContent(
     MyAuthProvider auth,
-    dynamic nextSchedule,
+    LocalScheduleProvider localSch,
+    CloudScheduleProvider cloudSch,
   ) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: textTheme.bodyLarge,
         ),
         _buildWelcomeMessage(textTheme, auth),
-        _buildNextSchedule(nextSchedule, textTheme, colorScheme),
+        _buildNextSchedule(localSch, cloudSch, textTheme, colorScheme),
       ],
     );
   }
@@ -121,10 +121,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNextSchedule(
-    dynamic nextSchedule,
+    LocalScheduleProvider localSch,
+    CloudScheduleProvider cloudSch,
     TextTheme textTheme,
     ColorScheme colorScheme,
   ) {
+    if (localSch.isLoading || cloudSch.isLoading) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: colorScheme.primary,
+        ),
+      );
+    }
+    
+    final nextSchedule = _getNextSchedule(localSch, cloudSch);
     if (nextSchedule == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
