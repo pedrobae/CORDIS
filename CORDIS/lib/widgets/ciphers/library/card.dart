@@ -53,11 +53,11 @@ class _CipherCardState extends State<CipherCard> {
                   widget.cipherId,
                 );
                 if (versionId == null) {
-                  return CircularProgressIndicator();
+                  return Center(child: CircularProgressIndicator());
                 }
                 final version = localVer.cachedVersion(versionId);
                 if (version == null || cipher == null) {
-                  return CircularProgressIndicator();
+                  return Center(child: CircularProgressIndicator());
                 }
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,

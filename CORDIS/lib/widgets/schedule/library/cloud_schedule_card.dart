@@ -55,7 +55,17 @@ class CloudScheduleCard extends StatelessWidget {
                 userProvider.isLoading ||
                 scheduleId == '-1') {
               return Center(
-                child: CircularProgressIndicator(color: colorScheme.primary),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CircularProgressIndicator(color: colorScheme.primary),
+                    Icon(
+                      Icons.cloud,
+                      size: 20,
+                      color: colorScheme.primary,
+                    ),
+                  ],
+                ),
               );
             }
 
