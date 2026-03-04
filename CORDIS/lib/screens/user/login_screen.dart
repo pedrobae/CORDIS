@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:cordis/l10n/app_localizations.dart';
-
-import 'package:cordis/routes/app_routes.dart';
+import 'package:cordis/screens/main_screen.dart';
 
 import 'package:cordis/screens/user/password_reset_screen.dart';
 import 'package:cordis/screens/user/register_screen.dart';
@@ -251,7 +250,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 onSuccess: (context) {
                   Navigator.of(
                     context,
-                  ).pushNamedAndRemoveUntil(AppRoutes.main, (route) => false);
+                  ).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => const MainScreen()),
+                    (route) => false,
+                  );
                 },
               ),
             ),
@@ -288,7 +290,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _emailSignIn() async {
     final authProvider = context.read<MyAuthProvider>();
-    final userProvider = context.read<UserProvider>();
 
     await authProvider.signInWithEmail(
       _emailController.text.trim(),
@@ -296,16 +297,10 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (authProvider.isAuthenticated) {
-      // Load users after successful login
-      await userProvider.loadUsers();
-      await userProvider.ensureUserExists(authProvider.id!);
-
-      authProvider.setUserData(
-        userProvider.getUserByFirebaseId(authProvider.id!)!,
-      );
-
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.main);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
       }
     }
   }
@@ -321,7 +316,9 @@ class _LoginScreenState extends State<LoginScreen> {
       await userProvider.ensureUserExists(authProvider.id!);
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.main);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
       }
       authProvider.setUserData(
         userProvider.getUserByFirebaseId(authProvider.id!)!,

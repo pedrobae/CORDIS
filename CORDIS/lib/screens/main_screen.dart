@@ -1,6 +1,8 @@
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
+import 'package:cordis/providers/user/my_auth_provider.dart';
+import 'package:cordis/providers/user/user_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/playlist/edit_playlist.dart';
@@ -22,6 +24,31 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
+  @override
+  void initState() {
+    super.initState();
+    
+    // Use post-frame callback to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      
+      // Load users
+      final user = context.read<UserProvider>();
+      final auth = context.read<MyAuthProvider>();
+
+      await user.ensureUserExists(auth.id!);  
+      await user.loadUsers();
+
+      final currentUser = user.getUserByFirebaseId(auth.id!);
+
+      if (currentUser == null) {
+        throw Exception("Current user should not be null after ensuring existence and loading users");
+      }
+
+      auth.setUserData(currentUser);
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Consumer<NavigationProvider>(

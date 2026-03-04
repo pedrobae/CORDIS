@@ -1,5 +1,4 @@
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -52,13 +51,13 @@ class AdminScreen extends StatelessWidget {
                         alpha: .08,
                       ),
                       onTap: () {
-                        switch (items[index].title) {
-                          case 'Gerenciamento de Usuários':
-                            Navigator.of(
-                              context,
-                            ).pushNamed(AppRoutes.adminUserManagement);
-                            break;
-                        }
+                        // switch (items[index].title) {
+                        //   case 'Gerenciamento de Usuários':
+                        //     Navigator.of(
+                        //       context,
+                        //     ).pushNamed(AppRoutes.adminUserManagement);
+                        //     break;
+                        // }
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(

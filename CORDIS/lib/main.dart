@@ -1,5 +1,6 @@
 import 'package:cordis/providers/auto_scroll_provider.dart';
 import 'package:cordis/providers/transposition_provider.dart';
+import 'package:cordis/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -28,8 +29,6 @@ import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/app_info_provider.dart';
 import 'package:cordis/providers/schedule/play_schedule_state_provider.dart';
-
-import 'package:cordis/routes/app_routes.dart';
 
 import 'package:cordis/services/firebase_service.dart';
 import 'package:cordis/services/settings_service.dart';
@@ -104,8 +103,8 @@ class MyApp extends StatelessWidget {
             theme: settingsProvider.lightTheme,
             darkTheme: settingsProvider.darkTheme,
             themeMode: settingsProvider.themeMode,
-            initialRoute: AppRoutes.splash,
-            routes: AppRoutes.routes,
+            home: const SplashScreen(),
+
           );
         },
       ),

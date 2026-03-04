@@ -10,12 +10,14 @@ class MyAuthProvider extends ChangeNotifier {
   User? _userData;
   bool _isAdmin = false;
   bool _isLoading = false;
+  bool _hasInitialized = false;
   String? _error;
 
   bool get isAuthenticated => _authUser != null;
   String? get id => _authUser?.uid;
   bool get isAdmin => _isAdmin;
   bool get isLoading => _isLoading;
+  bool get hasInitialized => _hasInitialized;
   String? get error => _error;
   int? get userLocalId => _userData?.id;
   String? get userName => _userData?.username;
@@ -31,6 +33,10 @@ class MyAuthProvider extends ChangeNotifier {
   }
 
   void _onAuthStateChanged(firebase_auth.User? user) {
+    if (!_hasInitialized) {
+      _hasInitialized = true;
+    }
+
     _authUser = user;
     _checkAdminStatus();
     notifyListeners();

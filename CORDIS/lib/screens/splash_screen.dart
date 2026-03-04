@@ -1,5 +1,5 @@
-import 'package:cordis/providers/user/user_provider.dart';
-import 'package:cordis/routes/app_routes.dart';
+import 'package:cordis/screens/main_screen.dart';
+import 'package:cordis/screens/user/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/user/my_auth_provider.dart';
@@ -12,39 +12,47 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _checkAuthState();
-  }
+  bool _hasNavigated = false;
 
-  Future<void> _checkAuthState() async {
-    // Wait a moment for auth state to be established
-    await Future.delayed(const Duration(milliseconds: 500));
+  void _navigateToNextScreen(BuildContext context, bool isAuthenticated) {
+    if (_hasNavigated) return;
+    _hasNavigated = true;
 
-    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
 
-    final auth = Provider.of<MyAuthProvider>(context, listen: false);
-    final user = Provider.of<UserProvider>(context, listen: false);
-
-    // Redirect based on authentication status
-    if (auth.isAuthenticated) {
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.main);
+      if (isAuthenticated) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
       }
-    } else {
-      await user.ensureUserExists(auth.id!);
-      await user.loadUsers();
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.login);
-      }
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    return Consumer<MyAuthProvider>(
+      builder: (context, auth, child) {
+        // Show splash screen while auth is initializing
+        if (!auth.hasInitialized) {
+          return _buildSplashScreen(context);
+        }
 
+        // Once initialized, trigger navigation (only once)
+        _navigateToNextScreen(context, auth.isAuthenticated);
+
+        // Return splash while navigation is pending
+        return _buildSplashScreen(context);
+      },
+    );
+  }
+
+  Scaffold _buildSplashScreen(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: Center(
