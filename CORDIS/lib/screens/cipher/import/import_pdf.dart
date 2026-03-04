@@ -313,7 +313,7 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
     await imp.importText();
     await par.parseCipher(imp.importedCipher!);
     nav.push(
-      EditCipherScreen(
+      () => EditCipherScreen(
         cipherID: -1,
         versionType: VersionType.import,
         versionID: -1,

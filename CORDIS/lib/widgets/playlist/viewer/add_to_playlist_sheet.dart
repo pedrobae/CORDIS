@@ -65,7 +65,7 @@ class AddToPlaylistSheet extends StatelessWidget {
 
                   // Navigate to Cipher Library Screen
                   navigationProvider.push(
-                    CipherLibraryScreen(playlistId: playlistId),
+                    () => CipherLibraryScreen(playlistId: playlistId),
                     showBottomNavBar: true,
 
                     onPopCallback: () {
@@ -86,7 +86,7 @@ class AddToPlaylistSheet extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                   navigationProvider.push(
-                    FlowItemEditor(playlistId: playlistId),
+                    () => FlowItemEditor(playlistId: playlistId),
                     showBottomNavBar: true,
                   );
                 },

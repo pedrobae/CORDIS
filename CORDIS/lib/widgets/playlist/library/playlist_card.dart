@@ -50,7 +50,7 @@ class PlaylistCard extends StatelessWidget {
                 selectionProvider.isSelectionMode
                     ? null
                     : navigationProvider.push(
-                        ViewPlaylistScreen(playlistId: playlistId),
+                        () => ViewPlaylistScreen(playlistId: playlistId),
                         changeDetector: () { return playlistProvider.hasUnsavedChanges; },
                         showBottomNavBar: true,
                       );
@@ -135,7 +135,7 @@ class PlaylistCard extends StatelessWidget {
                         isDense: true,
                         onPressed: () {
                           navigationProvider.push(
-                            ViewPlaylistScreen(playlistId: playlistId),
+                            () => ViewPlaylistScreen(playlistId: playlistId),
                             changeDetector: () { return playlistProvider.hasUnsavedChanges; },
                             showBottomNavBar: true,
                           );

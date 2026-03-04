@@ -228,6 +228,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       text: AppLocalizations.of(context)!.changePassword,
       onPressed: () {
         nav.push(
+          () =>
           NewPasswordScreen(),
           showBottomNavBar: true,
         );

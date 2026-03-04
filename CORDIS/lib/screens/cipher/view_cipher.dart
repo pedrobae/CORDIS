@@ -323,7 +323,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
     SectionProvider sect,
   ) {
     context.read<NavigationProvider>().push(
-      EditCipherScreen(
+      () => EditCipherScreen(
         cipherID: widget.cipherID,
         versionID: widget.versionID,
         versionType: widget.versionType,

@@ -209,7 +209,7 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
 
       // Navigate to parsing screen
       nav.push(
-        EditCipherScreen(
+        () => EditCipherScreen(
           versionType: VersionType.import,
           versionID: -1,
           cipherID: -1,

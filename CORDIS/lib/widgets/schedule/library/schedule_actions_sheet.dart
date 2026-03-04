@@ -62,7 +62,7 @@ class ScheduleActionsSheet extends StatelessWidget {
                       selectionProvider
                           .enableSelectionMode(); // For playlist assignment
                       navigationProvider.push(
-                        CreateScheduleScreen(creationStep: 1),
+                        () => CreateScheduleScreen(creationStep: 1),
                         showBottomNavBar: true,
                         changeDetector: () => localScheduleProvider.hasUnsavedChanges,
                         onPopCallback: () {
@@ -79,7 +79,7 @@ class ScheduleActionsSheet extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).pop(); // Close the bottom sheet
                       navigationProvider.push(
-                        ShareCodeScreen(
+                        () => ShareCodeScreen(
                           onBack: (_) {
                             navigationProvider.attemptPop(context);
                           },

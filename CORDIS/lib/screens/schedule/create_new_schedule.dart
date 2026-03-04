@@ -206,7 +206,7 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
     SelectionProvider sel,
   ) {
     localSch.cacheBrandNewSchedule(sel.selectedItemIds.first, auth.id!);
-    nav.push(CreateScheduleScreen(creationStep: 2), showBottomNavBar: true);
+    nav.push(() => CreateScheduleScreen(creationStep: 2), showBottomNavBar: true);
   }
 
   void _handleStep2(LocalScheduleProvider localSch, NavigationProvider nav) {
@@ -218,7 +218,7 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
       location: _locationController.text,
       roomVenue: _roomVenueController.text,
     );
-    nav.push(CreateScheduleScreen(creationStep: 3), showBottomNavBar: true);
+    nav.push(() => CreateScheduleScreen(creationStep: 3), showBottomNavBar: true);
   }
 
   void _handleStep3(

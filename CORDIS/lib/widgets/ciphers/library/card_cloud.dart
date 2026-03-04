@@ -127,7 +127,7 @@ class CloudCipherCard extends StatelessWidget {
                       if (selectionProvider.isSelectionMode) {
                         selectionProvider.select(versionId);
                         navigationProvider.push(
-                          EditCipherScreen(
+                          () => EditCipherScreen(
                             versionType: VersionType.playlist,
                             playlistID: selectionProvider.targetId!,
                             isEnabled: false,
@@ -140,7 +140,7 @@ class CloudCipherCard extends StatelessWidget {
                         );
                       } else {
                         navigationProvider.push(
-                          ViewCipherScreen(
+                          () => ViewCipherScreen(
                             cipherID: null,
                             versionID: versionId,
                             versionType: VersionType.cloud,

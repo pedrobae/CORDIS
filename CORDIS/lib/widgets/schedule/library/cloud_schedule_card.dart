@@ -222,7 +222,7 @@ class CloudScheduleCard extends StatelessWidget {
                           isDense: true,
                           onPressed: () {
                             navigationProvider.push(
-                              PlayScheduleScreen(scheduleId: scheduleId),
+                              () => PlayScheduleScreen(scheduleId: scheduleId),
                               onPopCallback: () {
                                 context.read<AutoScrollProvider>().clearCache();
                               },

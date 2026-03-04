@@ -8,17 +8,32 @@ import 'package:flutter/material.dart';
 
 enum NavigationRoute { home, library, playlists, schedule }
 
+/// Screen metadata for storing in the navigation stack
+class _ScreenMetadata {
+  final Widget Function() screenBuilder;
+  final bool showAppBar;
+  final bool showDrawerIcon;
+  final bool showBottomNavBar;
+  final bool showFAB;
+  final VoidCallback onPopCallback;
+  final bool Function() changeDetector;
+
+  _ScreenMetadata({
+    required this.screenBuilder,
+    required this.showAppBar,
+    required this.showDrawerIcon,
+    required this.showBottomNavBar,
+    required this.showFAB,
+    required this.onPopCallback,
+    required this.changeDetector,
+  });
+}
+
 class NavigationProvider extends ChangeNotifier {
   NavigationRoute _currentRoute = NavigationRoute.home;
 
-  static final List<Widget> _screenStack = [];
-  static final List<bool> _showAppBarStack = [];
-  static final List<bool> _showDrawerIconStack = [];
-  static final List<bool> _showBottomNavBarStack = [];
-  static final List<bool> _showFABStack = [];
-  static final List<bool Function()> _changeDetectors = [];
-
-  static final List<VoidCallback> _onPopCallbacks = [];
+  // Store screen metadata instead of Widget instances to avoid build scope issues
+  final List<_ScreenMetadata> _screenStack = [];
 
   Widget?
   _screenOnForeground; // Screen that can be placed on top of the current stack without affecting it
@@ -29,27 +44,20 @@ class NavigationProvider extends ChangeNotifier {
   // Getters
   NavigationRoute get currentRoute => _currentRoute;
 
-  Widget get currentScreen => Stack(
-    children: [
-      _screenStack.isNotEmpty
-          ? _screenStack.last
-          : _getScreenForRoute(_currentRoute),
-      if (_screenOnForeground != null)
-        Positioned(bottom: 0, left: 0, right: 0, child: _screenOnForeground!),
-    ],
-  );
-
   Widget buildCurrentScreen(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final appBarHeight = showAppBar ? kToolbarHeight : 0;
     final bottomNavHeight = showBottomNavBar ? 120 : 0;
     final maxHeight = screenHeight - appBarHeight - bottomNavHeight;
 
+    // Build the current screen from metadata to ensure proper build context
+    final currentScreenWidget = _screenStack.isNotEmpty
+        ? _screenStack.last.screenBuilder()
+        : _getScreenForRoute(_currentRoute);
+
     return Stack(
       children: [
-        _screenStack.isNotEmpty
-            ? _screenStack.last
-            : _getScreenForRoute(_currentRoute),
+        currentScreenWidget,
         if (_screenOnForeground != null)
           Positioned(
             bottom: 0,
@@ -66,12 +74,12 @@ class NavigationProvider extends ChangeNotifier {
 
   Widget? get screenOnForeground => _screenOnForeground;
   bool get showAppBar =>
-      _showAppBarStack.isNotEmpty ? _showAppBarStack.last : true;
+      _screenStack.isNotEmpty ? _screenStack.last.showAppBar : true;
   bool get showDrawerIcon =>
-      _showDrawerIconStack.isNotEmpty ? _showDrawerIconStack.last : true;
+      _screenStack.isNotEmpty ? _screenStack.last.showDrawerIcon : true;
   bool get showBottomNavBar =>
-      _showBottomNavBarStack.isNotEmpty ? _showBottomNavBarStack.last : true;
-  bool get showFAB => _showFABStack.isNotEmpty ? _showFABStack.last : true;
+      _screenStack.isNotEmpty ? _screenStack.last.showBottomNavBar : true;
+  bool get showFAB => _screenStack.isNotEmpty ? _screenStack.last.showFAB : true;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -80,8 +88,8 @@ class NavigationProvider extends ChangeNotifier {
     BuildContext context, {
     NavigationRoute? route,
   }) async {
-    final hasChanges = _changeDetectors.isNotEmpty && 
-                       _changeDetectors.last.call();
+    final hasChanges = _screenStack.isNotEmpty && 
+                       _screenStack.last.changeDetector();
     
     if (hasChanges) {
       // If the top of the pop interceptor stack is true, show the unsaved changes warning
@@ -124,24 +132,13 @@ class NavigationProvider extends ChangeNotifier {
     _screenOnForeground =
         null; // Clear any foreground screen when navigating to a new route
     _screenStack.clear();
-    _showAppBarStack.clear();
-    _showDrawerIconStack.clear();
-    _showBottomNavBarStack.clear();
-    _showFABStack.clear();
-    _changeDetectors.clear();
-
-    // Clear onPop callbacks
-    while (_onPopCallbacks.isNotEmpty) {
-      _onPopCallbacks.last();
-      _onPopCallbacks.removeLast();
-    }
 
     _error = null; // Clear any previous errors
     notifyListeners();
   }
 
   void push(
-    Widget screen, {
+    Widget Function() screenBuilder, {
     bool showAppBar = false,
     bool showDrawerIcon = false,
     bool showBottomNavBar = false,
@@ -149,14 +146,18 @@ class NavigationProvider extends ChangeNotifier {
     VoidCallback? onPopCallback,
     bool Function()? changeDetector,
   }) {
-    debugPrint('NAVIGATION - Pushing screen: ${screen.runtimeType}');
-    _screenStack.add(screen);
-    _showAppBarStack.add(showAppBar);
-    _showDrawerIconStack.add(showDrawerIcon);
-    _showBottomNavBarStack.add(showBottomNavBar);
-    _showFABStack.add(showFAB);
-    _onPopCallbacks.add(onPopCallback ?? () {});
-    _changeDetectors.add(changeDetector ?? () => false);
+    debugPrint('NAVIGATION - Pushing screen');
+    _screenStack.add(
+      _ScreenMetadata(
+        screenBuilder: screenBuilder,
+        showAppBar: showAppBar,
+        showDrawerIcon: showDrawerIcon,
+        showBottomNavBar: showBottomNavBar,
+        showFAB: showFAB,
+        onPopCallback: onPopCallback ?? () {},
+        changeDetector: changeDetector ?? () => false,
+      ),
+    );
     notifyListeners();
   }
 
@@ -168,7 +169,7 @@ class NavigationProvider extends ChangeNotifier {
   }
 
   void pushReplacement(
-    Widget screen, {
+    Widget Function() screenBuilder, {
     bool showAppBar = false,
     bool showDrawerIcon = false,
     bool showBottomNavBar = false,
@@ -180,7 +181,7 @@ class NavigationProvider extends ChangeNotifier {
       pop();
     }
     push(
-      screen,
+      screenBuilder,
       showAppBar: showAppBar,
       showDrawerIcon: showDrawerIcon,
       showBottomNavBar: showBottomNavBar,
@@ -198,18 +199,12 @@ class NavigationProvider extends ChangeNotifier {
     }
     if (_screenStack.isNotEmpty) {
       try {
-        _onPopCallbacks.last();
+        _screenStack.last.onPopCallback();
       } catch (e) {
         // Silently catch callback errors during pop to avoid deactivated widget issues
         debugPrint('Error in onPopCallback: $e');
       }
-      _onPopCallbacks.removeLast();
       _screenStack.removeLast();
-      _showAppBarStack.removeLast();
-      _showDrawerIconStack.removeLast();
-      _showBottomNavBarStack.removeLast();
-      _showFABStack.removeLast();
-      _changeDetectors.removeLast();
       notifyListeners();
       return;
     }

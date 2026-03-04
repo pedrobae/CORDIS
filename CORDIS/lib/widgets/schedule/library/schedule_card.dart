@@ -159,7 +159,7 @@ class ScheduleCard extends StatelessWidget {
                     )!.viewPlaceholder(AppLocalizations.of(context)!.schedule),
                     onPressed: () {
                       navigationProvider.push(
-                        ViewScheduleScreen(scheduleId: scheduleId),
+                        () => ViewScheduleScreen(scheduleId: scheduleId),
                         showBottomNavBar: true,
                       );
                     },

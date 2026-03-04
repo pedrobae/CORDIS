@@ -104,7 +104,7 @@ class FlowItemCard extends StatelessWidget {
                         isDiscrete: true,
                         onPressed: () {
                           navigationProvider.push(
-                            FlowItemEditor(
+                            () => FlowItemEditor(
                               playlistId: playlistId,
                               flowItemId: flowItemId,
                             ),

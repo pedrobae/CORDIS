@@ -8,7 +8,9 @@ class AppInfoProvider extends ChangeNotifier {
   String get appVersion => _packageInfo?.version ?? 'Unknown';
   bool get isLoading => _isLoading;
 
-  AppInfoProvider() {
+  AppInfoProvider();
+
+  void initialize() {
     _loadAppVersion();
   }
 

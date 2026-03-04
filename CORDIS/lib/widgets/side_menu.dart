@@ -79,7 +79,7 @@ class SideMenu extends StatelessWidget {
                           /// WEBSITE WEBVIEW
                           Navigator.of(context).pop(); // Close the drawer first
                           navigationProvider.push(
-                            const WebViewScreen(),
+                            () => const WebViewScreen(),
                             showBottomNavBar: true,
                             showAppBar: true,
                             showDrawerIcon: true,
@@ -106,7 +106,7 @@ class SideMenu extends StatelessWidget {
                         onTap: () {
                           Navigator.of(context).pop();
                           navigationProvider.push(
-                            const SettingsScreen(),
+                            () => const SettingsScreen(),
                             showBottomNavBar: true,
                             showAppBar: true,
                             showDrawerIcon: true,

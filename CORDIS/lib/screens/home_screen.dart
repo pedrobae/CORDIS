@@ -63,7 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
             CloudScheduleProvider
           >(
             builder: (context, auth, localSch, cloudSch, child) {
-
               return _buildContent(auth, localSch, cloudSch);
             },
           ),
@@ -113,9 +112,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildWelcomeMessage(TextTheme textTheme, MyAuthProvider auth) {
     return Text(
-      AppLocalizations.of(
-        context,
-      )!.helloUser(auth.userName ?? AppLocalizations.of(context)!.guest),
+      auth.userName == null
+          ? AppLocalizations.of(context)!.welcome
+          : AppLocalizations.of(context)!.helloUser(auth.userName!),
       style: textTheme.headlineSmall,
     );
   }
@@ -128,12 +127,10 @@ class _HomeScreenState extends State<HomeScreen> {
   ) {
     if (localSch.isLoading || cloudSch.isLoading) {
       return Center(
-        child: CircularProgressIndicator(
-          color: colorScheme.primary,
-        ),
+        child: CircularProgressIndicator(color: colorScheme.primary),
       );
     }
-    
+
     final nextSchedule = _getNextSchedule(localSch, cloudSch);
     if (nextSchedule == null) {
       return Column(

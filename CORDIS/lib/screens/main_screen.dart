@@ -205,6 +205,7 @@ class MainScreenState extends State<MainScreen> {
     final localVer = context.read<LocalVersionProvider>();
 
     nav.push(
+      () => 
       EditCipherScreen(
         versionID: -1,
         cipherID: -1,
@@ -223,7 +224,7 @@ class MainScreenState extends State<MainScreen> {
     final localVer = context.read<LocalVersionProvider>();
 
     nav.push(
-      EditPlaylistScreen(),
+      () => EditPlaylistScreen(),
       changeDetector: () => localVer.hasUnsavedChanges,
       showBottomNavBar: true,
     );

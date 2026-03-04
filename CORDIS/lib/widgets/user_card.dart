@@ -18,7 +18,10 @@ class UserCard extends StatelessWidget {
           onTap: () {
             Navigator.of(context).pop();
 
-            navigationProvider.push(ProfileScreen(), showBottomNavBar: true);
+            navigationProvider.push(
+              () => ProfileScreen(),
+              showBottomNavBar: true,
+            );
           },
           child: Container(
             padding: const EdgeInsets.all(16.0),

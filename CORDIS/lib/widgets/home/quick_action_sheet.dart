@@ -67,8 +67,8 @@ class QuickActionSheet extends StatelessWidget {
                     route: NavigationRoute.playlists,
                   );
                   navigationProvider.push(
+                    () => EditPlaylistScreen(),
                     changeDetector: () => playlistProvider.hasUnsavedChanges,
-                    EditPlaylistScreen(),
                     showBottomNavBar: true,
                   );
                 },
@@ -91,7 +91,7 @@ class QuickActionSheet extends StatelessWidget {
                     route: NavigationRoute.library,
                   );
                   navigationProvider.push(
-                    EditCipherScreen(
+                    () => EditCipherScreen(
                       cipherID: -1,
                       versionID: -1,
                       versionType: VersionType.brandNew,
@@ -118,7 +118,7 @@ class QuickActionSheet extends StatelessWidget {
                   );
                   selectionProvider.enableSelectionMode();
                   navigationProvider.push(
-                    CreateScheduleScreen(creationStep: 1),
+                    () => CreateScheduleScreen(creationStep: 1),
                     showBottomNavBar: true,
                     changeDetector: () =>
                         localScheduleProvider.hasUnsavedChanges,
@@ -135,7 +135,7 @@ class QuickActionSheet extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the bottom sheet
                   navigationProvider.push(
-                    ShareCodeScreen(
+                    () => ShareCodeScreen(
                       onBack: (_) {
                         navigationProvider.attemptPop(
                           context,

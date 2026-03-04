@@ -337,7 +337,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                             isDiscrete: true,
                             onPressed: () {
                               navigationProvider.push(
-                                ViewCipherScreen(
+                                () => ViewCipherScreen(
                                   versionType: VersionType.playlist,
                                   versionID: widget.versionId,
                                   cipherID: isCloud ? null : version.cipherId,

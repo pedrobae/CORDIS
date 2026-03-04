@@ -85,7 +85,7 @@ class VersionCardActionsSheet extends StatelessWidget {
                     trailingIcon: Icons.chevron_right,
                     onPressed: () {
                       navigationProvider.push(
-                        EditCipherScreen(
+                        () => EditCipherScreen(
                           versionType: VersionType.playlist,
                           versionID: versionID,
                           cipherID: (versionID is String) ? null : cipherID,

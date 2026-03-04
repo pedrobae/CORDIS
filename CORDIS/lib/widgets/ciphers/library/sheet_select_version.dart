@@ -85,7 +85,7 @@ class SelectVersionSheet extends StatelessWidget {
                                 context,
                               ).pop(); // Close the bottom sheet
                               navigationProvider.push(
-                                ViewCipherScreen(
+                                () => ViewCipherScreen(
                                   versionType: VersionType.local,
                                   cipherID: cipherId,
                                   versionID: versionID,

@@ -74,7 +74,7 @@ class CipherCardActionsSheet extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).pop(); // Close the bottom sheet
                       navigationProvider.push(
-                        EditCipherScreen(
+                        () => EditCipherScreen(
                           versionType: versionType,
                           cipherID: cipherId,
                           isEnabled: versionType == VersionType.local,

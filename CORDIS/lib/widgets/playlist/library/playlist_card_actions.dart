@@ -77,8 +77,9 @@ class PlaylistCardActionsSheet extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).pop(); // Close the bottom sheet
                       navigationProvider.push(
-                        changeDetector: () => playlistProvider.hasUnsavedChanges,
-                        EditPlaylistScreen(playlistId: playlistId),
+                        () => EditPlaylistScreen(playlistId: playlistId),
+                        changeDetector: () =>
+                            playlistProvider.hasUnsavedChanges,
                         showBottomNavBar: true,
                       );
                     },

@@ -226,7 +226,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
           icon: const Icon(Icons.play_circle_fill),
           onPressed: () {
             context.read<NavigationProvider>().push(
-              PlayScheduleScreen(scheduleId: widget.scheduleId),
+              () => PlayScheduleScreen(scheduleId: widget.scheduleId),
               onPopCallback: () {
                 context.read<AutoScrollProvider>().clearCache();
               },
@@ -283,8 +283,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
             child: FilledTextButton(
               text: AppLocalizations.of(context)!.editPlaceholder(''),
               onPressed: () {
-                nav.push(
-                  EditScheduleScreen(
+                nav.push(() => EditScheduleScreen(
                     mode: EditScheduleMode.details,
                     scheduleId: widget.scheduleId,
                   ),
@@ -362,7 +361,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
               text: AppLocalizations.of(context)!.editPlaceholder(''),
               onPressed: () {
                 if (isCloud) return;
-                nav.push(
+                nav.push(() =>
                   ViewPlaylistScreen(playlistId: playlist!.id),
                   changeDetector: () => play.hasUnsavedChanges,
                   showBottomNavBar: true,
@@ -431,7 +430,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
             child: FilledTextButton(
               text: AppLocalizations.of(context)!.editPlaceholder(''),
               onPressed: () {
-                nav.push(
+                nav.push(() => 
                   EditScheduleScreen(
                     mode: EditScheduleMode.roleMember,
                     scheduleId: widget.scheduleId,

@@ -183,7 +183,7 @@ class _CipherCardState extends State<CipherCard> {
                         if (sel.isSelectionMode) {
                           sel.select(versionId);
                           nav.push(
-                            EditCipherScreen(
+                            () => EditCipherScreen(
                               cipherID: widget.cipherId,
                               versionID: versionId,
                               versionType: VersionType.playlist,
@@ -202,7 +202,7 @@ class _CipherCardState extends State<CipherCard> {
                           );
                         } else {
                           nav.push(
-                            ViewCipherScreen(
+                            () => ViewCipherScreen(
                               cipherID: widget.cipherId,
                               versionID: versionId,
                               versionType: VersionType.local,
@@ -216,7 +216,7 @@ class _CipherCardState extends State<CipherCard> {
                           sel.select(versionId);
                         } else {
                           nav.push(
-                            EditCipherScreen(
+                            () => EditCipherScreen(
                               cipherID: widget.cipherId,
                               versionID: versionId,
                               versionType: VersionType.local,
