@@ -17,7 +17,7 @@ class Schedule {
   final String location;
   final String? roomVenue;
   final String? annotations;
-  final int? playlistId;
+  final int playlistId;
   final List<Role> roles;
   final String shareCode;
   bool isPublic;
@@ -63,7 +63,7 @@ class Schedule {
       ),
       location: map['location'] as String,
       roomVenue: map['room_venue'] as String?,
-      playlistId: map['playlist_id'] as int?,
+      playlistId: map['playlist_id'] as int,
       roles: roles,
       annotations: map['annotations'] as String?,
       shareCode: map['share_code'] as String? ?? generateShareCode(),
@@ -175,7 +175,7 @@ class Schedule {
       roomVenue: (source.roomVenue != null && source.roomVenue!.isNotEmpty)
           ? source.roomVenue
           : target.roomVenue,
-      playlistId: source.playlistId ?? target.playlistId,
+      playlistId: source.playlistId,
       roles: source.roles.isNotEmpty ? source.roles : target.roles,
       shareCode: source.shareCode,
       isPublic: true,

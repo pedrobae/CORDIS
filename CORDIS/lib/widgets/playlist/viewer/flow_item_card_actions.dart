@@ -69,7 +69,7 @@ class FlowItemCardActionsSheet extends StatelessWidget {
                         flowItemId,
                         AppLocalizations.of(context)!.copySuffix,
                         playlistProvider
-                            .getPlaylistById(playlistId)!
+                            .getPlaylist(playlistId)!
                             .items
                             .length,
                       );

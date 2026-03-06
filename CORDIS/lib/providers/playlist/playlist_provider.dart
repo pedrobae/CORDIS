@@ -44,7 +44,7 @@ class PlaylistProvider extends ChangeNotifier {
 
   String? get error => _error;
 
-  Playlist? getPlaylistById(int id) {
+  Playlist? getPlaylist(int id) {
     return _playlists[id];
   }
 

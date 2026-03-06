@@ -27,7 +27,7 @@ class _EditPlaylistScreenState extends State<EditPlaylistScreen> {
         context,
         listen: false,
       );
-      final playlist = playlistProvider.getPlaylistById(widget.playlistId!)!;
+      final playlist = playlistProvider.getPlaylist(widget.playlistId!)!;
       playlistNameController.text = playlist.name;
     }
   }

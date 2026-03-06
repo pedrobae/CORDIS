@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:cordis/models/domain/user.dart';
 import 'package:cordis/models/dtos/user_dto.dart';
 import 'package:cordis/repositories/local/user_repository.dart';
@@ -70,6 +71,28 @@ class UserProvider extends ChangeNotifier {
 
     if (user == null) {
       await downloadUserFromCloud(firebaseUserId);
+    }
+  }
+
+  /// UPSERT - Creates a new user in local SQLite or Updates existing one
+  Future<void> upsertUser(User user) async {
+    try {
+      User? existingUser = _knownUsers.firstWhereOrNull(
+        (u) => u.email == user.email,
+      );
+
+      if (existingUser == null) {
+        // Create new user
+        final userId = await _localUserRepository.createUser(user);
+        _knownUsers.add(user.copyWith(id: userId));
+      } else {
+        // Update existing user
+        _localUserRepository.updateUser(user);
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      notifyListeners();
     }
   }
 

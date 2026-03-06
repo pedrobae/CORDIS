@@ -23,18 +23,14 @@ class CloudUserRepository {
   }
 
   Future<UserDto?> fetchUserByEmail(String email) async {
-    final querySnapshot = await _firestoreService.fetchDocumentsContainingValue(
+    final querySnapshot = await _firestoreService.fetchDocumentByField(
       collectionPath: 'users',
-      field: 'mail',
-      value: email,
-      orderField: '',
+      fieldName: 'email',
+      fieldValue: email,
     );
 
-    if (querySnapshot.isNotEmpty) {
-      final doc = querySnapshot.first;
-      return UserDto.fromFirestore(doc.data() as Map<String, dynamic>);
-    }
-    return null;
+    if (querySnapshot == null) return null;
+    return UserDto.fromFirestore(querySnapshot.data() as Map<String, dynamic>);
   }
 
   // ===== UPDATE =====

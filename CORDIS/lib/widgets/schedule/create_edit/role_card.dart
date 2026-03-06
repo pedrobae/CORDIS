@@ -2,7 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
-import 'package:cordis/widgets/schedule/create_edit/sheet_edit_role.dart';
+import 'package:cordis/widgets/schedule/create_edit/sheet_rename_role.dart';
 import 'package:cordis/widgets/schedule/create_edit/sheet_user.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

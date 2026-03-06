@@ -407,7 +407,7 @@ class PlaylistRepository {
       columns: ['id'],
       where:
           'playlist_id = ? AND version_id = ?${position != null ? ' AND position = ?' : ''}',
-      whereArgs: [playlistId, versionId, if (position != null) position],
+      whereArgs: [playlistId, versionId, ?position],
     );
 
     if (result.isNotEmpty) {

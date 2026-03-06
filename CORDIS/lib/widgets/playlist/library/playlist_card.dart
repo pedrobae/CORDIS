@@ -40,7 +40,7 @@ class PlaylistCard extends StatelessWidget {
             authProvider,
             child,
           ) {
-            final playlist = playlistProvider.getPlaylistById(playlistId)!;
+            final playlist = playlistProvider.getPlaylist(playlistId)!;
 
             final itemCount = playlist.items.length;
 

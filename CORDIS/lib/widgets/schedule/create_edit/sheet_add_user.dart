@@ -130,16 +130,24 @@ class _AddUserSheetState extends State<AddUserSheet> {
     final scheduleProvider = context.read<LocalScheduleProvider>();
 
     // Check if user exists in known users
-    dynamic user = userProvider.knownUsers.firstWhereOrNull(
+    User? user = userProvider.knownUsers.firstWhereOrNull(
       (user) => user.email.toLowerCase() == email.toLowerCase(),
     );
 
     if (widget.role is Role) {
+      if (user == null || user.firebaseId == null || user.firebaseId!.isEmpty) {
+        user = (await userProvider.fetchUserDtoByEmail(email))?.toDomain();
+
+        if (user != null) {
+          // Upsert to local db if found in cloud
+          await userProvider.upsertUser(user);
+        }
+      }
       user ??= await userProvider.createLocalUnknownUser(username, email);
 
       scheduleProvider.addUserToRole(widget.scheduleId, widget.role.id, user);
     } else {
-      // CLOUD - SKIP
+      debugPrint('Adding user to RoleDTO is not implemented yet');
     }
     if (context.mounted) {
       Navigator.of(context).pop();

@@ -269,7 +269,7 @@ class ScheduleSyncService {
     );
 
     final domainPlaylist = (await _playlistRepo.getPlaylistById(
-      schedule.playlistId!,
+      schedule.playlistId,
     ))!;
 
     // Build Item DTOs

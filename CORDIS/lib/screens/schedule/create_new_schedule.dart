@@ -5,8 +5,8 @@ import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/screens/playlist/playlist_library.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
-import 'package:cordis/widgets/schedule/create_edit/details_form.dart';
-import 'package:cordis/widgets/schedule/create_edit/roles_users_form.dart';
+import 'package:cordis/widgets/schedule/create_edit/edit_details.dart';
+import 'package:cordis/widgets/schedule/create_edit/edit_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,11 +21,6 @@ class CreateScheduleScreen extends StatefulWidget {
 
 class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
   late LocalScheduleProvider _scheduleProvider;
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _startTimeController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
-  final TextEditingController _roomVenueController = TextEditingController();
 
   @override
   void initState() {
@@ -40,6 +35,7 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
   }
 
   void _scheduleErrorListener() {
+    if (!mounted) return;
     final error = _scheduleProvider.error;
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -54,14 +50,6 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
   @override
   void dispose() {
     _scheduleProvider.removeListener(_scheduleErrorListener);
-
-    // Dispose all controllers
-    _nameController.dispose();
-    _dateController.dispose();
-    _startTimeController.dispose();
-    _locationController.dispose();
-    _roomVenueController.dispose();
-
     super.dispose();
   }
 
@@ -69,7 +57,6 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
   Widget build(BuildContext context) {
     final nav = Provider.of<NavigationProvider>(context, listen: false);
     final auth = Provider.of<MyAuthProvider>(context, listen: false);
-    final sel = Provider.of<SelectionProvider>(context, listen: false);
     final localSch = Provider.of<LocalScheduleProvider>(context, listen: false);
 
     return Scaffold(
@@ -84,7 +71,7 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
             _buildStepInstruction(),
             _buildStepSpacing(),
             _buildStepContent(),
-            _buildContinueButton(localSch, nav, auth, sel),
+            _buildContinueButton(localSch, nav, auth),
           ],
         ),
       ),
@@ -142,16 +129,11 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
     return switch (widget.creationStep) {
       1 => const Expanded(child: PlaylistLibraryScreen()),
       2 => Expanded(
-        child: ScheduleForm(
-          scheduleId: -1,
-          nameController: _nameController,
-          dateController: _dateController,
-          startTimeController: _startTimeController,
-          locationController: _locationController,
-          roomVenueController: _roomVenueController,
+        child: EditDetails(
+          scheduleID: -1,
         ),
       ),
-      3 => const Expanded(child: RolesAndUsersForm(scheduleId: -1)),
+      3 => const Expanded(child: EditRoles(scheduleId: -1)),
       _ => const SizedBox.shrink(),
     };
   }
@@ -171,13 +153,16 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
     LocalScheduleProvider localSch,
     NavigationProvider nav,
     MyAuthProvider auth,
-    SelectionProvider sel,
   ) {
-    return FilledTextButton(
-      text: _getButtonText(),
-      onPressed: () => _handleStepAction(localSch, nav, auth, sel),
-      isDisabled: sel.selectedItemIds.length != 1,
-      isDark: true,
+    return Consumer<SelectionProvider>(
+      builder: (context, sel, child) {
+        return FilledTextButton(
+          text: _getButtonText(),
+          onPressed: () => _handleStepAction(localSch, nav, auth, sel),
+          isDisabled: sel.selectedItemIds.length != 1,
+          isDark: true,
+        );
+      }
     );
   }
 
@@ -210,14 +195,6 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
   }
 
   void _handleStep2(LocalScheduleProvider localSch, NavigationProvider nav) {
-    localSch.cacheScheduleDetails(
-      -1,
-      name: _nameController.text,
-      date: _dateController.text,
-      startTime: _startTimeController.text,
-      location: _locationController.text,
-      roomVenue: _roomVenueController.text,
-    );
     nav.push(() => CreateScheduleScreen(creationStep: 3), showBottomNavBar: true);
   }
 

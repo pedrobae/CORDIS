@@ -120,7 +120,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
     final sectionProvider = context.read<SectionProvider>();
 
     final playlistName = AppLocalizations.of(context)!.playlistVersionName(
-      playlistProvider.getPlaylistById(widget.playlistID!)!.name,
+      playlistProvider.getPlaylist(widget.playlistID!)!.name,
     );
 
     if (widget.versionID is int) {

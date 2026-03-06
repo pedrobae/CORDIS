@@ -57,8 +57,8 @@ class ScheduleCard extends StatelessWidget {
 
             final schedule = localScheduleProvider.getSchedule(scheduleId);
 
-            final playlist = playlistProvider.getPlaylistById(
-              schedule!.playlistId!,
+            final playlist = playlistProvider.getPlaylist(
+              schedule!.playlistId,
             );
 
             String? userRole = AppLocalizations.of(context)!.generalMember;

@@ -41,7 +41,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
       await play.loadPlaylist(widget.playlistId);
 
       // Load versions for the playlist items
-      final items = play.getPlaylistById(widget.playlistId)?.items ?? [];
+      final items = play.getPlaylist(widget.playlistId)?.items ?? [];
 
       for (var item in items) {
         if (item.type == PlaylistItemType.version) {
@@ -61,7 +61,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
 
     return Consumer<PlaylistProvider>(
       builder: (context, play, child) {
-        final playlist = play.getPlaylistById(widget.playlistId);
+        final playlist = play.getPlaylist(widget.playlistId);
 
         if (playlist == null) {
           return const Scaffold(

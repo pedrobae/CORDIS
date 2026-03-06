@@ -157,7 +157,7 @@ class PlaylistCardActionsSheet extends StatelessWidget {
     NavigationProvider navigationProvider,
     FlowItemProvider flowItemProvider,
   ) async {
-    for (var item in playlistProvider.getPlaylistById(playlistId)!.items) {
+    for (var item in playlistProvider.getPlaylist(playlistId)!.items) {
       if (item.type == PlaylistItemType.version) {
         await versionProvider.deleteVersion(item.contentId!);
       } else if (item.type == PlaylistItemType.flowItem) {
@@ -179,7 +179,7 @@ class PlaylistCardActionsSheet extends StatelessWidget {
     )!;
 
     // Create pruned Playlist copy
-    final playlist = playlistProvider.getPlaylistById(playlistId);
+    final playlist = playlistProvider.getPlaylist(playlistId);
 
     await playlistProvider.createPlaylistFromDomain(
       Playlist(

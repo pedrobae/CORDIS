@@ -60,10 +60,10 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
 
     if (!isCloud) {
       final schedule = scheduleProvider.getSchedule(widget.scheduleId)!;
-      await playlistProvider.loadPlaylist(schedule.playlistId!);
+      await playlistProvider.loadPlaylist(schedule.playlistId);
       if (mounted) {
         setState(() {
-          items = playlistProvider.getPlaylistById(schedule.playlistId!)!.items;
+          items = playlistProvider.getPlaylist(schedule.playlistId)!.items;
         });
       }
     } else {
