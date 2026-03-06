@@ -12,6 +12,8 @@ class AutoScrollProvider extends ChangeNotifier {
 
   bool isAutoScrolling = false;
 
+  static const int _millisecondsPerLine = 1500; // Base timing: 1000ms per line
+
   late final ValueNotifier<int> currentSectionIndex = ValueNotifier(
     0,
   ); // 0-based index of current section
@@ -23,6 +25,7 @@ class AutoScrollProvider extends ChangeNotifier {
   DateTime? _timerStartTime;
 
   Map<int, GlobalKey> sectionKeys = {}; // Maps section index to its GlobalKey
+  Map<int, int> sectionLineCounts = {}; // Maps section index to its number of lines
 
   // ===== SETTINGS METHODS =====
   /// Gets settings from SettingsService and updates provider state
@@ -42,6 +45,7 @@ class AutoScrollProvider extends ChangeNotifier {
 
   void toggleScrollMode() {
     scrollModeEnabled = !scrollModeEnabled;
+    isAutoScrolling = false; // Stop scrolling when toggling mode
     SettingsService.setAutoScrollEnabled(scrollModeEnabled);
     notifyListeners();
   }
@@ -67,7 +71,7 @@ class AutoScrollProvider extends ChangeNotifier {
   }
 
   /// Starts the auto-scroll timer
-  /// Which scrolls through sections at intervals based on scrollSpeed
+  /// Which scrolls through sections at intervals based on line count and scrollSpeed
   void startAutoScroll() {
     if (!scrollModeEnabled) return; // Scroll mode must be enabled
     if (isAutoScrolling) return; // Already scrolling
@@ -75,23 +79,35 @@ class AutoScrollProvider extends ChangeNotifier {
     notifyListeners();
     if (sectionKeys.isEmpty) return; // No sections available
 
-    // Duration per section: 3 seconds at speed 1.0
-    // Speed 0.5 = 6 seconds per section, Speed 1.5 = 2 seconds per section
-    final durationPerSection = Duration(
-      milliseconds: (3000 / scrollSpeed).toInt(),
-    );
-
-    // Scroll to first section immediately
-    _timerStartTime = DateTime.now();
-
     // Start update timer to refresh UI with new progress value (60fps)
     _updateTimer?.cancel();
     _updateTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
       notifyListeners();
     });
 
-    autoScrollTimer = Timer.periodic(durationPerSection, (_) {
-      if (sectionKeys.isEmpty) return;
+    // Schedule first section scroll with its line-count-based duration
+    _scheduleNextSectionScroll();
+  }
+
+  /// Schedules the next section scroll based on current section's line count
+  /// Uses a single-shot timer that recalculates duration for each section
+  void _scheduleNextSectionScroll() {
+    if (sectionKeys.isEmpty || !isAutoScrolling) return;
+
+    // Calculate duration for current section based on its line count
+    final lineCount = sectionLineCounts[currentSectionIndex.value];
+    if (lineCount == null || lineCount <= 0) return;
+
+    final durationPerSection = Duration(
+      milliseconds: (_millisecondsPerLine * lineCount ~/ scrollSpeed).toInt(),
+    );
+
+    _timerStartTime = DateTime.now();
+
+    // Cancel existing timer and schedule next section scroll
+    autoScrollTimer?.cancel();
+    autoScrollTimer = Timer(durationPerSection, () {
+      if (sectionKeys.isEmpty || !isAutoScrolling) return;
 
       debugPrint(
         'Scrolling to ${currentSectionIndex.value + 1} / $_totalSections',
@@ -101,6 +117,7 @@ class AutoScrollProvider extends ChangeNotifier {
       if (currentSectionIndex.value < _totalSections - 1) {
         currentSectionIndex.value++;
         scrollToSection(currentSectionIndex.value);
+        _scheduleNextSectionScroll(); // Schedule next with its line count
       } else {
         // Stop at the end
         stopAutoScroll();
@@ -137,7 +154,7 @@ class AutoScrollProvider extends ChangeNotifier {
     }
 
     final durationPerSection = Duration(
-      milliseconds: (3000 / scrollSpeed).toInt(),
+      milliseconds: (_millisecondsPerLine * sectionLineCounts[currentSectionIndex.value]! ~/ scrollSpeed).toInt(),
     );
 
     // Calculate elapsed time since timer started

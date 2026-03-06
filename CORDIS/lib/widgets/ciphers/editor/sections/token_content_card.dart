@@ -124,7 +124,6 @@ class _TokenContentCardState extends State<TokenContentCard> {
               );
             }
 
-            final tokens = _tokenizer.tokenize(section.contentText);
             return Container(
               decoration: BoxDecoration(
                 color: colorScheme.surface,
@@ -176,7 +175,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                             ? DragTarget<ContentToken>(
                                 onAcceptWithDetails: (details) => {
                                   _removeChordAt(
-                                    tokens,
+                                    _tokenizer.tokenize(section.contentText),
                                     details.data.position!,
                                   ),
                                 },
@@ -213,11 +212,14 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   /// CONTENT
                   LayoutBuilder(
                     builder: (context, constraints) {
-                      final chordStyle = laySet.chordTextStyle(colorScheme.surface);
+                      final chordStyle = laySet.chordTextStyle(
+                        colorScheme.surface,
+                      );
                       final lyricStyle = laySet.lyricTextStyle;
                       final contentWidth = max(
                         0.0,
-                        constraints.maxWidth - TokenizationConstants.contentPaddingEdit,
+                        constraints.maxWidth -
+                            TokenizationConstants.contentPaddingEdit,
                       );
 
                       final editContext = EditBuildContext(
@@ -226,9 +228,9 @@ class _TokenContentCardState extends State<TokenContentCard> {
                         contentColor: section.contentColor,
                         surfaceColor: colorScheme.surface,
                         onSurfaceColor: colorScheme.onSurface,
-                        maxWidth: contentWidth,
                         isEnabled: _isEnabled(selectionProvider),
                         cache: {},
+                        maxWidth: contentWidth,
                         toggleDrag: _toggleDrag,
                         onAddChord: _addChord,
                         onAddPrecedingChord: _addPrecedingChord,
@@ -239,7 +241,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                         content: section.contentText,
                         ctx: PositioningContext(
                           underLineColor: colorScheme.onSurface,
-                          maxWidth: constraints.maxWidth,
+                          maxWidth: contentWidth,
                           isEditMode: true,
                         ),
                         chordStyle: chordStyle,
@@ -249,7 +251,9 @@ class _TokenContentCardState extends State<TokenContentCard> {
                       );
 
                       return Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(
+                          TokenizationConstants.contentPaddingEdit / 2,
+                        ),
                         child: SizedBox(
                           width: double.infinity,
                           height: content.contentHeight,

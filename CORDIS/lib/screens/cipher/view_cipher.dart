@@ -45,6 +45,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
   void initState() {
     super.initState();
     scrollController = ScrollController();
+    context.read<AutoScrollProvider>().currentSectionIndex.value = 0;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadData();
       _setOriginalKey();
@@ -76,127 +77,43 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer4<
+    return Consumer3<
       CipherProvider,
       LocalVersionProvider,
-      CloudVersionProvider,
-      SectionProvider
+      CloudVersionProvider
     >(
-      builder: (context, ciph, localVer, cloudVer, sect, child) {
-        if (_isLoading(ciph, localVer, cloudVer, sect)) {
-          return _buildLoadingState();
-        }
+      builder: (context, ciph, localVer, cloudVer, child) {
+        final versionData = _extractVersionData(ciph, localVer, cloudVer);
 
-        if (_hasError(ciph, localVer, cloudVer, sect)) {
-          return _buildErrorState(ciph, localVer, cloudVer, sect);
-        }
+        final filteredStructure = _filterSongStructure(
+          versionData.songStructure,
+        );
 
-        return _buildContentState(ciph, localVer, cloudVer, sect);
-      },
-    );
-  }
-
-  bool _isLoading(
-    CipherProvider ciph,
-    LocalVersionProvider localVer,
-    CloudVersionProvider cloudVer,
-    SectionProvider sect,
-  ) {
-    return ciph.isLoading ||
-        localVer.isLoading ||
-        cloudVer.isLoading ||
-        sect.isLoading;
-  }
-
-  bool _hasError(
-    CipherProvider ciph,
-    LocalVersionProvider localVer,
-    CloudVersionProvider cloudVer,
-    SectionProvider sect,
-  ) {
-    return ciph.error != null ||
-        localVer.error != null ||
-        cloudVer.error != null ||
-        sect.error != null;
-  }
-
-  Scaffold _buildLoadingState() {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Carregando...')),
-      body: const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-  Scaffold _buildErrorState(
-    CipherProvider ciph,
-    LocalVersionProvider localVer,
-    CloudVersionProvider cloudVer,
-    SectionProvider sect,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final errorMessage =
-        ciph.error ?? localVer.error ?? cloudVer.error ?? sect.error;
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Erro')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        return Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 16,
           children: [
-            Icon(Icons.error_outline, size: 64, color: colorScheme.error),
-            const SizedBox(height: 16),
-            Text('Erro: $errorMessage'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadData,
-              child: const Text('Tentar Novamente'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContentState(
-    CipherProvider cipherProvider,
-    LocalVersionProvider localVersionProvider,
-    CloudVersionProvider cloudVersionProvider,
-    SectionProvider sectionProvider,
-  ) {
-    final versionData = _extractVersionData(
-      cipherProvider,
-      localVersionProvider,
-      cloudVersionProvider,
-    );
-    final filteredStructure = _filterSongStructure(versionData.songStructure);
-    final sectionCardList = _buildSectionCards(
-      sectionProvider,
-      filteredStructure,
-    );
-
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 16,
-      children: [
-        _buildActionBar(cipherProvider, localVersionProvider, sectionProvider),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                spacing: 16,
-                children: [
-                  _buildHeaderSection(versionData),
-                  _buildSongStructureSection(filteredStructure),
-                  _buildSectionsGrid(sectionCardList),
-                ],
+            _buildActionBar(ciph, localVer),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: Column(
+                    spacing: 16,
+                    children: [
+                      _buildHeaderSection(versionData),
+                      _buildSongStructureSection(filteredStructure),
+                      _buildSectionsGrid(filteredStructure),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 
@@ -245,22 +162,31 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
   }
 
   List<Widget> _buildSectionCards(
-    SectionProvider sect,
     List<String> filteredStructure,
+    SectionProvider se,
   ) {
-    final scrollProvider = context.read<AutoScrollProvider>();
     final sectionCardList = <Widget>[];
 
     for (var (index, sectionCode) in filteredStructure.indexed) {
       final trimmedCode = sectionCode.trim();
-      final section = sect.getSection(widget.versionID, trimmedCode);
 
-      if (section == null || section.contentText.isEmpty) continue;
+      final scroll = context.read<AutoScrollProvider>();
 
-      if (scrollProvider.sectionKeys[index] == null) {
-        scrollProvider.sectionKeys[index] = GlobalKey();
+      final section = se.getSection(widget.versionID, trimmedCode);
+
+      if (section == null || section.contentText.isEmpty) {
+        continue;
       }
-      final key = scrollProvider.sectionKeys[index]!;
+
+      GlobalKey key;
+      if (scroll.sectionKeys[index] == null) {
+        key = GlobalKey();
+        scroll.sectionKeys[index] = key;
+      } else {
+        key = scroll.sectionKeys[index]!;
+      }
+
+      scroll.sectionLineCounts[index] = section.contentText.split('\n').length;
 
       if (isAnnotation(trimmedCode)) {
         sectionCardList.add(
@@ -282,16 +208,11 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
         );
       }
     }
-
     sectionCardList.add(const SizedBox(height: 200));
     return sectionCardList;
   }
 
-  Widget _buildActionBar(
-    CipherProvider ciph,
-    LocalVersionProvider localVer,
-    SectionProvider sect,
-  ) {
+  Widget _buildActionBar(CipherProvider ciph, LocalVersionProvider localVer) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
@@ -299,7 +220,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
           if (widget.versionType == VersionType.local)
             IconButton(
               icon: const Icon(Icons.edit),
-              onPressed: () => _navigateToEditScreen(ciph, localVer, sect),
+              onPressed: () => _navigateToEditScreen(),
             ),
           const Spacer(),
           IconButton(
@@ -323,11 +244,10 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
     );
   }
 
-  void _navigateToEditScreen(
-    CipherProvider ciph,
-    LocalVersionProvider localVer,
-    SectionProvider sect,
-  ) {
+  void _navigateToEditScreen() {
+    final localVer = context.read<LocalVersionProvider>();
+    final ciph = context.read<CipherProvider>();
+    final sect = context.read<SectionProvider>();
     context.read<NavigationProvider>().push(
       () => EditCipherScreen(
         cipherID: widget.cipherID,
@@ -418,17 +338,26 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
     );
   }
 
-  Widget _buildSectionsGrid(List<Widget> sectionCardList) {
+  Widget _buildSectionsGrid(List<String> filteredStructure) {
     final laySet = context.read<LayoutSettingsProvider>();
+    return Consumer<SectionProvider>(
+      builder: (context, sect, child) {
+        if (sect.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return MasonryGridView.count(
-      crossAxisCount: laySet.columnCount,
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      itemCount: sectionCardList.length,
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemBuilder: (context, index) => sectionCardList[index],
+        final sectionCardList = _buildSectionCards(filteredStructure, sect);
+
+        return MasonryGridView.count(
+          crossAxisCount: laySet.columnCount,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          itemCount: sectionCardList.length,
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemBuilder: (context, index) => sectionCardList[index],
+        );
+      },
     );
   }
 

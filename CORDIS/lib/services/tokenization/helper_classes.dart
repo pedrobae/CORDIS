@@ -85,7 +85,7 @@ class TokenizationConstants {
   static const double dragFeedbackCutoutPadding = 4.0;
 
   /// CONTENT POSITIONING
-  static const double contentPaddingEdit = 80.0;
+  static const double contentPaddingEdit = 32.0;
   static const double contentPaddingView = 64.0;
 }
 

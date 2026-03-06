@@ -54,7 +54,6 @@ class _PlayVersionState extends State<PlayVersion> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _calculateHeaderHeight();
       _scrollController.addListener(_scrollListener);
-      _scrollProvider.startAutoScroll();
     });
   }
 
@@ -144,9 +143,11 @@ class _PlayVersionState extends State<PlayVersion> {
             final filteredStructure = songStructure
                 .where(
                   (sectionCode) =>
-                      ((layoutProvider.layoutFilters[LayoutFilter.annotations]! ||
+                      ((layoutProvider.layoutFilters[LayoutFilter
+                              .annotations]! ||
                           !isAnnotation(sectionCode)) &&
-                      (layoutProvider.layoutFilters[LayoutFilter.transitions]! ||
+                      (layoutProvider.layoutFilters[LayoutFilter
+                              .transitions]! ||
                           !isTransition(sectionCode))),
                 )
                 .toList();
@@ -364,6 +365,10 @@ class _PlayVersionState extends State<PlayVersion> {
         if (scrollProvider.sectionKeys[index] == null) {
           scrollProvider.sectionKeys[index] = GlobalKey();
         }
+        scrollProvider.sectionLineCounts[index] = section.contentText
+            .split('\n')
+            .length;
+
         return SectionCard(
           key: scrollProvider.sectionKeys[index],
           sectionType: section.contentType,
