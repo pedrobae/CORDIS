@@ -130,7 +130,7 @@ class UserProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {
-        print('Error loading ciphers: $e');
+        print('Error loading users: $e');
       }
     } finally {
       _isLoading = false;
@@ -189,19 +189,13 @@ class UserProvider extends ChangeNotifier {
   }
 
   User? getUserById(int id) {
-    try {
-      return _knownUsers.firstWhere((user) => user.id == id);
-    } catch (e) {
-      return null;
-    }
+    return _knownUsers.firstWhereOrNull((user) => user.id == id);
   }
 
   User? getUserByFirebaseId(String firebaseId) {
-    try {
-      return _knownUsers.firstWhere((user) => user.firebaseId == firebaseId);
-    } catch (e) {
-      return null;
-    }
+    return _knownUsers.firstWhereOrNull(
+      (user) => user.firebaseId == firebaseId,
+    );
   }
 
   // ==== UPDATE =====

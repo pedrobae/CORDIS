@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/screens/settings/report_bug_screen.dart';
 import 'package:cordis/screens/settings/settings_screen.dart';
+import 'package:cordis/screens/user/login_screen.dart';
 import 'package:cordis/screens/web_view_screen.dart';
 import 'package:cordis/widgets/user_card.dart';
 import 'package:flutter/material.dart';
@@ -18,178 +19,175 @@ class SideMenu extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Consumer2<NavigationProvider, MyAuthProvider>(
-      builder: (context, navigationProvider, authProvider, child) {
-        return Drawer(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.horizontal(),
-          ),
-          width: math.min(
-            math.max(MediaQuery.of(context).size.width * (5 / 6), 300),
-            400,
-          ),
-          backgroundColor: colorScheme.surface,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // HEADER
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).viewPadding.top,
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/logos/app_icon_transparent.png',
-                      height: 40,
-                      fit: BoxFit.contain,
-                    ),
-                    Positioned(
-                      right: 0,
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // MAIN NAVIGATION ITEMS
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    UserCard(),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: colorScheme.surfaceContainerHighest,
-                            width: 1.2,
-                          ),
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: ListTile(
-                        title: Text(AppLocalizations.of(context)!.about),
-                        onTap: () {
-                          /// WEBSITE WEBVIEW
-                          Navigator.of(context).pop(); // Close the drawer first
-                          navigationProvider.push(
-                            () => const WebViewScreen(),
-                            showBottomNavBar: true,
-                            showAppBar: true,
-                            showDrawerIcon: true,
-                          );
-                        },
-                        trailing: Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: colorScheme.surfaceContainerHighest,
-                            width: 1.2,
-                          ),
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: ListTile(
-                        title: Text(AppLocalizations.of(context)!.settings),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          navigationProvider.push(
-                            () => const SettingsScreen(),
-                            showBottomNavBar: true,
-                            showAppBar: true,
-                            showDrawerIcon: true,
-                          );
-                        },
-                        trailing: Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // LOGOUT BUTTON
-              Padding(
-                padding: const EdgeInsets.only(left: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        authProvider.signOut();
-                      },
-                      child: Row(
-                        spacing: 16,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.logout),
-                          Text(
-                            AppLocalizations.of(context)!.logOut,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        navigationProvider.push(
-                          () => const ReportBugScreen(),
-                          showAppBar: true,
-                          showBottomNavBar: true,
-                          showDrawerIcon: true,
-                        );
-                      },
-                      icon: Icon(Icons.bug_report_outlined),
-                    ),
-                  ],
-                ),
-              ),
+    final nav = context.read<NavigationProvider>();
+    final auth = context.read<MyAuthProvider>();
 
-              // FOOTER
-              Container(
-                decoration: BoxDecoration(color: Colors.grey[800]),
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewPadding.bottom,
+    return Drawer(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.horizontal()),
+      width: math.min(
+        math.max(MediaQuery.of(context).size.width * (5 / 6), 300),
+        400,
+      ),
+      backgroundColor: colorScheme.surface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // HEADER
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).viewPadding.top,
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  'assets/logos/app_icon_transparent.png',
+                  height: 40,
+                  fit: BoxFit.contain,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/logos/v2_simple_color_white.svg',
-                      height: 100,
-                      fit: BoxFit.contain,
-                    ),
-                    Text(
-                      AppLocalizations.of(context)!.newHeart,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.surface,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        );
-      },
+          // MAIN NAVIGATION ITEMS
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                UserCard(),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: colorScheme.surfaceContainerHighest,
+                        width: 1.2,
+                      ),
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: ListTile(
+                    title: Text(AppLocalizations.of(context)!.about),
+                    onTap: () {
+                      /// WEBSITE WEBVIEW
+                      Navigator.of(context).pop(); // Close the drawer first
+                      nav.push(
+                        () => const WebViewScreen(),
+                        showBottomNavBar: true,
+                        showAppBar: true,
+                        showDrawerIcon: true,
+                      );
+                    },
+                    trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: colorScheme.surfaceContainerHighest,
+                        width: 1.2,
+                      ),
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: ListTile(
+                    title: Text(AppLocalizations.of(context)!.settings),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      nav.push(
+                        () => const SettingsScreen(),
+                        showBottomNavBar: true,
+                        showAppBar: true,
+                        showDrawerIcon: true,
+                      );
+                    },
+                    trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // LOGOUT BUTTON
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () async {
+                    final navigator = Navigator.of(context);
+                    navigator.pop();
+                    await auth.signOut();
+                    navigator.pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const LoginScreen(),
+                      ),
+                    );
+                  },
+                  child: Row(
+                    spacing: 16,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.logout),
+                      Text(
+                        AppLocalizations.of(context)!.logOut,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    nav.push(
+                      () => const ReportBugScreen(),
+                      showAppBar: true,
+                      showBottomNavBar: true,
+                      showDrawerIcon: true,
+                    );
+                  },
+                  icon: Icon(Icons.bug_report_outlined),
+                ),
+              ],
+            ),
+          ),
+
+          // FOOTER
+          Container(
+            decoration: BoxDecoration(color: Colors.grey[800]),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewPadding.bottom,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SvgPicture.asset(
+                  'assets/logos/v2_simple_color_white.svg',
+                  height: 100,
+                  fit: BoxFit.contain,
+                ),
+                Text(
+                  AppLocalizations.of(context)!.newHeart,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.surface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

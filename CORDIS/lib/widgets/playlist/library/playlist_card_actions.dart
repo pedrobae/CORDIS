@@ -20,168 +20,136 @@ class PlaylistCardActionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer4<
-      NavigationProvider,
-      PlaylistProvider,
-      LocalVersionProvider,
-      FlowItemProvider
-    >(
-      builder:
-          (
-            context,
-            navigationProvider,
-            playlistProvider,
-            versionProvider,
-            flowItemProvider,
-            child,
-          ) {
-            final textTheme = Theme.of(context).textTheme;
-            final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
-            // Your widget build logic here
-            return Container(
-              padding: const EdgeInsets.all(16.0),
-              color: colorScheme.surface,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 8,
-                children: [
-                  // HEADER
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.optionsPlaceholder(
-                          AppLocalizations.of(context)!.playlist,
-                        ),
-                        style: textTheme.titleMedium,
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.close,
-                          color: colorScheme.onSurface,
-                          size: 32,
-                        ),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ],
-                  ),
+    final nav = context.read<NavigationProvider>();
 
-                  /// ACTIONS
-                  // rename
-                  FilledTextButton(
-                    text: AppLocalizations.of(context)!.renamePlaceholder(''),
-                    trailingIcon: Icons.chevron_right,
-                    isDiscrete: true,
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close the bottom sheet
-                      navigationProvider.push(
-                        () => EditPlaylistScreen(playlistId: playlistId),
-                        changeDetector: () =>
-                            playlistProvider.hasUnsavedChanges,
-                        showBottomNavBar: true,
-                      );
-                    },
-                  ),
+    // Your widget build logic here
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      color: colorScheme.surface,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 8,
+        children: [
+          // HEADER
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizations.of(
+                  context,
+                )!.optionsPlaceholder(AppLocalizations.of(context)!.playlist),
+                style: textTheme.titleMedium,
+              ),
+              IconButton(
+                icon: Icon(Icons.close, color: colorScheme.onSurface, size: 32),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
 
-                  // duplicate
-                  FilledTextButton(
-                    text: AppLocalizations.of(
-                      context,
-                    )!.duplicatePlaceholder(''),
-                    trailingIcon: Icons.chevron_right,
-                    isDiscrete: true,
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _duplicatePlaylist(
-                        context,
-                        playlistProvider,
-                        versionProvider,
-                        flowItemProvider,
-                      );
-                    },
-                  ),
+          /// ACTIONS
+          // rename
+          FilledTextButton(
+            text: AppLocalizations.of(context)!.renamePlaceholder(''),
+            trailingIcon: Icons.chevron_right,
+            isDiscrete: true,
+            onPressed: () {
+              final play = context.read<PlaylistProvider>();
 
-                  // delete
-                  FilledTextButton(
-                    text: AppLocalizations.of(context)!.delete,
-                    tooltip: AppLocalizations.of(
-                      context,
-                    )!.deletePlaylistDescription,
-                    trailingIcon: Icons.chevron_right,
-                    isDangerous: true,
-                    isDiscrete: true,
-                    onPressed: () {
-                      showModalBottomSheet(
-                        isScrollControlled: true,
-                        context: context,
-                        builder: (context) {
-                          return BottomSheet(
-                            shape: LinearBorder(),
-                            onClosing: () {},
-                            builder: (context) {
-                              return DeleteConfirmationSheet(
-                                itemType: AppLocalizations.of(
-                                  context,
-                                )!.playlist,
-                                onConfirm: () async {
-                                  Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Close the bottom sheet
+              nav.push(
+                () => EditPlaylistScreen(playlistId: playlistId),
+                changeDetector: () => play.hasUnsavedChanges,
+                showBottomNavBar: true,
+              );
+            },
+          ),
 
-                                  await _deletePlaylist(
-                                    playlistProvider,
-                                    versionProvider,
-                                    navigationProvider,
-                                    flowItemProvider,
-                                  );
-                                },
-                              );
-                            },
-                          );
+          // duplicate
+          FilledTextButton(
+            text: AppLocalizations.of(context)!.duplicatePlaceholder(''),
+            trailingIcon: Icons.chevron_right,
+            isDiscrete: true,
+            onPressed: () {
+              Navigator.of(context).pop();
+              _duplicatePlaylist(context);
+            },
+          ),
+
+          // delete
+          FilledTextButton(
+            text: AppLocalizations.of(context)!.delete,
+            tooltip: AppLocalizations.of(context)!.deletePlaylistDescription,
+            trailingIcon: Icons.chevron_right,
+            isDangerous: true,
+            isDiscrete: true,
+            onPressed: () {
+              showModalBottomSheet(
+                isScrollControlled: true,
+                context: context,
+                builder: (context) {
+                  return BottomSheet(
+                    shape: LinearBorder(),
+                    onClosing: () {},
+                    builder: (context) {
+                      return DeleteConfirmationSheet(
+                        itemType: AppLocalizations.of(context)!.playlist,
+                        onConfirm: () async {
+                          Navigator.of(context).pop();
+
+                          await _deletePlaylist(context, nav);
                         },
                       );
                     },
-                  ),
+                  );
+                },
+              );
+            },
+          ),
 
-                  SizedBox(height: 16),
-                ],
-              ),
-            );
-          },
+          SizedBox(height: 16),
+        ],
+      ),
     );
   }
 
   Future<void> _deletePlaylist(
-    PlaylistProvider playlistProvider,
-    LocalVersionProvider versionProvider,
-    NavigationProvider navigationProvider,
-    FlowItemProvider flowItemProvider,
+    BuildContext context,
+    NavigationProvider nav,
   ) async {
-    for (var item in playlistProvider.getPlaylist(playlistId)!.items) {
+    final play = context.read<PlaylistProvider>();
+    final localVer = context.read<LocalVersionProvider>();
+    final flow = context.read<FlowItemProvider>();
+
+    for (var item in play.getPlaylist(playlistId)!.items) {
       if (item.type == PlaylistItemType.version) {
-        await versionProvider.deleteVersion(item.contentId!);
+        await localVer.deleteVersion(item.contentId!);
+
       } else if (item.type == PlaylistItemType.flowItem) {
-        await flowItemProvider.deleteFlowItem(item.contentId!);
+        await flow.deleteFlowItem(item.contentId!);
       }
     }
-    await playlistProvider.deletePlaylist(playlistId);
-    navigationProvider.pop();
+    await play.deletePlaylist(playlistId);
+    nav.pop();
   }
 
-  Future<void> _duplicatePlaylist(
-    BuildContext context,
-    PlaylistProvider playlistProvider,
-    LocalVersionProvider localVersionProvider,
-    FlowItemProvider flowItemProvider,
-  ) async {
+  Future<void> _duplicatePlaylist(BuildContext context) async {
+    final play = context.read<PlaylistProvider>();
+    final localVer = context.read<LocalVersionProvider>();
+    final flow = context.read<FlowItemProvider>();
+
     final userID = context.read<UserProvider>().getLocalIdByFirebaseId(
       context.read<MyAuthProvider>().id!,
     )!;
 
     // Create pruned Playlist copy
-    final playlist = playlistProvider.getPlaylist(playlistId);
+    final playlist = play.getPlaylist(playlistId);
 
-    await playlistProvider.createPlaylistFromDomain(
+    await play.createPlaylistFromDomain(
       Playlist(
         id: -1,
         name: '${playlist!.name} ${AppLocalizations.of(context)!.copySuffix}',
@@ -193,15 +161,13 @@ class PlaylistCardActionsSheet extends StatelessWidget {
     for (var item in playlist.items) {
       switch (item.type) {
         case PlaylistItemType.version:
-          final version = (await localVersionProvider.fetchVersion(
-            item.contentId!,
-          ))!;
+          final version = (await localVer.fetchVersion(item.contentId!))!;
 
           if (!context.mounted) {
             throw Exception('Context is not mounted');
           }
 
-          localVersionProvider.setNewVersionInCache(
+          localVer.setNewVersionInCache(
             version.copyWith(
               id: -1,
               firebaseId: '',
@@ -209,20 +175,18 @@ class PlaylistCardActionsSheet extends StatelessWidget {
                   '${version.versionName} ${AppLocalizations.of(context)!.copySuffix}',
             ),
           );
-          final newId = (await localVersionProvider.createVersion())!;
+          final newId = (await localVer.createVersion())!;
 
-          playlistProvider.cacheAddVersion(playlistId, newId);
+          play.cacheAddVersion(playlistId, newId);
 
         case PlaylistItemType.flowItem:
-          final flowItem = (await flowItemProvider.fetchFlowItem(
-            item.contentId!,
-          ))!;
+          final flowItem = (await flow.fetchFlowItem(item.contentId!))!;
 
           if (!context.mounted) {
             throw Exception('Context is not mounted');
           }
 
-          await flowItemProvider.createFlowItem(
+          await flow.createFlowItem(
             flowItem.copyWith(
               firebaseId: '',
               title:

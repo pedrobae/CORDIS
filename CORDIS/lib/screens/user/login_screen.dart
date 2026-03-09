@@ -248,9 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.of(context).pop();
                 },
                 onSuccess: (context) {
-                  Navigator.of(
-                    context,
-                  ).pushAndRemoveUntil(
+                  Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => const MainScreen()),
                     (route) => false,
                   );
@@ -289,40 +287,39 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _emailSignIn() async {
-    final authProvider = context.read<MyAuthProvider>();
+    final auth = context.read<MyAuthProvider>();
 
-    await authProvider.signInWithEmail(
+    await auth.signInWithEmail(
       _emailController.text.trim(),
       _passwordController.text,
     );
 
-    if (authProvider.isAuthenticated) {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainScreen()),
-        );
-      }
+    if (auth.isAuthenticated) {
+      await _postSignIn(auth);
     }
   }
 
   void _googleSignIn() async {
-    final authProvider = context.read<MyAuthProvider>();
+    final auth = context.read<MyAuthProvider>();
+
+    await auth.signInWithGoogle();
+    if (auth.isAuthenticated) {
+      await _postSignIn(auth);
+    }
+  }
+
+  Future<void> _postSignIn(MyAuthProvider auth) async {
     final userProvider = context.read<UserProvider>();
+    // Load users after successful login
+    await userProvider.loadUsers();
+    await userProvider.ensureUserExists(auth.id!);
 
-    await authProvider.signInWithGoogle();
-    if (authProvider.isAuthenticated) {
-      // Load users after successful login
-      await userProvider.loadUsers();
-      await userProvider.ensureUserExists(authProvider.id!);
-
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainScreen()),
-        );
-      }
-      authProvider.setUserData(
-        userProvider.getUserByFirebaseId(authProvider.id!)!,
+    if (mounted &&
+        (userProvider.error == null || userProvider.error!.isEmpty)) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainScreen()),
       );
+      auth.setUserData(userProvider.getUserByFirebaseId(auth.id!)!);
     }
   }
 }

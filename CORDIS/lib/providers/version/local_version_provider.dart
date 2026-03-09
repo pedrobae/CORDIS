@@ -123,16 +123,12 @@ class LocalVersionProvider extends ChangeNotifier {
 
       _versions[versionId] = versionWithCipherId.copyWith(id: versionId);
 
-      if (kDebugMode) {
-        print(
-          'Created a new version with id $versionId, for cipher ${cipherID ?? versionWithCipherId.cipherId}',
-        );
-      }
+      debugPrint(
+        'Created a new version with id $versionId, for cipher ${cipherID ?? versionWithCipherId.cipherId}',
+      );
     } catch (e) {
       _error = e.toString();
-      if (kDebugMode) {
-        print('Error creating cipher version: $e');
-      }
+      debugPrint('Error creating cipher version: $e');
     } finally {
       _isSaving = false;
       _hasUnsavedChanges = false;
@@ -162,14 +158,10 @@ class LocalVersionProvider extends ChangeNotifier {
       for (final version in versionList) {
         _versions[version.id!] = version;
       }
-      if (kDebugMode) {
-        print('Loaded ${versionList.length} versions of cipher $cipherId');
-      }
+      debugPrint('Loaded ${versionList.length} versions of cipher $cipherId');
     } catch (e) {
       _error = e.toString();
-      if (kDebugMode) {
-        print('Error loading versions of cipher: $e');
-      }
+      debugPrint('Error loading versions of cipher: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -191,16 +183,12 @@ class LocalVersionProvider extends ChangeNotifier {
       }
 
       _versions[versionId] = version;
-      if (kDebugMode) {
-        print(
-          'Loaded the version: ${_versions[versionId]?.versionName} into cache',
-        );
-      }
+      debugPrint(
+        'Loaded the version: ${_versions[versionId]?.versionName} into cache',
+      );
     } catch (e) {
       _error = e.toString();
-      if (kDebugMode) {
-        print('Error loading cipher version by id: $e');
-      }
+      debugPrint('Error loading version by id: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -245,32 +233,27 @@ class LocalVersionProvider extends ChangeNotifier {
 
       if (existingVersion != null) {
         // Update existing version
+        versionId = existingVersion.id!;
         await _repo.updateVersion(version.copyWith(id: existingVersion.id));
         for (final section in version.sections!.values) {
           await _sectionRepo.updateSection(
             section.copyWith(versionId: existingVersion.id),
           );
         }
-        if (kDebugMode) {
-          print('Updated existing version with id: ${existingVersion.id}');
-        }
+        debugPrint('Updated existing version with id: ${existingVersion.id}');
       } else {
         // Insert new version
-        final versionId = await _repo.insertVersion(version);
+        versionId = await _repo.insertVersion(version);
         for (final section in version.sections!.values) {
           await _sectionRepo.insertSection(
             section.copyWith(versionId: versionId),
           );
         }
-        if (kDebugMode) {
-          print('Inserted new version with id: $versionId');
-        }
+        debugPrint('Inserted new version with id: $versionId');
       }
     } catch (e) {
       _error = e.toString();
-      if (kDebugMode) {
-        print('Error upserting cipher version: $e');
-      }
+      debugPrint('Error upserting cipher version: $e');
     } finally {
       _isSaving = false;
       notifyListeners();
@@ -291,14 +274,10 @@ class LocalVersionProvider extends ChangeNotifier {
       await _repo.updateVersion(version);
       loadVersion(version.id!);
 
-      if (kDebugMode) {
-        print('Updated version with id: ${version.id}');
-      }
+      debugPrint('Updated version with id: ${version.id}');
     } catch (e) {
       _error = e.toString();
-      if (kDebugMode) {
-        print('Error updating cipher version: $e');
-      }
+      debugPrint('Error updating cipher version: $e');
     } finally {
       _isSaving = false;
       notifyListeners();
@@ -327,9 +306,7 @@ class LocalVersionProvider extends ChangeNotifier {
       );
     } catch (e) {
       _error = e.toString();
-      if (kDebugMode) {
-        print('Error caching song structure: $e');
-      }
+      debugPrint('Error caching song structure: $e');
     } finally {
       _isSaving = false;
       _hasUnsavedChanges = true;
@@ -380,9 +357,7 @@ class LocalVersionProvider extends ChangeNotifier {
       await _repo.deleteVersion(versionId);
     } catch (e) {
       _error = e.toString();
-      if (kDebugMode) {
-        print('Error deleting cipher version: $e');
-      }
+      debugPrint('Error deleting cipher version: $e');
     } finally {
       _isSaving = false;
       notifyListeners();

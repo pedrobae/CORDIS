@@ -85,21 +85,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
           appBar: _buildAppBar(nav),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              spacing: 16,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildEmailField(auth),
-                _buildUsernameField(),
-                _buildCountryPicker(auth, settings, user),
-                _buildLanguagePicker(auth, settings, user),
-                _buildTimezonePicker(auth, settings, user),
-                Spacer(),
-                _buildSaveButton(user, auth),
-                _buildChangePasswordButton(nav),
-                _buildDeleteAccountButton(auth, user),
-                _buildAppVersionText(),
-              ],
+            child: SingleChildScrollView(
+              child: Column(
+                spacing: 16,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildEmailField(auth),
+                  _buildUsernameField(),
+                  _buildCountryPicker(auth, settings, user),
+                  _buildLanguagePicker(auth, settings, user),
+                  _buildTimezonePicker(auth, settings, user),
+                  Spacer(),
+                  _buildSaveButton(user, auth),
+                  _buildChangePasswordButton(nav),
+                  _buildDeleteAccountButton(auth, user),
+                  _buildAppVersionText(),
+                ],
+              ),
             ),
           ),
         );

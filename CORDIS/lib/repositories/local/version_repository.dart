@@ -9,7 +9,6 @@ class LocalVersionRepository {
   final _sectionRepo = SectionRepository();
 
   // ============= VERSION OPERATIONS =============
-
   // ===== CREATE =====
   /// Inserts a version to the SQLite database
   /// Returns the local ID of the inserted version
@@ -69,27 +68,6 @@ class LocalVersionRepository {
     return _buildVersion(result[0]);
   }
 
-  /// Gets list of versions by a list of local IDs
-  Future<List<Version>> getVersionsByIds(List<int?> versionIds) async {
-    if (versionIds.isEmpty) return [];
-
-    final db = await _databaseHelper.database;
-    final placeholders = versionIds.map((_) => '?').join(',');
-    final results = await db.query(
-      'version',
-      where: 'id IN ($placeholders)',
-      whereArgs: versionIds,
-      orderBy: 'id',
-    );
-
-    List<Version> versions = [];
-    for (var row in results) {
-      versions.add(await _buildVersion(row));
-    }
-
-    return versions;
-  }
-
   Future<Version> getOldestVersionOfCipher(int cipherId) async {
     final db = await _databaseHelper.database;
     final result = await db.query(
@@ -128,18 +106,37 @@ class LocalVersionRepository {
     await db.update('version', field, where: 'id = ?', whereArgs: [versionId]);
   }
 
-  /// Deletes all sections of a version
-  /// Used when updating version sections
-  Future<void> deleteAllVersionSections(int versionId) async {
-    final db = await _databaseHelper.database;
-    await db.delete('section', where: 'version_id = ?', whereArgs: [versionId]);
-  }
-
   // ===== DELETE =====
   /// Deletes version by its local ID
   Future<void> deleteVersion(int id) async {
     final db = await _databaseHelper.database;
-    await db.delete('version', where: 'id = ?', whereArgs: [id]);
+    await db.transaction((txn) async {
+      final result = await txn.query(
+        'version',
+        where: 'id = ?',
+        whereArgs: [id],
+        limit: 1,
+      );
+
+      if (result.isEmpty) {
+        return;
+      }
+
+      final cipherId = result.first['cipher_id'];
+
+      await txn.delete('version', where: 'id = ?', whereArgs: [id]);
+
+      final remainingVersion = await txn.query(
+        'version',
+        where: 'cipher_id = ?',
+        whereArgs: [cipherId],
+        limit: 1,
+      );
+
+      if (remainingVersion.isEmpty) {
+        await txn.delete('cipher', where: 'id = ?', whereArgs: [cipherId]);
+      }
+    });
   }
 
   Future<Version> _buildVersion(Map<String, dynamic> row) async {

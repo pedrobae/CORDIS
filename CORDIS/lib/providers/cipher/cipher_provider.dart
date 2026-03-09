@@ -226,9 +226,6 @@ class CipherProvider extends ChangeNotifier {
           'Upserted cipher with Title ${cipher.title} - Cipher ID: $cipherId',
         );
       }
-
-      // Load the upserted cipher into the cache
-      await loadCipher(cipherId);
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {

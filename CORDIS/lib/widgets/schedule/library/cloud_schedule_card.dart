@@ -1,6 +1,7 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/auto_scroll_provider.dart';
 import 'package:cordis/screens/schedule/play_schedule.dart';
+import 'package:cordis/widgets/common/cloud_download_indicator.dart';
 import 'package:cordis/widgets/schedule/status_chip.dart';
 
 import 'package:provider/provider.dart';
@@ -171,38 +172,7 @@ class CloudScheduleCard extends StatelessWidget {
                             if (cloudScheduleProvider
                                     .syncingStatus[scheduleId] ==
                                 true) ...[
-                              SizedBox(
-                                height: 35,
-                                width: 35,
-                                child: Stack(
-                                  children: [
-                                    SizedBox(
-                                      height: 25,
-                                      width: 25,
-                                      child: CircularProgressIndicator(
-                                        color: colorScheme.onSurface,
-                                        strokeWidth: 5,
-                                      ),
-                                    ),
-                                    Positioned(
-                                      bottom: 2,
-                                      right: 0,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: colorScheme.surfaceTint,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        padding: const EdgeInsets.only(left: 6),
-                                        child: Icon(
-                                          Icons.cloud_download,
-                                          size: 25,
-                                          color: colorScheme.onSurface,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              const CloudDownloadIndicator(),
                             ],
                             if (showActions) ...[
                               IconButton(

@@ -13,6 +13,7 @@ class CloudVersionProvider extends ChangeNotifier {
 
   bool _isSaving = false;
   bool _isLoading = false;
+  final Map<String, bool> _isDownloading = {}; // versionID -> isDownloading
 
   String _searchTerm = '';
 
@@ -46,6 +47,7 @@ class CloudVersionProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
   String? get error => _error;
+  bool isDownloading(String versionID) => _isDownloading[versionID] ?? false;
 
   // ===== CREATE =====
   /// Persist the cache of an ID to the database
@@ -187,6 +189,10 @@ class CloudVersionProvider extends ChangeNotifier {
   }
 
   // ===== DELETE =====
+  void removeVersion(String versionID) {
+    _versions.remove(versionID);
+    notifyListeners();
+  }
 
   // ===== HELPER METHODS =====
   void clearCache() {
@@ -196,6 +202,11 @@ class CloudVersionProvider extends ChangeNotifier {
     _isSaving = false;
     _searchTerm = '';
 
+    notifyListeners();
+  }
+
+  void toggleIsDownloading(String versionID) {
+    _isDownloading[versionID] = !isDownloading(versionID);
     notifyListeners();
   }
 
