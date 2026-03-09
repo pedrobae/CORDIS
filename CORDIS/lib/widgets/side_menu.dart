@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/screens/settings/report_bug_screen.dart';
 import 'package:cordis/screens/settings/settings_screen.dart';
 import 'package:cordis/screens/web_view_screen.dart';
 import 'package:cordis/widgets/user_card.dart';
@@ -123,23 +124,41 @@ class SideMenu extends StatelessWidget {
               ),
               // LOGOUT BUTTON
               Padding(
-                padding: const EdgeInsets.only(left: 20.0, bottom: 20.0),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    authProvider.signOut();
-                  },
-                  child: Row(
-                    spacing: 16,
-                    children: [
-                      Icon(Icons.logout),
-                      Text(
-                        AppLocalizations.of(context)!.logOut,
-                        style: theme.textTheme.bodyMedium,
+                padding: const EdgeInsets.only(left: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        authProvider.signOut();
+                      },
+                      child: Row(
+                        spacing: 16,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.logout),
+                          Text(
+                            AppLocalizations.of(context)!.logOut,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        navigationProvider.push(
+                          () => const ReportBugScreen(),
+                          showAppBar: true,
+                          showBottomNavBar: true,
+                          showDrawerIcon: true,
+                        );
+                      },
+                      icon: Icon(Icons.bug_report_outlined),
+                    ),
+                  ],
                 ),
               ),
 

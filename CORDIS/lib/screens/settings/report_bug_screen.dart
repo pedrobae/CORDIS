@@ -26,6 +26,16 @@ class _ReportBugScreenState extends State<ReportBugScreen> {
   BugSeverity? severity;
 
   @override
+  void initState() {
+    super.initState();
+    _titleController.text = '';
+    _descriptionController.text = '';
+    _reproductionController.text = '';
+    _expectedController.text = '';
+    _actualController.text = '';
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
