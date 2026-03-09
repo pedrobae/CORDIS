@@ -161,7 +161,7 @@ class _FlowItemEditorState extends State<FlowItemEditor> {
                             .optionalPlaceholder(
                               AppLocalizations.of(context)!.annotations,
                             ),
-                        isMultiline: true,
+                        lineCount: 7,
                       ),
                     ],
                   ),

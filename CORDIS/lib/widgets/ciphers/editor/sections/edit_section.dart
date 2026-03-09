@@ -168,7 +168,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                     label: AppLocalizations.of(context)!.sectionText,
                     hint: AppLocalizations.of(context)!.sectionTextHint,
                     controller: contentTextController,
-                    isMultiline: true,
+                    lineCount: 8,
                   ),
                 ],
               ),

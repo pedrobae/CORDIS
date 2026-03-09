@@ -1,4 +1,5 @@
 import 'package:cordis/providers/auto_scroll_provider.dart';
+import 'package:cordis/providers/bug_report_provider.dart';
 import 'package:cordis/providers/transposition_provider.dart';
 import 'package:cordis/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -66,6 +67,7 @@ class MyApp extends StatelessWidget {
           create: (_) => LayoutSettingsProvider()..loadSettings(),
         ),
         ChangeNotifierProvider(create: (_) => AppInfoProvider()..initialize()),
+        ChangeNotifierProvider(create: (_) => BugReportProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
 
         // ADMIN DOMAIN PROVIDERS

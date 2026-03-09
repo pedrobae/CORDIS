@@ -1063,4 +1063,40 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get reportBug => 'Relatar um Erro';
+
+  @override
+  String get description => 'Descrição';
+
+  @override
+  String get stepsToReproduce => 'Passos para Reproduzir';
+
+  @override
+  String get behavior => 'Comportamento';
+
+  @override
+  String get expected => 'Esperado';
+
+  @override
+  String get actual => 'Real';
+
+  @override
+  String get severity => 'Severidade';
+
+  @override
+  String get low => 'Baixa';
+
+  @override
+  String get medium => 'Média';
+
+  @override
+  String get high => 'Alta';
+
+  @override
+  String get critical => 'Crítica';
+
+  @override
+  String get report => 'Relatar';
+
+  @override
+  String get bugReportSuccess => 'Bug report submitted successfully!';
 }

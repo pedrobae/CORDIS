@@ -1053,4 +1053,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportBug => 'Report a Bug';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get stepsToReproduce => 'Steps to Reproduce';
+
+  @override
+  String get behavior => 'Behavior';
+
+  @override
+  String get expected => 'Expected';
+
+  @override
+  String get actual => 'Actual';
+
+  @override
+  String get severity => 'Severity';
+
+  @override
+  String get low => 'Low';
+
+  @override
+  String get medium => 'Medium';
+
+  @override
+  String get high => 'High';
+
+  @override
+  String get critical => 'Critical';
+
+  @override
+  String get report => 'Report';
+
+  @override
+  String get bugReportSuccess => 'Bug report submitted successfully!';
 }

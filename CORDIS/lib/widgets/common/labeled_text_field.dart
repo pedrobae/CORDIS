@@ -6,9 +6,10 @@ class LabeledTextField extends StatelessWidget {
   final TextEditingController controller;
   final String? Function(String?)? validator;
   final String? instruction;
-  final bool isMultiline;
+  final int lineCount;
   final bool isEnabled;
   final bool obscureText;
+  final bool isDense;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
 
@@ -19,9 +20,10 @@ class LabeledTextField extends StatelessWidget {
     required this.controller,
     this.validator,
     this.instruction,
-    this.isMultiline = false,
+    this.lineCount = 1,
     this.isEnabled = true,
     this.obscureText = false,
+    this.isDense = false,
     this.prefixIcon,
     this.suffixIcon,
   });
@@ -35,9 +37,9 @@ class LabeledTextField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        spacing: 8,
+        spacing: isDense ? 4 : 8,
         children: [
-          Text(label, style: textTheme.labelLarge),
+          Text(label, style: isDense ? textTheme.labelMedium: textTheme.labelLarge),
           TextFormField(
             validator: validator,
             controller: controller,
@@ -58,9 +60,9 @@ class LabeledTextField extends StatelessWidget {
               ),
               visualDensity: VisualDensity.compact,
             ),
-            maxLines: isMultiline ? null : 1,
+            maxLines: lineCount,
 
-            keyboardType: isMultiline
+            keyboardType: lineCount > 1
                 ? TextInputType.multiline
                 : TextInputType.text,
             enabled: isEnabled,

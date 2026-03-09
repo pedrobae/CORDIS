@@ -1951,6 +1951,78 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Relatar um Erro'**
   String get reportBug;
+
+  /// Label for the bug description field
+  ///
+  /// In pt, this message translates to:
+  /// **'Descrição'**
+  String get description;
+
+  /// Label for the steps to reproduce field
+  ///
+  /// In pt, this message translates to:
+  /// **'Passos para Reproduzir'**
+  String get stepsToReproduce;
+
+  /// Label for the observed behavior field
+  ///
+  /// In pt, this message translates to:
+  /// **'Comportamento'**
+  String get behavior;
+
+  /// Label for the expected behavior field
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperado'**
+  String get expected;
+
+  /// Label for the actual behavior field
+  ///
+  /// In pt, this message translates to:
+  /// **'Real'**
+  String get actual;
+
+  /// Label for the bug severity field
+  ///
+  /// In pt, this message translates to:
+  /// **'Severidade'**
+  String get severity;
+
+  /// Low severity level
+  ///
+  /// In pt, this message translates to:
+  /// **'Baixa'**
+  String get low;
+
+  /// Medium severity level
+  ///
+  /// In pt, this message translates to:
+  /// **'Média'**
+  String get medium;
+
+  /// High severity level
+  ///
+  /// In pt, this message translates to:
+  /// **'Alta'**
+  String get high;
+
+  /// Critical severity level
+  ///
+  /// In pt, this message translates to:
+  /// **'Crítica'**
+  String get critical;
+
+  /// Label for the report button
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatar'**
+  String get report;
+
+  /// Message for succesfull bug report
+  ///
+  /// In pt, this message translates to:
+  /// **'Bug report submitted successfully!'**
+  String get bugReportSuccess;
 }
 
 class _AppLocalizationsDelegate

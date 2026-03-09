@@ -56,7 +56,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildColorVariantToggle(set),
             _buildLanguageButton(set),
             const SizedBox(height: 32),
-
+            
             _buildSectionHeader(
               AppLocalizations.of(context)!.support,
               Icons.support_agent,

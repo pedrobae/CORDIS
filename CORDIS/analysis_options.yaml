@@ -10,10 +10,9 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+
   exclude:
-    # Exclude generated localization files
     - "lib/l10n/app_localizations*.dart"
-    # Exclude generated files (if any)
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "**/*.gr.dart"
@@ -22,9 +21,16 @@ analyzer:
     - ".dart_tool/**"
     # Exclude Firebase generated options
     - "lib/firebase_options.dart"
+    
+    - android/**  # Exclude Android native code
+    - ios/**      # Exclude iOS native code
+    - assets/**   # Exclude assets directory
+    - functions/** # Exclude Firebase Functions code
+    - web/**      # Exclude web-specific code
   
   # Enable stricter type checking (optional, but recommended)
   language:
+
     strict-casts: false
     strict-inference: false
     strict-raw-types: false
@@ -41,7 +47,8 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
+    avoid_print: false
+
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
 
 # Additional information about this file can be found at
