@@ -36,6 +36,10 @@ class _CipherCardState extends State<CipherCard> {
     final sel = context.read<SelectionProvider>();
     final sect = context.read<SectionProvider>();
 
+    if (widget.cipherId == -1) {
+      return SizedBox.shrink();
+    }
+
     return Consumer2<CipherProvider, LocalVersionProvider>(
       builder: (context, ciph, localVer, child) {
         // Card content
