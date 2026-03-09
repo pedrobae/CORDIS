@@ -1,8 +1,10 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/cipher/section.dart';
 
 import 'package:cordis/models/domain/playlist/flow_item.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
+import 'package:cordis/providers/auto_scroll_provider.dart';
 
 import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/playlist/flow_item_provider.dart';
@@ -11,8 +13,9 @@ import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/play_schedule_state_provider.dart';
-import 'package:cordis/providers/section_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
+import 'package:cordis/providers/section_provider.dart';
 
 import 'package:cordis/widgets/schedule/play/play_flow_item.dart';
 import 'package:cordis/widgets/schedule/play/play_version.dart';
@@ -35,7 +38,6 @@ class PlayScheduleScreen extends StatefulWidget {
 class PlayScheduleScreenState extends State<PlayScheduleScreen>
     with SingleTickerProviderStateMixin {
   late final bool isCloud = widget.scheduleId is String;
-  List<PlaylistItem> items = [];
   late PlayScheduleStateProvider _stateProvider;
 
   @override
@@ -45,84 +47,79 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
     _stateProvider.reset();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _initializePlaylist();
-      await _loadItemsAroundCurrent(0);
+      await _loadData();
     });
   }
 
   /// Load only the current playlist structure without full content
-  Future<void> _initializePlaylist() async {
-    final scheduleProvider = context.read<LocalScheduleProvider>();
-    final cloudScheduleProvider = context.read<CloudScheduleProvider>();
-    final playlistProvider = context.read<PlaylistProvider>();
-
+  Future<void> _loadData() async {
     if (widget.scheduleId == null) throw Exception("Schedule ID is required");
 
     if (!isCloud) {
-      final schedule = scheduleProvider.getSchedule(widget.scheduleId)!;
-      await playlistProvider.loadPlaylist(schedule.playlistId);
-      if (mounted) {
-        setState(() {
-          items = playlistProvider.getPlaylist(schedule.playlistId)!.items;
-        });
-      }
+      await _loadLocal();
     } else {
-      if (!cloudScheduleProvider.schedules.containsKey(widget.scheduleId)) {
-        await cloudScheduleProvider.loadSchedule(widget.scheduleId);
-      }
+      await _loadCloud();
+    }
+  }
 
-      final schedule = cloudScheduleProvider.schedules[widget.scheduleId];
-      if (schedule == null) {
-        throw Exception("Schedule not found");
-      }
-      if (mounted) {
-        setState(() {
-          items = schedule.playlist.getPlaylistItems();
-        });
+  Future<void> _loadLocal() async {
+    final scheduleProvider = context.read<LocalScheduleProvider>();
+    final playlistProvider = context.read<PlaylistProvider>();
+    final localVer = context.read<LocalVersionProvider>();
+    final flow = context.read<FlowItemProvider>();
+    final state = context.read<PlayScheduleStateProvider>();
+
+    final schedule = scheduleProvider.getSchedule(widget.scheduleId)!;
+    await playlistProvider.loadPlaylist(schedule.playlistId);
+
+    final items = playlistProvider.getPlaylist(schedule.playlistId)!.items;
+    state.setItems(items);
+    for (var item in items) {
+      switch (item.type) {
+        case PlaylistItemType.version:
+          await localVer.loadVersion(item.contentId!);
+
+          break;
+        case PlaylistItemType.flowItem:
+          await flow.loadFlowItem(item.contentId!);
       }
     }
   }
 
-  /// Lazy load data for current
-  /// This dramatically reduces initial load time and memory usage
-  Future<void> _loadItemsAroundCurrent(int currentIndex) async {
-    if (isCloud) return; // Cloud items are loaded on with scheduleDTO
-    final versionProvider = context.read<LocalVersionProvider>();
-    final cipherProvider = context.read<CipherProvider>();
-    final flowItemProvider = context.read<FlowItemProvider>();
-    final sectionProvider = context.read<SectionProvider>();
+  Future<void> _loadCloud() async {
+    final cloudSch = context.read<CloudScheduleProvider>();
+    final cloudVer = context.read<CloudVersionProvider>();
+    final sect = context.read<SectionProvider>();
+    final state = context.read<PlayScheduleStateProvider>();
 
-    // Load current, previous, and next items
-    const int loadRadius = 1;
-    final indicesToLoad = <int>{};
-    indicesToLoad.add(currentIndex);
-    for (int i = 1; i <= loadRadius; i++) {
-      if (currentIndex - i >= 0) indicesToLoad.add(currentIndex - i);
-      if (currentIndex + i < items.length) indicesToLoad.add(currentIndex + i);
-    }
+    await cloudSch.loadSchedule(widget.scheduleId);
+    final schedule = cloudSch.getSchedule(widget.scheduleId)!;
 
-    for (final idx in indicesToLoad) {
-      final item = items[idx];
+    final items = schedule.items;
+    state.setItems(items);
 
-      if (item.type == PlaylistItemType.version) {
-        // Skip if already loaded
-        if (versionProvider.cachedVersion(item.contentId!) != null) continue;
+    for (var item in items) {
+      switch (item.type) {
+        case PlaylistItemType.version:
+          final version = schedule.playlist.versions[item.firebaseContentId]!;
+          cloudVer.setVersion(item.firebaseContentId!, version);
 
-        await versionProvider.loadVersion(item.contentId!);
-        await cipherProvider.loadCipherOfVersion(item.contentId!);
-        await sectionProvider.loadSectionsOfVersion(item.contentId!);
-      } else if (item.type == PlaylistItemType.flowItem) {
-        // Skip if already loaded
-        if (flowItemProvider.getFlowItem(item.contentId!) != null) continue;
+          final sections = <String, Section>{};
+          for (var entry in version.sections.entries) {
+            sections[entry.key] = Section.fromFirestore(entry.value);
+          }
 
-        await flowItemProvider.loadFlowItem(item.contentId!);
+          sect.setNewSectionsInCache(item.firebaseContentId!, sections);
+          break;
+        case PlaylistItemType.flowItem:
+          // Flow items are loaded as part of the schedule, so no need to load separately
+          break;
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final nav = Provider.of<NavigationProvider>(context, listen: false);
 
     return Consumer6<
@@ -136,82 +133,51 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
       builder: (context, state, cloudSch, play, localVer, ciph, flow, child) {
         return Stack(
           children: [
-            _buildTabViewer(state, cloudSch, play, localVer, ciph, flow),
-            _buildCloseButton(nav, colorScheme),
-            _buildBottomControls(state, colorScheme, cloudSch, localVer, ciph, flow),
+            _buildCurrentItem(cloudSch, flow, state),
+            _buildCloseButton(nav),
+            _buildBottomControls(state, cloudSch, localVer, ciph, flow),
           ],
         );
       },
     );
   }
 
-  Widget _buildTabViewer(
+  Widget _buildCurrentItem(
+    CloudScheduleProvider cloudSch,
+    FlowItemProvider flow,
     PlayScheduleStateProvider state,
-    CloudScheduleProvider cloudSch,
-    PlaylistProvider play,
-    LocalVersionProvider localVer,
-    CipherProvider ciph,
-    FlowItemProvider flow,
   ) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    if (items.isEmpty) {
-      return _buildLoadingOrEmptyState(localVer, cloudSch, flow, ciph, play, colorScheme, textTheme);
+    final item = state.currentItem;
+    if (item == null) {
+      return Center(child: CircularProgressIndicator());
     }
-
-    return Builder(
-      builder: (context) {
-        return _buildCurrentItem(state.currentTabIndex, cloudSch, flow);
-      },
-    );
-  }
-
-  Widget _buildLoadingOrEmptyState(
-    LocalVersionProvider localVer,
-    CloudScheduleProvider cloudSch,
-    FlowItemProvider flow,
-    CipherProvider ciph,
-    PlaylistProvider play,
-    ColorScheme colorScheme,
-    TextTheme textTheme,
-  ) {
-    if (localVer.isLoading || cloudSch.isLoading || flow.isLoading || ciph.isLoading || play.isLoading) {
-      return Center(
-        child: CircularProgressIndicator(color: colorScheme.primary),
-      );
-    }
-    return Center(
-      child: Text(
-        AppLocalizations.of(context)!.noPlaylistItems,
-        style: textTheme.bodyMedium,
-      ),
-    );
-  }
-
-  Widget _buildCurrentItem(int currentTabIndex, CloudScheduleProvider cloudSch, FlowItemProvider flow) {
-    final item = items[currentTabIndex];
     switch (item.type) {
       case PlaylistItemType.version:
         if (isCloud) {
-          return PlayVersion(cloudVersionID: item.firebaseContentId!);
+          return PlayVersion(
+            key: ValueKey(
+              'cloud_version_${item.firebaseContentId}_${item.position}',
+            ),
+            cloudVersionID: item.firebaseContentId!,
+          );
         } else {
-          return PlayVersion(localVersionID: item.contentId!);
+          return PlayVersion(
+            key: ValueKey('local_version_${item.contentId}_${item.position}'),
+            localVersionID: item.contentId!,
+          );
         }
       case PlaylistItemType.flowItem:
         if (isCloud) {
-          final flowItemMap = (cloudSch.schedules[widget.scheduleId] as ScheduleDto)
-              .playlist
-              .flowItems[item.firebaseContentId]!;
+          final flowItemMap =
+              (cloudSch.schedules[widget.scheduleId] as ScheduleDto)
+                  .playlist
+                  .flowItems[item.firebaseContentId]!;
 
           return PlayFlowItem(
-            flowItem: FlowItem(
+            flowItem: FlowItem.fromFirestore(
+              flowItemMap,
               firebaseId: item.firebaseContentId!,
               playlistId: -1,
-              title: flowItemMap['title'] as String,
-              contentText: flowItemMap['contentText'] as String,
-              duration: Duration(seconds: (flowItemMap['duration'] as int)),
-              position: flowItemMap['position'] as int,
             ),
           );
         } else {
@@ -220,7 +186,9 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
     }
   }
 
-  Widget _buildCloseButton(NavigationProvider nav, ColorScheme colorScheme) {
+  Widget _buildCloseButton(NavigationProvider nav) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Positioned(
       top: 8,
       right: 8,
@@ -237,12 +205,13 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
 
   Widget _buildBottomControls(
     PlayScheduleStateProvider state,
-    ColorScheme colorScheme,
     CloudScheduleProvider cloudSch,
     LocalVersionProvider localVer,
     CipherProvider ciph,
     FlowItemProvider flow,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Positioned(
       bottom: 0,
       child: Container(
@@ -256,16 +225,25 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
         width: MediaQuery.of(context).size.width,
         child: Column(
           children: [
-            if (state.showSettings)
-              _buildSettingsControls(state, colorScheme),
-            _buildPlayControls(state, colorScheme, cloudSch, localVer, ciph, flow),
+            if (state.showSettings) _buildSettingsControls(state, colorScheme),
+            _buildPlayControls(
+              state,
+              colorScheme,
+              cloudSch,
+              localVer,
+              ciph,
+              flow,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSettingsControls(PlayScheduleStateProvider state, ColorScheme colorScheme) {
+  Widget _buildSettingsControls(
+    PlayScheduleStateProvider state,
+    ColorScheme colorScheme,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
@@ -317,10 +295,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return BottomSheet(
-          onClosing: () {},
-          builder: (context) => sheet,
-        );
+        return BottomSheet(onClosing: () {}, builder: (context) => sheet);
       },
     );
   }
@@ -366,7 +341,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
         if (currentIndex > 0) {
           final newIndex = currentIndex - 1;
           state.setCurrentTabIndex(newIndex);
-          _loadItemsAroundCurrent(newIndex);
+          context.read<AutoScrollProvider>().clearCache();
         }
       },
       child: SizedBox(
@@ -394,9 +369,17 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
         child: Builder(
           builder: (context) {
             String nextTitle = '';
-            if (currentIndex < items.length - 1) {
-              final nextItem = items[currentIndex + 1];
-              nextTitle = _getItemTitle(nextItem, localVer, ciph, flow, cloudSch);
+            final currentItem = state.currentItem;
+            if (currentItem != null &&
+                state.currentTabIndex < state.itemCount - 1) {
+              final nextItem = state.nextItem;
+              nextTitle = _getItemTitle(
+                nextItem,
+                localVer,
+                ciph,
+                flow,
+                cloudSch,
+              );
             }
             return Text(
               nextTitle.isEmpty
@@ -419,10 +402,12 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
   ) {
     return GestureDetector(
       onTap: () {
-        if (currentIndex < items.length - 1) {
-          final newIndex = currentIndex + 1;
+        final currentItem = state.currentItem;
+        if (currentItem != null &&
+            state.currentTabIndex < state.itemCount - 1) {
+          final newIndex = state.currentTabIndex + 1;
           state.setCurrentTabIndex(newIndex);
-          _loadItemsAroundCurrent(newIndex);
+          context.read<AutoScrollProvider>().clearCache();
         }
       },
       child: SizedBox(
@@ -433,15 +418,15 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
     );
   }
 
-
   /// Helper to extract title from different item types
   String _getItemTitle(
-    PlaylistItem item,
+    PlaylistItem? item,
     LocalVersionProvider versionProvider,
     CipherProvider cipherProvider,
     FlowItemProvider flowItemProvider,
     CloudScheduleProvider cloudScheduleProvider,
   ) {
+    if (item == null) return '';
     switch (item.type) {
       case PlaylistItemType.version:
         if (isCloud) {

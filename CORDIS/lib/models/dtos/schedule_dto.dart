@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cordis/helpers/codes.dart';
+import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/models/dtos/playlist_dto.dart';
 import 'package:cordis/models/dtos/user_dto.dart';
@@ -27,6 +28,44 @@ class ScheduleDto {
     required this.roles,
     required this.shareCode,
   });
+
+  List<PlaylistItem> get items {
+    List<PlaylistItem> items = [];
+    int position = 0;
+    for (var key in playlist.itemOrder) {
+      final split = key.split(':');
+      if (split.length != 2) continue;
+      final typeStr = split[0];
+      final contentId = split[1];
+
+      if (typeStr == 'v') {
+        final version = playlist.versions[contentId];
+
+        items.add(
+          PlaylistItem(
+            type: PlaylistItemType.version,
+            firebaseContentId: version!.firebaseId,
+            position: position,
+            duration: Duration(seconds: version.duration),
+          ),
+        );
+        position++;
+      } else if (typeStr == 'f') {
+        final flow = playlist.flowItems[contentId]!;
+
+        items.add(
+          PlaylistItem(
+            type: PlaylistItemType.flowItem,
+            firebaseContentId: contentId,
+            position: position,
+            duration: Duration(seconds: flow['duration'] as int),
+          ),
+        );
+        position++;
+      }
+    }
+    return items;
+  }
 
   factory ScheduleDto.fromFirestore(Map<String, dynamic> json, String id) {
     return ScheduleDto(

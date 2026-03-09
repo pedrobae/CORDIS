@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:cordis/helpers/codes.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/models/domain/user.dart';
@@ -53,13 +54,9 @@ class LocalScheduleProvider extends ChangeNotifier {
   }
 
   Schedule? getNextSchedule() {
-    try {
-      return _schedules.values.firstWhere(
-        (schedule) => schedule.date.isAfter(DateTime.now()),
-      );
-    } catch (e) {
-      return null;
-    }
+    return _schedules.values.firstWhereOrNull(
+      (schedule) => schedule.date.isAfter(DateTime.now()),
+    );
   }
 
   String? getUserRoleInSchedule(int scheduleID, int? localUserId) {
@@ -83,15 +80,11 @@ class LocalScheduleProvider extends ChangeNotifier {
   }
 
   Future<Schedule?> getScheduleWithPlaylistId(int playlistId) async {
-    try {
       await loadSchedules();
 
-      return _schedules.values.firstWhere(
+      return _schedules.values.firstWhereOrNull(
         (schedule) => schedule.playlistId == playlistId,
       );
-    } catch (e) {
-      return null;
-    }
   }
 
   // ===== CREATE =====

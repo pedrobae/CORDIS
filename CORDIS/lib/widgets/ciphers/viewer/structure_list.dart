@@ -59,6 +59,12 @@ class _StructureListState extends State<StructureList> {
 
     return Consumer<SectionProvider>(
       builder: (context, sect, child) {
+        if (sect.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
         return SizedBox(
           width: double.infinity,
           child: widget.filteredStructure.isEmpty
@@ -95,7 +101,7 @@ class _StructureListState extends State<StructureList> {
                               sectionCode,
                             );
                             // Loading state
-                            if (section == null || sect.isLoading) {
+                            if (section == null) {
                               return const Center(
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,

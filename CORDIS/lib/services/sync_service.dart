@@ -123,12 +123,12 @@ class ScheduleSyncService {
     final existing = await _userRepo.getUserByEmail(userDto.email);
     if (existing == null) {
       final user = userDto.toDomain();
-      await _userRepo.createUser(user);
-      return user;
+      final userID = await _userRepo.createUser(user);
+      return user.copyWith(id: userID);
     } else {
       final merged = userDto.toDomain().mergeWith(existing);
-      await _userRepo.updateUser(merged);
-      return merged;
+      final mergedID = await _userRepo.updateUser(merged);
+      return merged.copyWith(id: mergedID);
     }
   }
 

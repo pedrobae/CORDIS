@@ -46,9 +46,6 @@ class _PlayVersionState extends State<PlayVersion> {
     _scrollController = ScrollController();
     _scrollProvider = context.read<AutoScrollProvider>();
 
-    // Initialize scroll provider state
-    _scrollProvider.currentSectionIndex.value = 0;
-
     isCloud = widget.cloudVersionID != null;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

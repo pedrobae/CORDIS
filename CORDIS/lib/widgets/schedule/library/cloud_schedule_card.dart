@@ -221,10 +221,11 @@ class CloudScheduleCard extends StatelessWidget {
                           isDark: true,
                           isDense: true,
                           onPressed: () {
+                            final scroll = context.read<AutoScrollProvider>();
                             navigationProvider.push(
                               () => PlayScheduleScreen(scheduleId: scheduleId),
                               onPopCallback: () {
-                                context.read<AutoScrollProvider>().clearCache();
+                                scroll.clearCache();
                               },
                             );
                           },
