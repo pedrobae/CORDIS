@@ -20,140 +20,128 @@ class QuickActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<NavigationProvider, SelectionProvider>(
-      builder: (context, navigationProvider, selectionProvider, child) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(0),
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            spacing: 8,
+    final nav = context.read<NavigationProvider>();
+    final sel = context.read<SelectionProvider>();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(0),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8,
+        children: [
+          // HEADER
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // HEADER
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.quickAction,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
+              Text(
+                AppLocalizations.of(context)!.quickAction,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-
-              // ACTIONS
-              // DIRECT CREATION BUTTONS
-              /// create playlist
-              FilledTextButton(
-                trailingIcon: Icons.chevron_right,
-                isDiscrete: true,
-                text: AppLocalizations.of(
-                  context,
-                )!.createPlaceholder(AppLocalizations.of(context)!.playlist),
+              IconButton(
+                icon: const Icon(Icons.close),
                 onPressed: () {
-                  final playlistProvider = context.read<PlaylistProvider>();
-                  Navigator.of(context).pop(); // Close the bottom sheet
-                  navigationProvider.attemptPop(
-                    context,
-                    route: NavigationRoute.playlists,
-                  );
-                  navigationProvider.push(
-                    () => EditPlaylistScreen(),
-                    changeDetector: () => playlistProvider.hasUnsavedChanges,
-                    showBottomNavBar: true,
-                  );
+                  Navigator.of(context).pop();
                 },
               ),
-              FilledTextButton(
-                trailingIcon: Icons.chevron_right,
-                isDiscrete: true,
-                text: AppLocalizations.of(
-                  context,
-                )!.addPlaceholder(AppLocalizations.of(context)!.cipher),
-                onPressed: () {
-                  final cipherProvider = context.read<CipherProvider>();
-                  final localVersionProvider = context
-                      .read<LocalVersionProvider>();
-                  final sectionProvider = context.read<SectionProvider>();
-
-                  Navigator.of(context).pop(); // Close the bottom sheet
-                  navigationProvider.attemptPop(
-                    context,
-                    route: NavigationRoute.library,
-                  );
-                  navigationProvider.push(
-                    () => EditCipherScreen(
-                      cipherID: -1,
-                      versionID: -1,
-                      versionType: VersionType.brandNew,
-                    ),
-                    changeDetector: () =>
-                        (cipherProvider.hasUnsavedChanges ||
-                        localVersionProvider.hasUnsavedChanges ||
-                        sectionProvider.hasUnsavedChanges),
-                    showBottomNavBar: true,
-                  );
-                },
-              ),
-              FilledTextButton(
-                trailingIcon: Icons.chevron_right,
-                isDiscrete: true,
-                text: AppLocalizations.of(context)!.assignSchedule,
-                onPressed: () {
-                  final localScheduleProvider = context
-                      .read<LocalScheduleProvider>();
-                  Navigator.of(context).pop(); // Close the bottom sheet
-                  navigationProvider.attemptPop(
-                    context,
-                    route: NavigationRoute.schedule,
-                  );
-                  selectionProvider.enableSelectionMode();
-                  navigationProvider.push(
-                    () => CreateScheduleScreen(creationStep: 1),
-                    showBottomNavBar: true,
-                    changeDetector: () =>
-                        localScheduleProvider.hasUnsavedChanges,
-                    onPopCallback: () {
-                      selectionProvider.disableSelectionMode();
-                    },
-                  );
-                },
-              ),
-              FilledTextButton(
-                text: AppLocalizations.of(context)!.enterShareCode,
-                trailingIcon: Icons.chevron_right,
-                isDiscrete: true,
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the bottom sheet
-                  navigationProvider.push(
-                    () => ShareCodeScreen(
-                      onBack: (_) {
-                        navigationProvider.attemptPop(
-                          context,
-                        ); // Close the share code screen
-                      },
-                      onSuccess: (_) {
-                        navigationProvider.pop(); // Close the share code screen
-                      },
-                    ),
-                    showBottomNavBar: true,
-                  );
-                },
-              ),
-              SizedBox(height: 16),
             ],
           ),
-        );
-      },
+
+          // ACTIONS
+          // DIRECT CREATION BUTTONS
+          /// create playlist
+          FilledTextButton(
+            trailingIcon: Icons.chevron_right,
+            isDiscrete: true,
+            text: AppLocalizations.of(
+              context,
+            )!.createPlaceholder(AppLocalizations.of(context)!.playlist),
+            onPressed: () {
+              final playlistProvider = context.read<PlaylistProvider>();
+              Navigator.of(context).pop(); // Close the bottom sheet
+              nav.attemptPop(context, route: NavigationRoute.playlists);
+              nav.push(
+                () => EditPlaylistScreen(),
+                changeDetector: () => playlistProvider.hasUnsavedChanges,
+                showBottomNavBar: true,
+              );
+            },
+          ),
+          FilledTextButton(
+            trailingIcon: Icons.chevron_right,
+            isDiscrete: true,
+            text: AppLocalizations.of(
+              context,
+            )!.addPlaceholder(AppLocalizations.of(context)!.cipher),
+            onPressed: () {
+              final cipherProvider = context.read<CipherProvider>();
+              final localVersionProvider = context.read<LocalVersionProvider>();
+              final sectionProvider = context.read<SectionProvider>();
+
+              Navigator.of(context).pop(); // Close the bottom sheet
+              nav.attemptPop(context, route: NavigationRoute.library);
+              nav.push(
+                () => EditCipherScreen(
+                  cipherID: -1,
+                  versionID: -1,
+                  versionType: VersionType.brandNew,
+                ),
+                changeDetector: () =>
+                    (cipherProvider.hasUnsavedChanges ||
+                    localVersionProvider.hasUnsavedChanges ||
+                    sectionProvider.hasUnsavedChanges),
+                showBottomNavBar: true,
+              );
+            },
+          ),
+          FilledTextButton(
+            trailingIcon: Icons.chevron_right,
+            isDiscrete: true,
+            text: AppLocalizations.of(context)!.assignSchedule,
+            onPressed: () {
+              final localScheduleProvider = context
+                  .read<LocalScheduleProvider>();
+              Navigator.of(context).pop(); // Close the bottom sheet
+              nav.attemptPop(context, route: NavigationRoute.schedule);
+              sel.enableSelectionMode();
+              nav.push(
+                () => CreateScheduleScreen(creationStep: 1),
+                showBottomNavBar: true,
+                changeDetector: () => localScheduleProvider.hasUnsavedChanges,
+                onPopCallback: () {
+                  sel.disableSelectionMode();
+                },
+              );
+            },
+          ),
+          FilledTextButton(
+            text: AppLocalizations.of(context)!.enterShareCode,
+            trailingIcon: Icons.chevron_right,
+            isDiscrete: true,
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the bottom sheet
+              nav.push(
+                () => ShareCodeScreen(
+                  onBack: (_) {
+                    nav.attemptPop(context); // Close the share code screen
+                  },
+                  onSuccess: (_) {
+                    nav.pop(); // Close the share code screen
+                  },
+                ),
+                showBottomNavBar: true,
+                showAppBar: true,
+                showDrawerIcon: true,
+              );
+            },
+          ),
+          SizedBox(height: 16),
+        ],
+      ),
     );
   }
 }

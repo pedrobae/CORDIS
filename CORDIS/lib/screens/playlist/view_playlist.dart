@@ -166,7 +166,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
         return PlaylistVersionCard(
           key: ValueKey('playlist_version_${item.id}'),
           index: index,
-          versionId: item.contentId,
+          versionId: item.contentId!,
           playlistId: widget.playlistId,
           itemId: item.id!,
         );

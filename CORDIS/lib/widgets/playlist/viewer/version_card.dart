@@ -19,7 +19,7 @@ import 'package:cordis/providers/version/local_version_provider.dart';
 
 class PlaylistVersionCard extends StatefulWidget {
   final int playlistId;
-  final dynamic versionId;
+  final int versionId;
   final int index;
   final int itemId;
 
@@ -41,31 +41,19 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
     super.initState();
     // Pre-load cipher data if not already loaded
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final versionProvider = context.read<LocalVersionProvider>();
-      final cloudVersionProvider = context.read<CloudVersionProvider>();
+      final localVer = context.read<LocalVersionProvider>();
       final sectionProvider = context.read<SectionProvider>();
-      final cipherProvider = context.read<CipherProvider>();
+      final ciph = context.read<CipherProvider>();
 
       // Ensure cipher is loaded for local versions
-      if (widget.versionId is int) {
-        await cipherProvider.loadCipherOfVersion(widget.versionId);
-      }
-
-      // Ensure the specific version is loaded
-      if (widget.versionId is String &&
-          !cloudVersionProvider.versions.containsKey(widget.versionId)) {
-        throw Exception(
-          'Cloud version with id ${widget.versionId} not found in cache',
-        );
-      } else {
-        await versionProvider.loadVersion(widget.versionId);
+        await ciph.loadCipherOfVersion(widget.versionId);
+        await localVer.loadVersion(widget.versionId);
         await sectionProvider.loadSectionsOfVersion(widget.versionId);
-      }
     });
   }
 
   void _onReorder(
-    BuildContext context,
+    LocalVersionProvider localVer,
     List<String> songStructure,
     int oldIndex,
     int newIndex,
@@ -77,7 +65,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
     updatedStructure.insert(newIndex, item);
 
     // Persist to database
-    context.read<LocalVersionProvider>().cacheSongStructure(
+    localVer.cacheSongStructure(
       widget.versionId,
       updatedStructure,
     );
@@ -88,42 +76,29 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Consumer4<
+    final nav = context.read<NavigationProvider>();
+    final ciph = context.read<CipherProvider>();
+
+    return Consumer<
       LocalVersionProvider,
-      CipherProvider,
-      CloudVersionProvider,
-      NavigationProvider
     >(
       builder:
           (
             context,
-            versionProvider,
-            cipherProvider,
-            cloudVersionProvider,
-            navigationProvider,
+            localVer,
             child,
           ) {
-            dynamic version;
-            bool isCloud;
 
-            if (widget.versionId is String) {
-              version = cloudVersionProvider.getVersion(widget.versionId);
-              isCloud = true;
-            } else {
-              version = versionProvider.cachedVersion(widget.versionId);
-              isCloud = false;
-            }
+final version = localVer.cachedVersion(widget.versionId);
 
             // If version is not cached yet, show loading indicator
             if (version == null) {
               return Center(child: CircularProgressIndicator());
             }
 
-            Cipher? cipher = isCloud
-                ? null
-                : cipherProvider.getCipher(version.cipherId);
+final cipher = ciph.getCipher(version.cipherId);
 
-            if (!isCloud && cipher == null) {
+            if (cipher == null) {
               return Center(child: CircularProgressIndicator());
             }
 
@@ -169,8 +144,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                   spacing: 4,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      isCloud ? version.title : cipher!.title,
+                                    Text(cipher.title,
                                       style: theme.textTheme.titleMedium,
                                       softWrap: true,
                                     ),
@@ -184,12 +158,8 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                               '${AppLocalizations.of(context)!.musicKey}: ',
                                               style: theme.textTheme.bodyMedium,
                                             ),
-                                            Text(
-                                              isCloud
-                                                  ? (version.transposedKey ??
-                                                        version.originalKey)
-                                                  : (version.transposedKey ??
-                                                        cipher!.musicKey),
+                                            Text(version.transposedKey ??
+                                                        cipher.musicKey,
                                               style: theme.textTheme.bodyMedium,
                                             ),
                                           ],
@@ -208,12 +178,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                           ],
                                         ),
                                         Text(
-                                          DateTimeUtils.formatDuration(
-                                            isCloud
-                                                ? Duration(
-                                                    seconds: version.duration,
-                                                  )
-                                                : version.duration,
+                                          DateTimeUtils.formatDuration(version.duration,
                                           ),
                                           style: theme.textTheme.bodyMedium,
                                         ),
@@ -247,12 +212,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                         itemBuilder: (_, index) {
                                           final sectionCode =
                                               songStructure[index];
-                                          final Section section = isCloud
-                                              ? Section.fromFirestore(
-                                                  version
-                                                      .sections[sectionCode]!,
-                                                )
-                                              : version.sections![sectionCode];
+                                          final Section section = version.sections![sectionCode];
                                           // To ensure unique keys for identical section codes,
                                           final occurrenceIndex = songStructure
                                               .take(index + 1)
@@ -340,7 +300,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                                 () => ViewCipherScreen(
                                   versionType: VersionType.playlist,
                                   versionID: widget.versionId,
-                                  cipherID: isCloud ? null : version.cipherId,
+                                  cipherID: version.cipherId,
                                 ),
                                 showBottomNavBar: true,
                               );
