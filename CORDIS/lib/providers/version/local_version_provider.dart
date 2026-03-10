@@ -414,10 +414,16 @@ class LocalVersionProvider extends ChangeNotifier {
   }
 
   /// ===== DELETE =====
-  void removeSectionFromStructByCode(int versionId, String contentCode) {
+  void removeSectionsByCode(int versionId, String contentCode) {
     _versions[versionId]!.songStructure.removeWhere(
       (code) => code == contentCode,
     );
+    _hasUnsavedChanges = true;
+    notifyListeners();
+  }
+
+  void removeSection(int versionID, int index) {
+    _versions[versionID]!.songStructure.removeAt(index);
     _hasUnsavedChanges = true;
     notifyListeners();
   }

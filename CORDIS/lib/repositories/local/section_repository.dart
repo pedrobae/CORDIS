@@ -74,9 +74,9 @@ class SectionRepository {
   }
 
   // ===== DELETE =====
-  /// Deletes section by its local ID
-  Future<void> deleteSection(int id) async {
+  /// Deletes section by its versionID and sectionCode
+  Future<void> deleteSection(int versionID, String sectionCode) async {
     final db = await _databaseHelper.database;
-    await db.delete('section', where: 'id = ?', whereArgs: [id]);
+    await db.delete('section', where: 'version_id = ?, content_code', whereArgs: [versionID, sectionCode]);
   }
 }

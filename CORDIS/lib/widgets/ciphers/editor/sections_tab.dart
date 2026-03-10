@@ -87,7 +87,7 @@ class _SectionsTabState extends State<SectionsTab> {
                         ),
 
                         // DRAGGABLE CHIPS
-                        ReorderableStructure(versionId: widget.versionID),
+                        ReorderableStructure(versionID: widget.versionID),
                       ],
                     ),
                     // CONTENT SECTION

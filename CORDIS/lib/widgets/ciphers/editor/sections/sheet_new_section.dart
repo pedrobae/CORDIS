@@ -10,12 +10,14 @@ import 'package:provider/provider.dart';
 class NewSectionSheet extends StatelessWidget {
   final bool secret;
   final int versionId;
-  const NewSectionSheet({super.key, this.secret = false, this.versionId = -1});
+  const NewSectionSheet({super.key, this.secret = false, required this.versionId});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    final nav = context.read<NavigationProvider>();
 
     return Container(
       decoration: BoxDecoration(
@@ -51,7 +53,7 @@ class NewSectionSheet extends StatelessWidget {
               trailingIcon: Icons.chevron_right,
               onPressed: () {
                 Navigator.of(context).pop();
-                context.read<NavigationProvider>().pushForeground(
+                nav.pushForeground(
                   SelectType(
                     sectionCode: null,
                     versionID: versionId,
@@ -70,7 +72,7 @@ class NewSectionSheet extends StatelessWidget {
               isDiscrete: true,
               onPressed: () {
                 Navigator.of(context).pop();
-                context.read<NavigationProvider>().push(
+                nav.push(
                   () => const ImportTextScreen(),
                 );
               },
@@ -82,7 +84,7 @@ class NewSectionSheet extends StatelessWidget {
             isDiscrete: true,
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<NavigationProvider>().push(() => const ImportPdfScreen());
+              nav.push(() => const ImportPdfScreen());
             },
           ),
           if (secret)

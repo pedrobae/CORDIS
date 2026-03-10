@@ -179,7 +179,7 @@ class MainScreenState extends State<MainScreen> {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        builder: (context) => NewSectionSheet(secret: true),
+        builder: (context) => NewSectionSheet(secret: true, versionId: -1),
       );
     }
   }

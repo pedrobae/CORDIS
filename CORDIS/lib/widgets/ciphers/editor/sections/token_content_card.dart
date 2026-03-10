@@ -4,7 +4,6 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
-import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/transposition_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/services/tokenization/helper_classes.dart';
@@ -36,6 +35,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
   static const TokenizationService _tokenizer = TokenizationService();
 
   bool _isDragging = false;
+
   List<ContentToken>? _activeTokens;
   String? _activeContent;
 
@@ -57,62 +57,59 @@ class _TokenContentCardState extends State<TokenContentCard> {
     return _activeTokens!;
   }
 
-  void _cacheChanges(List<ContentToken> tokens) {
-    final newContent = _tokenizer.reconstructContent(
-      tokens, // Excludes the last newline token
-    );
+  void _cacheChanges() {
+    if (_activeTokens == null) return;
 
-    _activeTokens = tokens;
-    _activeContent = newContent;
+    final newContent = _tokenizer.reconstructContent(_activeTokens!);
 
-    context.read<SectionProvider>().cacheUpdate(
-      widget.versionID,
-      widget.sectionCode,
-      newContentText: newContent,
+    context.read<SectionProvider>().cacheContent(
+      versionID: widget.versionID,
+      sectionCode: widget.sectionCode,
+      content: newContent,
     );
   }
 
-  void _addChord(
-    List<ContentToken> tokens,
-    ContentToken draggable,
-    ContentToken target,
-  ) {
+  void _addChord(ContentToken draggable, ContentToken target) {
+    if (_activeTokens == null) return;
+
     int index = 0;
-    for (var token in tokens) {
+    for (var token in _activeTokens!) {
       if (token == target) break;
       index++;
     }
-    tokens.insert(index, draggable);
+    _activeTokens!.insert(index, draggable);
 
-    _cacheChanges(tokens);
+    _cacheChanges();
   }
 
-  void _addPrecedingChord(
-    List<ContentToken> tokens,
-    ContentToken draggable,
-    ContentToken target,
-  ) {
+  void _addPrecedingChord(ContentToken draggable, ContentToken target) {
+    if (_activeTokens == null) return;
+
     final emptySpaceToken = ContentToken(text: ' ', type: TokenType.space);
 
     int index = 0;
-    for (var token in tokens) {
+    for (var token in _activeTokens!) {
       if (token == target) break;
       index++;
     }
 
-    if (index < tokens.length) {
-      tokens.insert(index, emptySpaceToken);
-      tokens.insert(index, draggable);
+    if (index < _activeTokens!.length) {
+      _activeTokens!.insert(index, emptySpaceToken);
+      _activeTokens!.insert(index, draggable);
     }
 
-    _cacheChanges(tokens);
+    _cacheChanges();
   }
 
-  void _removeChord(List<ContentToken> tokens, ContentToken draggable) {
-    final index = tokens.indexOf(draggable);
-    if (index >= 0 && index < tokens.length) tokens.removeAt(index);
+  void _removeChord(ContentToken draggable) {
+    if (_activeTokens == null) return;
 
-    _cacheChanges(tokens);
+    final index = _activeTokens!.indexOf(draggable);
+    if (index >= 0 && index < _activeTokens!.length) {
+      _activeTokens!.removeAt(index);
+    }
+
+    _cacheChanges();
   }
 
   @override
@@ -120,182 +117,148 @@ class _TokenContentCardState extends State<TokenContentCard> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Consumer4<
-      LayoutSettingsProvider,
-      SectionProvider,
-      SelectionProvider,
-      TranspositionProvider
-    >(
-      builder:
-          (context, laySet, sectionProvider, selectionProvider, tp, child) {
-            final section = sectionProvider.getSection(
-              widget.versionID,
-              widget.sectionCode,
-            );
+    final laySet = context.read<LayoutSettingsProvider>();
 
-            // Handle case where section doesn't exist
-            if (section == null || section.contentText.isEmpty) {
-              return Container(
+    return Consumer2<SectionProvider, TranspositionProvider>(
+      builder: (context, sect, trans, child) {
+        final section = sect.getSection(widget.versionID, widget.sectionCode);
+
+        if (section == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final tokens = _tokensForContent(section.contentText);
+
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(0),
+            border: Border.all(color: colorScheme.shadow, width: 1.2),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// HEADER
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 4),
                 decoration: BoxDecoration(
-                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(0),
-                  border: Border.all(color: colorScheme.shadow, width: 1.2),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Center(
-                    child: Text(
-                      'Section not found or empty',
-                      style: textTheme.bodyMedium,
-                    ),
+                  border: Border(
+                    bottom: BorderSide(color: colorScheme.shadow, width: 1.2),
                   ),
                 ),
-              );
-            }
+                child: Row(
+                  spacing: 8,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    /// Drag Handle icon
+                    Icon(
+                      Icons.drag_indicator,
+                      size: 28,
+                      color: colorScheme.shadow,
+                    ),
 
-            final tokens = _tokensForContent(section.contentText);
+                    /// Section Code badge
+                    SectionBadge(
+                      sectionCode: section.contentCode,
+                      sectionColor: section.contentColor,
+                    ),
 
-            return Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: BorderRadius.circular(0),
-                border: Border.all(color: colorScheme.shadow, width: 1.2),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// HEADER
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(0),
-                      border: Border(
-                        bottom: BorderSide(
-                          color: colorScheme.shadow,
-                          width: 1.2,
-                        ),
+                    /// Section Type label
+                    Expanded(
+                      child: Text(
+                        section.contentType,
+                        style: textTheme.bodyLarge,
                       ),
                     ),
-                    child: Row(
-                      spacing: 8,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        /// Drag Handle icon
-                        Icon(
-                          Icons.drag_indicator,
+
+                    /// Delete icon (only visible when dragging)
+                    _isDragging
+                        ? DragTarget<ContentToken>(
+                            onAcceptWithDetails: (details) => {
+                              _removeChord(details.data),
+                            },
+                            builder: (context, candidateData, rejectedData) {
+                              if (candidateData.isNotEmpty) {
+                                return Icon(Icons.delete, color: Colors.red);
+                              }
+                              return Icon(Icons.delete, color: Colors.grey);
+                            },
+                          )
+                        : const SizedBox.shrink(),
+
+                    /// Edit Section button
+                    if (widget.isEnabled)
+                      GestureDetector(
+                        onTap: _showQuickActions,
+                        child: Icon(
+                          Icons.more_vert,
                           size: 28,
                           color: colorScheme.shadow,
                         ),
-
-                        /// Section Code badge
-                        SectionBadge(
-                          sectionCode: section.contentCode,
-                          sectionColor: section.contentColor,
-                        ),
-
-                        /// Section Type label
-                        Expanded(
-                          child: Text(
-                            section.contentType,
-                            style: textTheme.bodyLarge,
-                          ),
-                        ),
-
-                        /// Delete icon (only visible when dragging)
-                        _isDragging
-                            ? DragTarget<ContentToken>(
-                                onAcceptWithDetails: (details) => {
-                                  _removeChord(tokens, details.data),
-                                },
-                                builder:
-                                    (context, candidateData, rejectedData) {
-                                      if (candidateData.isNotEmpty) {
-                                        return Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
-                                        );
-                                      }
-                                      return Icon(
-                                        Icons.delete,
-                                        color: Colors.grey,
-                                      );
-                                    },
-                              )
-                            : const SizedBox.shrink(),
-
-                        /// Edit Section button
-                        if (widget.isEnabled)
-                          GestureDetector(
-                            onTap: _showQuickActions,
-                            child: Icon(
-                              Icons.more_vert,
-                              size: 28,
-                              color: colorScheme.shadow,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-
-                  /// CONTENT
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final chordStyle = laySet.chordTextStyle(
-                        colorScheme.surface,
-                      );
-                      final lyricStyle = laySet.lyricTextStyle;
-                      final contentWidth = max(
-                        0.0,
-                        constraints.maxWidth -
-                            TokenizationConstants.contentPaddingEdit,
-                      );
-
-                      final editContext = TokenBuildContext(
-                        chordStyle: chordStyle,
-                        lyricStyle: lyricStyle,
-                        contentColor: section.contentColor,
-                        surfaceColor: colorScheme.surface,
-                        onSurfaceColor: colorScheme.onSurface,
-                        isEnabled: widget.isEnabled,
-                        cache: {},
-                        maxWidth: contentWidth,
-                        toggleDrag: _toggleDrag,
-                        onAddChord: _addChord,
-                        onAddPrecedingChord: _addPrecedingChord,
-                        onRemoveChord: _removeChord,
-                      );
-
-                      final content = _tokenizer.createContent(
-                        content: section.contentText,
-                        initialTokens: tokens,
-                        posCtx: PositioningContext(
-                          underLineColor: colorScheme.onSurface,
-                          maxWidth: contentWidth,
-                          isEditMode: true,
-                        ),
-                        buildCtx: editContext,
-                        transposeChord: tp.transposeChord,
-                      );
-
-                      return Padding(
-                        padding: const EdgeInsets.all(
-                          TokenizationConstants.contentPaddingEdit / 2,
-                        ),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: content.contentHeight,
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [...content.tokens],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+                      ),
+                  ],
+                ),
               ),
-            );
-          },
+
+              /// CONTENT
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final chordStyle = laySet.chordTextStyle(colorScheme.surface);
+                  final lyricStyle = laySet.lyricTextStyle;
+                  final contentWidth = max(
+                    0.0,
+                    constraints.maxWidth -
+                        TokenizationConstants.contentPaddingEdit,
+                  );
+
+                  final editContext = TokenBuildContext(
+                    chordStyle: chordStyle,
+                    lyricStyle: lyricStyle,
+                    contentColor: section.contentColor,
+                    surfaceColor: colorScheme.surface,
+                    onSurfaceColor: colorScheme.onSurface,
+                    isEnabled: widget.isEnabled,
+                    cache: {},
+                    maxWidth: contentWidth,
+                    transposeChord: (String chord) =>
+                        trans.transposeChord(chord),
+                    toggleDrag: _toggleDrag,
+                    onAddChord: _addChord,
+                    onAddPrecedingChord: _addPrecedingChord,
+                    onRemoveChord: _removeChord,
+                  );
+
+                  final content = _tokenizer.createContent(
+                    content: section.contentText,
+                    initialTokens: tokens,
+                    posCtx: PositioningContext(
+                      underLineColor: colorScheme.onSurface,
+                      maxWidth: contentWidth,
+                      isEditMode: true,
+                    ),
+                    buildCtx: editContext,
+                  );
+
+                  return Padding(
+                    padding: const EdgeInsets.all(
+                      TokenizationConstants.contentPaddingEdit / 2,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: content.contentHeight,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [...content.tokens],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -370,13 +333,13 @@ class _TokenContentCardState extends State<TokenContentCard> {
                       return DeleteConfirmationSheet(
                         itemType: AppLocalizations.of(context)!.section,
                         onConfirm: () {
-                          context.read<SectionProvider>().cacheDeleteSection(
+                          context.read<SectionProvider>().cacheDeletion(
                             widget.versionID,
                             widget.sectionCode,
                           );
                           context
                               .read<LocalVersionProvider>()
-                              .removeSectionFromStructByCode(
+                              .removeSectionsByCode(
                                 widget.versionID,
                                 widget.sectionCode,
                               );

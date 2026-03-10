@@ -8,13 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SelectType extends StatelessWidget {
-  final int? versionID;
+  final int versionID;
   final String? sectionCode;
   final bool isNewSection;
 
   const SelectType({
     super.key,
-    this.versionID,
+    required this.versionID,
     this.sectionCode,
     this.isNewSection = false,
   });
@@ -23,6 +23,8 @@ class SelectType extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+
+    final nav = context.read<NavigationProvider>();
 
     return Container(
       decoration: BoxDecoration(
@@ -42,7 +44,7 @@ class SelectType extends StatelessWidget {
                 left: 0,
                 child: BackButton(
                   onPressed: () {
-                    context.read<NavigationProvider>().attemptPop(context);
+                    nav.attemptPop(context);
                   },
                 ),
               ),
@@ -86,21 +88,19 @@ class SelectType extends StatelessWidget {
                         try {
                           final newCode = _upsertSection(context, section);
                           isNewSection
-                              ? context
-                                    .read<NavigationProvider>()
+                              ? nav
                                     .pushForeground(
                                       EditSectionScreen(
                                         sectionCode: newCode,
-                                        versionID: versionID!,
+                                        versionID: versionID,
                                         isNewSection: true,
                                       ),
                                     )
-                              : context
-                                    .read<NavigationProvider>()
+                              : nav
                                     .pushForeground(
                                       EditSectionScreen(
                                         sectionCode: newCode,
-                                        versionID: versionID!,
+                                        versionID: versionID,
                                       ),
                                     );
                         } catch (e) {
@@ -162,18 +162,18 @@ class SelectType extends StatelessWidget {
   }
 
   String _upsertSection(BuildContext context, SectionLabel section) {
-    final sectionProvider = context.read<SectionProvider>();
+    final sect = context.read<SectionProvider>();
     if (isNewSection) {
-      final newCode = sectionProvider.cacheAddSection(
-        versionID!,
+      final newCode = sect.cacheAddSection(
+        versionID,
         section.code,
         section.color,
         section.officialLabel,
       );
       return newCode;
     } else {
-      final newCode = sectionProvider.cacheUpdate(
-        versionID!,
+      final newCode = sect.cacheUpdate(
+        versionID,
         sectionCode!,
         newContentCode: section.code,
         newContentType: section.officialLabel,
@@ -183,13 +183,13 @@ class SelectType extends StatelessWidget {
       // If the content code has changed, update the song structure accordingly
       if (sectionCode! != section.code) {
         context.read<LocalVersionProvider>().updateSectionCodeInStruct(
-          versionID!,
+          versionID,
           oldCode: sectionCode!,
           newCode: newCode,
         );
 
         context.read<SectionProvider>().renameSectionKey(
-          versionID!,
+          versionID,
           oldCode: sectionCode!,
           newCode: newCode,
         );

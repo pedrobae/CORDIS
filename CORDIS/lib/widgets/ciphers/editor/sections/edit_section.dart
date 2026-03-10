@@ -11,8 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EditSectionScreen extends StatefulWidget {
-  final int? versionID;
-  final String? sectionCode;
+  final int versionID;
+  final String sectionCode;
   final bool isNewSection;
 
   const EditSectionScreen({
@@ -36,21 +36,15 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
   void initState() {
     super.initState();
 
-    Section? section = context.read<SectionProvider>().getSection(
+    Section section = context.read<SectionProvider>().getSection(
       widget.versionID,
-      widget.sectionCode ?? '',
-    );
+      widget.sectionCode,
+    )!;
 
-    contentCodeController = TextEditingController(
-      text: section?.contentCode ?? '',
-    );
-    contentTypeController = TextEditingController(
-      text: section?.contentType ?? '',
-    );
-    contentTextController = TextEditingController(
-      text: section?.contentText ?? '',
-    );
-    contentColor = section?.contentColor ?? Colors.grey;
+    contentCodeController = TextEditingController(text: section.contentCode);
+    contentTypeController = TextEditingController(text: section.contentType);
+    contentTextController = TextEditingController(text: section.contentText);
+    contentColor = section.contentColor;
   }
 
   @override
@@ -205,7 +199,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     // Update the section with new values
     final newCode = context.read<SectionProvider>().cacheUpdate(
       widget.versionID,
-      widget.sectionCode!,
+      widget.sectionCode,
       newContentCode: contentCodeController.text,
       newContentType: contentTypeController.text,
       newContentText: contentTextController.text,
@@ -215,7 +209,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     // If it is a new section Add the section to the song structure
     if (widget.isNewSection) {
       context.read<LocalVersionProvider>().addSectionToStruct(
-        widget.versionID!,
+        widget.versionID,
         newCode,
       );
     }
@@ -223,13 +217,13 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     // If the content code has changed, update the song structure accordingly
     if (newCode != widget.sectionCode) {
       context.read<LocalVersionProvider>().updateSectionCodeInStruct(
-        widget.versionID!,
-        oldCode: widget.sectionCode!,
+        widget.versionID,
+        oldCode: widget.sectionCode,
         newCode: newCode,
       );
       context.read<SectionProvider>().renameSectionKey(
-        widget.versionID!,
-        oldCode: widget.sectionCode!,
+        widget.versionID,
+        oldCode: widget.sectionCode,
         newCode: newCode,
       );
     }
@@ -238,13 +232,13 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
   void _deleteSection() {
     if (widget.isNewSection) return;
 
-    context.read<SectionProvider>().cacheDeleteSection(
-      widget.versionID!,
-      widget.sectionCode!,
+    context.read<SectionProvider>().cacheDeletion(
+      widget.versionID,
+      widget.sectionCode,
     );
-    context.read<LocalVersionProvider>().removeSectionFromStructByCode(
-      widget.versionID!,
-      widget.sectionCode!,
+    context.read<LocalVersionProvider>().removeSectionsByCode(
+      widget.versionID,
+      widget.sectionCode,
     );
   }
 }

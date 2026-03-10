@@ -1,7 +1,6 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
-import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -35,6 +34,8 @@ class _AddTagSheetState extends State<AddTagSheet> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+
+    final ciph = context.read<CipherProvider>();
 
     return SingleChildScrollView(
       child: Container(
@@ -94,33 +95,27 @@ class _AddTagSheetState extends State<AddTagSheet> {
                 ),
               ),
             ),
-            Consumer2<CipherProvider, CloudVersionProvider>(
-              builder: (context, cipherProvider, cloudVersionProvider, child) =>
-                  FilledTextButton(
-                    text: AppLocalizations.of(context)!.addPlaceholder(''),
-                    isDark: true,
-                    onPressed: () {
-                      switch (widget.versionType) {
-                        case VersionType.playlist:
-                          throw Exception(
-                            'Cannot add tags to playlist versions',
-                          );
-                        case VersionType.brandNew:
-                        case VersionType.import:
-                        case VersionType.local:
-                          cipherProvider.addTagtoCache(
-                            widget.cipherID ?? -1,
-                            tagController.text.trim(),
-                          );
-                        case VersionType.cloud:
-                          cloudVersionProvider.addTagToCloudCache(
-                            widget.versionID!,
-                            tagController.text.trim(),
-                          );
-                      }
-                      Navigator.of(context).pop();
-                    },
-                  ),
+            FilledTextButton(
+              text: AppLocalizations.of(context)!.addPlaceholder(''),
+              isDark: true,
+              onPressed: () {
+                switch (widget.versionType) {
+                  case VersionType.playlist:
+                    throw Exception('Cannot add tags to playlist versions');
+                  case VersionType.brandNew:
+                  case VersionType.import:
+                  case VersionType.local:
+                    ciph.addTagtoCache(
+                      widget.cipherID ?? -1,
+                      tagController.text.trim(),
+                    );
+                  case VersionType.cloud:
+                    throw Exception(
+                      'Cannot add tags to cloud versions. Please save the version locally first.',
+                    );
+                }
+                Navigator.of(context).pop();
+              },
             ),
             SizedBox(height: 32),
           ],

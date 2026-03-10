@@ -132,7 +132,6 @@ class TokenizationService {
     required String content,
     required PositioningContext posCtx,
     required TokenBuildContext buildCtx,
-    required String Function(String) transposeChord,
     List<ContentToken>? initialTokens,
     // View mode parameters
     Map<ContentFilter, bool>? contentFilters,
@@ -143,13 +142,8 @@ class TokenizationService {
     final tokens = initialTokens ?? tokenize(content);
 
     // Step 2: Apply mode-specific processing
-    for (var token in tokens) {
-      if (token.type == TokenType.chord) {
-        token.text = transposeChord(token.text);
-      }
-    }
-
-    if (!isEditMode) {
+    if (isEditMode) {
+    } else {
       filterTokens(tokens, contentFilters);
     }
 

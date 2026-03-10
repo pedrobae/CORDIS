@@ -14,6 +14,7 @@ class SectionProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _isSaving = false;
   bool _hasUnsavedChanges = false;
+  final List<MapEntry<int, String>> _cachedDeletions = [];
 
   String? _error;
 
@@ -126,7 +127,6 @@ class SectionProvider extends ChangeNotifier {
   }
 
   /// ===== UPDATE =====
-  // Modify a section (content_text)
   String cacheUpdate(
     dynamic versionID,
     String contentCode, {
@@ -140,29 +140,24 @@ class SectionProvider extends ChangeNotifier {
       newCode = _assignNumbering(versionID, contentCode, newContentCode);
     }
 
-    final section = _sections[versionID]![contentCode];
-    if (section == null) {
-      // Create a new section if it doesn't exist
-      final newSection = Section(
-        versionId: versionID is String ? -1 : versionID,
-        contentCode: newCode,
-        contentType: newContentType ?? 'default',
-        contentText: newContentText ?? '',
-        contentColor: newColor ?? Colors.grey,
-      );
+    final section = _sections[versionID]![contentCode]!;
+    section.contentCode = newCode;
+    section.contentType = newContentType ?? section.contentType;
+    section.contentColor = newColor ?? section.contentColor;
+    section.contentText = newContentText ?? section.contentText;
 
-      _sections[newSection.versionId] ??= {};
-      _sections[newSection.versionId]![newSection.contentCode] = newSection;
-    } else {
-      // Update existing section
-      section.contentCode = newCode;
-      section.contentType = newContentType ?? section.contentType;
-      section.contentText = newContentText ?? section.contentText;
-      section.contentColor = newColor ?? section.contentColor;
-    }
     _hasUnsavedChanges = true;
     notifyListeners();
     return newCode;
+  }
+
+  void cacheContent({
+    required String sectionCode,
+    required int versionID,
+    required String content,
+  }) {
+    _sections[versionID]![sectionCode]!.contentText = content;
+    _hasUnsavedChanges = true;
   }
 
   void renameSectionKey(
@@ -183,8 +178,9 @@ class SectionProvider extends ChangeNotifier {
 
   /// ===== DELETE =====
   // Remove all sections by its code
-  void cacheDeleteSection(dynamic versionKey, String sectionCode) {
+  void cacheDeletion(dynamic versionKey, String sectionCode) {
     _sections[versionKey]!.remove(sectionCode);
+    _cachedDeletions.add(MapEntry(versionKey as int, sectionCode));
     _hasUnsavedChanges = true;
     notifyListeners();
   }
@@ -208,6 +204,9 @@ class SectionProvider extends ChangeNotifier {
 
       for (final entry in _sections[versionID]!.entries) {
         await _repo.upsertSection(entry.value.copyWith(versionId: versionID));
+      }
+      for (final deletion in _cachedDeletions) {
+        await _repo.deleteSection(deletion.key, deletion.value);
       }
     } catch (e) {
       _error = e.toString();

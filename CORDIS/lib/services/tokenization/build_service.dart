@@ -20,24 +20,24 @@ class TokenizationBuilder {
   }) {
     cache ??= {};
     final key =
-        '$text|${style.fontFamily}|${style.fontSize}|'
-        '${style.fontWeight?.index}|${style.letterSpacing}';
+          '$text|${style.fontFamily}|${style.fontSize}|'
+          '${style.fontWeight?.index}|${style.letterSpacing}';
     return cache.putIfAbsent(key, () {
       final textPainter = TextPainter(
         text: TextSpan(text: text, style: style),
-        maxLines: 1,
-        textDirection: TextDirection.ltr,
+          maxLines: 1,
+          textDirection: TextDirection.ltr,
       )..layout();
       final measurements = Measurements(
         width: textPainter.width,
         height: textPainter.height,
         baseline: textPainter.computeDistanceToActualBaseline(
           TextBaseline.alphabetic,
-        ),
+        ),  
         size: style.fontSize ?? 14.0,
-      );
-
-      return measurements;
+      );  
+  
+        return measurements;
     });
   }
 
@@ -310,7 +310,6 @@ class TokenizationBuilder {
     return _buildGenericDragTarget(
       tokenBuildCtx: ctx,
       child: dragTargetChild,
-      tokens: tokens,
       token: token,
       onAccept: ctx.onAddPrecedingChord!,
 
@@ -332,7 +331,6 @@ class TokenizationBuilder {
       tokenBuildCtx: ctx,
       child: dragTargetChild,
       tokenLine: tokenLine,
-      tokens: tokens,
       token: token,
       onAccept: ctx.onAddChord!,
       tokenPositions: tokenPositions,
@@ -356,7 +354,6 @@ class TokenizationBuilder {
       tokenBuildCtx: ctx,
       child: dragTargetChild,
       tokenLine: tokenLine,
-      tokens: tokens,
       token: token,
       onAccept: ctx.onAddChord!,
       tokenPositions: tokenPositions,
@@ -368,10 +365,8 @@ class TokenizationBuilder {
   Widget _buildGenericDragTarget({
     required TokenBuildContext tokenBuildCtx,
     required Widget child,
-    required List<ContentToken> tokens,
     required ContentToken token,
     required Function(
-      List<ContentToken> tokens,
       ContentToken draggable,
       ContentToken target,
     )
@@ -383,8 +378,8 @@ class TokenizationBuilder {
     return tokenBuildCtx.isEnabled!
         ? DragTarget<ContentToken>(
             onAcceptWithDetails: (details) {
-              tokenBuildCtx.onRemoveChord!(tokens, details.data);
-              onAccept(tokens, details.data, token);
+              tokenBuildCtx.onRemoveChord!(details.data);
+              onAccept(details.data, token);
             },
             builder: (context, candidateData, rejectedData) {
               if (candidateData.isNotEmpty) {
@@ -468,7 +463,7 @@ class TokenizationBuilder {
                 TokenizationConstants.dragFeedbackCutoutPadding -
                 chordMsr.bottomPadding,
             child: Text(
-              draggedChord.text,
+              ctx.transposeChord(draggedChord.text),
               style: ctx.chordStyle.copyWith(color: ctx.onSurfaceColor),
             ),
           ),

@@ -41,10 +41,9 @@ class TokenView extends StatelessWidget {
                 surfaceColor: colorScheme.surface,
                 onSurfaceColor: colorScheme.onSurface,
                 maxWidth: contentWidth,
-                cache: {},),
-              transposeChord: (chord) {
-                return trans.transposeChord(chord);
-              },
+                transposeChord: (chord) => trans.transposeChord(chord),
+                cache: {},
+              ),
             );
             return SizedBox(
               height: content.contentHeight,

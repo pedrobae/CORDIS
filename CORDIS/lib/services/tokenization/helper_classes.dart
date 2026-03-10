@@ -16,12 +16,15 @@ class TokenBuildContext {
   /// LAYOUT PARAMETERS
   final double maxWidth;
 
+  /// TRANSPOSER
+  final String Function(String chord) transposeChord;
+
   /// EDIT MODE SPECIFIC PARAMETERS
   final bool? isEnabled;
   final VoidCallback? toggleDrag;
-  final Function(List<ContentToken>, ContentToken, ContentToken)? onAddChord;
-  final Function(List<ContentToken>, ContentToken, ContentToken)? onAddPrecedingChord;
-  final Function(List<ContentToken>, ContentToken)? onRemoveChord;
+  final Function(ContentToken, ContentToken)? onAddChord;
+  final Function(ContentToken, ContentToken)? onAddPrecedingChord;
+  final Function(ContentToken)? onRemoveChord;
 
   const TokenBuildContext({
     required this.chordStyle,
@@ -31,6 +34,7 @@ class TokenBuildContext {
     required this.onSurfaceColor,
     required this.maxWidth,
     required this.cache,
+    required this.transposeChord,
      this.isEnabled,
      this.toggleDrag,
      this.onAddChord,
