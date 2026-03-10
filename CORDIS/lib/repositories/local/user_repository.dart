@@ -105,12 +105,14 @@ class UserRepository {
   Future<int> updateUser(User user) async {
     final db = await _databaseHelper.database;
 
-    return await db.update(
+    await db.update(
       'user',
       user.toSQLite(),
       where: 'id = ?',
       whereArgs: [user.id],
     );
+
+    return user.id!;
   }
 
   // ===== DELETE =====

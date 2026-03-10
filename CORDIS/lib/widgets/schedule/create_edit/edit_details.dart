@@ -91,6 +91,10 @@ class _EditDetailsState extends State<EditDetails> {
     final auth = context.read<MyAuthProvider>();
     final localSch = context.read<LocalScheduleProvider>();
 
+    if (widget.scheduleID == -1) {
+      return _buildForm();
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => nav.attemptPop(context)),
@@ -109,64 +113,63 @@ class _EditDetailsState extends State<EditDetails> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          autovalidateMode: AutovalidateMode.onUnfocus,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 16,
-              children: [
-                LabeledTextField(
-                  label: AppLocalizations.of(context)!.scheduleName,
-                  controller: nameController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(
-                        context,
-                      )!.pleaseEnterScheduleName;
-                    }
-                    return null;
-                  },
-                ),
-                _buildDatePickerField(
-                  label: AppLocalizations.of(context)!.date,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.pleaseEnterDate;
-                    }
-                    return null;
-                  },
-                ),
-                _buildTimePickerField(
-                  label: AppLocalizations.of(context)!.startTime,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.pleaseEnterStartTime;
-                    }
-                    return null;
-                  },
-                ),
-                LabeledTextField(
-                  label: AppLocalizations.of(context)!.location,
-                  controller: locationController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.pleaseEnterLocation;
-                    }
-                    return null;
-                  },
-                ),
-                LabeledTextField(
-                  label: AppLocalizations.of(context)!.optionalPlaceholder(
-                    AppLocalizations.of(context)!.roomVenue,
-                  ),
-                  controller: roomVenueController,
-                ),
-              ],
+      body: Padding(padding: const EdgeInsets.all(16.0), child: _buildForm()),
+    );
+  }
+
+  Form _buildForm() {
+    return Form(
+      autovalidateMode: AutovalidateMode.onUnfocus,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16,
+          children: [
+            LabeledTextField(
+              label: AppLocalizations.of(context)!.scheduleName,
+              controller: nameController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return AppLocalizations.of(context)!.pleaseEnterScheduleName;
+                }
+                return null;
+              },
             ),
-          ),
+            _buildDatePickerField(
+              label: AppLocalizations.of(context)!.date,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return AppLocalizations.of(context)!.pleaseEnterDate;
+                }
+                return null;
+              },
+            ),
+            _buildTimePickerField(
+              label: AppLocalizations.of(context)!.startTime,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return AppLocalizations.of(context)!.pleaseEnterStartTime;
+                }
+                return null;
+              },
+            ),
+            LabeledTextField(
+              label: AppLocalizations.of(context)!.location,
+              controller: locationController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return AppLocalizations.of(context)!.pleaseEnterLocation;
+                }
+                return null;
+              },
+            ),
+            LabeledTextField(
+              label: AppLocalizations.of(
+                context,
+              )!.optionalPlaceholder(AppLocalizations.of(context)!.roomVenue),
+              controller: roomVenueController,
+            ),
+          ],
         ),
       ),
     );

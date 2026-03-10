@@ -22,6 +22,10 @@ class EditRoles extends StatelessWidget {
 
     return Consumer<LocalScheduleProvider>(
       builder: (context, localSch, child) {
+        if (scheduleId == -1) {
+          return _buildContent(context, localSch);
+        }
+
         return Scaffold(
           appBar: AppBar(
             leading: BackButton(onPressed: () => nav.attemptPop(context)),
@@ -36,80 +40,81 @@ class EditRoles extends StatelessWidget {
                 icon: Icon(Icons.save),
                 onPressed: () {
                   localSch.saveSchedule(scheduleId);
-      localSch.uploadChangesToCloud(scheduleId, auth.id!);
-      nav.pop();
+                  localSch.uploadChangesToCloud(scheduleId, auth.id!);
+                  nav.pop();
                 },
               ),
             ],
           ),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ROLES LIST
-                Builder(
-                  builder: (context) {
-                    final schedule = localSch.getSchedule(scheduleId);
-
-                    if (schedule == null) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (schedule.roles.isEmpty) {
-                      return Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.noRoles,
-                              style: textTheme.headlineSmall,
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.addRolesInstructions,
-                              style: textTheme.bodyMedium,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                    return Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: schedule.roles.map((role) {
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 16.0),
-                              child: RoleCard(
-                                scheduleId: scheduleId,
-                                role: role,
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                // ADD ROLE BUTTON
-                FilledTextButton(
-                  text: AppLocalizations.of(context)!.role,
-                  isDense: true,
-                  icon: Icons.add,
-                  onPressed: () => showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (context) {
-                      return EditRoleSheet(scheduleId: scheduleId, role: null);
-                    },
-                  ),
-                ),
-              ],
-            ),
+            child: _buildContent(context, localSch),
           ),
         );
       },
+    );
+  }
+
+  Column _buildContent(BuildContext context, LocalScheduleProvider localSch) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // ROLES LIST
+        Expanded(
+          child: Builder(
+            builder: (context) {
+              final schedule = localSch.getSchedule(scheduleId);
+          
+              if (schedule == null) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (schedule.roles.isEmpty) {
+                return Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.noRoles,
+                        style: textTheme.headlineSmall,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        AppLocalizations.of(context)!.addRolesInstructions,
+                        style: textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return SingleChildScrollView(
+                child: Column(
+                  children: schedule.roles.map((role) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      child: RoleCard(scheduleId: scheduleId, role: role),
+                    );
+                  }).toList(),
+                ),
+              );
+            },
+          ),
+        ),
+        // ADD ROLE BUTTON
+        FilledTextButton(
+          text: AppLocalizations.of(context)!.role,
+          isDense: true,
+          icon: Icons.add,
+          onPressed: () => showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) {
+              return EditRoleSheet(scheduleId: scheduleId, role: null);
+            },
+          ),
+        ),
+      ],
     );
   }
 }
