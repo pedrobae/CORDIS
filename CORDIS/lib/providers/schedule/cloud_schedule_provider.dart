@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
 import 'package:cordis/repositories/cloud/schedule_repository.dart';
@@ -145,20 +147,36 @@ class CloudScheduleProvider extends ChangeNotifier {
       for (var schedule in schedules) {
         _schedules[schedule.firebaseId!] = schedule;
       }
-
-      for (var schedule in schedules) {
-        if (schedule.ownerFirebaseId == userId) {
-          _isSyncing[schedule.firebaseId!] = true;
-          await _syncService.scheduleToLocal(schedule);
-          _schedules.remove(schedule.firebaseId!);
-          _isSyncing[schedule.firebaseId!] = false;
-        }
-      }
     } catch (e) {
       debugPrint('Error loading schedules: $e');
       _error = e.toString();
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+
+    // Keep loading state scoped to cloud fetch only.
+    // Owner schedule sync can be slow and should not block the screen loader.
+    for (final schedule in _schedules.values.toList()) {
+      if (schedule.ownerFirebaseId == userId && schedule.firebaseId != null) {
+        unawaited(_syncOwnedSchedule(schedule));
+      }
+    }
+  }
+
+  Future<void> _syncOwnedSchedule(ScheduleDto schedule) async {
+    final scheduleId = schedule.firebaseId!;
+
+    _isSyncing[scheduleId] = true;
+    notifyListeners();
+
+    try {
+      await _syncService.scheduleToLocal(schedule);
+      _schedules.remove(scheduleId);
+    } catch (e) {
+      debugPrint('Error syncing owned schedule $scheduleId: $e');
+    } finally {
+      _isSyncing[scheduleId] = false;
       notifyListeners();
     }
   }
@@ -196,7 +214,7 @@ class CloudScheduleProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _repo.deleteSchedule(userId, scheduleId);
+      await _repo.deleteSchedule(scheduleId, userId);
       _schedules.remove(scheduleId);
     } catch (e) {
       _error = e.toString();
@@ -209,6 +227,9 @@ class CloudScheduleProvider extends ChangeNotifier {
   // ===== HELPERS =====
   void clearCache() {
     _schedules.clear();
+    _isLoading = false;
+    _isSaving = false;
+    _isSyncing.clear();
     _searchTerm = '';
     _error = null;
     notifyListeners();

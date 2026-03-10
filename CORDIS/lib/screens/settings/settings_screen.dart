@@ -255,6 +255,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
 
+      await _reloadAllData();
+
       // Check mounted again after async operations
       if (!mounted) return;
 

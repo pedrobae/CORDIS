@@ -4,6 +4,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/settings_provider.dart';
 import 'package:cordis/providers/user/user_provider.dart';
 import 'package:cordis/providers/app_info_provider.dart';
+import 'package:cordis/screens/user/login_screen.dart';
 import 'package:cordis/screens/user/new_password_screen.dart';
 import 'package:cordis/utils/locale.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
@@ -72,13 +73,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<
-      MyAuthProvider,
-      UserProvider,
-      SettingsProvider
-    >(
+    return Consumer3<MyAuthProvider, UserProvider, SettingsProvider>(
       builder: (context, auth, user, settings, child) {
         _handleReauthIfNeeded(auth, user);
+        _handleSignOutIfNeeded(auth);
         final nav = context.read<NavigationProvider>();
 
         return Scaffold(
@@ -134,6 +132,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _handleSignOutIfNeeded(MyAuthProvider auth) {
+    if (!auth.isAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false,
+        );
+      });
+    }
+  }
+
   AppBar _buildAppBar(NavigationProvider nav) {
     return AppBar(
       leading: BackButton(
@@ -179,7 +188,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     UserProvider user,
   ) {
     return LabeledLanguagePicker(
-      language: auth.userLanguage ??
+      language:
+          auth.userLanguage ??
           LocaleUtils.getLanguageName(settings.locale, context),
       onLanguageChanged: (value) {
         final locale = LocaleUtils.getLocaleFromLanguageName(value, context);
@@ -226,11 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return FilledTextButton(
       text: AppLocalizations.of(context)!.changePassword,
       onPressed: () {
-        nav.push(
-          () =>
-          NewPasswordScreen(),
-          showBottomNavBar: true,
-        );
+        nav.push(() => NewPasswordScreen(), showBottomNavBar: true);
       },
     );
   }
@@ -261,9 +267,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         child: Text(
           AppLocalizations.of(context)!.deleteAccountRequest,
-          style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.error,
-          ),
+          style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
         ),
       ),
     );

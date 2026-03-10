@@ -373,12 +373,13 @@ class _EditCipherScreenState extends State<EditCipherScreen>
     final navigationProvider = context.read<NavigationProvider>();
     final selectionProvider = context.read<SelectionProvider>();
 
-    for (dynamic versionId in selectionProvider.selectedItemIds) {
-      if (versionId.runtimeType == int) {
+    for (dynamic verID in selectionProvider.selectedItemIds) {
+      int? versionId;
+      if (verID.runtimeType == int) {
         // Version is local, create a copy for the playlist
-        versionId = await localVersionProvider.createVersion();
+        versionId = (await localVersionProvider.createVersion())!;
         playlistProvider.addVersion(selectionProvider.targetId!, versionId);
-      } else if (versionId.runtimeType == String) {
+      } else if (verID.runtimeType == String) {
         // Version is cloud, create a local copy and add to playlist
         int? localCipherID = widget.cipherID;
         if (widget.cipherID == null) {
@@ -387,11 +388,12 @@ class _EditCipherScreenState extends State<EditCipherScreen>
           await cipherProvider.saveCipher(widget.cipherID!);
         }
 
-        versionId = await localVersionProvider.createVersion(cipherID: localCipherID);
+        versionId = (await localVersionProvider.createVersion(
+          cipherID: localCipherID,
+        ))!;
       }
 
-      await sectionProvider.createSections(versionId);
-      await sectionProvider.loadSectionsOfVersion(versionId);
+      await sectionProvider.createSections(versionId!);
       playlistProvider.cacheAddVersion(selectionProvider.targetId!, versionId);
     }
 
@@ -427,7 +429,9 @@ class _EditCipherScreenState extends State<EditCipherScreen>
     final navigationProvider = context.read<NavigationProvider>();
 
     final cipherID = await cipherProvider.createCipher();
-    final versionID = await localVersionProvider.createVersion(cipherID: cipherID);
+    final versionID = await localVersionProvider.createVersion(
+      cipherID: cipherID,
+    );
 
     if (versionID == null) {
       throw Exception('Failed to create version for imported song');
@@ -443,7 +447,9 @@ class _EditCipherScreenState extends State<EditCipherScreen>
     final sectionProvider = context.read<SectionProvider>();
 
     final cipherID = await cipherProvider.createCipher();
-    final versionID = await localVersionProvider.createVersion(cipherID: cipherID);
+    final versionID = await localVersionProvider.createVersion(
+      cipherID: cipherID,
+    );
 
     if (versionID == null) {
       throw Exception('Failed to create version for new song');

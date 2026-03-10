@@ -125,12 +125,6 @@ class _HomeScreenState extends State<HomeScreen> {
     TextTheme textTheme,
     ColorScheme colorScheme,
   ) {
-    if (localSch.isLoading || cloudSch.isLoading) {
-      return Center(
-        child: CircularProgressIndicator(color: colorScheme.primary),
-      );
-    }
-
     final nextSchedule = _getNextSchedule(localSch, cloudSch);
     if (nextSchedule == null) {
       return Column(

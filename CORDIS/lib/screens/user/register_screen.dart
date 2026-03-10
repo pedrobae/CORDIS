@@ -1,4 +1,5 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/screens/user/login_screen.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
@@ -152,10 +153,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       controller: _passwordController,
       obscureText: _obscurePassword,
       validator: _validatePassword,
-      prefixIcon: Icon(
-        Icons.lock_outline,
-        color: colorScheme.primary,
-      ),
+      prefixIcon: Icon(Icons.lock_outline, color: colorScheme.primary),
       suffixIcon: IconButton(
         icon: Icon(
           _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -175,10 +173,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       controller: _confirmPasswordController,
       obscureText: _obscureConfirmPassword,
       label: AppLocalizations.of(context)!.confirmPassword,
-      prefixIcon: Icon(
-        Icons.lock_outline,
-        color: colorScheme.primary,
-      ),
+      prefixIcon: Icon(Icons.lock_outline, color: colorScheme.primary),
       suffixIcon: IconButton(
         icon: Icon(
           _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
@@ -221,18 +216,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildRegisterButton(MyAuthProvider auth) {
     return FilledTextButton(
-      text: AppLocalizations.of(context)!.createPlaceholder(
-        AppLocalizations.of(context)!.account,
-      ),
+      text: AppLocalizations.of(
+        context,
+      )!.createPlaceholder(AppLocalizations.of(context)!.account),
       isDark: true,
       icon: Icons.person_add,
       isDisabled: auth.isLoading,
-      onPressed: () {
+      onPressed: () async {
         if (_formKey.currentState?.validate() ?? false) {
-          auth.signUpWithEmail(
+          await auth.signUpWithEmail(
             _emailController.text,
             _passwordController.text,
           );
+
+          if (auth.isAuthenticated && mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return const LoginScreen();
+                },
+              ),
+            );
+          }
         }
       },
     );
@@ -245,13 +250,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
       children: [
         Text(
           AppLocalizations.of(context)!.alreadyHaveAccount,
-          style: TextStyle(
-            color: colorScheme.onSurfaceVariant,
-          ),
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
         TextButton(
           onPressed: () {
-            Navigator.of(context).pushReplacementNamed('/login');
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return const LoginScreen();
+                },
+              ),
+            );
           },
           child: Text(
             AppLocalizations.of(context)!.login,

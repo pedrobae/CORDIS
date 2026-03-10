@@ -424,6 +424,9 @@ class LocalVersionProvider extends ChangeNotifier {
 
   void clearCache() {
     _versions.clear();
+    _isLoading = false;
+    _isSaving = false;
+    _error = null;
     _hasUnsavedChanges = false;
     notifyListeners();
   }

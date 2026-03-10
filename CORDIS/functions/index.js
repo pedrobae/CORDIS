@@ -57,6 +57,28 @@ async function auditLog(action, details) {
   }
 }
 
+// Firestore batched writes support up to 500 operations per commit.
+// Keep a safety margin to avoid limit-related failures.
+const BATCH_LIMIT = 450;
+
+async function processInBatches(docs, operation) {
+  let processed = 0;
+
+  for (let i = 0; i < docs.length; i += BATCH_LIMIT) {
+    const chunk = docs.slice(i, i + BATCH_LIMIT);
+    const batch = admin.firestore().batch();
+
+    for (const doc of chunk) {
+      operation(batch, doc);
+    }
+
+    await batch.commit();
+    processed += chunk.length;
+  }
+
+  return processed;
+}
+
 
 // === ADMIN FUNCTIONS ===
 /// Grant admin privileges to a user by email (admin-only)
@@ -251,40 +273,64 @@ exports.createUserDocument = beforeUserCreated(async (event) => {
 
 /// Cleanup user-related data after Firebase Auth account deletion
 exports.cleanSchedulesOfUser = auth.user().onDelete(async (user) => {
-  const {uid, email} = user;
+  const uid = user?.uid || user?.data?.uid;
+  const email = user?.email || user?.data?.email || "";
+  const db = admin.firestore();
+
+  if (!uid) {
+    console.error("Auth delete payload missing uid", {
+      payloadKeys: user && typeof user === "object" ? Object.keys(user) : [],
+    });
+
+    await auditLog("user_deleted_cleanup_failed", {
+      uid: "unknown",
+      email,
+      error: "Missing uid in auth delete payload",
+    });
+
+    return null;
+  }
 
   try {
     // Remove user profile document if it exists.
-    await admin.firestore().collection("users").doc(uid).delete();
+    await db.collection("users").doc(uid).delete();
 
     // Delete schedules where the user is the owner
-    const schedulesSnap = await admin.firestore().collection("schedules")
-        .where("owner", "==", uid)
+    const schedulesSnap = await db.collection("schedules")
+        .where("ownerId", "==", uid)
         .get();
 
-    const batch = admin.firestore().batch();
-    schedulesSnap.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-    await batch.commit();
+    const deletedSchedules = await processInBatches(
+        schedulesSnap.docs,
+        (batch, doc) => batch.delete(doc.ref),
+    );
 
     // Remove user from collaborators in schedules they are part of
-    const collaboratorSnap = await admin.firestore().collection("schedules")
+    const collaboratorSnap = await db.collection("schedules")
         .where("collaborators", "array-contains", uid)
         .get();
 
-    const collaboratorBatch = admin.firestore().batch();
-    collaboratorSnap.forEach((doc) => {
-      collaboratorBatch.update(doc.ref, {
-        collaborators: admin.firestore.FieldValue.arrayRemove(uid),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
+    const updatedCollaborations = await processInBatches(
+        collaboratorSnap.docs,
+        (batch, doc) => {
+          batch.update(doc.ref, {
+            collaborators: admin.firestore.FieldValue.arrayRemove(uid),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        },
+    );
+
+    console.log("User cleanup completed", {
+      uid,
+      deletedSchedules,
+      updatedCollaborations,
     });
-    await collaboratorBatch.commit();
 
     await auditLog("user_deleted_cleanup_success", {
       uid,
-      email: email || "",
+      email,
+      deletedSchedules,
+      updatedCollaborations,
     });
 
     return null;
@@ -293,7 +339,7 @@ exports.cleanSchedulesOfUser = auth.user().onDelete(async (user) => {
 
     await auditLog("user_deleted_cleanup_failed", {
       uid,
-      email: email || "",
+      email,
       error: error.message || "unknown",
     });
 

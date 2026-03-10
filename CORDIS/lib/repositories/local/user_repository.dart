@@ -1,3 +1,5 @@
+import 'package:sqflite/sqflite.dart';
+
 import '../../helpers/database.dart';
 import '../../models/domain/user.dart';
 
@@ -10,7 +12,11 @@ class UserRepository {
   Future<int> createUser(User user) async {
     final db = await _databaseHelper.database;
 
-    return await db.insert('user', user.toSQLite());
+    return await db.insert(
+      'user',
+      user.toSQLite(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   // ===== READ =====
