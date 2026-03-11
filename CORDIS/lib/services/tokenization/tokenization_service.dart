@@ -136,15 +136,13 @@ class TokenizationService {
     // View mode parameters
     Map<ContentFilter, bool>? contentFilters,
   }) {
-    final isEditMode = contentFilters == null;
-
     // Step 1: Tokenize content (shared)
-    final tokens = initialTokens ?? tokenize(content);
+    List<ContentToken> tokens = initialTokens ?? tokenize(content);
 
     // Step 2: Apply mode-specific processing
-    if (isEditMode) {
+    if (posCtx.isEditMode) {
     } else {
-      filterTokens(tokens, contentFilters);
+      tokens = filterTokens(tokens, contentFilters!);
     }
 
     // Step 3: Organize tokens
@@ -158,7 +156,7 @@ class TokenizationService {
         final style = token.type == TokenType.chord
             ? buildCtx.chordStyle
             : buildCtx.lyricStyle;
-        final cache = isEditMode ? buildCtx.cache : null;
+        final cache = posCtx.isEditMode ? buildCtx.cache : null;
         final measured = _builder.measureText(
           text: token.text,
           style: style,
@@ -173,7 +171,7 @@ class TokenizationService {
           size: measured.size,
         );
 
-        if (isEditMode && token.type == TokenType.chord) {
+        if (posCtx.isEditMode && token.type == TokenType.chord) {
           tokenMeasurements[token]!.height += TokenizationConstants
               .chordTokenHeightPadding; // Top + bottom visual padding
           tokenMeasurements[token]!.width += TokenizationConstants
@@ -192,7 +190,7 @@ class TokenizationService {
 
     // Step 6: Build widgets (mode-specific)
     final OrganizedWidgets contentWidgets;
-    if (isEditMode) {
+    if (posCtx.isEditMode) {
       // Build edit widgets with pre-calculated positions
       contentWidgets = _builder.buildEditWidgets(
         contentTokens: organizedTokens,
