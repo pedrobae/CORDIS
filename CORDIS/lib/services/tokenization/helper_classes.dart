@@ -79,8 +79,8 @@ class TokenizationConstants {
   static const double precedingTargetWidth = 24.0;
 
   /// CHORD TOKEN
-  static const double chordTokenHeightPadding = -2;
-  static const double chordTokenWidthPadding = 20.0;
+  static const double chordTokenHeightPadding = 4;
+  static const double chordTokenWidthPadding = 10.0;
 
   /// DRAG TARGET FEEDBACK
   static const int dragFeedbackTokensBefore = 5;
@@ -89,8 +89,11 @@ class TokenizationConstants {
   static const double dragFeedbackCutoutPadding = 4.0;
 
   /// CONTENT POSITIONING
-  static const double contentPaddingEdit = 32.0;
-  static const double contentPaddingView = 64.0;
+  static const double widthConstraintPaddingEdit = 32.0;
+  static const double widthConstraintPaddingView = 64.0;
+
+  static const double heightPaddingEdit = 4.0;
+  static const double heightPaddingView = 8.0;
 }
 
 class ContentToken {

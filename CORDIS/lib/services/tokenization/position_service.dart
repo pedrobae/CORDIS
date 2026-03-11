@@ -38,7 +38,7 @@ class PositionService {
     );
 
     if (posCtx.isEditMode) {
-      chordMsr.height += TokenizationConstants.chordTokenHeightPadding;
+      chordMsr.size += 2 * TokenizationConstants.chordTokenHeightPadding;
     }
 
     final precedingOffset = _calculatePrecedingChordOffset(
@@ -47,10 +47,11 @@ class PositionService {
       posCtx,
     );
 
-    final lineHeight =
-        chordMsr.height + lyricMsr.size + posCtx.chordLyricSpacing;
+    final lineHeight = chordMsr.size + lyricMsr.size + posCtx.chordLyricSpacing;
 
-    double yOffset = chordMsr.height;
+    double yOffset = posCtx.isEditMode
+        ? TokenizationConstants.heightPaddingEdit
+        : TokenizationConstants.heightPaddingView;
     final positionMap = TokenPositionMap();
     for (var line in organizedTokens.lines) {
       double chordX = 0;
@@ -77,12 +78,14 @@ class PositionService {
                     text: '',
                     type: TokenType.underline,
                   );
+
                   wordPositions.add((
                     token: token,
                     x: lyricsX,
                     y: yOffset,
                     type: TokenType.underline,
                   ));
+
                   tokenMsr[token] = Measurements(
                     width: chordX - lyricsX,
                     height: lyricMsr.height,
@@ -98,8 +101,12 @@ class PositionService {
 
               wordPositions.add((
                 token: token,
-                x: lyricsX,
-                y: yOffset - lyricMsr.baseline,
+                x:
+                    lyricsX -
+                    (posCtx.isEditMode
+                        ? TokenizationConstants.chordTokenWidthPadding
+                        : 0),
+                y: yOffset - lyricMsr.size - posCtx.chordLyricSpacing,
                 type: TokenType.chord,
               ));
 
@@ -176,8 +183,11 @@ class PositionService {
               case TokenType.chord:
                 positionMap.setPosition(
                   pos.token,
-                  lyricsX,
-                  yOffset - lyricMsr.baseline,
+                  lyricsX -
+                      (posCtx.isEditMode
+                          ? TokenizationConstants.chordTokenWidthPadding
+                          : 0),
+                  yOffset - lyricMsr.size - posCtx.chordLyricSpacing,
                 );
                 chordX =
                     lyricsX +
@@ -238,7 +248,7 @@ class PositionService {
     }
 
     final tokenWidgets = <Positioned>[];
-    double maxY = chordMsr.height;
+    double maxY = 0;
 
     // Iterate through widgets and tokens together to get both widget and position
     for (var widgetLine in contentWidgets.lines) {
@@ -247,20 +257,14 @@ class PositionService {
           // Skip newlines and underlines
           if (tokenWidget.type == TokenType.newline) {
             continue;
-          }          
+          }
 
           // Get position from map
           final x = positionMap.getX(tokenWidget.token) ?? 0.0;
           final y = positionMap.getY(tokenWidget.token) ?? 0.0;
 
           tokenWidgets.add(
-            Positioned(
-              left: x,
-              top: y,
-              width: tokenMeasurements[tokenWidget.token]!.width,
-              height: tokenMeasurements[tokenWidget.token]!.height,
-              child: tokenWidget.widget,
-            ),
+            Positioned(left: x, top: y, child: tokenWidget.widget),
           );
 
           // Track max Y for total height

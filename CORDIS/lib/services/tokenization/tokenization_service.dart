@@ -148,7 +148,7 @@ class TokenizationService {
     // Step 3: Organize tokens
     final organizedTokens = _organize(tokens);
 
-    // Step 4: Measure tokens and calculate positions
+    // Step 4: Measure tokens
     final tokenMeasurements = <ContentToken, Measurements>{};
     for (var token in tokens) {
       if (token.type != TokenType.newline &&
@@ -158,24 +158,25 @@ class TokenizationService {
             : buildCtx.lyricStyle;
         final cache = posCtx.isEditMode ? buildCtx.cache : null;
         final measured = _builder.measureText(
-          text: token.text,
+          text: buildCtx.transposeChord(token.text),
           style: style,
           cache: cache,
         );
-
-        // Clone measurements per token to avoid mutating shared cached instances.
         tokenMeasurements[token] = Measurements(
           width: measured.width,
           height: measured.height,
           baseline: measured.baseline,
           size: measured.size,
         );
-
         if (posCtx.isEditMode && token.type == TokenType.chord) {
-          tokenMeasurements[token]!.height += TokenizationConstants
-              .chordTokenHeightPadding; // Top + bottom visual padding
-          tokenMeasurements[token]!.width += TokenizationConstants
-              .chordTokenWidthPadding; // Left + right visual padding
+          tokenMeasurements[token]!.size +=
+              2 *
+              TokenizationConstants
+                  .chordTokenHeightPadding; // Top + bottom visual padding
+          tokenMeasurements[token]!.width +=
+              2 *
+              TokenizationConstants
+                  .chordTokenWidthPadding; // Left + right visual padding
         }
       }
     }
@@ -188,7 +189,7 @@ class TokenizationService {
       tokenMsr: tokenMeasurements,
     );
 
-    // Step 6: Build widgets (mode-specific)
+    // Step 6: Build widgets
     final OrganizedWidgets contentWidgets;
     if (posCtx.isEditMode) {
       // Build edit widgets with pre-calculated positions

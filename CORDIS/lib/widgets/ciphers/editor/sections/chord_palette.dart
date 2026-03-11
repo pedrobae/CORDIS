@@ -1,12 +1,11 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/providers/layout_settings_provider.dart';
 import 'package:cordis/providers/transposition_provider.dart';
 import 'package:cordis/services/tokenization/helper_classes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/helpers/chords/chords.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_token.dart';
-
-double _fontSize = 20;
 
 class ChordPalette extends StatefulWidget {
   final dynamic versionId;
@@ -203,22 +202,10 @@ class _ChordPaletteState extends State<ChordPalette> {
   }
 
   Draggable<ContentToken> _buildDraggableChordToken(String chord) {
+    final laySet = context.read<LayoutSettingsProvider>();
+
     final token = ContentToken(text: chord, type: TokenType.chord);
     final colorScheme = Theme.of(context).colorScheme;
-
-    final tp = TextPainter(
-      text: TextSpan(
-        text: chord,
-        style: TextStyle(fontSize: _fontSize),
-      ),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    final size = Size(
-      tp.width,
-      tp.height
-    );
 
     return Draggable<ContentToken>(
       data: token,
@@ -226,28 +213,22 @@ class _ChordPaletteState extends State<ChordPalette> {
         color: Colors.transparent,
         child: ChordToken(
           token: token,
-          tokenSize: size,
           sectionColor: colorScheme.onSurface.withValues(alpha: .7),
-          textStyle: TextStyle(fontSize: _fontSize, color: colorScheme.surface),
+          textStyle: laySet.lyricTextStyle.copyWith(color: colorScheme.surface),
         ),
       ),
       childWhenDragging: Opacity(
         opacity: 0.3,
         child: ChordToken(
-          tokenSize: size,
           token: token,
           sectionColor: colorScheme.onSurface.withValues(alpha: .4),
-          textStyle: TextStyle(
-            fontSize: _fontSize,
-            color: colorScheme.surface.withValues(alpha: .4),
-          ),
+          textStyle: laySet.lyricTextStyle.copyWith(color: colorScheme.surface),
         ),
       ),
       child: ChordToken(
-        tokenSize: size,
         token: token,
         sectionColor: colorScheme.onSurface,
-        textStyle: TextStyle(fontSize: _fontSize, color: colorScheme.surface),
+        textStyle: laySet.lyricTextStyle.copyWith(color: colorScheme.surface),
       ),
     );
   }

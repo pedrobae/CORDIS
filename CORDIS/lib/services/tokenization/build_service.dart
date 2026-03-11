@@ -20,24 +20,24 @@ class TokenizationBuilder {
   }) {
     cache ??= {};
     final key =
-          '$text|${style.fontFamily}|${style.fontSize}|'
-          '${style.fontWeight?.index}|${style.letterSpacing}';
+        '$text|${style.fontFamily}|${style.fontSize}|'
+        '${style.fontWeight?.index}|${style.letterSpacing}';
     return cache.putIfAbsent(key, () {
       final textPainter = TextPainter(
         text: TextSpan(text: text, style: style),
-          maxLines: 1,
-          textDirection: TextDirection.ltr,
+        maxLines: 1,
+        textDirection: TextDirection.ltr,
       )..layout();
       final measurements = Measurements(
         width: textPainter.width,
         height: textPainter.height,
         baseline: textPainter.computeDistanceToActualBaseline(
           TextBaseline.alphabetic,
-        ),  
+        ),
         size: style.fontSize ?? 14.0,
-      );  
-  
-        return measurements;
+      );
+
+      return measurements;
     });
   }
 
@@ -64,7 +64,10 @@ class TokenizationBuilder {
             case TokenType.chord:
               wordWidgets.add(
                 TokenWidget(
-                  widget: Text(ctx.transposeChord(token.text), style: ctx.chordStyle),
+                  widget: Text(
+                    ctx.transposeChord(token.text),
+                    style: ctx.chordStyle,
+                  ),
                   token: token,
                 ),
               );
@@ -157,18 +160,9 @@ class TokenizationBuilder {
               );
               break;
             case TokenType.chord:
-              final tokenMsr = measureText(
-                text: token.text,
-                style: ctx.chordStyle,
-                cache: ctx.cache,
-              );
               wordWidgets.add(
                 TokenWidget(
-                  widget: _buildDraggableChord(
-                    tokenSize: Size(tokenMsr.width, tokenMsr.height),
-                    ctx: ctx,
-                    token: token,
-                  ),
+                  widget: buildDraggableChord(ctx: ctx, token: token),
                   token: token,
                 ),
               );
@@ -240,24 +234,21 @@ class TokenizationBuilder {
     return OrganizedWidgets(lines);
   }
 
-  Widget _buildDraggableChord({
+  Widget buildDraggableChord({
     required TokenBuildContext ctx,
     required ContentToken token,
-    required Size tokenSize,
   }) {
     // ChordTokens
     final chordWidget = ChordToken(
-      tokenSize: tokenSize,
       token: token,
       sectionColor: ctx.contentColor,
-      textStyle: ctx.chordStyle,
+      textStyle: ctx.lyricStyle,
     );
 
     final dimChordWidget = ChordToken(
-      tokenSize: tokenSize,
       token: token,
       sectionColor: ctx.contentColor.withValues(alpha: .5),
-      textStyle: ctx.chordStyle,
+      textStyle: ctx.lyricStyle,
     );
 
     // GestureDetector to handle long press to drag transition
@@ -366,11 +357,7 @@ class TokenizationBuilder {
     required TokenBuildContext tokenBuildCtx,
     required Widget child,
     required ContentToken token,
-    required Function(
-      ContentToken draggable,
-      ContentToken target,
-    )
-    onAccept,
+    required Function(ContentToken draggable, ContentToken target) onAccept,
     // Feedback
     required TokenLine tokenLine,
     required TokenPositionMap tokenPositions,
@@ -461,10 +448,10 @@ class TokenizationBuilder {
             left: xOffset,
             top:
                 TokenizationConstants.dragFeedbackCutoutPadding -
-                chordMsr.bottomPadding,
+                lyricMsr.bottomPadding,
             child: Text(
               ctx.transposeChord(draggedChord.text),
-              style: ctx.chordStyle.copyWith(color: ctx.onSurfaceColor),
+              style: ctx.lyricStyle.copyWith(color: ctx.onSurfaceColor),
             ),
           ),
         );
@@ -514,8 +501,7 @@ class TokenizationBuilder {
           child: Container(
             height:
                 lyricMsr.size +
-                chordMsr.height +
-                TokenizationConstants.chordTokenHeightPadding +
+                chordMsr.size +
                 2 * TokenizationConstants.dragFeedbackCutoutPadding,
             width: TokenizationConstants.dragFeedbackCutoutWidth,
             padding: const EdgeInsets.symmetric(
@@ -544,7 +530,7 @@ class TokenizationBuilder {
     required Color color,
   }) {
     return SizedBox(
-      height: msr.size,
+      height: msr.height,
       width: msr.width,
       child: Stack(
         children: [

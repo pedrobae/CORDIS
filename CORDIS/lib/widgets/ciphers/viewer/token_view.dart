@@ -24,7 +24,7 @@ class TokenView extends StatelessWidget {
           builder: (context, constraints) {
             final contentWidth = max(
               0.0,
-              constraints.maxWidth - TokenizationConstants.contentPaddingView,
+              constraints.maxWidth - TokenizationConstants.widthConstraintPaddingView,
             );
 
             final content = _tokenizer.createContent(

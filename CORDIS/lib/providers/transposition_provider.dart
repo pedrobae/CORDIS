@@ -56,8 +56,8 @@ class TranspositionProvider extends ChangeNotifier {
   int get _transposeValue {
     if (_transposedKey == null) return 0;
 
-    int indexOriginal = chordRoots.indexOf(_originalKey);
-    int indexTransposed = chordRoots.indexOf(_transposedKey!);
+    int indexOriginal = keyList.indexOf(_originalKey);
+    int indexTransposed = keyList.indexOf(_transposedKey!);
 
     if (indexOriginal == -1 || indexTransposed == -1) return 0;
 

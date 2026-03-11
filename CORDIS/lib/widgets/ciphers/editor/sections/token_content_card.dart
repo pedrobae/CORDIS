@@ -204,17 +204,15 @@ class _TokenContentCardState extends State<TokenContentCard> {
               /// CONTENT
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final chordStyle = laySet.chordTextStyle(colorScheme.surface);
-                  final lyricStyle = laySet.lyricTextStyle;
                   final contentWidth = max(
                     0.0,
                     constraints.maxWidth -
-                        TokenizationConstants.contentPaddingEdit,
+                        TokenizationConstants.widthConstraintPaddingEdit,
                   );
 
-                  final editContext = TokenBuildContext(
-                    chordStyle: chordStyle,
-                    lyricStyle: lyricStyle,
+                  final buildCtx = TokenBuildContext(
+                    chordStyle: laySet.chordTextStyle(colorScheme.surface),
+                    lyricStyle: laySet.lyricTextStyle,
                     contentColor: section.contentColor,
                     surfaceColor: colorScheme.surface,
                     onSurfaceColor: colorScheme.onSurface,
@@ -237,12 +235,12 @@ class _TokenContentCardState extends State<TokenContentCard> {
                       maxWidth: contentWidth,
                       isEditMode: true,
                     ),
-                    buildCtx: editContext,
+                    buildCtx: buildCtx,
                   );
 
                   return Padding(
                     padding: const EdgeInsets.all(
-                      TokenizationConstants.contentPaddingEdit / 2,
+                      TokenizationConstants.widthConstraintPaddingEdit / 2,
                     ),
                     child: SizedBox(
                       width: double.infinity,
