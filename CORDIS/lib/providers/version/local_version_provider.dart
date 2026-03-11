@@ -8,6 +8,7 @@ class LocalVersionProvider extends ChangeNotifier {
   final _sectionRepo = SectionRepository();
 
   final Map<int, Version> _versions = {}; // Cached versions localID -> Version
+  final List<int> _cachedDeletions = [];
 
   bool _isLoading = false;
   bool _isSaving = false;
@@ -284,36 +285,6 @@ class LocalVersionProvider extends ChangeNotifier {
     }
   }
 
-  // Saves a new structure of a version (playlist reordering)
-  Future<void> cacheSongStructure(
-    int versionId,
-    List<String> songStructure,
-  ) async {
-    if (_isSaving) return;
-
-    _isSaving = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      _repo.updateFieldOfVersion(versionId, {
-        'song_structure': songStructure.join(','),
-      });
-
-      // Update cached version if it exists
-      _versions[versionId] = _versions[versionId]!.copyWith(
-        songStructure: songStructure,
-      );
-    } catch (e) {
-      _error = e.toString();
-      debugPrint('Error caching song structure: $e');
-    } finally {
-      _isSaving = false;
-      _hasUnsavedChanges = true;
-      notifyListeners();
-    }
-  }
-
   // Cache changes to the version data (Version Name / Transposed Key)
   void cacheUpdates(
     int versionId, {
@@ -345,6 +316,15 @@ class LocalVersionProvider extends ChangeNotifier {
     return;
   }
 
+  /// Cache the deletion of a version by its ID, 
+  /// The actual deletion will be done when saving changes
+  void cacheDeletion(int versionId) {
+    _cachedDeletions.add(versionId);
+    _versions.remove(versionId);
+    _hasUnsavedChanges = true;
+    notifyListeners();
+  }
+
   /// ===== DELETE - Version =====
   Future<void> deleteVersion(int versionId) async {
     if (_isSaving) return;
@@ -362,6 +342,13 @@ class LocalVersionProvider extends ChangeNotifier {
       _isSaving = false;
       notifyListeners();
     }
+  }
+
+  Future<void> persistCachedDeletions() async {
+    for (final versionId in _cachedDeletions) {
+      await deleteVersion(versionId);
+    }
+    _cachedDeletions.clear();
   }
 
   // ===== SAVE =====

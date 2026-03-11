@@ -9,6 +9,8 @@ class FlowItemProvider extends ChangeNotifier {
   FlowItemProvider();
 
   final Map<int, FlowItem> _flowItems = {};
+
+  bool _hasPendingChanges = false;
   bool _isLoading = false;
   bool _isSaving = false;
   bool _isDeleting = false;
@@ -16,6 +18,7 @@ class FlowItemProvider extends ChangeNotifier {
 
   // Getters
   Map<int, FlowItem> get flowItems => _flowItems;
+  bool get hasPendingChanges => _hasPendingChanges;
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
   bool get isDeleting => _isDeleting;
@@ -71,7 +74,7 @@ class FlowItemProvider extends ChangeNotifier {
 
   // ===== CREATE =====
   // Create a new FlowItem from scratch
-  Future<void> createFlowItem(FlowItem flowItem) async {
+  Future<void> create(FlowItem flowItem) async {
     if (_isSaving) return;
 
     try {
@@ -81,49 +84,6 @@ class FlowItemProvider extends ChangeNotifier {
 
       final id = await _flowItemRepo.createFlowItem(flowItem);
       await loadFlowItem(id);
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isSaving = false;
-      notifyListeners();
-    }
-  }
-
-  /// Upserts a Flow Item (create or update)
-  Future<void> upsertFlowItem(FlowItem flowItem) async {
-    if (_isSaving) return;
-
-    _isSaving = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      // Check if exists
-      bool exists = false;
-      int? localId;
-      if (flowItem.id != null) {
-        exists = _flowItems.containsKey(flowItem.id!);
-        localId = flowItem.id;
-      } else {
-        localId = await getLocalIdByFirebaseId(flowItem.firebaseId);
-        exists = localId != null;
-      }
-
-      if (!exists) {
-        // Create new
-        localId = await _flowItemRepo.createFlowItem(flowItem);
-      } else {
-        // Update existing
-        await _flowItemRepo.updateFlowItem(
-          localId!,
-          title: flowItem.title,
-          content: flowItem.contentText,
-          position: flowItem.position,
-          duration: flowItem.duration.inSeconds,
-        );
-      }
-
-      await loadFlowItem(localId);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -170,29 +130,52 @@ class FlowItemProvider extends ChangeNotifier {
   }
 
   // ===== UPDATE =====
-  // Update a Flow Item with new data (title/content)
-  Future<void> updateFlowItem(
-    int id,
-    String? title,
-    String? content,
-    int? position,
-  ) async {
+  /// Cache Duration update for a Flow Item
+  void cacheDuration(int id, Duration newDuration) {
+    if (_flowItems.containsKey(id)) {
+      _flowItems[id] = _flowItems[id]!.copyWith(duration: newDuration);
+      _hasPendingChanges = true;
+      notifyListeners();
+    }
+  }
+
+  /// Caches title update for a Flow Item
+  void cacheTitle(int id, String newTitle) {
+    if (_flowItems.containsKey(id)) {
+      _flowItems[id] = _flowItems[id]!.copyWith(title: newTitle);
+      _hasPendingChanges = true;
+      notifyListeners();
+    }
+  }
+
+  /// Caches content text update for a Flow Item
+  void cacheContent(int id, String newContent) {
+    if (_flowItems.containsKey(id)) {
+      _flowItems[id] = _flowItems[id]!.copyWith(contentText: newContent);
+      _hasPendingChanges = true;
+      notifyListeners();
+    }
+  }
+
+  /// Persist cached changes of a Flow Item to the database
+  Future<void> save(int id) async {
     if (_isSaving) return;
+    if (!_flowItems.containsKey(id)) return;
 
     _isSaving = true;
     _error = null;
     notifyListeners();
 
     try {
+      final flowItem = _flowItems[id]!;
       await _flowItemRepo.updateFlowItem(
         id,
-        title: title,
-        content: content,
-        position: position,
+        title: flowItem.title,
+        content: flowItem.contentText,
+        position: flowItem.position,
+        duration: flowItem.duration.inSeconds,
       );
-
-      // Force reload the updated text section to get fresh data
-      await loadFlowItem(id);
+      _hasPendingChanges = false;
     } catch (e) {
       _error = e.toString();
     } finally {

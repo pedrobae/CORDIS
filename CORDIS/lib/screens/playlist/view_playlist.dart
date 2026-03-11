@@ -56,8 +56,6 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
   @override
   Widget build(BuildContext context) {
     final nav = Provider.of<NavigationProvider>(context, listen: false);
-    final localSch = Provider.of<LocalScheduleProvider>(context, listen: false);
-    final auth = Provider.of<MyAuthProvider>(context, listen: false);
 
     return Consumer<PlaylistProvider>(
       builder: (context, play, child) {
@@ -70,26 +68,20 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
         }
 
         return Scaffold(
-          appBar: _buildAppBar(playlist, play, nav, localSch, auth),
+          appBar: _buildAppBar(playlist, nav),
           floatingActionButton: _buildFloatingActionButton(),
           body: Padding(
             padding: const EdgeInsets.all(16),
             child: playlist.items.isEmpty
                 ? _buildEmptyState()
-                : _buildItemsList(context, playlist),
+                : _buildItemsList(playlist),
           ),
         );
       },
     );
   }
 
-  AppBar _buildAppBar(
-    Playlist playlist,
-    PlaylistProvider play,
-    NavigationProvider nav,
-    LocalScheduleProvider localSch,
-    MyAuthProvider auth,
-  ) {
+  AppBar _buildAppBar(Playlist playlist, NavigationProvider nav) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -102,7 +94,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
       actions: [
         IconButton(
           icon: Icon(Icons.save, color: colorScheme.onSurface),
-          onPressed: () => _handleSave(playlist, play, nav, localSch, auth),
+          onPressed: () => _handleSave(playlist, nav),
         ),
       ],
     );
@@ -111,7 +103,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
   FloatingActionButton _buildFloatingActionButton() {
     final colorScheme = Theme.of(context).colorScheme;
     return FloatingActionButton(
-      onPressed: () => _openPlaylistEditSheet(context),
+      onPressed: () => _openPlaylistEditSheet(),
       backgroundColor: colorScheme.onSurface,
       shape: const CircleBorder(),
       child: Icon(Icons.add, color: colorScheme.onPrimary),
@@ -137,24 +129,20 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
     );
   }
 
-  Widget _buildItemsList(BuildContext context, Playlist playlist) {
-    return Builder(
-      builder: (context) {
-        return ReorderableListView.builder(
-          shrinkWrap: true,
-          proxyDecorator: (child, index, animation) =>
-              Material(type: MaterialType.transparency, child: child),
-          buildDefaultDragHandles: false,
-          physics: const ClampingScrollPhysics(),
-          scrollDirection: Axis.vertical,
-          onReorder: (oldIndex, newIndex) =>
-              _onReorder(context, playlist, oldIndex, newIndex),
-          itemCount: playlist.items.length,
-          itemBuilder: (BuildContext context, int index) {
-            final item = playlist.items[index];
-            return _buildPlaylistItem(item, index);
-          },
-        );
+  Widget _buildItemsList(Playlist playlist) {
+    return ReorderableListView.builder(
+      shrinkWrap: true,
+      proxyDecorator: (child, index, animation) =>
+          Material(type: MaterialType.transparency, child: child),
+      buildDefaultDragHandles: false,
+      physics: const ClampingScrollPhysics(),
+      scrollDirection: Axis.vertical,
+      onReorder: (oldIndex, newIndex) =>
+          _onReorder(playlist, oldIndex, newIndex),
+      itemCount: playlist.items.length,
+      itemBuilder: (BuildContext context, int index) {
+        final item = playlist.items[index];
+        return _buildPlaylistItem(item, index);
       },
     );
   }
@@ -162,17 +150,16 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
   Widget _buildPlaylistItem(PlaylistItem item, int index) {
     switch (item.type) {
       case PlaylistItemType.version:
-        if (item.id == null) return SizedBox.shrink(key: GlobalKey(),);
         return PlaylistVersionCard(
-          key: ValueKey('playlist_version_${item.id}'),
+          key: ValueKey('ver_${item.id}_idx_$index'),
           index: index,
           versionId: item.contentId!,
           playlistId: widget.playlistId,
-          itemId: item.id!,
+          itemId: item.id ?? -1,
         );
       case PlaylistItemType.flowItem:
         return FlowItemCard(
-          key: ValueKey('flow_item_${item.id}'),
+          key: ValueKey('flow_${item.id}_idx_$index'),
           index: index,
           flowItemId: item.contentId ?? item.id!,
           playlistId: widget.playlistId,
@@ -180,14 +167,14 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
     }
   }
 
-  Future<void> _handleSave(
-    Playlist playlist,
-    PlaylistProvider play,
-    NavigationProvider nav,
-    LocalScheduleProvider localSch,
-    MyAuthProvider auth,
-  ) async {
+  Future<void> _handleSave(Playlist playlist, NavigationProvider nav) async {
+    final play = context.read<PlaylistProvider>();
+    final localVer = context.read<LocalVersionProvider>();
+    final localSch = context.read<LocalScheduleProvider>();
+    final auth = context.read<MyAuthProvider>();
+
     play.updatePlaylistFromCache(widget.playlistId);
+    localVer.persistCachedDeletions();
 
     final schedule = await localSch.getScheduleWithPlaylistId(
       widget.playlistId,
@@ -199,15 +186,15 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
     nav.pop();
   }
 
-  void _openPlaylistEditSheet(BuildContext context) {
+  void _openPlaylistEditSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (BuildContext context) {
+      builder: (context) {
         return BottomSheet(
           shape: LinearBorder(),
           onClosing: () {},
-          builder: (BuildContext context) {
+          builder: (context) {
             return AddToPlaylistSheet(playlistId: widget.playlistId);
           },
         );
@@ -215,12 +202,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
     );
   }
 
-  void _onReorder(
-    BuildContext context,
-    Playlist playlist,
-    int oldIndex,
-    int newIndex,
-  ) async {
+  void _onReorder(Playlist playlist, int oldIndex, int newIndex) {
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
@@ -232,20 +214,17 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
         newIndex,
       );
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao reordenar: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            action: SnackBarAction(
-              label: 'Tentar Novamente',
-              textColor: Colors.white,
-              onPressed: () =>
-                  _onReorder(context, playlist, oldIndex, newIndex),
-            ),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao reordenar: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          action: SnackBarAction(
+            label: 'Tentar Novamente',
+            textColor: Colors.white,
+            onPressed: () => _onReorder(playlist, oldIndex, newIndex),
           ),
-        );
-      }
+        ),
+      );
     }
   }
 }

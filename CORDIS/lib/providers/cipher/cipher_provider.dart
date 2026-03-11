@@ -158,33 +158,6 @@ class CipherProvider extends ChangeNotifier {
     }
   }
 
-  /// Load single cipher into cache by Version Id
-  Future<void> loadCipherOfVersion(int versionId) async {
-    if (_isLoading) return;
-
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      Cipher cipher = (await _cipherRepository.getCipherWithVersionId(
-        versionId,
-      ))!;
-      if (cipher.musicKey.isEmpty) {
-        final recognizedKey = await _recognizer.recognizeKeyLocal(cipher.id);
-        cipher = cipher.copyWith(musicKey: recognizedKey);
-        await _cipherRepository.updateCipher(cipher);
-      }
-      _ciphers[cipher.id] = cipher;
-    } catch (e) {
-      _error = e.toString();
-      debugPrint('CIPHER - Error loading cipher of Version: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
   // ===== UPSERT =====
   /// Upsert a cipher into the database used when syncing a playlist
   /// Returns the local cipher ID

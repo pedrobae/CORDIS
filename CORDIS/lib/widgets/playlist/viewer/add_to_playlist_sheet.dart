@@ -1,11 +1,14 @@
+import 'package:flutter/material.dart';
 import 'package:cordis/l10n/app_localizations.dart';
+
+import 'package:provider/provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
+
 import 'package:cordis/screens/cipher/cipher_library.dart';
+
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_editor.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class AddToPlaylistSheet extends StatelessWidget {
   final int playlistId;
@@ -86,7 +89,7 @@ class AddToPlaylistSheet extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                   navigationProvider.push(
-                    () => FlowItemEditor(playlistId: playlistId),
+                    () => FlowItemEditor(playID: playlistId),
                     showBottomNavBar: true,
                   );
                 },

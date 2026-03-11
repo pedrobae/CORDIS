@@ -1,11 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:cordis/l10n/app_localizations.dart';
+
+import 'package:provider/provider.dart';
 import 'package:cordis/providers/playlist/flow_item_provider.dart';
-import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
+
 import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class FlowItemCardActionsSheet extends StatelessWidget {
   final int flowItemId;
@@ -19,17 +20,11 @@ class FlowItemCardActionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<NavigationProvider, FlowItemProvider, PlaylistProvider>(
-      builder:
-          (
-            context,
-            navigationProvider,
-            flowItemProvider,
-            playlistProvider,
-            child,
-          ) {
             final textTheme = Theme.of(context).textTheme;
             final colorScheme = Theme.of(context).colorScheme;
+
+            final flow = context.read<FlowItemProvider>();
+            final play = context.read<PlaylistProvider>();
 
             // Your widget build logic here
             return Container(
@@ -65,10 +60,10 @@ class FlowItemCardActionsSheet extends StatelessWidget {
                     trailingIcon: Icons.chevron_right,
                     isDiscrete: true,
                     onPressed: () {
-                      flowItemProvider.duplicateFlowItem(
+                      flow.duplicateFlowItem(
                         flowItemId,
                         AppLocalizations.of(context)!.copySuffix,
-                        playlistProvider
+                        play
                             .getPlaylist(playlistId)!
                             .items
                             .length,
@@ -96,10 +91,10 @@ class FlowItemCardActionsSheet extends StatelessWidget {
                                 )!.flowItem,
                                 isDangerous: true,
                                 onConfirm: () async {
-                                  await flowItemProvider.deleteFlowItem(
+                                  await flow.deleteFlowItem(
                                     flowItemId,
                                   );
-                                  await playlistProvider.loadPlaylist(
+                                  await play.loadPlaylist(
                                     playlistId,
                                   );
                                   if (context.mounted) {
@@ -117,7 +112,5 @@ class FlowItemCardActionsSheet extends StatelessWidget {
                 ],
               ),
             );
-          },
-    );
   }
 }

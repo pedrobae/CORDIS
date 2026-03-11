@@ -186,7 +186,7 @@ class PlaylistCardActionsSheet extends StatelessWidget {
             throw Exception('Context is not mounted');
           }
 
-          await flow.createFlowItem(
+          await flow.create(
             flowItem.copyWith(
               firebaseId: '',
               title:

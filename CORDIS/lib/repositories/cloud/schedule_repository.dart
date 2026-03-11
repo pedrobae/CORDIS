@@ -5,6 +5,7 @@ import 'package:cordis/services/cache_service.dart';
 import 'package:cordis/services/firestore_service.dart';
 import 'package:cordis/utils/timezone_utils.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
 class CloudScheduleRepository {
@@ -180,13 +181,20 @@ class CloudScheduleRepository {
     try {
       return await action();
     } catch (e) {
-      final error = e as FirebaseFunctionsException;
-      debugPrint('Error during $actionDescription: ${error.message}');
-      // Log error to analytics
-      await FirebaseAnalytics.instance.logEvent(
-        name: 'error_during_$actionDescription',
-        parameters: {'error': error.message!},
-      );
+      if (e is FirebaseFunctionsException) {
+        debugPrint('Error during $actionDescription: ${e.message}');
+        await FirebaseAnalytics.instance.logEvent(
+          name: 'error_during_$actionDescription',
+          parameters: {'error': e.message!},
+        );
+      }
+      if (e is FirebaseException) {
+        debugPrint('Firebase error during $actionDescription: ${e.message}');
+        await FirebaseAnalytics.instance.logEvent(
+          name: 'firebase_error_during_$actionDescription',
+          parameters: {'error': e.message!},
+        );
+      }
 
       rethrow;
     }

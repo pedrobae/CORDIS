@@ -90,19 +90,6 @@ class CipherRepository {
     return _buildFullCipher(results.first);
   }
 
-  /// Gets cipher that contains the given version ID
-  /// Returns null if not found
-  Future<Cipher?> getCipherWithVersionId(int versionId) async {
-    final db = await _databaseHelper.database;
-    final result = await db.query(
-      'version',
-      where: 'id = ?',
-      whereArgs: [versionId],
-      columns: ['cipher_id'],
-    );
-    return getCipherById(result[0]['cipher_id'] as int);
-  }
-
   /// Gets cipherId by its title and author
   /// Returns null if not found
   Future<int?> getCipherIdByTitleAuthor({

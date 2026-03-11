@@ -72,6 +72,7 @@ class ImportProvider extends ChangeNotifier {
           final pdfDocument = await _pdfService.extractTextWithFormatting(
             selectedFile!,
             selectedFileName!,
+            1,
           );
 
           _importedCipher = ParsingCipher(
@@ -86,11 +87,16 @@ class ImportProvider extends ChangeNotifier {
               .split('.') // remove file extension
               .first;
 
-          _importedCipher!.result.lines.addAll(
-            _importVariation == ImportVariation.pdfWithColumns
-                ? pdfDocument.pageLinesWithColumns[0]!
-                : pdfDocument.pageLines[0]!,
-          );
+          final importedLines =
+              _importVariation == ImportVariation.pdfWithColumns
+              ? pdfDocument.pageLinesWithColumns[0]
+              : pdfDocument.pageLines[0];
+
+          if (importedLines == null || importedLines.isEmpty) {
+            throw Exception('No text lines were extracted from the PDF');
+          }
+
+          _importedCipher!.result.lines.addAll(importedLines);
           break;
 
         case ImportType.image:

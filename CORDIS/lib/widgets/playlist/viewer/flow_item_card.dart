@@ -1,13 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:cordis/l10n/app_localizations.dart';
+
+import 'package:provider/provider.dart';
 import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
+
 import 'package:cordis/utils/date_utils.dart';
+
 import 'package:cordis/widgets/common/custom_reorderable_delayed.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_editor.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_card_actions.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class FlowItemCard extends StatelessWidget {
   final int flowItemId;
@@ -26,12 +29,13 @@ class FlowItemCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Consumer2<FlowItemProvider, NavigationProvider>(
-      builder: (context, flowItemProvider, navigationProvider, child) {
-        final flowItem = flowItemProvider.getFlowItem(flowItemId);
+    final nav = context.read<NavigationProvider>();
 
-        // Loading state
-        if (flowItem == null) {
+    return Consumer<FlowItemProvider>(
+      builder: (context, flow, child) {
+        final flowItem = flow.getFlowItem(flowItemId);
+
+        if (flowItem == null || flow.isLoading) {
           return Center(
             child: CircularProgressIndicator(color: colorScheme.primary),
           );
@@ -103,11 +107,12 @@ class FlowItemCard extends StatelessWidget {
                         isDense: true,
                         isDiscrete: true,
                         onPressed: () {
-                          navigationProvider.push(
+                          nav.push(
                             () => FlowItemEditor(
-                              playlistId: playlistId,
-                              flowItemId: flowItemId,
+                              playID: playlistId,
+                              flowID: flowItemId,
                             ),
+                            changeDetector: () => flow.hasPendingChanges,
                             showBottomNavBar: true,
                           );
                         },

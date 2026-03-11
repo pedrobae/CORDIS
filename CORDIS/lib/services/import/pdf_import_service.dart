@@ -39,15 +39,20 @@ class PDFImportService extends ImportService {
   Future<DocumentData> extractTextWithFormatting(
     String path,
     String fileName,
+    int? maxPages,
   ) async {
+    PdfDocument? document;
     try {
       final bytes = await File(path).readAsBytes();
-      final document = PdfDocument(inputBytes: bytes);
+      document = PdfDocument(inputBytes: bytes);
 
       // Extract glyphs per page directly from renderer glyph list
       final Map<int, List<TextGlyph>> pageGlyphs = {};
+      final int pagesToProcess = maxPages == null
+          ? document.pages.count
+          : (maxPages < document.pages.count ? maxPages : document.pages.count);
 
-      for (int i = 0; i < document.pages.count; i++) {
+      for (int i = 0; i < pagesToProcess; i++) {
         pageGlyphs[i] = PdfGlyphExtractorHelper.extractPageGlyphs(document, i);
       }
 
@@ -66,6 +71,8 @@ class PDFImportService extends ImportService {
       return documentData;
     } catch (e) {
       throw Exception('Failed to extract formatted text from PDF: $e');
+    } finally {
+      document?.dispose();
     }
   }
 
