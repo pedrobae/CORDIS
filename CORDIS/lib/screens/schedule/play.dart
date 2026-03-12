@@ -309,7 +309,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
     FlowItemProvider flow,
   ) {
     final textTheme = Theme.of(context).textTheme;
-    final currentIndex = state.currentTabIndex;
+    final currentIndex = state.currentItemIndex;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -340,7 +340,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
       onTap: () {
         if (currentIndex > 0) {
           final newIndex = currentIndex - 1;
-          state.setCurrentTabIndex(newIndex);
+          state.setCurrentItemIndex(newIndex);
           context.read<AutoScrollProvider>().clearCache();
         }
       },
@@ -371,7 +371,7 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
             String nextTitle = '';
             final currentItem = state.currentItem;
             if (currentItem != null &&
-                state.currentTabIndex < state.itemCount - 1) {
+                state.currentItemIndex < state.itemCount - 1) {
               final nextItem = state.nextItem;
               nextTitle = _getItemTitle(
                 nextItem,
@@ -404,9 +404,9 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
       onTap: () {
         final currentItem = state.currentItem;
         if (currentItem != null &&
-            state.currentTabIndex < state.itemCount - 1) {
-          final newIndex = state.currentTabIndex + 1;
-          state.setCurrentTabIndex(newIndex);
+            state.currentItemIndex < state.itemCount - 1) {
+          final newIndex = state.currentItemIndex + 1;
+          state.setCurrentItemIndex(newIndex);
           context.read<AutoScrollProvider>().clearCache();
         }
       },

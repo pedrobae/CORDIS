@@ -13,7 +13,7 @@ import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/playlist/view_playlist.dart';
-import 'package:cordis/screens/schedule/play_schedule.dart';
+import 'package:cordis/screens/schedule/play.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/create_edit/edit_details.dart';

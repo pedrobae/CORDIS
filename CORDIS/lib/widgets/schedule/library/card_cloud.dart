@@ -1,6 +1,7 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/auto_scroll_provider.dart';
-import 'package:cordis/screens/schedule/play_schedule.dart';
+import 'package:cordis/screens/schedule/play.dart';
+import 'package:cordis/screens/schedule/vert_play.dart';
 import 'package:cordis/widgets/common/cloud_download_indicator.dart';
 import 'package:cordis/widgets/schedule/status_chip.dart';
 
@@ -60,11 +61,7 @@ class CloudScheduleCard extends StatelessWidget {
                   alignment: Alignment.center,
                   children: [
                     CircularProgressIndicator(color: colorScheme.primary),
-                    Icon(
-                      Icons.cloud,
-                      size: 20,
-                      color: colorScheme.primary,
-                    ),
+                    Icon(Icons.cloud, size: 20, color: colorScheme.primary),
                   ],
                 ),
               );
@@ -194,6 +191,15 @@ class CloudScheduleCard extends StatelessWidget {
                             final scroll = context.read<AutoScrollProvider>();
                             navigationProvider.push(
                               () => PlayScheduleScreen(scheduleId: scheduleId),
+                              onPopCallback: () {
+                                scroll.clearCache();
+                              },
+                            );
+                          },
+                          onLongPress: () {
+                            final scroll = context.read<AutoScrollProvider>();
+                            navigationProvider.push(
+                              () => VertPlaySchedule(scheduleId: scheduleId),
                               onPopCallback: () {
                                 scroll.clearCache();
                               },

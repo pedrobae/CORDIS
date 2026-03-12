@@ -87,12 +87,9 @@ class _PlayVersionState extends State<PlayVersion> {
     }
 
     // Update scroll index
-    final sectionIndex = _scrollProvider.calcCurrentIndex(
+    _scrollProvider.calcCurrentIndex(
       _scrollController.position.viewportDimension,
     );
-    if (sectionIndex != _scrollProvider.currentSectionIndex.value) {
-      _scrollProvider.currentSectionIndex.value = sectionIndex;
-    }
   }
 
   @override
@@ -196,7 +193,6 @@ class _PlayVersionState extends State<PlayVersion> {
                                     versionId:
                                         widget.localVersionID ??
                                         widget.cloudVersionID!,
-                                    filteredStructure: filteredStructure,
                                   ),
                                 ),
                               ],
@@ -233,7 +229,6 @@ class _PlayVersionState extends State<PlayVersion> {
                     child: _buildStickyBar(
                       context,
                       colorScheme,
-                      filteredStructure,
                     ),
                   ),
                 ),
@@ -379,7 +374,6 @@ class _PlayVersionState extends State<PlayVersion> {
   Widget _buildStickyBar(
     BuildContext context,
     ColorScheme colorScheme,
-    List<String> filteredStructure,
   ) {
     return SizedBox(
       height: 66,
@@ -403,7 +397,6 @@ class _PlayVersionState extends State<PlayVersion> {
               ),
               child: StructureList(
                 versionId: widget.localVersionID ?? widget.cloudVersionID!,
-                filteredStructure: filteredStructure,
               ),
             ),
           ),

@@ -1,18 +1,20 @@
-import 'package:cordis/l10n/app_localizations.dart';
-import 'package:cordis/providers/auto_scroll_provider.dart';
-import 'package:cordis/providers/section_provider.dart';
+import 'package:cordis/providers/schedule/play_schedule_state_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:cordis/l10n/app_localizations.dart';
+
 import 'package:provider/provider.dart';
+import 'package:cordis/providers/auto_scroll_provider.dart';
+import 'package:cordis/providers/layout_settings_provider.dart';
+import 'package:cordis/providers/version/cloud_version_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
+import 'package:cordis/providers/section_provider.dart';
+
+import 'package:cordis/utils/section_constants.dart';
 
 class StructureList extends StatefulWidget {
   final dynamic versionId;
-  final List<String> filteredStructure;
 
-  const StructureList({
-    super.key,
-    required this.versionId,
-    required this.filteredStructure,
-  });
+  const StructureList({super.key, required this.versionId});
 
   @override
   State<StructureList> createState() => _StructureListState();
@@ -55,15 +57,19 @@ class _StructureListState extends State<StructureList> {
     final colorScheme = Theme.of(context).colorScheme;
     final scroll = Provider.of<AutoScrollProvider>(context);
 
-    return Consumer<SectionProvider>(
-      builder: (context, sect, child) {
+    final state = context.read<PlayScheduleStateProvider>();
+
+    return Consumer2<SectionProvider, LayoutSettingsProvider>(
+      builder: (context, sect, laySet, child) {
         if (sect.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
+        final filteredStructure = _getStructureForVersion(laySet);
+
         return SizedBox(
           width: double.infinity,
-          child: widget.filteredStructure.isEmpty
+          child: filteredStructure.isEmpty
               ? Center(
                   child: Text(
                     AppLocalizations.of(context)!.emptyStructure,
@@ -86,9 +92,7 @@ class _StructureListState extends State<StructureList> {
                         spacing: 8,
                         children: [
                           const SizedBox(),
-                          ...widget.filteredStructure.asMap().entries.map((
-                            entry,
-                          ) {
+                          ...filteredStructure.asMap().entries.map((entry) {
                             final index = entry.key;
                             final sectionCode = entry.value;
                             final isCurrentSection = index == scrollIndex;
@@ -111,7 +115,12 @@ class _StructureListState extends State<StructureList> {
                             }
                             return RepaintBoundary(
                               child: GestureDetector(
-                                onTap: () => scroll.scrollToSection(index),
+                                onTap: () => state.isVertPlay
+                                    ? scroll.scrollToItemSection(
+                                        state.currentItemIndex,
+                                        index,
+                                      )
+                                    : scroll.scrollToSectionTabs(index),
                                 child: Container(
                                   height: 44,
                                   width: 44,
@@ -149,5 +158,27 @@ class _StructureListState extends State<StructureList> {
         );
       },
     );
+  }
+
+  List<String> _getStructureForVersion(LayoutSettingsProvider laySet) {
+    final localVer = context.read<LocalVersionProvider>();
+    final cloudVer = context.read<CloudVersionProvider>();
+
+    List<String> songStructure;
+    if (widget.versionId is int) {
+      songStructure = localVer.getVersion(widget.versionId)!.songStructure;
+    } else {
+      songStructure = cloudVer.getVersion(widget.versionId)!.songStructure;
+    }
+
+    return songStructure
+        .where(
+          (sectionCode) =>
+              ((laySet.layoutFilters[LayoutFilter.annotations]! ||
+                  !isAnnotation(sectionCode)) &&
+              (laySet.layoutFilters[LayoutFilter.transitions]! ||
+                  !isTransition(sectionCode))),
+        )
+        .toList();
   }
 }

@@ -18,19 +18,28 @@ class AutoScrollProvider extends ChangeNotifier {
     0,
   ); // 0-based index of current section
 
+  late final ValueNotifier<int> currentItemIndex = ValueNotifier(
+    0,
+  ); // 0-based index of current item for vert play
+
   int get _totalSections => sectionKeys.length;
+
+   Map<int, GlobalKey> get currentSectionKeys =>
+      itemSectionKeys[currentItemIndex.value] ?? {};
 
   Timer? autoScrollTimer;
   Timer? _updateTimer; // Separate timer for UI updates
   DateTime? _timerStartTime;
 
   Map<int, GlobalKey> sectionKeys = {}; // Maps section index to its GlobalKey
+  Map<int, Map<int, GlobalKey>> itemSectionKeys = {}; // Maps item index, Section index to its GlobalKey
   Map<int, int> sectionLineCounts = {}; // Maps section index to its number of lines
 
   // ===== SETTINGS METHODS =====
   /// Gets settings from SettingsService and updates provider state
   Future<void> _loadSettings() async {
     currentSectionIndex.value = 0;
+    currentItemIndex.value = 0;
     scrollModeEnabled = SettingsService.getAutoScrollEnabled();
     scrollSpeed = SettingsService.getAutoScrollSpeed();
     notifyListeners();
@@ -52,11 +61,11 @@ class AutoScrollProvider extends ChangeNotifier {
 
   // ===== AUTO SCROLL METHODS =====
   /// Toggles auto-scroll on/off and starts/stops timer accordingly
-  void toggleAutoScroll() {
+  void toggleAutoScrollTabs() {
     if (!scrollModeEnabled || isAutoScrolling) {
       stopAutoScroll();
     } else {
-      startAutoScroll();
+      startAutoScrollTabs();
     }
   }
 
@@ -72,7 +81,7 @@ class AutoScrollProvider extends ChangeNotifier {
 
   /// Starts the auto-scroll timer
   /// Which scrolls through sections at intervals based on line count and scrollSpeed
-  void startAutoScroll() {
+  void startAutoScrollTabs() {
     if (!scrollModeEnabled) return; // Scroll mode must be enabled
     if (isAutoScrolling) return; // Already scrolling
     isAutoScrolling = true;
@@ -116,7 +125,7 @@ class AutoScrollProvider extends ChangeNotifier {
       // Move to next section
       if (currentSectionIndex.value < _totalSections - 1) {
         currentSectionIndex.value++;
-        scrollToSection(currentSectionIndex.value);
+        scrollToSectionTabs(currentSectionIndex.value);
         _scheduleNextSectionScroll(); // Schedule next with its line count
       } else {
         // Stop at the end
@@ -126,7 +135,7 @@ class AutoScrollProvider extends ChangeNotifier {
   }
 
   /// Scrolls to the section at the given index using its GlobalKey
-  void scrollToSection(int index) {
+  void scrollToSectionTabs(int index) {
     if (index >= _totalSections) return;
 
     final sectionKey = sectionKeys[index];
@@ -141,6 +150,28 @@ class AutoScrollProvider extends ChangeNotifier {
       );
     }
 
+    currentSectionIndex.value = index;
+  }
+
+
+  /// Scrolls to the section at the given indexes using its GlobalKey
+  void scrollToItemSection(int itemIndex, int index) {
+    if (itemSectionKeys[itemIndex] == null) return;
+    if (itemSectionKeys[itemIndex]![index] == null) return;
+
+    final sectionKey = itemSectionKeys[itemIndex]![index];
+    final context = sectionKey!.currentContext;
+
+    if (context != null && context.mounted) {
+      Scrollable.ensureVisible(
+        context,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        alignment: 0.2, // Position section 20% from top
+      );
+    }
+
+    currentItemIndex.value = itemIndex;
     currentSectionIndex.value = index;
   }
 
@@ -167,7 +198,7 @@ class AutoScrollProvider extends ChangeNotifier {
   }
 
   /// Calculates the current section index based on the scroll offset
-  int calcCurrentIndex(double viewportHeight) {
+  void calcCurrentIndex(double viewportHeight) {
     for (final entry in sectionKeys.entries) {
       final sectionContext = entry.value.currentContext;
       if (sectionContext == null) continue;
@@ -179,18 +210,40 @@ class AutoScrollProvider extends ChangeNotifier {
       final sectionTop = box.localToGlobal(Offset.zero).dy;
 
       // Check if section is in viewport (accounting for some buffer)
-      if (sectionTop > viewportHeight * 0.15 &&
+      if (sectionTop > viewportHeight * 0.10 &&
           sectionTop < viewportHeight * 0.30) {
-        return entry.key;
+        currentSectionIndex.value = entry.key;
       }
     }
-    return currentSectionIndex.value; // Fallback to current
+  }
+
+  /// Calculates the current section index based on the scroll offset VERT PLAY
+  void calcCurrentItemSection(double viewportHeight) {
+    for (final entry in itemSectionKeys.entries) {
+      for (final subEntry in entry.value.entries) {
+        final sectionContext = subEntry.value.currentContext;
+        if (sectionContext == null) continue;
+
+        final box = sectionContext.findRenderObject() as RenderBox?;
+        if (box == null) continue;
+
+        // Get section's position relative to the scrollable
+        final sectionTop = box.localToGlobal(Offset.zero).dy;
+
+        // Check if section is in viewport (accounting for some buffer)
+        if (sectionTop > viewportHeight * 0.15 &&
+            sectionTop < viewportHeight * 0.30) {
+          currentSectionIndex.value = subEntry.key;
+        }
+      }
+    }
   }
 
   /// Clears cache
   void clearCache() {
     sectionKeys.clear();
     currentSectionIndex.value = 0;
+    currentItemIndex.value = 0;
     _updateTimer?.cancel();
     _timerStartTime = null;
     autoScrollTimer?.cancel();
@@ -204,6 +257,7 @@ class AutoScrollProvider extends ChangeNotifier {
   void dispose() {
     autoScrollTimer?.cancel();
     currentSectionIndex.dispose();
+    currentItemIndex.dispose();
     _updateTimer?.cancel();
     super.dispose();
   }

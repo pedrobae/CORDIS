@@ -2,7 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/screens/home_screen.dart';
 import 'package:cordis/screens/cipher/cipher_library.dart';
 import 'package:cordis/screens/playlist/playlist_library.dart';
-import 'package:cordis/screens/schedule/schedule_library.dart';
+import 'package:cordis/screens/schedule/library.dart';
 import 'package:cordis/widgets/common/unsaved_changes_warning.dart';
 import 'package:flutter/material.dart';
 

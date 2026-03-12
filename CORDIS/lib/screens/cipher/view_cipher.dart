@@ -30,6 +30,7 @@ class ViewCipherScreen extends StatefulWidget {
     super.key,
     required this.cipherID,
     this.versionID,
+
     required this.versionType,
   });
 
@@ -87,17 +88,17 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
         final versionData = _extractVersionData(ciph, localVer, cloudVer);
 
         final filteredStructure = <String>[];
-    for (var sectionCode in versionData.songStructure) {
-      if (!laySet.layoutFilters[LayoutFilter.annotations]! &&
-          isAnnotation(sectionCode)) {
-        continue;
-      }
-      if (!laySet.layoutFilters[LayoutFilter.transitions]! &&
-          isTransition(sectionCode)) {
-        continue;
-      }
-      filteredStructure.add(sectionCode);
-    }
+        for (var sectionCode in versionData.songStructure) {
+          if (!laySet.layoutFilters[LayoutFilter.annotations]! &&
+              isAnnotation(sectionCode)) {
+            continue;
+          }
+          if (!laySet.layoutFilters[LayoutFilter.transitions]! &&
+              isTransition(sectionCode)) {
+            continue;
+          }
+          filteredStructure.add(sectionCode);
+        }
 
         return Column(
           mainAxisSize: MainAxisSize.max,
@@ -114,7 +115,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
                     spacing: 16,
                     children: [
                       _buildHeaderSection(versionData),
-                      _buildSongStructureSection(filteredStructure),
+                      _buildSongStructureSection(),
                       _buildSectionsGrid(filteredStructure),
                     ],
                   ),
@@ -312,7 +313,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
     );
   }
 
-  Widget _buildSongStructureSection(List<String> filteredStructure) {
+  Widget _buildSongStructureSection() {
     final textTheme = Theme.of(context).textTheme;
 
     return Column(
@@ -322,10 +323,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
           AppLocalizations.of(context)!.songStructure,
           style: textTheme.titleMedium,
         ),
-        StructureList(
-          versionId: widget.versionID,
-          filteredStructure: filteredStructure,
-        ),
+        StructureList(versionId: widget.versionID),
       ],
     );
   }

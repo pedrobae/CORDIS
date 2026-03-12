@@ -4,7 +4,7 @@ import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/user/user_provider.dart';
-import 'package:cordis/screens/schedule/view_schedule.dart';
+import 'package:cordis/screens/schedule/view.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';

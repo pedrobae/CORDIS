@@ -9,7 +9,7 @@ import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/playlist/edit_playlist.dart';
-import 'package:cordis/screens/schedule/create_new_schedule.dart';
+import 'package:cordis/screens/schedule/create.dart';
 import 'package:cordis/screens/schedule/share_code_screen.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
