@@ -31,7 +31,6 @@ class TokenizationService {
 
     final List<ContentToken> tokens = [];
     final List<ContentToken> lineTokens = [];
-    bool spaceBeforeLyrics = false;
     bool foundLyricInLine = false;
     for (int index = 0; index < content.length; index++) {
       final char = content[index];
@@ -44,23 +43,11 @@ class TokenizationService {
 
         lineTokens.add(ContentToken(type: TokenType.newline, text: char));
 
-        if (!spaceBeforeLyrics) {
-          // Insert preceding chord target tokens at the starts of lines
-          lineTokens.insert(
-            0,
-            ContentToken(type: TokenType.precedingChordTarget, text: ''),
-          );
-        }
-
         // Add Line and Reset for the next line
-        spaceBeforeLyrics = false;
         foundLyricInLine = false;
         tokens.addAll(lineTokens);
         lineTokens.clear();
       } else if (char == ' ' || char == '\t') {
-        if (!foundLyricInLine) {
-          spaceBeforeLyrics = true;
-        }
         lineTokens.add(ContentToken(type: TokenType.space, text: char));
       } else if (char == '[') {
         index++; // Move past the '['
@@ -71,19 +58,49 @@ class TokenizationService {
         }
         lineTokens.add(ContentToken(type: TokenType.chord, text: chordText));
       } else {
-        foundLyricInLine = true;
+        if (!foundLyricInLine) {
+          foundLyricInLine = true;
+          // Go backwards,
+          // If no space found before this lyric, add a preceding chord target token
+          // If there are spaces, add a separatorToken to indicate the boundary between lyric start and preceding chords / target
+          if (lineTokens.isEmpty) {
+            lineTokens.add(ContentToken(type: TokenType.precedingChordTarget));
+            lineTokens.add(ContentToken(type: TokenType.separator));
+          } else {
+            for (int j = lineTokens.length - 1; j >= 0; j--) {
+              if (lineTokens[j].type == TokenType.space) {
+                lineTokens.insert(
+                  j + 1,
+                  ContentToken(type: TokenType.separator),
+                );
+                break;
+              }
+              if (j == 0) {
+                lineTokens.insert(0, ContentToken(type: TokenType.separator));
+                lineTokens.insert(
+                  0,
+                  ContentToken(type: TokenType.precedingChordTarget),
+                );
+              }
+              if (lineTokens[j].type == TokenType.newline) {
+                lineTokens.insert(
+                  j + 1,
+                  ContentToken(type: TokenType.separator),
+                );
+                lineTokens.insert(
+                  j + 1,
+                  ContentToken(type: TokenType.precedingChordTarget),
+                );
+                break;
+              }
+            }
+          }
+        }
         lineTokens.add(ContentToken(type: TokenType.lyric, text: char));
       }
     }
 
     if (lineTokens.isNotEmpty) {
-      if (!spaceBeforeLyrics) {
-        // Insert preceding chord target tokens at the starts of lines
-        lineTokens.insert(
-          0,
-          ContentToken(type: TokenType.precedingChordTarget, text: ''),
-        );
-      }
       tokens.addAll(lineTokens);
     }
 
@@ -108,6 +125,7 @@ class TokenizationService {
         case TokenType.newline:
           return token.text;
         case TokenType.precedingChordTarget:
+        case TokenType.separator:
         case TokenType.underline:
           return ''; // Purely visual tokens - return empty string
       }
@@ -241,8 +259,9 @@ class TokenizationService {
         case TokenType.precedingChordTarget:
           return false;
         case TokenType.underline:
-          debugPrint("UNDERLINE FOUND ON FILTER");
+          debugPrint("UNDERLINE FOUND ON FILTERING");
           return false;
+        case TokenType.separator:
         case TokenType.newline:
           // Returns true if any content is shown
           return contentFilters[ContentFilter.chords]! ||
@@ -281,6 +300,7 @@ class TokenizationService {
           currentLine.clear();
           break;
 
+        case TokenType.separator:
         case TokenType.space:
           // End of word
           if (currentWord.isNotEmpty) {
@@ -295,9 +315,9 @@ class TokenizationService {
         case TokenType.lyric:
         case TokenType.chord:
         case TokenType.precedingChordTarget:
+        case TokenType.underline:
           // Part of a word
           currentWord.add(token);
-        case TokenType.underline:
           break;
       }
     }

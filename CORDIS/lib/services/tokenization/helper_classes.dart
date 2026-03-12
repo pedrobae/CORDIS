@@ -94,7 +94,7 @@ class ContentToken {
   final TokenType type;
   int? position;
 
-  ContentToken({required this.text, required this.type, this.position});
+  ContentToken({this.text = '', required this.type, this.position});
 }
 
 enum TokenType {
@@ -103,6 +103,7 @@ enum TokenType {
   space,
   newline,
   precedingChordTarget, // Token that exists when editing
+  separator, // Used to separate indicate preceding chords
   underline, // Underscore widget used to stretch a word when a chord cant fit
 }
 

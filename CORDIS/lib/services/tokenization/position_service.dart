@@ -58,8 +58,8 @@ class PositionService {
 
       for (var word in line.words) {
         bool lineBroke = false;
-        List<({ContentToken token, double x, double y, TokenType type})>
-        wordPositions = [];
+        final wordPositions =
+            <({ContentToken token, double x, double y, TokenType type})>[];
         int charIndex = 0;
         Map<int, ContentToken> tokensToAdd = {};
 
@@ -68,6 +68,19 @@ class PositionService {
           if (msr == null) continue;
 
           switch (token.type) {
+            case TokenType.separator:
+              // After the separator use the preceding offset instead of 0,
+              // To position the lyrics and chords correctly when there are preceding chords
+              lyricsX = precedingOffset;
+              chordX = precedingOffset;
+              wordPositions.add((
+                token: token,
+                x: 0,
+                y: yOffset,
+                type: TokenType.separator,
+              ));
+              charIndex++;
+              break;
             case TokenType.chord:
               // If the chord there is no space for the chord.
               if (lyricsX < chordX) {
@@ -207,6 +220,7 @@ class PositionService {
               case TokenType.precedingChordTarget:
               case TokenType.space:
               case TokenType.newline:
+              case TokenType.separator:
                 debugPrint("Invalid Token Found after linebreak");
                 break;
             }
@@ -280,7 +294,9 @@ class PositionService {
     Map<ContentToken, Measurements> tokenMeasurements,
     PositioningContext ctx,
   ) {
-    double precedingOffset = TokenizationConstants.precedingTargetWidth;
+    double precedingOffset = ctx.isEditMode
+        ? TokenizationConstants.precedingTargetWidth
+        : 0;
     for (var line in contentTokens.lines) {
       double linePrecedingOffset = 0;
       bool hasSpaceBeforeLyrics = false;
@@ -321,7 +337,7 @@ class PositionService {
     return precedingOffset;
   }
 
-  /// Helper to check if a chord token is after the last lyric in the line, 
+  /// Helper to check if a chord token is after the last lyric in the line,
   /// Meaning it should be positioned without an underline
   bool _isAfterLastLyric(TokenLine line, ContentToken token) {
     bool foundLyric = false;

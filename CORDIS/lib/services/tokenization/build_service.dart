@@ -95,7 +95,8 @@ class TokenizationBuilder {
               );
               break;
             case TokenType.precedingChordTarget:
-              // Preceding chord targets are only relevant in edit mode, so we skip them in view mode
+            case TokenType.separator:
+              // Preceding chord targets and separators are only relevant in edit mode, so we skip
               break;
             case TokenType.underline:
               wordWidgets.add(
@@ -220,6 +221,8 @@ class TokenizationBuilder {
                   token: token,
                 ),
               );
+              break;
+            case TokenType.separator:
               break;
           }
         }
