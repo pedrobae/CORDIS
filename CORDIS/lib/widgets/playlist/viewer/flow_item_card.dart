@@ -12,7 +12,7 @@ import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_editor.dart';
 import 'package:cordis/widgets/playlist/viewer/flow_item_card_actions.dart';
 
-class FlowItemCard extends StatelessWidget {
+class FlowItemCard extends StatefulWidget {
   final int flowItemId;
   final int playlistId;
   final int index;
@@ -25,6 +25,22 @@ class FlowItemCard extends StatelessWidget {
   });
 
   @override
+  State<FlowItemCard> createState() => _FlowItemCardState();
+}
+
+class _FlowItemCardState extends State<FlowItemCard> {
+  @override
+  void initState() {
+    super.initState();
+
+    final flow = context.read<FlowItemProvider>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await flow.loadFlowItem(widget.flowItemId);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
@@ -33,7 +49,7 @@ class FlowItemCard extends StatelessWidget {
 
     return Consumer<FlowItemProvider>(
       builder: (context, flow, child) {
-        final flowItem = flow.getFlowItem(flowItemId);
+        final flowItem = flow.getFlowItem(widget.flowItemId);
 
         if (flowItem == null || flow.isLoading) {
           return Center(
@@ -54,9 +70,9 @@ class FlowItemCard extends StatelessWidget {
             spacing: 8,
             children: [
               CustomReorderableDelayed(
-                key: key,
+                key: widget.key,
                 delay: Duration(milliseconds: 100),
-                index: index,
+                index: widget.index,
                 child: Icon(Icons.drag_indicator),
               ),
               Expanded(
@@ -109,8 +125,8 @@ class FlowItemCard extends StatelessWidget {
                         onPressed: () {
                           nav.push(
                             () => FlowItemEditor(
-                              playID: playlistId,
-                              flowID: flowItemId,
+                              playID: widget.playlistId,
+                              flowID: widget.flowItemId,
                             ),
                             changeDetector: () => flow.hasPendingChanges,
                             showBottomNavBar: true,
@@ -138,8 +154,8 @@ class FlowItemCard extends StatelessWidget {
           onClosing: () {},
           builder: (context) {
             return FlowItemCardActionsSheet(
-              flowItemId: flowItemId,
-              playlistId: playlistId,
+              flowItemId: widget.flowItemId,
+              playlistId: widget.playlistId,
             );
           },
         );

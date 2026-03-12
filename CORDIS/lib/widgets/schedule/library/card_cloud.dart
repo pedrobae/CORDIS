@@ -15,7 +15,7 @@ import 'package:cordis/utils/date_utils.dart';
 
 import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
-import 'package:cordis/widgets/schedule/library/duplicate_schedule_sheet.dart';
+import 'package:cordis/widgets/schedule/library/sheet_duplicate.dart';
 
 import 'package:flutter/material.dart';
 

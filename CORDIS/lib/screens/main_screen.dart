@@ -8,7 +8,7 @@ import 'package:cordis/screens/cipher/edit_cipher.dart';
 import 'package:cordis/screens/playlist/edit_playlist.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/sheet_new_section.dart';
 import 'package:cordis/widgets/home/quick_action_sheet.dart';
-import 'package:cordis/widgets/schedule/library/schedule_actions_sheet.dart';
+import 'package:cordis/widgets/schedule/library/sheet_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

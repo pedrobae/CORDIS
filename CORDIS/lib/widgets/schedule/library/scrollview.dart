@@ -3,8 +3,8 @@ import 'package:cordis/providers/user/my_auth_provider.dart';
 import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
-import 'package:cordis/widgets/schedule/library/cloud_schedule_card.dart';
-import 'package:cordis/widgets/schedule/library/schedule_card.dart';
+import 'package:cordis/widgets/schedule/library/card_cloud.dart';
+import 'package:cordis/widgets/schedule/library/card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
