@@ -1,12 +1,14 @@
 class ChordHelper {
-  List<String> notesFlat = [
+  const ChordHelper();
+
+  static const List<String> keyList = [
     'C',
     'Db',
     'D',
     'Eb',
     'E',
     'F',
-    'Gb',
+    'F#',
     'G',
     'Ab',
     'A',
@@ -14,18 +16,32 @@ class ChordHelper {
     'B',
   ];
 
-  List<String> notesSharp = [
-    'C',
+  static const List<String> allRoots = [
     'C#',
-    'D',
+    'Db',
     'D#',
+    'Eb',
+    'F#',
+    'Gb',
+    'G#',
+    'Ab',
+    'A#',
+    'Bb',
+    'C', 'D', 'E', 'F', 'G', 'A', 'B', // Ordered to match semitone steps
+  ];
+
+  List<String> getChordRoots(bool useFlats) => [
+    'C',
+    useFlats ? 'Db' : 'C#',
+    'D',
+    useFlats ? 'Eb' : 'D#',
     'E',
     'F',
-    'F#',
+    useFlats ? 'Gb' : 'F#',
     'G',
-    'G#',
+    useFlats ? 'Ab' : 'G#',
     'A',
-    'A#',
+    useFlats ? 'Bb' : 'A#',
     'B',
   ];
 
@@ -101,12 +117,8 @@ class ChordHelper {
   }
 
   String transpose(String chord, int value, {required bool useFlats}) {
-    final chromatic = useFlats ? notesFlat : notesSharp;
+    final chromatic = getChordRoots(useFlats);
     int rootIndex = chromatic.indexOf(chord);
-    if (rootIndex == -1) {
-      // Try alternate chromatic
-      rootIndex = (useFlats ? notesSharp : notesFlat).indexOf(chord);
-    }
     if (rootIndex == -1) return chord;
     int newIndex = (rootIndex + value) % chromatic.length;
     if (newIndex < 0) newIndex += chromatic.length;

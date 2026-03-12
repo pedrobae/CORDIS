@@ -1,3 +1,4 @@
+import 'package:cordis/helpers/chords/chords.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/transposition_provider.dart';
 import 'package:cordis/widgets/ciphers/transposer.dart';
@@ -213,7 +214,7 @@ class _TranspositionSandboxScreenState
                       labelText: 'Original key',
                       isDense: true,
                     ),
-                    items: tp.keyList
+                    items: ChordHelper.keyList
                         .map(
                           (k) => DropdownMenuItem<String>(
                             value: k,

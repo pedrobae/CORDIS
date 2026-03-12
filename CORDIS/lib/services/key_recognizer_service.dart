@@ -1,23 +1,17 @@
 import 'package:cordis/models/dtos/version_dto.dart';
-import 'package:cordis/repositories/local/section_repository.dart';
+import 'package:cordis/helpers/chords/chords.dart';
+
 import 'package:cordis/repositories/local/version_repository.dart';
+import 'package:cordis/repositories/local/section_repository.dart';
 
 class KeyRecognizerService {
-  // Pre-sorted list of all chord roots (longest first for proper parsing)
-  static const List<String> _keys = [
-    'C', 'D', 'E', 'F', 'G', 'A', 'B', // 1-char roots second
-  ];
-
-  static const List<String> _flatKeys = ['Bb', 'Eb', 'Ab', 'Db', 'Gb'];
-  static const List<String> _sharpKeys = ['C#', 'D#', 'F#', 'G#', 'A#'];
-
   final _localVersionRepo = LocalVersionRepository();
   final _sectionRepo = SectionRepository();
+  final _chords = ChordHelper();
 
   /// Collects all chords of a cipherID and select a music key based on them
   Future<String> recognizeKeyLocal(int cipherID) async {
     final version = await _localVersionRepo.getOldestVersionOfCipher(cipherID);
-
     final sections = await _sectionRepo.getSections(version.id!);
 
     List<String> chords = [];
@@ -83,32 +77,15 @@ class KeyRecognizerService {
         chordCounts[root] = (chordCounts[root] ?? 0) + 1;
       }
 
-      int flatCount = 0;
-      int sharpCount = 0;
-      for (var chord in chordCounts.entries) {
-        if (chord.key.contains('b')) {
-          flatCount += chord.value;
-        } else if (chord.key.contains('#')) {
-          sharpCount += chord.value;
-        }
-      }
-
-      bool isFlatKey = flatCount > sharpCount;
-
-      Map<String, int> keyScores = {};
-      for (var key in [
-        ..._keys,
-        if (isFlatKey) ..._flatKeys,
-        if (!isFlatKey) ..._sharpKeys,
-      ]) {
-        int score = 0;
+      Map<String, double> keyScores = {};
+      for (var key in ChordHelper.keyList) {
+        int inPaletteCount = 0;
         for (var chord in chordCounts.keys) {
-          int position = _getChordPositionInKey(chord, key, isFlatKey);
-          if (position != -1) {
-            score += (4 - position) * chordCounts[chord]!;
+          if (_isInPalette(chord, key)) {
+            inPaletteCount += chordCounts[chord]!;
           }
         }
-        keyScores[key] = score;
+        keyScores[key] = inPaletteCount / chords.length;
       }
 
       return keyScores.entries.reduce((a, b) => a.value > b.value ? a : b).key;
@@ -117,34 +94,7 @@ class KeyRecognizerService {
 
   /// Calculates the position of a chord in a key, based on the circle of fifths
   /// Returns -1 if the chord is not in the key
-  int _getChordPositionInKey(String chord, String key, bool isFlatKey) {
-    List<String> circleOfFifths = [
-      'C',
-      if (isFlatKey) 'Db' else 'C#',
-      'D',
-      if (isFlatKey) 'Eb' else 'D#',
-      'E',
-      'F',
-      if (isFlatKey) 'Gb' else 'F#',
-      'G',
-      if (isFlatKey) 'Ab' else 'G#',
-      'A',
-      if (isFlatKey) 'Bb' else 'A#',
-      'B',
-    ];
-
-    int keyIndex = circleOfFifths.indexOf(key);
-    if (keyIndex == -1) return -1;
-
-    List<String> keyChords = [
-      circleOfFifths[keyIndex], // I
-      circleOfFifths[(keyIndex + 2) % 12], // ii
-      circleOfFifths[(keyIndex + 4) % 12], // iii
-      circleOfFifths[(keyIndex + 5) % 12], // IV
-      circleOfFifths[(keyIndex + 7) % 12], // V
-      circleOfFifths[(keyIndex + 9) % 12], // vi
-    ];
-
-    return keyChords.indexOf(chord);
+  bool _isInPalette(String chord, String key) {
+    return _chords.getChordsForKey(key).contains(chord);
   }
 }

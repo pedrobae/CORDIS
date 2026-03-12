@@ -1,3 +1,4 @@
+import 'package:cordis/helpers/chords/chords.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/transposition_provider.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
@@ -73,7 +74,7 @@ class _SelectKeySheetState extends State<SelectKeySheet> {
                     childAspectRatio: 2,
                   ),
                   itemBuilder: (BuildContext context, int index) {
-                    final key = tp.keyList[index];
+                    final key = ChordHelper.keyList[index];
                     return GestureDetector(
                       onTap: () {
                         setState(() {

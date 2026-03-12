@@ -2,50 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cordis/helpers/chords/chords.dart';
 
 class TranspositionProvider extends ChangeNotifier {
-  final List<String> keyList = [
-    'C',
-    'Db',
-    'D',
-    'Eb',
-    'E',
-    'F',
-    'F#',
-    'G',
-    'Ab',
-    'A',
-    'Bb',
-    'B',
-  ];
-
-  List<String> get chordRoots => [
-    'C',
-    useFlats ? 'Db' : 'C#',
-    'D',
-    useFlats ? 'Eb' : 'D#',
-    'E',
-    'F',
-    useFlats ? 'Gb' : 'F#',
-    'G',
-    useFlats ? 'Ab' : 'G#',
-    'A',
-    useFlats ? 'Bb' : 'A#',
-    'B',
-  ];
-
-  static const List<String> _allRoots = [
-    'C#',
-    'Db',
-    'D#',
-    'Eb',
-    'F#',
-    'Gb',
-    'G#',
-    'Ab',
-    'A#',
-    'Bb',
-    'C', 'D', 'E', 'F', 'G', 'A', 'B', // Ordered to match semitone steps
-  ];
-
   String _originalKey = '';
   String? _transposedKey;
 
@@ -56,8 +12,8 @@ class TranspositionProvider extends ChangeNotifier {
   int get _transposeValue {
     if (_transposedKey == null) return 0;
 
-    int indexOriginal = keyList.indexOf(_originalKey);
-    int indexTransposed = keyList.indexOf(_transposedKey!);
+    int indexOriginal = ChordHelper.keyList.indexOf(_originalKey);
+    int indexTransposed = ChordHelper.keyList.indexOf(_transposedKey!);
 
     if (indexOriginal == -1 || indexTransposed == -1) return 0;
 
@@ -85,19 +41,19 @@ class TranspositionProvider extends ChangeNotifier {
   }
 
   void transposeUp() {
-    int index = keyList.indexOf(_transposedKey ?? _originalKey);
+    int index = ChordHelper.keyList.indexOf(_transposedKey ?? _originalKey);
     if (index == -1) return;
-    int newIndex = (index + 1) % keyList.length;
-    _transposedKey = keyList[newIndex];
+    int newIndex = (index + 1) % ChordHelper.keyList.length;
+    _transposedKey = ChordHelper.keyList[newIndex];
     notifyListeners();
   }
 
   void transposeDown() {
-    int index = keyList.indexOf(_transposedKey ?? _originalKey);
+    int index = ChordHelper.keyList.indexOf(_transposedKey ?? _originalKey);
     if (index == -1) return;
     int newIndex = index - 1;
-    if (newIndex < 0) newIndex += keyList.length;
-    _transposedKey = keyList[newIndex];
+    if (newIndex < 0) newIndex += ChordHelper.keyList.length;
+    _transposedKey = ChordHelper.keyList[newIndex];
     notifyListeners();
   }
 
@@ -107,7 +63,7 @@ class TranspositionProvider extends ChangeNotifier {
     String remainingSuffix = '';
 
     // Find the longest matching root (handles both C# and C correctly)
-    for (final r in _allRoots) {
+    for (final r in ChordHelper.allRoots) {
       if (chord.startsWith(r)) {
         root = r;
         remainingSuffix = chord.substring(r.length);
@@ -126,7 +82,7 @@ class TranspositionProvider extends ChangeNotifier {
       final bassPart = remainingSuffix.substring(slashIndex + 1);
 
       // Find bass note (should match exactly or be at the start)
-      for (final r in _allRoots) {
+      for (final r in ChordHelper.allRoots) {
         if (bassPart == r || bassPart.startsWith(r)) {
           bass = r;
           break;
