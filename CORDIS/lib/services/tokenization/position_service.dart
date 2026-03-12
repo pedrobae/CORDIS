@@ -50,7 +50,7 @@ class PositionService {
     final lineHeight = chordMsr.size + lyricMsr.size + posCtx.chordLyricSpacing;
 
     double yOffset = chordMsr.size;
-            
+
     final positionMap = TokenPositionMap();
     for (var line in organizedTokens.lines) {
       double chordX = 0;
@@ -69,10 +69,13 @@ class PositionService {
 
           switch (token.type) {
             case TokenType.chord:
+              // If the chord there is no space for the chord.
               if (lyricsX < chordX) {
                 /// Add underline token to push lyrics below chord
-                /// Only add if chord is ahead of lyrics, otherwise lyrics will be positioned correctly below chord
-                if (wordPositions.isNotEmpty && !wordPositions.every((wp) => wp.type != TokenType.lyric)) {
+                /// Only add if there is a lyric in the word, otherwise just adjust the offset of the lyrics
+                if (wordPositions.isNotEmpty &&
+                    !wordPositions.every((wp) => wp.type != TokenType.lyric) &&
+                    !_isAfterLastLyric(line, token)) {
                   final token = ContentToken(
                     text: '',
                     type: TokenType.underline,
@@ -277,7 +280,7 @@ class PositionService {
     Map<ContentToken, Measurements> tokenMeasurements,
     PositioningContext ctx,
   ) {
-    double precedingOffset = 0;
+    double precedingOffset = TokenizationConstants.precedingTargetWidth;
     for (var line in contentTokens.lines) {
       double linePrecedingOffset = 0;
       bool hasSpaceBeforeLyrics = false;
@@ -316,5 +319,22 @@ class PositionService {
       precedingOffset += ctx.minChordSpacing;
     }
     return precedingOffset;
+  }
+
+  /// Helper to check if a chord token is after the last lyric in the line, 
+  /// Meaning it should be positioned without an underline
+  bool _isAfterLastLyric(TokenLine line, ContentToken token) {
+    bool foundLyric = false;
+    for (var w in line.words.reversed) {
+      for (var t in w.tokens.reversed) {
+        if (t == token) {
+          return !foundLyric;
+        }
+        if (t.type == TokenType.lyric) {
+          foundLyric = true;
+        }
+      }
+    }
+    return false;
   }
 }

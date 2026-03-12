@@ -201,9 +201,8 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
               /// CONTENT
               Padding(
-                padding: const EdgeInsets.only(
-                  left: TokenizationConstants.chordTokenWidthPadding + 4,
-                  right: 4,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: TokenizationConstants.chordTokenWidthPadding + 4,
                 ),
                 child: LayoutBuilder(
                   builder: (context, constraints) {

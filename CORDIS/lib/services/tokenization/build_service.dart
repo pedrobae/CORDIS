@@ -282,15 +282,15 @@ class TokenizationBuilder {
     );
 
     final dragTargetChild = SizedBox(
-      height: lyricMsr.size,
+      height: lyricMsr.height,
       width: TokenizationConstants.precedingTargetWidth,
       child: Stack(
         children: [
           Positioned(
             top: lyricMsr.baseline,
             child: Container(
-              color: Colors.grey.shade400,
-              height: 2,
+              color: ctx.onSurfaceColor,
+              height: 1,
               width: TokenizationConstants.precedingTargetWidth,
             ),
           ),
@@ -303,7 +303,6 @@ class TokenizationBuilder {
       child: dragTargetChild,
       token: token,
       onAccept: ctx.onAddPrecedingChord!,
-
       tokenLine: tokenLine,
       tokenPositions: tokenPositions,
     );
@@ -446,7 +445,8 @@ class TokenizationBuilder {
         cutoutWidgets.add(
           Positioned(
             left: xOffset,
-            bottom: lyricMsr.size + TokenizationConstants.dragFeedbackCutoutPadding,
+            bottom:
+                lyricMsr.size + TokenizationConstants.dragFeedbackCutoutPadding,
             child: Text(
               ctx.transposeChord(draggedChord.text),
               style: ctx.lyricStyle.copyWith(color: ctx.onSurfaceColor),
