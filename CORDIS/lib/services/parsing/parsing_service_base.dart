@@ -3,18 +3,15 @@ import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/models/domain/parsing_cipher.dart';
 import 'package:cordis/models/dtos/pdf_dto.dart';
 import 'package:cordis/services/parsing/chord_line_parser.dart';
-import 'package:cordis/services/parsing/metadata_parser.dart';
 import 'package:cordis/services/parsing/section_parser.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class ParsingServiceBase {
-  final MetadataParser metadataParser = MetadataParser();
   final ChordLineParser chordLineParser = ChordLineParser();
   final SectionParser sectionParser = SectionParser();
 
   void parse(ParsingResult result) {
     parseSections(result);
-    parseMetadata(result);
     parseChords(result);
   }
 
@@ -28,18 +25,6 @@ class ParsingServiceBase {
         break;
       case ParsingStrategy.pdfFormatting:
         sectionParser.parseByPdfFormatting(result);
-        break;
-    }
-  }
-
-  void parseMetadata(ParsingResult result) {
-    switch (result.strategy) {
-      case ParsingStrategy.doubleNewLine:
-      case ParsingStrategy.sectionLabels:
-        metadataParser.parseBySimpleText(result);
-        break;
-      case ParsingStrategy.pdfFormatting:
-        metadataParser.parseByPdfFormatting(result);
         break;
     }
   }

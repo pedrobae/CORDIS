@@ -66,20 +66,76 @@ class _EditCipherScreenState extends State<EditCipherScreen>
   }
 
   Future<void> _loadImportedCipher() async {
-    final parserProvider = context.read<ParserProvider>();
-    final cipherProvider = context.read<CipherProvider>();
-    final localVersionProvider = context.read<LocalVersionProvider>();
-    final sectionProvider = context.read<SectionProvider>();
+    final parse = context.read<ParserProvider>();
+    final ciph = context.read<CipherProvider>();
+    final localVer = context.read<LocalVersionProvider>();
+    final sect = context.read<SectionProvider>();
 
-    final cipher = parserProvider.parsedCipher;
+    final cipher = parse.parsedCipher;
     if (cipher == null) return;
 
-    cipherProvider.setNewCipherInCache(cipher);
-    final version = cipher.versions.first;
-    localVersionProvider.setNewVersionInCache(version);
-    sectionProvider.setNewSectionsInCache(-1, version.sections!);
+    if (widget.cipherID == -1) {
+      // CREATING NEW FROM IMPORTED
+      ciph.cacheUpdates(widget.cipherID);
+      final version = cipher.versions.first;
+      localVer.setNewVersionInCache(version);
+      sect.setNewSectionsInCache(-1, version.sections!);
+    } else {
+      // MERGING IMPORTED SECTIONS WITH EXISTING CIPHER
+      final importedVersion = cipher.versions.first;
+      final importedStruct = importedVersion.songStructure;
+      final importedSections = importedVersion.sections!;
 
-    parserProvider.clearCache();
+      final existingVersion = localVer.getVersion(widget.versionID)!;
+      final existingStruct = existingVersion.songStructure;
+
+      // FOR ANY CODE THAT OVERLAPS RENAME THE IMPORTED CODE
+      for (String code in importedStruct) {
+        String? newCode;
+
+        final baseCode = code.toString().replaceAll(RegExp(r'\d+$'), '');
+        if (existingStruct.contains(code)) {
+          // Get new Code
+          final matchingCodes = <String>[];
+          for (String code in existingStruct) {
+            // Strip numbering suffixes for comparison
+            final strippedCode = code.toString().replaceAll(
+              RegExp(r'\d+$'),
+              '',
+            );
+            if (strippedCode == baseCode) {
+              matchingCodes.add(code);
+            }
+          }
+          newCode = '$baseCode${matchingCodes.length + 1}';
+        }
+        final newSect = importedSections[code]!.copyWith(
+          contentCode: newCode ?? code,
+          versionId: widget.versionID,
+        );
+        // Cache new section
+        sect.cacheAddSection(
+          widget.versionID,
+          newSect.contentCode,
+          newSect.contentColor,
+          newSect.contentType,
+        );
+        sect.cacheContent(
+          sectionCode: newSect.contentCode,
+          versionID: widget.versionID,
+          content: newSect.contentText,
+        );
+        // append to existing struct
+        existingStruct.add(newSect.contentCode);
+      }
+      // Cache new struct
+      localVer.cacheUpdates(
+        widget.versionID,
+        songStructure: existingStruct,
+      );
+    }
+
+    parse.clearCache();
     context.read<ImportProvider>().clearCache();
   }
 

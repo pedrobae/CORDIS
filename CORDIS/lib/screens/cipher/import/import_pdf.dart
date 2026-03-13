@@ -13,7 +13,9 @@ import 'package:cordis/providers/cipher/import_provider.dart';
 import 'package:flutter/material.dart';
 
 class ImportPdfScreen extends StatefulWidget {
-  const ImportPdfScreen({super.key});
+  final int cipherID;
+  final int versionID;
+  const ImportPdfScreen({super.key, this.versionID = -1, this.cipherID = -1});
 
   @override
   State<ImportPdfScreen> createState() => _ImportPdfScreenState();
@@ -314,9 +316,9 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
     await par.parseCipher(imp.importedCipher!);
     nav.push(
       () => EditCipherScreen(
-        cipherID: -1,
+        cipherID: widget.cipherID,
         versionType: VersionType.import,
-        versionID: -1,
+        versionID: widget.versionID,
       ),
       changeDetector: () =>
           localVer.hasUnsavedChanges || ciph.hasUnsavedChanges,

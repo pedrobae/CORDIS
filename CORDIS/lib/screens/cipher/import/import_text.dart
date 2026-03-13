@@ -13,9 +13,10 @@ import 'package:cordis/providers/cipher/import_provider.dart';
 import 'package:provider/provider.dart';
 
 class ImportTextScreen extends StatefulWidget {
-  final int? cipherId;
+  final int cipherID;
+  final int versionID;
 
-  const ImportTextScreen({super.key, this.cipherId});
+  const ImportTextScreen({super.key, this.cipherID = -1, this.versionID = -1});
 
   @override
   State<ImportTextScreen> createState() => _ImportTextScreenState();
@@ -55,8 +56,8 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
           body: imp.error != null
               ? _buildErrorState(imp)
               : imp.isImporting
-                  ? _buildLoadingState()
-                  : _buildContentState(imp, par),
+              ? _buildLoadingState()
+              : _buildContentState(imp, par),
         );
       },
     );
@@ -124,10 +125,7 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(0),
-            borderSide: BorderSide(
-              color: colorScheme.primary,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: colorScheme.primary, width: 2),
           ),
         ),
       ),
@@ -159,9 +157,7 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
               trackOutlineColor: WidgetStatePropertyAll<Color>(
                 colorScheme.primary,
               ),
-              thumbIcon: WidgetStatePropertyAll<Icon>(
-                Icon(Icons.circle),
-              ),
+              thumbIcon: WidgetStatePropertyAll<Icon>(Icon(Icons.circle)),
               value: imp.parsingStrategy == ParsingStrategy.sectionLabels,
               onChanged: (value) {
                 imp.setParsingStrategy(
@@ -211,8 +207,8 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
       nav.push(
         () => EditCipherScreen(
           versionType: VersionType.import,
-          versionID: -1,
-          cipherID: -1,
+          versionID: widget.versionID,
+          cipherID: widget.cipherID,
         ),
         changeDetector: () {
           return ciph.hasUnsavedChanges ||
