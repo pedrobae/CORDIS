@@ -18,6 +18,9 @@ class StructureList extends StatefulWidget {
 
   @override
   State<StructureList> createState() => _StructureListState();
+
+  static const double buttonWidth = 36;
+  static const double spacing = 4;
 }
 
 class _StructureListState extends State<StructureList> {
@@ -33,21 +36,18 @@ class _StructureListState extends State<StructureList> {
     if (!listScrollController.hasClients) return;
     if (!listScrollController.position.hasViewportDimension) return;
 
-    // Each button: 44px wide + 8px spacing = 52px per item
-    // Plus initial padding of 8px
-    const buttonWidth = 44.0;
-    const spacing = 8.0;
-    const itemWidth = buttonWidth + spacing;
+    const itemWidth = StructureList.buttonWidth + 2 * StructureList.spacing;
     const initialPadding = 8.0;
 
     // Calculate position to center button in viewport
     final targetScroll =
         (index * itemWidth + initialPadding) -
-        (listScrollController.position.viewportDimension / 2 - buttonWidth / 2);
+        (listScrollController.position.viewportDimension / 2 -
+            StructureList.buttonWidth / 2);
 
     listScrollController.animateTo(
       targetScroll.clamp(0.0, listScrollController.position.maxScrollExtent),
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 100),
       curve: Curves.easeInOut,
     );
   }
@@ -56,7 +56,6 @@ class _StructureListState extends State<StructureList> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final scroll = Provider.of<AutoScrollProvider>(context);
-
     final state = context.read<PlayScheduleStateProvider>();
 
     return Consumer2<SectionProvider, LayoutSettingsProvider>(
@@ -81,15 +80,13 @@ class _StructureListState extends State<StructureList> {
                   valueListenable: scroll.currentSectionIndex,
                   builder: (context, scrollIndex, child) {
                     // Auto-scroll structure list to show current section
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _scrollToIndex(scrollIndex);
-                    });
+                    _scrollToIndex(scrollIndex);
 
                     return SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       controller: listScrollController,
                       child: Row(
-                        spacing: 8,
+                        spacing: StructureList.spacing,
                         children: [
                           const SizedBox(),
                           ...filteredStructure.asMap().entries.map((entry) {
@@ -110,20 +107,17 @@ class _StructureListState extends State<StructureList> {
                             }
                             final color = section.contentColor;
 
-                            if (scroll.sectionKeys[entry.key] == null) {
-                              scroll.sectionKeys[entry.key] = GlobalKey();
-                            }
                             return RepaintBoundary(
                               child: GestureDetector(
-                                onTap: () => state.isVertPlay
+                                onTap: () => scroll.isVerticalMode
                                     ? scroll.scrollToItemSection(
-                                        state.currentItemIndex,
-                                        index,
+                                        itemIndex: state.currentItemIndex,
+                                        sectionIndex: index,
                                       )
                                     : scroll.scrollToSectionTabs(index),
                                 child: Container(
-                                  height: 44,
-                                  width: 44,
+                                  height: StructureList.buttonWidth,
+                                  width: StructureList.buttonWidth,
                                   decoration: BoxDecoration(
                                     color: color.withValues(alpha: 0.9),
                                     borderRadius: BorderRadius.circular(6),
@@ -139,7 +133,7 @@ class _StructureListState extends State<StructureList> {
                                       sectionCode,
                                       style: TextStyle(
                                         color: colorScheme.surface,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w600,
                                         fontSize: 14,
                                       ),
                                       textAlign: TextAlign.center,
@@ -149,7 +143,6 @@ class _StructureListState extends State<StructureList> {
                               ),
                             );
                           }),
-                          const SizedBox(),
                         ],
                       ),
                     );

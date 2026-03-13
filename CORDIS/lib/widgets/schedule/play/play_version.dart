@@ -87,7 +87,7 @@ class _PlayVersionState extends State<PlayVersion> {
     }
 
     // Update scroll index
-    _scrollProvider.calcCurrentIndex(
+    _scrollProvider.syncTabSectionFromViewport(
       _scrollController.position.viewportDimension,
     );
   }
@@ -226,10 +226,7 @@ class _PlayVersionState extends State<PlayVersion> {
                         child: child!,
                       );
                     },
-                    child: _buildStickyBar(
-                      context,
-                      colorScheme,
-                    ),
+                    child: _buildStickyBar(context, colorScheme),
                   ),
                 ),
 
@@ -328,6 +325,7 @@ class _PlayVersionState extends State<PlayVersion> {
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemBuilder: (context, index) {
+        final sectionKey = _scrollProvider.registerTabSection(index);
         final trimmedCode = filteredStructure[index].trim();
         final section = isCloud
             ? () {
@@ -342,26 +340,21 @@ class _PlayVersionState extends State<PlayVersion> {
           return const SizedBox.shrink();
         }
 
+        _scrollProvider.setTabSectionLineCount(
+          index,
+          section.contentText.split('\n').length,
+        );
+
         if (isAnnotation(trimmedCode)) {
           return AnnotationCard(
+            key: sectionKey,
             sectionText: section.contentText,
             sectionType: section.contentType,
           );
         }
-        // Create key if it doesn't exist
-        final scrollProvider = Provider.of<AutoScrollProvider>(
-          context,
-          listen: false,
-        );
-        if (scrollProvider.sectionKeys[index] == null) {
-          scrollProvider.sectionKeys[index] = GlobalKey();
-        }
-        scrollProvider.sectionLineCounts[index] = section.contentText
-            .split('\n')
-            .length;
 
         return SectionCard(
-          key: scrollProvider.sectionKeys[index],
+          key: sectionKey,
           sectionType: section.contentType,
           sectionCode: trimmedCode,
           sectionText: section.contentText,
@@ -371,10 +364,7 @@ class _PlayVersionState extends State<PlayVersion> {
     );
   }
 
-  Widget _buildStickyBar(
-    BuildContext context,
-    ColorScheme colorScheme,
-  ) {
+  Widget _buildStickyBar(BuildContext context, ColorScheme colorScheme) {
     return SizedBox(
       height: 66,
       child: Row(

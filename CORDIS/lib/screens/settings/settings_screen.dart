@@ -355,16 +355,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final db = await dbHelper.database;
 
       // Get table counts
-      final tables = [
+      const tables = [
         'tag',
         'cipher',
+        'cipher_tags',
         'version',
         'section',
         'user',
         'playlist',
+        'playlist_version',
+        'user_playlist',
         'flow_item',
         'schedule',
         'role',
+        'role_member',
       ];
       final Map<String, int> tableCounts = {};
 
@@ -385,84 +389,92 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (!mounted) return;
 
       final colorScheme = Theme.of(context).colorScheme;
+      final size = MediaQuery.of(context).size;
 
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           backgroundColor: colorScheme.surface,
           shape: ContinuousRectangleBorder(
             borderRadius: BorderRadius.circular(0),
           ),
           title: Text('${AppLocalizations.of(context)!.database}_v.$dbVersion'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.recordsPerTable,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                ...tableCounts.entries.map((entry) {
-                  final count = entry.value;
-                  return GestureDetector(
-                    onTap: count > 0
-                        ? () {
-                            _showTableData(entry.key);
-                          }
-                        : null,
-                    child: Container(
-                      margin: EdgeInsets.only(bottom: 8),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        border: Border.all(
-                          color: colorScheme.surfaceContainerHigh,
-                          width: 1,
+          content: SizedBox(
+            width: size.width * 0.95,
+            height: size.height * 0.75,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.recordsPerTable,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  ...tableCounts.entries.map((entry) {
+                    final count = entry.value;
+                    final canOpen = count >= 0;
+                    return GestureDetector(
+                      onTap: canOpen
+                          ? () {
+                              Navigator.of(context).pop();
+                              _showTableData(entry.key);
+                            }
+                          : null,
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          border: Border.all(
+                            color: colorScheme.surfaceContainerHigh,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(0),
                         ),
-                        borderRadius: BorderRadius.circular(0),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              entry.key,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: colorScheme.onSurface,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                entry.key,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: colorScheme.onSurface,
+                                ),
                               ),
                             ),
-                          ),
-                          Text(
-                            count == -1 ? 'Erro' : count.toString(),
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: count == -1
-                                  ? colorScheme.error
-                                  : (count > 0
-                                        ? colorScheme.primary
-                                        : colorScheme.surfaceContainerLow),
+                            Text(
+                              count == -1 ? 'Error' : count.toString(),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: count == -1
+                                    ? colorScheme.error
+                                    : (count > 0
+                                          ? colorScheme.primary
+                                          : colorScheme.onSurfaceVariant),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: count > 0
-                                ? colorScheme.primary
-                                : colorScheme.surfaceContainerLow,
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: canOpen
+                                  ? colorScheme.primary
+                                  : colorScheme.onSurfaceVariant,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }),
-              ],
+                    );
+                  }),
+                ],
+              ),
             ),
           ),
         ),
@@ -486,62 +498,181 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _showTableData(String tableName) async {
     try {
+      const allowedTables = {
+        'tag',
+        'cipher',
+        'cipher_tags',
+        'version',
+        'section',
+        'user',
+        'playlist',
+        'playlist_version',
+        'user_playlist',
+        'flow_item',
+        'schedule',
+        'role',
+        'role_member',
+      };
+
+      if (!allowedTables.contains(tableName)) {
+        throw Exception('Table not allowed: $tableName');
+      }
+
       final dbHelper = DatabaseHelper();
       final db = await dbHelper.database;
 
-      final rows = await db.query(tableName, limit: 100);
+      List<Map<String, Object?>> rows = await db.query(tableName, limit: 100);
 
       if (!mounted) return;
 
       final colorScheme = Theme.of(context).colorScheme;
+      final size = MediaQuery.of(context).size;
+
+      Future<void> refreshRows(StateSetter setState) async {
+        final refreshedRows = await db.query(tableName, limit: 100);
+        if (!mounted) return;
+        setState(() {
+          rows = refreshedRows;
+        });
+      }
 
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          shape: ContinuousRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
-          backgroundColor: colorScheme.surface,
-          title: Text(AppLocalizations.of(context)!.tableData(tableName)),
-          content: SingleChildScrollView(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: colorScheme.surfaceContainer,
-                  width: 1,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+            shape: ContinuousRectangleBorder(
+              borderRadius: BorderRadius.circular(0),
+            ),
+            backgroundColor: colorScheme.surface,
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(AppLocalizations.of(context)!.tableData(tableName)),
                 ),
-                borderRadius: BorderRadius.circular(0),
-              ),
-              width: double.maxFinite,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columnSpacing: 8,
-                  columns: rows.first.keys
-                      .map(
-                        (column) =>
-                            DataColumn(label: Text(column.toUpperCase())),
+                IconButton(
+                  tooltip: 'Refresh',
+                  onPressed: () => refreshRows(setState),
+                  icon: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              width: size.width * 0.96,
+              height: size.height * 0.8,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: colorScheme.surfaceContainer,
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(0),
+                ),
+                child: rows.isEmpty
+                    ? const Center(
+                        child: Text('No rows found in this table.'),
                       )
-                      .toList(),
-                  rows: rows
-                      .map(
-                        (row) => DataRow(
-                          cells: row.values
-                              .map(
-                                (value) => DataCell(
-                                  Text(
-                                    value?.toString() ?? 'null',
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
+                    : SingleChildScrollView(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            columnSpacing: 8,
+                            columns: [
+                              ...rows.first.keys.map(
+                                (column) => DataColumn(
+                                  label: Text(column.toUpperCase()),
                                 ),
-                              )
-                              .toList(),
+                              ),
+                              const DataColumn(label: Text('ACTIONS')),
+                            ],
+                            rows: rows.map((row) {
+                              final dynamic rowId = row['id'];
+                              final bool canDelete = rowId != null;
+                              return DataRow(
+                                cells: [
+                                  ...row.values.map(
+                                    (value) => DataCell(
+                                      Text(
+                                        value?.toString() ?? 'null',
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    IconButton(
+                                      tooltip: canDelete
+                                          ? 'Delete row'
+                                          : 'Row has no id',
+                                      icon: Icon(
+                                        Icons.delete_outline,
+                                        color: canDelete
+                                            ? colorScheme.error
+                                            : colorScheme.onSurfaceVariant,
+                                      ),
+                                      onPressed: canDelete
+                                          ? () async {
+                                              final bool? confirmed =
+                                                  await showDialog<bool>(
+                                                    context: context,
+                                                    builder: (context) => AlertDialog(
+                                                      title: const Text('Delete row?'),
+                                                      content: Text(
+                                                        'Delete id=$rowId from "$tableName"?',
+                                                      ),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.of(context).pop(false),
+                                                          child: const Text('Cancel'),
+                                                        ),
+                                                        FilledButton(
+                                                          onPressed: () =>
+                                                              Navigator.of(context).pop(true),
+                                                          style: FilledButton.styleFrom(
+                                                            backgroundColor:
+                                                                colorScheme.error,
+                                                          ),
+                                                          child: const Text('Delete'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+
+                                              if (confirmed != true) return;
+
+                                              await db.delete(
+                                                tableName,
+                                                where: 'id = ?',
+                                                whereArgs: [rowId],
+                                              );
+
+                                              if (!mounted) return;
+                                              await refreshRows(setState);
+
+                                              if (!mounted) return;
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        'Deleted row id=$rowId from $tableName.',
+                                                      ),
+                                                    ),
+                                                  );
+                                            }
+                                          : null,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
                         ),
-                      )
-                      .toList(),
-                ),
+                      ),
               ),
             ),
           ),

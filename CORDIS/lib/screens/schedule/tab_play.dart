@@ -39,14 +39,18 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
     with SingleTickerProviderStateMixin {
   late final bool isCloud = widget.scheduleId is String;
   late PlayScheduleStateProvider _stateProvider;
+  late AutoScrollProvider _scrollProvider;
 
   @override
   void initState() {
     super.initState();
     _stateProvider = context.read<PlayScheduleStateProvider>();
-    _stateProvider.reset();
+    _scrollProvider = context.read<AutoScrollProvider>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _scrollProvider.setPlayMode(isVertPlay: false);
+      _scrollProvider.clearCache();
+      _stateProvider.reset();
       await _loadData();
     });
   }
@@ -341,7 +345,8 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
         if (currentIndex > 0) {
           final newIndex = currentIndex - 1;
           state.setCurrentItemIndex(newIndex);
-          context.read<AutoScrollProvider>().clearCache();
+          _scrollProvider.stopAutoScroll();
+          _scrollProvider.clearCache();
         }
       },
       child: SizedBox(
@@ -407,7 +412,8 @@ class PlayScheduleScreenState extends State<PlayScheduleScreen>
             state.currentItemIndex < state.itemCount - 1) {
           final newIndex = state.currentItemIndex + 1;
           state.setCurrentItemIndex(newIndex);
-          context.read<AutoScrollProvider>().clearCache();
+          _scrollProvider.stopAutoScroll();
+          _scrollProvider.clearCache();
         }
       },
       child: SizedBox(

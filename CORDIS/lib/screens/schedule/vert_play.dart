@@ -1,9 +1,14 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+
 import 'package:cordis/l10n/app_localizations.dart';
+
 import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
-import 'package:cordis/providers/auto_scroll_provider.dart';
 
+import 'package:provider/provider.dart';
+import 'package:cordis/providers/auto_scroll_provider.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
 import 'package:cordis/providers/playlist/flow_item_provider.dart';
@@ -15,21 +20,19 @@ import 'package:cordis/providers/schedule/play_schedule_state_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
+
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/utils/section_constants.dart';
+
+import 'package:flutter/rendering.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:cordis/widgets/ciphers/viewer/annotation_card.dart';
 import 'package:cordis/widgets/ciphers/viewer/section_card.dart';
 import 'package:cordis/widgets/ciphers/viewer/structure_list.dart';
 import 'package:cordis/widgets/schedule/play/auto_scroll_indicator.dart';
-
 import 'package:cordis/widgets/settings/auto_scroll_settings.dart';
 import 'package:cordis/widgets/settings/content_filters.dart';
 import 'package:cordis/widgets/settings/style_settings.dart';
-
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:provider/provider.dart';
 
 class VertPlaySchedule extends StatefulWidget {
   final dynamic scheduleId;
@@ -40,25 +43,25 @@ class VertPlaySchedule extends StatefulWidget {
   State<VertPlaySchedule> createState() => VertPlayScheduleState();
 }
 
-class VertPlayScheduleState extends State<VertPlaySchedule>
-    with SingleTickerProviderStateMixin {
+class VertPlayScheduleState extends State<VertPlaySchedule> {
   late final bool isCloud = widget.scheduleId is String;
-  late final PlayScheduleStateProvider _stateProvider;
-  late final AutoScrollProvider _scrollProvider;
+
+  late final PlayScheduleStateProvider _state;
+  late final AutoScrollProvider _scroll;
   late final ScrollController _scrollController;
-  final Map<int, GlobalKey> _itemKeys = {};
 
   @override
   void initState() {
     super.initState();
-    _stateProvider = context.read<PlayScheduleStateProvider>();
-    _scrollProvider = context.read<AutoScrollProvider>();
+    _state = context.read<PlayScheduleStateProvider>();
+    _scroll = context.read<AutoScrollProvider>();
 
     _scrollController = ScrollController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _stateProvider.reset();
-      _stateProvider.setVertPlay(true);
+      _scroll.setPlayMode(isVertPlay: true);
+      _scroll.clearCache();
+      _state.reset();
 
       _loadData();
       _scrollController.addListener(_scrollListener);
@@ -78,8 +81,8 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
     final isManualScroll =
         _scrollController.position.userScrollDirection != ScrollDirection.idle;
 
-    if (isManualScroll && _scrollProvider.scrollModeEnabled) {
-      _scrollProvider.stopAutoScroll();
+    if (isManualScroll && _scroll.scrollModeEnabled) {
+      _scroll.stopAutoScroll();
     }
 
     _syncCurrentSectionFromViewport();
@@ -88,40 +91,30 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
   }
 
   void _syncCurrentItemFromViewport() {
-    final viewportHeight = _scrollController.position.viewportDimension;
-
-    for (final entry in _itemKeys.entries) {
-      final itemContext = entry.value.currentContext;
-      if (itemContext == null) continue;
-
-      final box = itemContext.findRenderObject() as RenderBox?;
-      if (box == null) continue;
-
-      // Get section's position relative to the scrollable
-      final itemTop = box.localToGlobal(Offset.zero).dy;
-      final itemBottom = itemTop + box.size.height;
-
-      // Check if section is in viewport (accounting for some buffer)
-      if (itemTop > viewportHeight * 0.10 && itemTop < viewportHeight * 0.30) {
-        _stateProvider.setCurrentItemIndex(entry.key);
-      } else if (itemBottom > viewportHeight * 0.40 &&
-          itemBottom < viewportHeight * 0.60) {
-        _stateProvider.setCurrentItemIndex(entry.key);
-      }
+    final visibleItemIndex = _scroll.syncVerticalItemFromViewport(
+      _scrollController.position.viewportDimension,
+    );
+    if (visibleItemIndex != null) {
+      _state.setCurrentItemIndex(visibleItemIndex);
+      _scroll.setActiveItemIndex(visibleItemIndex);
     }
   }
 
   void _syncCurrentSectionFromViewport() {
-    _scrollProvider.calcCurrentItemSection(
+    final visibleSection = _scroll.syncVerticalSectionFromViewport(
       _scrollController.position.viewportDimension,
     );
+    if (visibleSection != null) {
+      _state.setCurrentItemIndex(visibleSection.itemIndex);
+      _scroll.setActiveItemIndex(visibleSection.itemIndex);
+    }
   }
 
   Future<void> _scrollToItem(int index) async {
-    if (index < 0 || index >= _stateProvider.itemCount) return;
+    if (index < 0 || index >= _state.itemCount) return;
 
-    final itemKey = _itemKeys[index];
-    final itemContext = itemKey?.currentContext;
+    final itemKey = _scroll.registerVerticalItem(index);
+    final itemContext = itemKey.currentContext;
     if (itemContext == null || !_scrollController.hasClients) return;
 
     await Scrollable.ensureVisible(
@@ -151,7 +144,7 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
 
     await _scrollController.animateTo(
       targetOffset,
-      duration: const Duration(microseconds: 1),
+      duration: const Duration(milliseconds: 1),
       curve: Curves.linear,
     );
   }
@@ -168,49 +161,50 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
   }
 
   Future<void> _loadLocal() async {
-    final state = context.read<PlayScheduleStateProvider>();
-
     final scheduleProvider = context.read<LocalScheduleProvider>();
     final playlistProvider = context.read<PlaylistProvider>();
-
-    final localVer = context.read<LocalVersionProvider>();
-    final ciph = context.read<CipherProvider>();
-    final sect = context.read<SectionProvider>();
-
     final flow = context.read<FlowItemProvider>();
 
     final schedule = scheduleProvider.getSchedule(widget.scheduleId)!;
     await playlistProvider.loadPlaylist(schedule.playlistId);
 
     final items = playlistProvider.getPlaylist(schedule.playlistId)!.items;
-    state.setItems(items);
+    _state.setItems(items);
+    _scroll.setActiveItemIndex(0);
     for (final item in items) {
       switch (item.type) {
         case PlaylistItemType.version:
-          await localVer.loadVersion(item.contentId!);
-          final version = localVer.getVersion(item.contentId!)!;
-
-          await ciph.loadCipher(version.cipherId);
-          await sect.loadSectionsOfVersion(item.contentId!);
+          unawaited(_loadLocalVersion(item));
           break;
         case PlaylistItemType.flowItem:
-          await flow.loadFlowItem(item.contentId!);
+          unawaited(flow.loadFlowItem(item.contentId!));
           break;
       }
     }
+  }
+
+  Future<void> _loadLocalVersion(PlaylistItem item) async {
+    final localVer = context.read<LocalVersionProvider>();
+    final ciph = context.read<CipherProvider>();
+    final sect = context.read<SectionProvider>();
+
+    await localVer.loadVersion(item.contentId!);
+    final version = localVer.getVersion(item.contentId!)!;
+    await ciph.loadCipher(version.cipherId);
+    await sect.loadSectionsOfVersion(item.contentId!);
   }
 
   Future<void> _loadCloud() async {
     final cloudSch = context.read<CloudScheduleProvider>();
     final cloudVer = context.read<CloudVersionProvider>();
     final sect = context.read<SectionProvider>();
-    final state = context.read<PlayScheduleStateProvider>();
 
     await cloudSch.loadSchedule(widget.scheduleId);
     final schedule = cloudSch.getSchedule(widget.scheduleId)!;
 
     final items = schedule.items;
-    state.setItems(items);
+    _state.setItems(items);
+    _scroll.setActiveItemIndex(0);
 
     for (var item in items) {
       switch (item.type) {
@@ -257,43 +251,67 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
   }
 
   Widget _buildListView() {
-    final state = context.read<PlayScheduleStateProvider>();
+    final scroll = context.read<AutoScrollProvider>();
+    final colorScheme = Theme.of(context).colorScheme;
 
-    if (state.itemCount == 0) {
-      return Center(child: Text(AppLocalizations.of(context)!.emptyPlaylist));
-    }
+    return Selector<PlayScheduleStateProvider, (int, bool)>(
+      selector: (_, state) => (state.itemCount, state.isLoading),
+      builder: (context, value, child) {
+        final (itemCount, isLoading) = value;
 
-    final items = List.generate(state.itemCount, (index) {
-      final item = state.getItemAt(index);
-      if (item == null) return const SizedBox.shrink();
-      final itemKey = _itemKeys.putIfAbsent(index, () => GlobalKey());
+        if (isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      switch (item.type) {
-        case PlaylistItemType.version:
-          return Container(
-            key: itemKey,
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-                _buildHeader(isCloud ? item.firebaseContentId : item.contentId),
-                _buildSectionGrid(
-                  index,
-                  isCloud ? item.firebaseContentId : item.contentId,
-                ),
-              ],
-            ),
+        if (itemCount == 0) {
+          return Center(
+            child: Text(AppLocalizations.of(context)!.emptyPlaylist),
           );
-        case PlaylistItemType.flowItem:
-          // TODO-: Implement flow item UI
-          return Container(key: itemKey);
-      }
-    });
+        }
 
-    return SingleChildScrollView(
-      controller: _scrollController,
-      padding: const EdgeInsets.only(top: 66, bottom: 120),
-      child: Column(children: items),
+        final stateProvider = context.read<PlayScheduleStateProvider>();
+        final items = List.generate(itemCount, (index) {
+          final item = stateProvider.getItemAt(index);
+          if (item == null) return const SizedBox.shrink();
+          final itemKey = scroll.registerVerticalItem(index);
+
+          switch (item.type) {
+            case PlaylistItemType.version:
+              return Container(
+                key: itemKey,
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Column(
+                  spacing: 8,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildHeader(
+                        isCloud ? item.firebaseContentId : item.contentId,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildSectionGrid(
+                        index,
+                        isCloud ? item.firebaseContentId : item.contentId,
+                      ),
+                    ),
+                    Divider(color: colorScheme.primary),
+                  ],
+                ),
+              );
+            case PlaylistItemType.flowItem:
+              // TODO-: Implement flow item UI
+              return Container(key: itemKey);
+          }
+        });
+
+        return SingleChildScrollView(
+          controller: _scrollController,
+          padding: const EdgeInsets.only(top: 66, bottom: 120),
+          child: Column(children: items),
+        );
+      },
     );
   }
 
@@ -323,7 +341,7 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
           top: 0,
           child: Container(
             width: MediaQuery.of(context).size.width,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
@@ -335,9 +353,25 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
                   width: 1,
                 ),
               ),
+              color: colorScheme.surface,
             ),
-            child: StructureList(
-              versionId: isCloud ? item.firebaseContentId : item.contentId,
+            child: Row(
+              spacing: 8,
+              children: [
+                Expanded(
+                  child: StructureList(
+                    versionId: isCloud
+                        ? item.firebaseContentId
+                        : item.contentId,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    nav.pop();
+                  },
+                  child: Icon(Icons.close, color: colorScheme.primary),
+                ),
+              ],
             ),
           ),
         );
@@ -583,9 +617,17 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
       builder: (context, localVer, cloudVer, sect, laySet, child) {
         List<String> songStructure;
         if (isCloud) {
-          songStructure = cloudVer.getVersion(versionId)!.songStructure;
+          final version = cloudVer.getVersion(versionId);
+          if (version == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          songStructure = version.songStructure;
         } else {
-          songStructure = localVer.getVersion(versionId)!.songStructure;
+          final version = localVer.getVersion(versionId);
+          if (version == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          songStructure = version.songStructure;
         }
 
         final filteredStructure = songStructure
@@ -598,6 +640,12 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
             )
             .toList();
 
+        final scroll = context.read<AutoScrollProvider>();
+
+        for (var i = 0; i < filteredStructure.length; i++) {
+          scroll.registerVerticalSection(itemIndex, i);
+        }
+
         return MasonryGridView.count(
           crossAxisCount: laySet.columnCount,
           mainAxisSpacing: 16,
@@ -607,6 +655,7 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
           shrinkWrap: true,
           itemBuilder: (context, index) {
             final trimmedCode = filteredStructure[index].trim();
+            final sectionKey = scroll.registerVerticalSection(itemIndex, index);
             final section = isCloud
                 ? () {
                     final sectionMap = cloudVer
@@ -620,24 +669,22 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
               return const SizedBox.shrink();
             }
 
+            scroll.setVerticalSectionLineCount(
+              itemIndex,
+              index,
+              section.contentText.split('\n').length,
+            );
+
             if (isAnnotation(trimmedCode)) {
               return AnnotationCard(
+                key: sectionKey,
                 sectionText: section.contentText,
                 sectionType: section.contentType,
               );
             }
-            // Create key if it doesn't exist
-            final scroll = context.read<AutoScrollProvider>();
-
-            if (scroll.currentSectionKeys[index] == null) {
-              scroll.itemSectionKeys[itemIndex]![index] = GlobalKey();
-            }
-            scroll.sectionLineCounts[index] = section.contentText
-                .split('\n')
-                .length;
 
             return SectionCard(
-              key: scroll.itemSectionKeys[itemIndex]![index],
+              key: sectionKey,
               sectionType: section.contentType,
               sectionCode: trimmedCode,
               sectionText: section.contentText,
@@ -650,61 +697,62 @@ class VertPlayScheduleState extends State<VertPlaySchedule>
   }
 
   Widget _buildHeader(dynamic versionID) {
-    final textTheme = Theme.of(context).textTheme;
+    return Consumer3<
+      LocalVersionProvider,
+      CloudVersionProvider,
+      CipherProvider
+    >(
+      builder: (context, localVer, cloudVer, ciph, child) {
+        final textTheme = Theme.of(context).textTheme;
 
-    final cipherProvider = context.read<CipherProvider>();
-    final localVersionProvider = context.read<LocalVersionProvider>();
-    final cloudVersionProvider = context.read<CloudVersionProvider>();
+        String title;
+        String key;
+        int bpm;
+        Duration duration;
 
-    String title;
-    String key;
-    int bpm;
-    Duration duration;
+        if (isCloud) {
+          final version = cloudVer.getVersion(versionID);
+          if (version == null) return const LinearProgressIndicator();
+          title = version.title;
+          key = version.transposedKey ?? version.originalKey;
+          bpm = version.bpm;
+          duration = Duration(milliseconds: version.duration);
+        } else {
+          final version = localVer.getVersion(versionID);
+          if (version == null) return const LinearProgressIndicator();
+          final cipher = ciph.getCipher(version.cipherId);
+          if (cipher == null) return const LinearProgressIndicator();
+          title = cipher.title;
+          key = version.transposedKey ?? cipher.musicKey;
+          bpm = version.bpm;
+          duration = version.duration;
+        }
 
-    (title, key, bpm, duration) = isCloud
-        ? () {
-            final version = cloudVersionProvider.getVersion(versionID)!;
-            return (
-              version.title,
-              version.transposedKey ?? version.originalKey,
-              version.bpm,
-              Duration(milliseconds: version.duration),
-            );
-          }()
-        : () {
-            final version = localVersionProvider.getVersion(versionID)!;
-            final cipher = cipherProvider.getCipher(version.cipherId);
-            return (
-              cipher?.title ?? '',
-              version.transposedKey ?? cipher?.musicKey ?? '',
-              version.bpm,
-              version.duration,
-            );
-          }();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 4,
-      children: [
-        Text(title, style: textTheme.titleMedium),
-        Row(
-          spacing: 16.0,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 4,
           children: [
-            Text(
-              AppLocalizations.of(context)!.keyWithPlaceholder(key),
-              style: textTheme.bodyMedium,
-            ),
-            Text(
-              AppLocalizations.of(context)!.bpmWithPlaceholder(bpm),
-              style: textTheme.bodyMedium,
-            ),
-            Text(
-              '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(duration)}',
-              style: textTheme.bodyMedium,
+            Text(title, style: textTheme.titleMedium),
+            Row(
+              spacing: 16.0,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.keyWithPlaceholder(key),
+                  style: textTheme.bodyMedium,
+                ),
+                Text(
+                  AppLocalizations.of(context)!.bpmWithPlaceholder(bpm),
+                  style: textTheme.bodyMedium,
+                ),
+                Text(
+                  '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(duration)}',
+                  style: textTheme.bodyMedium,
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }

@@ -3,43 +3,46 @@ import 'dart:async';
 import 'package:cordis/services/settings_service.dart';
 import 'package:flutter/material.dart';
 
+enum AutoScrollMode { tab, vertical }
+
 class AutoScrollProvider extends ChangeNotifier {
   AutoScrollProvider() {
     _loadSettings();
   }
-  bool scrollModeEnabled = false;
-  double scrollSpeed = 1.0; // 0.5 = slow, 1 = normal, 1.5 = fast
+
+  double scrollSpeed = 1.0;
+  static const int _millisecondsPerLine = 1500;
 
   bool isAutoScrolling = false;
+  bool scrollModeEnabled = false;
+  AutoScrollMode _mode = AutoScrollMode.tab;
+  int _activeVerticalItemIndex = 0;
 
-  static const int _millisecondsPerLine = 1500; // Base timing: 1000ms per line
+  late final ValueNotifier<int> currentSectionIndex = ValueNotifier(0);
 
-  late final ValueNotifier<int> currentSectionIndex = ValueNotifier(
-    0,
-  ); // 0-based index of current section
+  Map<int, GlobalKey> get currentItemSectionKeys =>
+      _vertSectionKeys[_activeVerticalItemIndex] ?? {};
 
-  late final ValueNotifier<int> currentItemIndex = ValueNotifier(
-    0,
-  ); // 0-based index of current item for vert play
-
-  int get _totalSections => sectionKeys.length;
-
-   Map<int, GlobalKey> get currentSectionKeys =>
-      itemSectionKeys[currentItemIndex.value] ?? {};
+  int get _tabSectionCount => _tabSectionKeys.length;
+  int get _verticalSectionCount => currentItemSectionKeys.length;
+  bool get isVerticalMode => _mode == AutoScrollMode.vertical;
 
   Timer? autoScrollTimer;
-  Timer? _updateTimer; // Separate timer for UI updates
+  Timer? _updateTimer;
   DateTime? _timerStartTime;
 
-  Map<int, GlobalKey> sectionKeys = {}; // Maps section index to its GlobalKey
-  Map<int, Map<int, GlobalKey>> itemSectionKeys = {}; // Maps item index, Section index to its GlobalKey
-  Map<int, int> sectionLineCounts = {}; // Maps section index to its number of lines
+  final Map<int, GlobalKey> _tabSectionKeys = {};
+  final Map<int, GlobalKey> _verticalItemKeys = {};
+  final Map<int, Map<int, GlobalKey>> _vertSectionKeys = {};
+
+  final Map<int, int> _tabSectionLineCount = {};
+  final Map<int, Map<int, int>> _vertSectionLineCount = {};
 
   // ===== SETTINGS METHODS =====
   /// Gets settings from SettingsService and updates provider state
   Future<void> _loadSettings() async {
     currentSectionIndex.value = 0;
-    currentItemIndex.value = 0;
+    _activeVerticalItemIndex = 0;
     scrollModeEnabled = SettingsService.getAutoScrollEnabled();
     scrollSpeed = SettingsService.getAutoScrollSpeed();
     notifyListeners();
@@ -54,19 +57,73 @@ class AutoScrollProvider extends ChangeNotifier {
 
   void toggleScrollMode() {
     scrollModeEnabled = !scrollModeEnabled;
-    isAutoScrolling = false; // Stop scrolling when toggling mode
+    stopAutoScroll();
     SettingsService.setAutoScrollEnabled(scrollModeEnabled);
     notifyListeners();
   }
 
+  void setPlayMode({required bool isVertPlay}) {
+    final nextMode = isVertPlay ? AutoScrollMode.vertical : AutoScrollMode.tab;
+    if (_mode == nextMode) return;
+
+    stopAutoScroll();
+    _mode = nextMode;
+    currentSectionIndex.value = 0;
+    _activeVerticalItemIndex = 0;
+    notifyListeners();
+  }
+
+  void setActiveItemIndex(int index) {
+    if (_activeVerticalItemIndex == index) return;
+
+    _activeVerticalItemIndex = index;
+    final sectionCount = _verticalSectionCount;
+    if (currentSectionIndex.value >= sectionCount) {
+      currentSectionIndex.value = 0;
+    }
+  }
+
+  GlobalKey registerTabSection(int index) {
+    return _tabSectionKeys.putIfAbsent(index, GlobalKey.new);
+  }
+
+  void setTabSectionLineCount(int index, int lineCount) {
+    _tabSectionLineCount[index] = lineCount;
+  }
+
+  GlobalKey registerVerticalItem(int itemIndex) {
+    return _verticalItemKeys.putIfAbsent(itemIndex, GlobalKey.new);
+  }
+
+  GlobalKey registerVerticalSection(int itemIndex, int sectionIndex) {
+    final itemSections = _vertSectionKeys.putIfAbsent(itemIndex, () => {});
+    return itemSections.putIfAbsent(sectionIndex, GlobalKey.new);
+  }
+
+  void setVerticalSectionLineCount(
+    int itemIndex,
+    int sectionIndex,
+    int lineCount,
+  ) {
+    final itemLineCounts = _vertSectionLineCount.putIfAbsent(
+      itemIndex,
+      () => {},
+    );
+    itemLineCounts[sectionIndex] = lineCount;
+  }
+
   // ===== AUTO SCROLL METHODS =====
   /// Toggles auto-scroll on/off and starts/stops timer accordingly
-  void toggleAutoScrollTabs() {
+  void toggleAutoScroll() {
     if (!scrollModeEnabled || isAutoScrolling) {
       stopAutoScroll();
     } else {
-      startAutoScrollTabs();
+      startAutoScroll();
     }
+  }
+
+  void toggleAutoScrollTabs() {
+    toggleAutoScroll();
   }
 
   void stopAutoScroll() {
@@ -81,30 +138,32 @@ class AutoScrollProvider extends ChangeNotifier {
 
   /// Starts the auto-scroll timer
   /// Which scrolls through sections at intervals based on line count and scrollSpeed
-  void startAutoScrollTabs() {
-    if (!scrollModeEnabled) return; // Scroll mode must be enabled
-    if (isAutoScrolling) return; // Already scrolling
+  void startAutoScroll() {
+    if (!scrollModeEnabled) return;
+    if (isAutoScrolling) return;
+    if (_activeSectionCount == 0) return;
+
     isAutoScrolling = true;
     notifyListeners();
-    if (sectionKeys.isEmpty) return; // No sections available
 
-    // Start update timer to refresh UI with new progress value (60fps)
     _updateTimer?.cancel();
     _updateTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
       notifyListeners();
     });
 
-    // Schedule first section scroll with its line-count-based duration
     _scheduleNextSectionScroll();
+  }
+
+  void startAutoScrollTabs() {
+    startAutoScroll();
   }
 
   /// Schedules the next section scroll based on current section's line count
   /// Uses a single-shot timer that recalculates duration for each section
   void _scheduleNextSectionScroll() {
-    if (sectionKeys.isEmpty || !isAutoScrolling) return;
+    if (_activeSectionCount == 0 || !isAutoScrolling) return;
 
-    // Calculate duration for current section based on its line count
-    final lineCount = sectionLineCounts[currentSectionIndex.value];
+    final lineCount = _activeLineCounts[currentSectionIndex.value];
     if (lineCount == null || lineCount <= 0) return;
 
     final durationPerSection = Duration(
@@ -116,16 +175,19 @@ class AutoScrollProvider extends ChangeNotifier {
     // Cancel existing timer and schedule next section scroll
     autoScrollTimer?.cancel();
     autoScrollTimer = Timer(durationPerSection, () {
-      if (sectionKeys.isEmpty || !isAutoScrolling) return;
-
-      debugPrint(
-        'Scrolling to ${currentSectionIndex.value + 1} / $_totalSections',
-      );
+      if (_activeSectionCount == 0 || !isAutoScrolling) return;
 
       // Move to next section
-      if (currentSectionIndex.value < _totalSections - 1) {
+      if (currentSectionIndex.value < _activeSectionCount - 1) {
         currentSectionIndex.value++;
-        scrollToSectionTabs(currentSectionIndex.value);
+        if (isVerticalMode) {
+          scrollToItemSection(
+            itemIndex: _activeVerticalItemIndex,
+            sectionIndex: currentSectionIndex.value,
+          );
+        } else {
+          scrollToSectionTabs(currentSectionIndex.value);
+        }
         _scheduleNextSectionScroll(); // Schedule next with its line count
       } else {
         // Stop at the end
@@ -136,9 +198,9 @@ class AutoScrollProvider extends ChangeNotifier {
 
   /// Scrolls to the section at the given index using its GlobalKey
   void scrollToSectionTabs(int index) {
-    if (index >= _totalSections) return;
+    if (index >= _tabSectionCount) return;
 
-    final sectionKey = sectionKeys[index];
+    final sectionKey = _tabSectionKeys[index];
     final context = sectionKey!.currentContext;
 
     if (context != null && context.mounted) {
@@ -153,13 +215,15 @@ class AutoScrollProvider extends ChangeNotifier {
     currentSectionIndex.value = index;
   }
 
-
   /// Scrolls to the section at the given indexes using its GlobalKey
-  void scrollToItemSection(int itemIndex, int index) {
-    if (itemSectionKeys[itemIndex] == null) return;
-    if (itemSectionKeys[itemIndex]![index] == null) return;
+  void scrollToItemSection({
+    required int itemIndex,
+    required int sectionIndex,
+  }) {
+    if (_vertSectionKeys[itemIndex] == null) return;
+    if (_vertSectionKeys[itemIndex]![sectionIndex] == null) return;
 
-    final sectionKey = itemSectionKeys[itemIndex]![index];
+    final sectionKey = _vertSectionKeys[itemIndex]![sectionIndex];
     final context = sectionKey!.currentContext;
 
     if (context != null && context.mounted) {
@@ -171,8 +235,8 @@ class AutoScrollProvider extends ChangeNotifier {
       );
     }
 
-    currentItemIndex.value = itemIndex;
-    currentSectionIndex.value = index;
+    _activeVerticalItemIndex = itemIndex;
+    currentSectionIndex.value = sectionIndex;
   }
 
   // ===== HELPER METHODS =====
@@ -184,8 +248,13 @@ class AutoScrollProvider extends ChangeNotifier {
       return 0.0;
     }
 
+    final lineCount = _activeLineCounts[currentSectionIndex.value];
+    if (lineCount == null || lineCount <= 0) {
+      return 0.0;
+    }
+
     final durationPerSection = Duration(
-      milliseconds: (_millisecondsPerLine * sectionLineCounts[currentSectionIndex.value]! ~/ scrollSpeed).toInt(),
+      milliseconds: (_millisecondsPerLine * lineCount ~/ scrollSpeed).toInt(),
     );
 
     // Calculate elapsed time since timer started
@@ -198,52 +267,115 @@ class AutoScrollProvider extends ChangeNotifier {
   }
 
   /// Calculates the current section index based on the scroll offset
-  void calcCurrentIndex(double viewportHeight) {
-    for (final entry in sectionKeys.entries) {
-      final sectionContext = entry.value.currentContext;
-      if (sectionContext == null) continue;
+  int? syncTabSectionFromViewport(double viewportHeight) {
+    final bestMatch = _findBestSectionIndex(
+      sectionKeys: _tabSectionKeys,
+      viewportHeight: viewportHeight,
+      minFactor: 0.10,
+      maxFactor: 0.30,
+      targetFactor: 0.20,
+    );
 
-      final box = sectionContext.findRenderObject() as RenderBox?;
-      if (box == null) continue;
+    if (bestMatch == null) return null;
 
-      // Get section's position relative to the scrollable
-      final sectionTop = box.localToGlobal(Offset.zero).dy;
-
-      // Check if section is in viewport (accounting for some buffer)
-      if (sectionTop > viewportHeight * 0.10 &&
-          sectionTop < viewportHeight * 0.30) {
-        currentSectionIndex.value = entry.key;
-      }
-    }
+    currentSectionIndex.value = bestMatch;
+    return bestMatch;
   }
 
   /// Calculates the current section index based on the scroll offset VERT PLAY
-  void calcCurrentItemSection(double viewportHeight) {
-    for (final entry in itemSectionKeys.entries) {
-      for (final subEntry in entry.value.entries) {
-        final sectionContext = subEntry.value.currentContext;
+  ({int itemIndex, int sectionIndex})? syncVerticalSectionFromViewport(
+    double viewportHeight,
+  ) {
+    ({int itemIndex, int sectionIndex, double distance})? bestMatch;
+
+    for (final itemEntry in _vertSectionKeys.entries) {
+      for (final sectionEntry in itemEntry.value.entries) {
+        final sectionContext = sectionEntry.value.currentContext;
         if (sectionContext == null) continue;
 
         final box = sectionContext.findRenderObject() as RenderBox?;
         if (box == null) continue;
 
-        // Get section's position relative to the scrollable
         final sectionTop = box.localToGlobal(Offset.zero).dy;
+        if (sectionTop < viewportHeight * 0.15 ||
+            sectionTop > viewportHeight * 0.30) {
+          continue;
+        }
 
-        // Check if section is in viewport (accounting for some buffer)
-        if (sectionTop > viewportHeight * 0.15 &&
-            sectionTop < viewportHeight * 0.30) {
-          currentSectionIndex.value = subEntry.key;
+        final distance = (sectionTop - viewportHeight * 0.20).abs();
+        if (bestMatch == null || distance < bestMatch.distance) {
+          bestMatch = (
+            itemIndex: itemEntry.key,
+            sectionIndex: sectionEntry.key,
+            distance: distance,
+          );
         }
       }
     }
+
+    if (bestMatch == null) return null;
+
+    _activeVerticalItemIndex = bestMatch.itemIndex;
+    currentSectionIndex.value = bestMatch.sectionIndex;
+    return (
+      itemIndex: bestMatch.itemIndex,
+      sectionIndex: bestMatch.sectionIndex,
+    );
   }
 
+  int? syncVerticalItemFromViewport(double viewportHeight) {
+    ({int itemIndex, double distance})? bestMatch;
+
+    for (final entry in _verticalItemKeys.entries) {
+      final itemContext = entry.value.currentContext;
+      if (itemContext == null) continue;
+
+      final box = itemContext.findRenderObject() as RenderBox?;
+      if (box == null) continue;
+
+      final itemTop = box.localToGlobal(Offset.zero).dy;
+      final itemBottom = itemTop + box.size.height;
+
+      if (itemTop > viewportHeight * 0.10 && itemTop < viewportHeight * 0.30) {
+        final distance = (itemTop - viewportHeight * 0.20).abs();
+        if (bestMatch == null || distance < bestMatch.distance) {
+          bestMatch = (itemIndex: entry.key, distance: distance);
+        }
+      }
+
+      if (itemBottom > viewportHeight * 0.40 &&
+          itemBottom < viewportHeight * 0.60) {
+        final distance = (itemBottom - viewportHeight * 0.50).abs();
+        if (bestMatch == null || distance < bestMatch.distance) {
+          bestMatch = (itemIndex: entry.key, distance: distance);
+        }
+      }
+    }
+
+    if (bestMatch == null) return null;
+
+    _activeVerticalItemIndex = bestMatch.itemIndex;
+    return bestMatch.itemIndex;
+  }
+
+  Map<int, int> get _activeLineCounts => isVerticalMode
+      ? (_vertSectionLineCount[_activeVerticalItemIndex] ?? {})
+      : _tabSectionLineCount;
+
+  int get _activeSectionCount =>
+      isVerticalMode ? _verticalSectionCount : _tabSectionCount;
+
   /// Clears cache
-  void clearCache() {
-    sectionKeys.clear();
+  void clearCache({bool resetItemIndex = true}) {
+    _tabSectionKeys.clear();
+    _tabSectionLineCount.clear();
+    _verticalItemKeys.clear();
+    _vertSectionKeys.clear();
+    _vertSectionLineCount.clear();
     currentSectionIndex.value = 0;
-    currentItemIndex.value = 0;
+    if (resetItemIndex) {
+      _activeVerticalItemIndex = 0;
+    }
     _updateTimer?.cancel();
     _timerStartTime = null;
     autoScrollTimer?.cancel();
@@ -257,8 +389,38 @@ class AutoScrollProvider extends ChangeNotifier {
   void dispose() {
     autoScrollTimer?.cancel();
     currentSectionIndex.dispose();
-    currentItemIndex.dispose();
     _updateTimer?.cancel();
     super.dispose();
+  }
+
+  int? _findBestSectionIndex({
+    required Map<int, GlobalKey> sectionKeys,
+    required double viewportHeight,
+    required double minFactor,
+    required double maxFactor,
+    required double targetFactor,
+  }) {
+    ({int index, double distance})? bestMatch;
+
+    for (final entry in sectionKeys.entries) {
+      final sectionContext = entry.value.currentContext;
+      if (sectionContext == null) continue;
+
+      final box = sectionContext.findRenderObject() as RenderBox?;
+      if (box == null) continue;
+
+      final sectionTop = box.localToGlobal(Offset.zero).dy;
+      if (sectionTop < viewportHeight * minFactor ||
+          sectionTop > viewportHeight * maxFactor) {
+        continue;
+      }
+
+      final distance = (sectionTop - viewportHeight * targetFactor).abs();
+      if (bestMatch == null || distance < bestMatch.distance) {
+        bestMatch = (index: entry.key, distance: distance);
+      }
+    }
+
+    return bestMatch?.index;
   }
 }

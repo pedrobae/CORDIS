@@ -1,6 +1,6 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/auto_scroll_provider.dart';
-import 'package:cordis/screens/schedule/play.dart';
+import 'package:cordis/screens/schedule/tab_play.dart';
 import 'package:cordis/screens/schedule/vert_play.dart';
 import 'package:cordis/widgets/common/cloud_download_indicator.dart';
 import 'package:cordis/widgets/schedule/status_chip.dart';

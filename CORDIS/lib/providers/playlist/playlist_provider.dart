@@ -58,12 +58,11 @@ class PlaylistProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      int id = await _playlistRepository.insertPlaylist(
-        Playlist(name: playlistName, id: -1, createdBy: userLocalId),
-      );
+      final playlist = Playlist(name: playlistName, id: -1, createdBy: userLocalId);
+      int id = await _playlistRepository.insertPlaylist(playlist);
 
       // Add the created playlist with new ID directly to cache
-      _playlists[id] = _playlists[id]!.copyWith(id: id);
+      _playlists[id] = playlist.copyWith(id: id);
     } catch (e) {
       _error = e.toString();
     } finally {

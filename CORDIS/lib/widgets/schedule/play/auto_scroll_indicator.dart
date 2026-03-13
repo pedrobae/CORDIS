@@ -13,7 +13,7 @@ class AutoScrollIndicator extends StatelessWidget {
       builder: (context, scrollProvider, child) {
         return GestureDetector(
           onTap: () {
-            scrollProvider.toggleAutoScrollTabs();
+            scrollProvider.toggleAutoScroll();
           },
           child: Container(
             decoration: BoxDecoration(

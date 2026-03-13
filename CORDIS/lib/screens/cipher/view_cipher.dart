@@ -172,15 +172,11 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
         continue;
       }
 
-      GlobalKey key;
-      if (scroll.sectionKeys[index] == null) {
-        key = GlobalKey();
-        scroll.sectionKeys[index] = key;
-      } else {
-        key = scroll.sectionKeys[index]!;
-      }
-
-      scroll.sectionLineCounts[index] = section.contentText.split('\n').length;
+      final key = scroll.registerTabSection(index);
+      scroll.setTabSectionLineCount(
+        index,
+        section.contentText.split('\n').length,
+      );
 
       if (isAnnotation(trimmedCode)) {
         sectionCardList.add(
