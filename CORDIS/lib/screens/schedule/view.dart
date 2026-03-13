@@ -14,6 +14,7 @@ import 'package:cordis/providers/schedule/local_schedule_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/playlist/view_playlist.dart';
 import 'package:cordis/screens/schedule/tab_play.dart';
+import 'package:cordis/screens/schedule/vert_play.dart';
 import 'package:cordis/utils/date_utils.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/schedule/create_edit/edit_details.dart';
@@ -168,6 +169,14 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
           onPressed: () {
             nav.push(
               () => PlayScheduleScreen(scheduleId: widget.scheduleId),
+              onPopCallback: () {
+                context.read<AutoScrollProvider>().clearCache();
+              },
+            );
+          },
+          onLongPress: () {
+            nav.push(
+              () => VertPlaySchedule(scheduleId: widget.scheduleId),
               onPopCallback: () {
                 context.read<AutoScrollProvider>().clearCache();
               },

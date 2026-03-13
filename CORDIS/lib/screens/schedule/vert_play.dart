@@ -255,6 +255,7 @@ class VertPlayScheduleState extends State<VertPlaySchedule> {
   Widget _buildListView() {
     final scroll = context.read<AutoScrollProvider>();
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Selector<PlayScheduleStateProvider, (int, bool)>(
       selector: (_, state) => (state.itemCount, state.isLoading),
@@ -281,7 +282,6 @@ class VertPlayScheduleState extends State<VertPlaySchedule> {
             case PlaylistItemType.version:
               return Container(
                 key: itemKey,
-                margin: const EdgeInsets.only(bottom: 16),
                 child: Column(
                   spacing: 8,
                   children: [
@@ -303,10 +303,68 @@ class VertPlayScheduleState extends State<VertPlaySchedule> {
                 ),
               );
             case PlaylistItemType.flowItem:
-              // TODO-: Implement flow item UI
-              return Container(key: itemKey);
+              return Container(
+                key: itemKey,
+                child: Consumer2<FlowItemProvider, LayoutSettingsProvider>(
+                  builder: (context, flow, laySet, child) {
+                    final flowItem = flow.getFlowItem(item.contentId!);
+
+                    if (flowItem == null) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+
+                    return Column(
+                      spacing: 8,
+                      children: [
+                        // HEADER
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            spacing: 4,
+                            children: [
+                              Text(
+                                flowItem.title,
+                                style: textTheme.titleMedium,
+                              ),
+                              Text(
+                                '${AppLocalizations.of(context)!.estimatedTime}: ${DateTimeUtils.formatDuration(flowItem.duration)}',
+                                style: textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.all(8),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(0),
+                            border: Border.fromBorderSide(
+                              BorderSide(
+                                color: colorScheme.surfaceContainerLow,
+                                width: 1.2,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            flowItem.contentText,
+                            style: textTheme.bodyMedium?.copyWith(
+                              height: 1.4,
+                              fontFamily: laySet.lyricTextStyle.fontFamily,
+                            ),
+                          ),
+                        ),
+                        Divider(color: colorScheme.primary)
+                      ],
+                    );
+                  },
+                ),
+              );
           }
         });
+
+        items.add(const SizedBox(height: 200));
 
         return SingleChildScrollView(
           controller: _scrollController,
