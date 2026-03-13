@@ -116,6 +116,12 @@ abstract class AppLocalizations {
   /// **'Essa versão do aplicativo não é mais suportada.\nPor favor, atualize para a versão mais recente para continuar usando o CORDIS.'**
   String get appVersionNotSupported;
 
+  /// Message displayed when account registration is disabled
+  ///
+  /// In pt, this message translates to:
+  /// **'Novos cadastros estão desativados no momento.'**
+  String get registrationDisabled;
+
   /// Company name
   ///
   /// In pt, this message translates to:

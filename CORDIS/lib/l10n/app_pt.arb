@@ -7,6 +7,8 @@
   "@appVersion": {"description": "App version label", "placeholders": {"version": {}}},
   "appVersionNotSupported": "Essa versão do aplicativo não é mais suportada.\nPor favor, atualize para a versão mais recente para continuar usando o CORDIS.",
   "@appVersionNotSupported": {"description": "Message displayed when the app version is no longer supported"},
+  "registrationDisabled": "Novos cadastros estão desativados no momento.",
+  "@registrationDisabled": {"description": "Message displayed when account registration is disabled"},
 
   "newHeart" : "New Heart Music Ministries",
   "@newHeart" : {"description": "Company name"},

@@ -1,5 +1,6 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/screens/user/login_screen.dart';
+import 'package:cordis/services/remote_config_service.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
 import 'package:flutter/material.dart';
@@ -73,6 +74,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!RemoteConfigService.isRegistrationEnabled) {
+      return _buildRegistrationDisabledScreen();
+    }
+
     return Scaffold(
       body: Consumer<MyAuthProvider>(
         builder: (context, auth, child) => Center(
@@ -103,6 +108,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegistrationDisabledScreen() {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.person_off, size: 56, color: colorScheme.primary),
+              const SizedBox(height: 20),
+              Text(
+                AppLocalizations.of(context)!.registrationDisabled,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              FilledTextButton(
+                text: AppLocalizations.of(context)!.login,
+                isDark: true,
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return const LoginScreen();
+                      },
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),
