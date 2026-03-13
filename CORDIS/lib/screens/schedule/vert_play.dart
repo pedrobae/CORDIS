@@ -147,6 +147,8 @@ class VertPlayScheduleState extends State<VertPlaySchedule> {
       duration: const Duration(milliseconds: 1),
       curve: Curves.linear,
     );
+
+    _scroll.stopAutoScroll();
   }
 
   /// Load only the current playlist structure without full content
