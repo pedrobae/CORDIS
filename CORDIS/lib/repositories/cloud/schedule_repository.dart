@@ -9,6 +9,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
 class CloudScheduleRepository {
+  static const String _functionsRegion = 'us-central1';
+
   final FirestoreService _firestoreService = FirestoreService();
   final GuardHelper _guardHelper = GuardHelper();
 
@@ -137,7 +139,9 @@ class CloudScheduleRepository {
     return await _withErrorHandling('join_via_share_code', () async {
       await _guardHelper.requireAuth();
 
-      final functions = FirebaseFunctions.instance;
+      final functions = FirebaseFunctions.instanceFor(
+        region: _functionsRegion,
+      );
 
       final result = await functions.httpsCallable('joinScheduleWithCode').call(
         <String, dynamic>{'shareCode': shareCode},

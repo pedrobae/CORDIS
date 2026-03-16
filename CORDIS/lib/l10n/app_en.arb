@@ -177,8 +177,8 @@
 
   "styleSettings": "Style Settings",
   "@styleSettings": {"description": "Title for style settings section"},
-  "numberOfColumns": "Number of Columns:",
-  "@numberOfColumns": {"description": "Label for number of columns setting"},
+  "scrollDirection": "Scroll Direction:",
+  "@scrollDirection": {"description": "Label for scroll direction setting"},
   "chordColor": "Chord Color:",
   "@chordColor": {"description": "Label for chord color setting"},
   "contentFilters": "Content Filters",

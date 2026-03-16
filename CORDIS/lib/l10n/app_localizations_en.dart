@@ -272,7 +272,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleSettings => 'Style Settings';
 
   @override
-  String get numberOfColumns => 'Number of Columns:';
+  String get scrollDirection => 'Scroll Direction:';
 
   @override
   String get chordColor => 'Chord Color:';

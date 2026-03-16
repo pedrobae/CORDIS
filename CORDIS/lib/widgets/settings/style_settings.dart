@@ -38,31 +38,29 @@ class StyleSettings extends StatelessWidget {
                   ),
                 ],
               ),
-              // COLUMN SETTINGS
+              // SCROLL DIRECTION SETTINGS
               _buildOption(
                 context,
                 child: Row(
                   children: [
                     Expanded(
                       child: Text(
-                        AppLocalizations.of(context)!.numberOfColumns,
+                        AppLocalizations.of(context)!.scrollDirection,
                         style: textTheme.labelLarge,
                       ),
                     ),
-                    for (int i = 1; i <= 3; i++)
-                      IconButton(
-                        icon: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: List.generate(
-                            i,
-                            (j) => const Icon(Icons.view_column, size: 18),
-                          ),
-                        ),
-                        color: settings.columnCount == i
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).iconTheme.color,
-                        onPressed: () => settings.setColumnCount(i),
+                    Switch(
+                      value: settings.scrollDirection == Axis.vertical,
+                      onChanged: (_) {
+                        settings.toggleAxisDirection();
+                      },
+                      thumbIcon: WidgetStatePropertyAll(
+                        settings.scrollDirection == Axis.vertical
+                            ? const Icon(Icons.swap_vert)
+                            : const Icon(Icons.swap_horiz),
                       ),
+                      inactiveThumbColor: Theme.of(context).iconTheme.color,
+                    ),
                   ],
                 ),
               ),
@@ -137,21 +135,25 @@ class StyleSettings extends StatelessWidget {
                   ],
                 ),
               ),
+
               /// COMPACT VIEW
-              _buildOption(context, child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      AppLocalizations.of(context)!.compactView,
-                      style: textTheme.labelLarge,
+              _buildOption(
+                context,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        AppLocalizations.of(context)!.compactView,
+                        style: textTheme.labelLarge,
+                      ),
                     ),
-                  ),
-                  Switch(
-                    value: !settings.showSectionHeaders,
-                    onChanged: (_) => settings.toggleSectionHeaders(),
-                  ),
-                ],
-              )),
+                    Switch(
+                      value: !settings.showSectionHeaders,
+                      onChanged: (_) => settings.toggleSectionHeaders(),
+                    ),
+                  ],
+                ),
+              ),
               SizedBox(),
             ],
           ),

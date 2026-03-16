@@ -22,6 +22,8 @@ class EmailStrings {
 }
 
 class EmailProvider extends ChangeNotifier {
+  static const String _functionsRegion = 'us-central1';
+
   // State management
   String? _error;
   bool _isSending = false;
@@ -46,7 +48,9 @@ class EmailProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      final functions = FirebaseFunctions.instance;
+      final functions = FirebaseFunctions.instanceFor(
+        region: _functionsRegion,
+      );
       final sendInviteEmail = functions.httpsCallable('sendInviteEmail');
 
       int successCount = 0;

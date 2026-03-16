@@ -186,8 +186,8 @@
 
   "styleSettings": "Configurações de Estilo",
   "@styleSettings": {"description": "Title for style settings section"},
-  "numberOfColumns": "Número de Colunas:",
-  "@numberOfColumns": {"description": "Number of columns field label"},
+  "scrollDirection": "Direção de Rolagem:",
+  "@scrollDirection": {"description": "Label for scroll direction setting"},
   "chordColor": "Cor do Acorde:",
   "@chordColor": {"description": "Label for chord color setting"},
   "contentFilters": "Filtros de Conteúdo",

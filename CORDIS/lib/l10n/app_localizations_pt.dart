@@ -275,7 +275,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get styleSettings => 'Configurações de Estilo';
 
   @override
-  String get numberOfColumns => 'Número de Colunas:';
+  String get scrollDirection => 'Direção de Rolagem:';
 
   @override
   String get chordColor => 'Cor do Acorde:';

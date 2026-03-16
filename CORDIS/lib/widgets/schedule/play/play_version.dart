@@ -238,7 +238,7 @@ class _PlayVersionState extends State<PlayVersion> {
     List<String> filteredStructure,
   ) {
     return MasonryGridView.count(
-      crossAxisCount: layoutProvider.columnCount,
+      crossAxisCount: 1, // TODO-updateToNewScroll: laySet.scrollDirection == Axis.vertical ? 1 : 2,
       mainAxisSpacing: 16,
       crossAxisSpacing: 16,
       itemCount: filteredStructure.length,

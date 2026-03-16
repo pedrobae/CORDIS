@@ -12,8 +12,8 @@ class SettingsService {
   // Layout Settings Keys
   static const String _keyFontSize = 'layout_font_size';
   static const String _keyFontFamily = 'layout_font_family';
-  static const String _keyColumnCount = 'layout_column_count';
   static const String _keyShowSectionHeaders = 'layout_show_section_headers';
+  static const String _keyScrollDirection = 'layout_scroll_direction';
 
   // Filter Settings Keys
   static const String _keyShowChords = 'layout_show_chords';
@@ -128,14 +128,18 @@ class SettingsService {
     return _preferences.getString(_keyFontFamily) ?? 'OpenSans';
   }
 
-  /// Save column count
-  static Future<void> setColumnCount(int count) async {
-    await _preferences.setInt(_keyColumnCount, count);
+  /// Save scroll direction
+  static Future<void> setScrollDirection(Axis direction) async {
+    await _preferences.setString(_keyScrollDirection, direction.toString());
   }
 
-  /// Get column count
-  static int getColumnCount() {
-    return _preferences.getInt(_keyColumnCount) ?? 1;
+  /// Get scroll direction
+  static Axis getScrollDirection() {
+    final value = _preferences.getString(_keyScrollDirection) ?? Axis.vertical.toString();
+    return Axis.values.firstWhere(
+      (axis) => axis.toString() == value,
+      orElse: () => Axis.vertical,
+    );
   }
 
   static Future<void> setShowSectionHeaders(bool show) async {

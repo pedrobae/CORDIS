@@ -584,11 +584,11 @@ abstract class AppLocalizations {
   /// **'Configurações de Estilo'**
   String get styleSettings;
 
-  /// Number of columns field label
+  /// Label for scroll direction setting
   ///
   /// In pt, this message translates to:
-  /// **'Número de Colunas:'**
-  String get numberOfColumns;
+  /// **'Direção de Rolagem:'**
+  String get scrollDirection;
 
   /// Label for chord color setting
   ///

@@ -7,8 +7,8 @@ enum LayoutFilter { annotations, transitions }
 class LayoutSettingsProvider extends ChangeNotifier {
   double fontSize = 16;
   String fontFamily = 'OpenSans';
-  int columnCount = 1;
   bool showSectionHeaders = true;
+  Axis scrollDirection = Axis.vertical;
 
   bool _showChords = true;
   bool _showLyrics = true;
@@ -31,7 +31,7 @@ class LayoutSettingsProvider extends ChangeNotifier {
   Future<void> loadSettings() async {
     fontSize = SettingsService.getFontSize();
     fontFamily = SettingsService.getFontFamily();
-    columnCount = SettingsService.getColumnCount();
+    scrollDirection = SettingsService.getScrollDirection();
     _showChords = SettingsService.getShowChords();
     _showLyrics = SettingsService.getShowLyrics();
     _showAnnotations = SettingsService.getShowNotes();
@@ -53,9 +53,9 @@ class LayoutSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setColumnCount(int count) {
-    columnCount = count;
-    SettingsService.setColumnCount(count);
+  void toggleAxisDirection() {
+    scrollDirection = scrollDirection == Axis.vertical ? Axis.horizontal : Axis.vertical;
+    SettingsService.setScrollDirection(scrollDirection);
     notifyListeners();
   }
 

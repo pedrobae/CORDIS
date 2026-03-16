@@ -707,7 +707,7 @@ class VertPlayScheduleState extends State<VertPlaySchedule> {
         }
 
         return MasonryGridView.count(
-          crossAxisCount: laySet.columnCount,
+          crossAxisCount: 1,// TODO-updateToNewScroll: laySet.scrollDirection == Axis.vertical ? 1 : 2,
           mainAxisSpacing: 16,
           crossAxisSpacing: 16,
           itemCount: filteredStructure.length,

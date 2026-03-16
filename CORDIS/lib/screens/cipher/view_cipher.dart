@@ -13,7 +13,6 @@ import 'package:cordis/widgets/ciphers/viewer/structure_list.dart';
 import 'package:cordis/widgets/settings/content_filters.dart';
 import 'package:cordis/widgets/settings/style_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/layout_settings_provider.dart';
@@ -105,23 +104,8 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 16,
           children: [
-            _buildActionBar(ciph, localVer),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Column(
-                    spacing: 16,
-                    children: [
-                      _buildHeaderSection(versionData),
-                      _buildSongStructureSection(),
-                      _buildSectionsGrid(filteredStructure),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            _buildActionBar(ciph, localVer, laySet),
+            _buildSectionsGrid(filteredStructure, versionData, laySet),
           ],
         );
       },
@@ -157,17 +141,15 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
 
   List<Widget> _buildSectionCards(
     List<String> filteredStructure,
-    SectionProvider se,
+    _VersionData versionData,
+    SectionProvider sect,
   ) {
-    final sectionCardList = <Widget>[];
+    final sectionCardList = <Widget>[_buildHeaderSection(versionData)];
 
     for (var (index, sectionCode) in filteredStructure.indexed) {
       final trimmedCode = sectionCode.trim();
-
       final scroll = context.read<AutoScrollProvider>();
-
-      final section = se.getSection(widget.versionID, trimmedCode);
-
+      final section = sect.getSection(widget.versionID, trimmedCode);
       if (section == null || section.contentText.isEmpty) {
         continue;
       }
@@ -202,33 +184,45 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
     return sectionCardList;
   }
 
-  Widget _buildActionBar(CipherProvider ciph, LocalVersionProvider localVer) {
+  Widget _buildActionBar(
+    CipherProvider ciph,
+    LocalVersionProvider localVer,
+    LayoutSettingsProvider laySet,
+  ) {
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
+      child: Column(
         children: [
-          if (widget.versionType == VersionType.local)
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => _navigateToEditScreen(),
-            ),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.text_fields),
-            onPressed: _showStyleSettings(),
+          Row(
+            children: [
+              if (isWideScreen)
+                Expanded(child: StructureList(versionId: widget.versionID)),
+
+              if (widget.versionType == VersionType.local) ...[
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => _navigateToEditScreen(),
+                ),
+              ],
+              IconButton(
+                icon: const Icon(Icons.text_fields),
+                onPressed: _showStyleSettings(),
+              ),
+              IconButton(
+                icon: const Icon(Icons.filter_alt),
+                onPressed: _showFilters(),
+              ),
+              const Transposer(),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () =>
+                    context.read<NavigationProvider>().attemptPop(context),
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.filter_alt),
-            onPressed: _showFilters(),
-          ),
-          const Spacer(),
-          const Transposer(),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () =>
-                context.read<NavigationProvider>().attemptPop(context),
-          ),
+          if (!isWideScreen) StructureList(versionId: widget.versionID),
         ],
       ),
     );
@@ -261,6 +255,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(versionData.title, style: textTheme.titleMedium),
         Text(
@@ -280,6 +275,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
   ) {
     return Row(
       spacing: 16.0,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           AppLocalizations.of(
@@ -309,42 +305,43 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
     );
   }
 
-  Widget _buildSongStructureSection() {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          AppLocalizations.of(context)!.songStructure,
-          style: textTheme.titleMedium,
-        ),
-        StructureList(versionId: widget.versionID),
-      ],
-    );
-  }
-
-  Widget _buildSectionsGrid(List<String> filteredStructure) {
-    final laySet = context.read<LayoutSettingsProvider>();
+  Widget _buildSectionsGrid(
+    List<String> filteredStructure,
+    _VersionData versionData,
+    LayoutSettingsProvider laySet,
+  ) {
     return Consumer<SectionProvider>(
       builder: (context, sect, child) {
         if (sect.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final sectionCardList = _buildSectionCards(filteredStructure, sect);
+        final sectionCardList = _buildSectionCards(
+          filteredStructure,
+          versionData,
+          sect,
+        );
 
-        return MasonryGridView.count(
-          crossAxisCount: laySet.columnCount,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          itemCount: sectionCardList.length,
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemBuilder: (context, index) => sectionCardList[index],
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: SingleChildScrollView(
+              scrollDirection: laySet.scrollDirection,
+              child: Wrap(
+                direction: _getOppositeAxis(laySet.scrollDirection),
+                spacing: 16,
+                runSpacing: 16,
+                children: sectionCardList,
+              ),
+            ),
+          ),
         );
       },
     );
+  }
+
+  Axis _getOppositeAxis(Axis axis) {
+    return axis == Axis.vertical ? Axis.horizontal : Axis.vertical;
   }
 
   Future<void> _loadData() async {
