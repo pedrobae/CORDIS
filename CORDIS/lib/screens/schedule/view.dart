@@ -7,6 +7,7 @@ import 'package:cordis/models/domain/playlist/flow_item.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/domain/schedule.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
+import 'package:flutter/services.dart';
 
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/auto_scroll_provider.dart';
@@ -171,11 +172,17 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
         ),
         IconButton(
           icon: Icon(Icons.play_circle, size: 32),
-          onPressed: () {
+          onPressed: () async {
+            await SystemChrome.setEnabledSystemUIMode(
+              SystemUiMode.immersiveSticky,
+            );
             nav.push(
-              () => VertPlaySchedule(scheduleId: widget.scheduleId),
-              onPopCallback: () {
+              () => PlaySchedule(scheduleId: widget.scheduleId),
+              onPopCallback: () async {
                 context.read<AutoScrollProvider>().clearCache();
+                await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.edgeToEdge,
+                );
               },
             );
           },

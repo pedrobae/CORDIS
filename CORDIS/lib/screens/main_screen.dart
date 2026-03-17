@@ -251,27 +251,29 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildBody(NavigationProvider nav) {
-    return Builder(
-      builder: (context) {
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 400),
-          transitionBuilder: (child, animation) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          layoutBuilder: (currentChild, previousChildren) {
-            return Stack(
-              children: <Widget>[
-                ...previousChildren,
-                currentChild ?? const SizedBox.shrink(),
-              ],
-            );
-          },
-          child: KeyedSubtree(
-            key: ValueKey(nav.currentRoute),
-            child: nav.buildCurrentScreen(context),
-          ),
-        );
-      },
+    return SafeArea(
+      child: Builder(
+        builder: (context) {
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            layoutBuilder: (currentChild, previousChildren) {
+              return Stack(
+                children: <Widget>[
+                  ...previousChildren,
+                  currentChild ?? const SizedBox.shrink(),
+                ],
+              );
+            },
+            child: KeyedSubtree(
+              key: ValueKey(nav.currentRoute),
+              child: nav.buildCurrentScreen(context),
+            ),
+          );
+        },
+      ),
     );
   }
 

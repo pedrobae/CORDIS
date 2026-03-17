@@ -3,6 +3,7 @@ import 'package:cordis/providers/auto_scroll_provider.dart';
 import 'package:cordis/screens/schedule/play.dart';
 import 'package:cordis/widgets/common/cloud_download_indicator.dart';
 import 'package:cordis/widgets/schedule/status_chip.dart';
+import 'package:flutter/services.dart';
 
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/user/my_auth_provider.dart';
@@ -186,11 +187,17 @@ class CloudScheduleCard extends StatelessWidget {
                         FilledTextButton(
                           isDark: true,
                           isDense: true,
-                          onPressed: () {
+                          onPressed: () async {
                             final scroll = context.read<AutoScrollProvider>();
+                            await SystemChrome.setEnabledSystemUIMode(
+                              SystemUiMode.immersiveSticky,
+                            );
                             navigationProvider.push(
-                              () => VertPlaySchedule(scheduleId: scheduleId),
-                              onPopCallback: () {
+                              () => PlaySchedule(scheduleId: scheduleId),
+                              onPopCallback: () async {
+                                await SystemChrome.setEnabledSystemUIMode(
+                                  SystemUiMode.edgeToEdge,
+                                );
                                 scroll.clearCache();
                               },
                             );

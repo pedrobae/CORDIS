@@ -29,16 +29,16 @@ import 'package:cordis/widgets/settings/auto_scroll_settings.dart';
 import 'package:cordis/widgets/settings/content_filters.dart';
 import 'package:cordis/widgets/settings/style_settings.dart';
 
-class VertPlaySchedule extends StatefulWidget {
+class PlaySchedule extends StatefulWidget {
   final dynamic scheduleId;
 
-  const VertPlaySchedule({super.key, required this.scheduleId});
+  const PlaySchedule({super.key, required this.scheduleId});
 
   @override
-  State<VertPlaySchedule> createState() => VertPlayScheduleState();
+  State<PlaySchedule> createState() => PlayScheduleState();
 }
 
-class VertPlayScheduleState extends State<VertPlaySchedule> {
+class PlayScheduleState extends State<PlaySchedule> {
   late final bool isCloud = widget.scheduleId is String;
   late final bool isWide = MediaQuery.of(context).size.width > 600;
 
