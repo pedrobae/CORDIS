@@ -99,7 +99,7 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, _) async {
-            if (didPop) return;
+            if (didPop || nav.shouldDeferSystemBack) return;
             await nav.attemptPop(context);
           },
           child: Scaffold(

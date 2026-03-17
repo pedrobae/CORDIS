@@ -84,6 +84,7 @@ class SideMenu extends StatelessWidget {
                         showBottomNavBar: true,
                         showAppBar: true,
                         showDrawerIcon: true,
+                        handlesSystemBack: true,
                       );
                     },
                     trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16),

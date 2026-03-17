@@ -12,6 +12,8 @@ class WebViewScreen extends StatefulWidget {
 
 class _WebViewScreenState extends State<WebViewScreen> {
   late WebViewController _controller;
+  bool _isLoading = false;
+  WebResourceError? _webResourceError;
 
   @override
   void initState() {
@@ -25,13 +27,20 @@ class _WebViewScreenState extends State<WebViewScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (String url) {
-            // Page started loading
+            setState(() {
+              _isLoading = true;
+            });
           },
           onPageFinished: (String url) {
-            // Page finished loading
+            setState(() {
+              _isLoading = false;
+            });
           },
           onWebResourceError: (WebResourceError error) {
-            // Handle web resource errors
+            setState(() {
+              _isLoading = false;
+              _webResourceError = error;
+            });
           },
         ),
       )
@@ -47,7 +56,25 @@ class _WebViewScreenState extends State<WebViewScreen> {
   }
 
   Widget _buildWebView() {
-    return WebViewWidget(controller: _controller);
+    if (_webResourceError != null) {
+      return Center(
+        child: Text(
+          'Error: ${_webResourceError!.description}',
+          style: TextStyle(color: Colors.red),
+        ),
+      );
+    }
+    return Stack(
+      children: [
+        WebViewWidget(controller: _controller),
+        if (_isLoading)
+          Positioned(
+            top: 24,
+            left: 24,
+            child: CircularProgressIndicator(color: Theme.of(context).colorScheme.surface),
+          ),
+      ],
+    );
   }
 
   Widget _buildPopScope(Widget child) {

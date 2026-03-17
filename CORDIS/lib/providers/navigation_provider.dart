@@ -15,6 +15,7 @@ class _ScreenMetadata {
   final bool showDrawerIcon;
   final bool showBottomNavBar;
   final bool showFAB;
+  final bool handlesSystemBack;
   final VoidCallback onPopCallback;
   final bool Function() changeDetector;
 
@@ -24,6 +25,7 @@ class _ScreenMetadata {
     required this.showDrawerIcon,
     required this.showBottomNavBar,
     required this.showFAB,
+    required this.handlesSystemBack,
     required this.onPopCallback,
     required this.changeDetector,
   });
@@ -80,6 +82,8 @@ class NavigationProvider extends ChangeNotifier {
   bool get showBottomNavBar =>
       _screenStack.isNotEmpty ? _screenStack.last.showBottomNavBar : true;
   bool get showFAB => _screenStack.isNotEmpty ? _screenStack.last.showFAB : true;
+    bool get shouldDeferSystemBack =>
+      _screenStack.isNotEmpty && _screenStack.last.handlesSystemBack;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -143,6 +147,7 @@ class NavigationProvider extends ChangeNotifier {
     bool showDrawerIcon = false,
     bool showBottomNavBar = false,
     bool showFAB = false,
+    bool handlesSystemBack = false,
     VoidCallback? onPopCallback,
     bool Function()? changeDetector,
   }) {
@@ -154,6 +159,7 @@ class NavigationProvider extends ChangeNotifier {
         showDrawerIcon: showDrawerIcon,
         showBottomNavBar: showBottomNavBar,
         showFAB: showFAB,
+        handlesSystemBack: handlesSystemBack,
         onPopCallback: onPopCallback ?? () {},
         changeDetector: changeDetector ?? () => false,
       ),
@@ -174,6 +180,7 @@ class NavigationProvider extends ChangeNotifier {
     bool showDrawerIcon = false,
     bool showBottomNavBar = false,
     bool showFAB = false,
+    bool handlesSystemBack = false,
     VoidCallback? onPopCallback,
     bool Function()? changeDetector,
   }) {
@@ -186,6 +193,7 @@ class NavigationProvider extends ChangeNotifier {
       showDrawerIcon: showDrawerIcon,
       showBottomNavBar: showBottomNavBar,
       showFAB: showFAB,
+      handlesSystemBack: handlesSystemBack,
       onPopCallback: onPopCallback,
       changeDetector: changeDetector,
     );
