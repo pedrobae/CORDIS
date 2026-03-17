@@ -22,6 +22,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _versionGateTriggered = false;
 
   @override
@@ -91,6 +92,10 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Consumer<NavigationProvider>(
       builder: (context, nav, child) {
+        final isWideScreen = MediaQuery.of(context).size.width > 600;
+        final showWideSidebar =
+            isWideScreen && (nav.showDrawerIcon || nav.showBottomNavBar);
+
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, _) async {
@@ -98,24 +103,109 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
             await nav.attemptPop(context);
           },
           child: Scaffold(
-            appBar: nav.showAppBar ? _buildAppBar() : null,
-            drawer: nav.showDrawerIcon ? SideMenu() : null,
-            bottomNavigationBar: nav.showBottomNavBar
-                ? _buildBottomNavigationBar(nav)
-                : null,
-            floatingActionButton: nav.showFAB ? _buildFAB(nav) : null,
-            body: _buildBody(nav),
+            key: _scaffoldKey,
+            drawer: SideMenu(),
+            body: Row(
+              children: [
+                if (showWideSidebar) _buildWideSidebar(nav),
+                Expanded(child: _buildInnerScaffold(nav, isWideScreen)),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  AppBar _buildAppBar() {
+  Widget _buildInnerScaffold(NavigationProvider nav, bool isWideScreen) {
+    return Scaffold(
+      appBar: nav.showAppBar ? _buildAppBar(nav, isWideScreen) : null,
+      bottomNavigationBar: !isWideScreen && nav.showBottomNavBar
+          ? _buildBottomNavigationBar(nav)
+          : null,
+      floatingActionButton: nav.showFAB ? _buildFAB(nav) : null,
+      body: _buildBody(nav),
+    );
+  }
+
+  Widget _buildWideSidebar(NavigationProvider nav) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: nav.showBottomNavBar ? 96 : 72,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(
+          right: BorderSide(
+            color: colorScheme.surfaceContainerLowest,
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            IconButton(
+              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              icon: const Icon(Icons.menu),
+            ),
+            Expanded(
+              child: NavigationRail(
+                selectedIndex: nav.currentRoute.index,
+                labelType: NavigationRailLabelType.none,
+                backgroundColor: Colors.transparent,
+                indicatorColor: colorScheme.surfaceTint,
+                indicatorShape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                
+                onDestinationSelected: (index) {
+                  if (mounted) {
+                    nav.attemptPop(
+                      context,
+                      route: NavigationRoute.values[index],
+                    );
+                  }
+                },
+                destinations: nav
+                    .getNavigationItems(
+                      context,
+                      iconSize: 28,
+                      color: colorScheme.onSurface,
+                      activeColor: colorScheme.primary,
+                    )
+                    .map(
+                      (navItem) => NavigationRailDestination(
+                        icon: navItem.icon,
+                        padding: EdgeInsets.symmetric(vertical: 4),
+                        selectedIcon: navItem.activeIcon,
+                        label: Text(navItem.title),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar(NavigationProvider nav, bool isWideScreen) {
     final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
       backgroundColor: colorScheme.surface,
       centerTitle: true,
+      automaticallyImplyLeading: false,
+      leading: (nav.showDrawerIcon && !isWideScreen)
+          ? IconButton(
+              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              icon: const Icon(Icons.menu),
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+            )
+          : null,
+      leadingWidth: nav.showDrawerIcon ? null : 0,
       title: Image.asset('assets/logos/app_icon_transparent.png', height: 40),
     );
   }
@@ -161,29 +251,27 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildBody(NavigationProvider nav) {
-    return SafeArea(
-      child: Builder(
-        builder: (context) {
-          return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
-            transitionBuilder: (child, animation) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            layoutBuilder: (currentChild, previousChildren) {
-              return Stack(
-                children: <Widget>[
-                  ...previousChildren,
-                  currentChild ?? const SizedBox.shrink(),
-                ],
-              );
-            },
-            child: KeyedSubtree(
-              key: ValueKey(nav.currentRoute),
-              child: nav.buildCurrentScreen(context),
-            ),
-          );
-        },
-      ),
+    return Builder(
+      builder: (context) {
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          transitionBuilder: (child, animation) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          layoutBuilder: (currentChild, previousChildren) {
+            return Stack(
+              children: <Widget>[
+                ...previousChildren,
+                currentChild ?? const SizedBox.shrink(),
+              ],
+            );
+          },
+          child: KeyedSubtree(
+            key: ValueKey(nav.currentRoute),
+            child: nav.buildCurrentScreen(context),
+          ),
+        );
+      },
     );
   }
 
@@ -214,51 +302,38 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   void _handleFABTap(NavigationProvider nav) {
     switch (nav.currentRoute) {
       case NavigationRoute.library:
-        _handleLibraryFAB(nav);
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (context) => NewSongSheet(),
+        );
         break;
       case NavigationRoute.playlists:
-        _handlePlaylistsFAB(nav);
+        final localVer = context.read<LocalVersionProvider>();
+        nav.push(
+          () => EditPlaylistScreen(),
+          changeDetector: () => localVer.hasUnsavedChanges,
+          showBottomNavBar: true,
+        );
         break;
       case NavigationRoute.home:
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (context) {
+            return QuickActionSheet();
+          },
+        );
+        break;
       case NavigationRoute.schedule:
-        _showBottomSheetForCurrentRoute(nav.currentRoute);
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (context) {
+            return ScheduleActionsSheet();
+          },
+        );
         break;
     }
-  }
-
-  void _handleLibraryFAB(NavigationProvider nav) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => NewSongSheet(),
-    );
-  }
-
-  void _handlePlaylistsFAB(NavigationProvider nav) {
-    final localVer = context.read<LocalVersionProvider>();
-
-    nav.push(
-      () => EditPlaylistScreen(),
-      changeDetector: () => localVer.hasUnsavedChanges,
-      showBottomNavBar: true,
-    );
-  }
-
-  void _showBottomSheetForCurrentRoute(NavigationRoute route) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        switch (route) {
-          case NavigationRoute.home:
-            return QuickActionSheet();
-          case NavigationRoute.schedule:
-            return ScheduleActionsSheet();
-          case NavigationRoute.library:
-          case NavigationRoute.playlists:
-            throw Exception("These routes' FABs don't open a bottom sheet");
-        }
-      },
-    );
   }
 }
