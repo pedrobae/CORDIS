@@ -173,13 +173,14 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
         IconButton(
           icon: Icon(Icons.play_circle, size: 32),
           onPressed: () async {
+            final scroll = context.read<AutoScrollProvider>();
             await SystemChrome.setEnabledSystemUIMode(
               SystemUiMode.immersiveSticky,
             );
             nav.push(
               () => PlaySchedule(scheduleId: widget.scheduleId),
               onPopCallback: () async {
-                context.read<AutoScrollProvider>().clearCache();
+                scroll.clearCache();
                 await SystemChrome.setEnabledSystemUIMode(
                   SystemUiMode.edgeToEdge,
                 );

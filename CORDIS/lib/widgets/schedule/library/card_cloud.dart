@@ -189,9 +189,11 @@ class CloudScheduleCard extends StatelessWidget {
                           isDense: true,
                           onPressed: () async {
                             final scroll = context.read<AutoScrollProvider>();
+
                             await SystemChrome.setEnabledSystemUIMode(
                               SystemUiMode.immersiveSticky,
                             );
+
                             navigationProvider.push(
                               () => PlaySchedule(scheduleId: scheduleId),
                               onPopCallback: () async {

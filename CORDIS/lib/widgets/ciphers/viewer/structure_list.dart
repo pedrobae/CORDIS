@@ -60,10 +60,6 @@ class _StructureListState extends State<StructureList> {
 
     return Consumer2<SectionProvider, LayoutSettingsProvider>(
       builder: (context, sect, laySet, child) {
-        if (sect.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
         final filteredStructure = _getStructureForVersion(laySet);
 
         return Padding(
@@ -79,7 +75,8 @@ class _StructureListState extends State<StructureList> {
                     ),
                   )
                 : Selector<AutoScrollProvider, int>(
-                    selector: (context, provider) => provider.currentSectionIndex,
+                    selector: (context, provider) =>
+                        provider.currentSectionIndex,
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       controller: listScrollController,
@@ -138,9 +135,11 @@ class _StructureListState extends State<StructureList> {
 
     List<String> songStructure;
     if (widget.versionId is int) {
-      songStructure = localVer.getVersion(widget.versionId)?.songStructure ?? [];
+      songStructure =
+          localVer.getVersion(widget.versionId)?.songStructure ?? [];
     } else {
-      songStructure = cloudVer.getVersion(widget.versionId)?.songStructure ?? [];
+      songStructure =
+          cloudVer.getVersion(widget.versionId)?.songStructure ?? [];
     }
 
     return songStructure
@@ -176,8 +175,7 @@ class _StructureSectionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: Selector<AutoScrollProvider, bool>(
-        selector: (context, scroll) =>
-            scroll.currentSectionIndex == index,
+        selector: (context, scroll) => scroll.currentSectionIndex == index,
         builder: (context, isCurrentSection, child) {
           return GestureDetector(
             onTap: onTap,
@@ -188,10 +186,7 @@ class _StructureSectionButton extends StatelessWidget {
                 color: sectionColor.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(6),
                 border: isCurrentSection
-                    ? Border.all(
-                        color: highlightColor,
-                        width: 2,
-                      )
+                    ? Border.all(color: highlightColor, width: 2)
                     : null,
               ),
               child: Center(
