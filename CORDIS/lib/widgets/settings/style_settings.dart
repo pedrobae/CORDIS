@@ -116,20 +116,14 @@ class _StyleSettingsState extends State<StyleSettings> {
                       ),
                     ),
                     Slider(
-                      value: _localCardWidthMult! * 10,
-                      min: 1,
-                      max: 9,
-                      divisions: 9,
-                      label: [
-                        AppLocalizations.of(context)!.small,
-                        AppLocalizations.of(context)!.medium,
-                        AppLocalizations.of(context)!.large,
-                      ][(_localCardWidthMult! * 10 - 1) ~/ 3],
+                      value: _localCardWidthMult!,
+                      min: 0.2,
+                      max: 1.2,
                       onChanged: (v) {
-                        setState(() => _localCardWidthMult = v * 0.1);
+                        setState(() => _localCardWidthMult = v);
                       },
                       onChangeEnd: (v) {
-                        settings.setCardWidthMult(v * 0.1);
+                        settings.setCardWidthMult(v);
                       },
                     ),
                   ],

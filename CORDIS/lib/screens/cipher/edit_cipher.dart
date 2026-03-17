@@ -76,7 +76,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
 
     if (widget.cipherID == -1) {
       // CREATING NEW FROM IMPORTED
-      ciph.cacheUpdates(widget.cipherID);
+      ciph.setNewCipherInCache(cipher);
       final version = cipher.versions.first;
       localVer.setNewVersionInCache(version);
       sect.setNewSectionsInCache(-1, version.sections!);

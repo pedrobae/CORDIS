@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cordis/providers/auto_scroll_provider.dart';
 import 'package:cordis/widgets/ciphers/section_badge.dart';
 import 'package:cordis/widgets/ciphers/viewer/token_view.dart';
@@ -29,14 +27,19 @@ class SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final double width = MediaQuery.of(context).size.width > 600
-        ? max(300, MediaQuery.of(context).size.width / 4) - 24
-        : MediaQuery.of(context).size.width - 32;
+    final width = MediaQuery.of(context).size.width;
 
-    return Selector2<LayoutSettingsProvider, AutoScrollProvider, ({bool isCurrent, bool showSectionHeaders})>(
+    return Selector2<
+      LayoutSettingsProvider,
+      AutoScrollProvider,
+      ({bool isCurrent, bool showSectionHeaders, double cardWidthMult})
+    >(
       selector: (context, laySet, scroll) => (
         showSectionHeaders: laySet.showSectionHeaders,
-        isCurrent: (scroll.currentSectionIndex == index && (scroll.currentItemIndex == itemIndex))
+        isCurrent:
+            (scroll.currentSectionIndex == index &&
+            (scroll.currentItemIndex == itemIndex)),
+        cardWidthMult: laySet.cardWidthMult,
       ),
       child: TokenView(chordPro: sectionText),
       builder: (context, selection, child) {
@@ -45,7 +48,7 @@ class SectionCard extends StatelessWidget {
             Color.lerp(sectionColor, colorScheme.surface, 0.82) ?? sectionColor;
 
         return SizedBox(
-          width: width,
+          width: width * selection.cardWidthMult,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: showSectionHeaders
@@ -58,19 +61,11 @@ class SectionCard extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(0),
               boxShadow: selection.isCurrent
-                  ? [
-                      BoxShadow(
-                        color: colorScheme.primary,
-                        blurRadius: 8,
-                      ),
-                    ]
+                  ? [BoxShadow(color: colorScheme.primary, blurRadius: 8)]
                   : null,
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -83,12 +78,15 @@ class SectionCard extends StatelessWidget {
                           sectionCode: sectionCode,
                           sectionColor: sectionColor,
                         ),
-                        Text(
-                          sectionType.isNotEmpty
-                              ? sectionType[0].toUpperCase() +
-                                    sectionType.substring(1)
-                              : sectionType,
-                          style: textTheme.labelLarge,
+                        Expanded(
+                          child: Text(
+                            sectionType.isNotEmpty
+                                ? sectionType[0].toUpperCase() +
+                                      sectionType.substring(1)
+                                : sectionType,
+                            style: textTheme.labelLarge,
+                            overflow: TextOverflow.fade,
+                          ),
                         ),
                       ],
                     ),
