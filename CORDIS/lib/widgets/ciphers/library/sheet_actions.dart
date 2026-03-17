@@ -134,10 +134,10 @@ class CipherCardActionsSheet extends StatelessWidget {
                           final versionID = localVer
                               .getIdOfOldestVersionOfCipher(cipherId)!;
                           final version = localVer.getVersion(versionID)!;
-                          if (version.firebaseId != null &&
-                              version.firebaseId!.isNotEmpty) {
+                          if (version.firebaseID != null &&
+                              version.firebaseID!.isNotEmpty) {
                             await cloudVer.ensureVersionIsLoaded(
-                              version.firebaseId!,
+                              version.firebaseID!,
                             );
                           }
 

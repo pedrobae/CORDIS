@@ -429,14 +429,14 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
 
           if (version == null) break;
           String firebaseId;
-          if (version.firebaseId == null) {
+          if (version.firebaseID == null) {
             firebaseId = generateFirebaseId();
-            localVer.updateVersion(version.copyWith(firebaseId: firebaseId));
+            localVer.updateVersion(version.copyWith(firebaseID: firebaseId));
           } else {
-            firebaseId = version.firebaseId!;
+            firebaseId = version.firebaseID!;
           }
 
-          final cipher = ciph.getCipher(version.cipherId);
+          final cipher = ciph.getCipher(version.cipherID);
 
           if (cipher == null) break;
           versions['v:$firebaseId'] = version.toDto(cipher);

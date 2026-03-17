@@ -6,8 +6,8 @@ enum VersionType { import, brandNew, cloud, local, playlist }
 
 class Version {
   final int? id;
-  final String? firebaseId;
-  final int cipherId;
+  final String? firebaseID;
+  final int cipherID;
   final String versionName;
   final String? transposedKey;
   final List<String> songStructure; // Changed from String to List<String>
@@ -18,8 +18,8 @@ class Version {
 
   const Version({
     this.id,
-    this.firebaseId,
-    required this.cipherId,
+    this.firebaseID,
+    required this.cipherID,
     this.versionName = 'Original',
     this.transposedKey,
     this.songStructure = const [],
@@ -38,8 +38,8 @@ class Version {
 
     return Version(
       id: row['id'] as int?,
-      firebaseId: row['firebase_id'] as String?,
-      cipherId: row['cipher_id'] as int,
+      firebaseID: row['firebase_id'] as String?,
+      cipherID: row['cipher_id'] as int,
       songStructure: row['song_structure'] as List<String>,
       transposedKey: row['transposed_key'] as String?,
       versionName: row['version_name'] as String,
@@ -68,8 +68,8 @@ class Version {
 
     return Version(
       id: row['id'] as int?,
-      firebaseId: row['firebase_id'] as String?,
-      cipherId: row['cipher_id'] as int,
+      firebaseID: row['firebase_id'] as String?,
+      cipherID: row['cipher_id'] as int,
       songStructure: songStructure,
       bpm: row['bpm'] as int,
       duration: row['duration'] != null
@@ -87,7 +87,7 @@ class Version {
   // To JSON for database (without content - sections handled separately)
   Map<String, dynamic> toSqLite() {
     final row = {
-      'cipher_id': cipherId,
+      'cipher_id': cipherID,
       'song_structure': songStructure.join(','),
       'duration': duration.inSeconds,
       'bpm': bpm,
@@ -95,8 +95,8 @@ class Version {
       'version_name': versionName,
       'created_at': createdAt.millisecondsSinceEpoch.toString(),
     };
-    if (firebaseId != null && firebaseId!.isNotEmpty) {
-      row['firebase_id'] = firebaseId;
+    if (firebaseID != null && firebaseID!.isNotEmpty) {
+      row['firebase_id'] = firebaseID;
     }
     return row;
   }
@@ -107,7 +107,7 @@ class Version {
 
   VersionDto toDto(Cipher cipher) {
     return VersionDto(
-      firebaseId: firebaseId,
+      firebaseId: firebaseID,
       versionName: versionName,
       transposedKey: transposedKey,
       songStructure: songStructure,
@@ -138,8 +138,8 @@ class Version {
 
   Version copyWith({
     int? id,
-    String? firebaseId,
-    int? cipherId,
+    String? firebaseID,
+    int? cipherID,
     List<String>? songStructure,
     Duration? duration,
     int? bpm,
@@ -150,8 +150,8 @@ class Version {
   }) {
     return Version(
       id: id ?? this.id,
-      firebaseId: firebaseId ?? this.firebaseId,
-      cipherId: cipherId ?? this.cipherId,
+      firebaseID: firebaseID ?? this.firebaseID,
+      cipherID: cipherID ?? this.cipherID,
       songStructure: songStructure ?? this.songStructure,
       transposedKey: transposedKey ?? this.transposedKey,
       duration: duration ?? this.duration,
@@ -167,8 +167,8 @@ class Version {
 
     return Version(
       id: id ?? other.id,
-      firebaseId: firebaseId ?? other.firebaseId,
-      cipherId: cipherId,
+      firebaseID: firebaseID ?? other.firebaseID,
+      cipherID: cipherID,
       songStructure: songStructure.isNotEmpty
           ? songStructure
           : other.songStructure,
@@ -186,7 +186,7 @@ class Version {
   // Factory for creating empty version
   factory Version.empty({int? cipherId}) {
     return Version(
-      cipherId: cipherId ?? -1,
+      cipherID: cipherId ?? -1,
       versionName: 'Versão 1',
       songStructure: [],
       transposedKey: '',

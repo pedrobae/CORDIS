@@ -286,11 +286,11 @@ class ScheduleSyncService {
           ));
 
           if (version == null) break;
-          final cipher = (await _cipherRepo.getCipherById(version.cipherId));
+          final cipher = (await _cipherRepo.getCipherById(version.cipherID));
 
           if (cipher == null) break;
 
-          final firebaseID = version.firebaseId ?? generateFirebaseId();
+          final firebaseID = version.firebaseID ?? generateFirebaseId();
           versions[firebaseID] = version.toDto(cipher);
           itemOrder.add('v:$firebaseID');
 

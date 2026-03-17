@@ -155,7 +155,7 @@ class ParsingServiceBase {
           songStructure: result.songStructure,
           bpm: result.metadata['bpm'] ?? 0,
           versionName: 'Imported',
-          cipherId: -1,
+          cipherID: -1,
           createdAt: DateTime.now(),
           duration: Duration(seconds: result.metadata['duration'] ?? 0),
         ),

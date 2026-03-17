@@ -182,7 +182,7 @@ class _ContentWrapState extends State<ContentWrap> {
         } else {
           final version = localVer.getVersion(versionID);
           if (version == null) return const LinearProgressIndicator();
-          final cipher = ciph.getCipher(version.cipherId);
+          final cipher = ciph.getCipher(version.cipherID);
           if (cipher == null) return const LinearProgressIndicator();
           title = cipher.title;
           key = version.transposedKey ?? cipher.musicKey;

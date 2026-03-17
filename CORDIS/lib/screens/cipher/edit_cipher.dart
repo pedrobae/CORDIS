@@ -179,7 +179,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
   ) async {
     final originalVersion = localVersionProvider.getVersion(widget.versionID)!;
     localVersionProvider.setNewVersionInCache(
-      originalVersion.copyWith(firebaseId: '', versionName: playlistName),
+      originalVersion.copyWith(firebaseID: '', versionName: playlistName),
     );
 
     await cipherProvider.loadCipher(widget.cipherID);

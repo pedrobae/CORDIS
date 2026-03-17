@@ -9,8 +9,9 @@ import 'package:provider/provider.dart';
 
 class NewSectionSheet extends StatelessWidget {
   final int versionID;
+  final int cipherID;
 
-  const NewSectionSheet({super.key, required this.versionID});
+  const NewSectionSheet({super.key, required this.versionID, required this.cipherID});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +72,7 @@ class NewSectionSheet extends StatelessWidget {
             isDiscrete: true,
             onPressed: () {
               Navigator.of(context).pop();
-              nav.push(() => const ImportTextScreen());
+              nav.push(() => ImportTextScreen(versionID: versionID, cipherID: cipherID,));
             },
           ),
           // pdf
@@ -82,7 +83,7 @@ class NewSectionSheet extends StatelessWidget {
             isDiscrete: true,
             onPressed: () {
               Navigator.of(context).pop();
-              nav.push(() => const ImportPdfScreen());
+              nav.push(() => ImportPdfScreen(versionID: versionID, cipherID: cipherID,));
             },
           ),
 

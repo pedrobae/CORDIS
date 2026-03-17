@@ -37,9 +37,11 @@ class _SectionsTabState extends State<SectionsTab> {
 
     return Consumer3<SectionProvider, LocalVersionProvider, CipherProvider>(
       builder: (context, sect, localVer, ciph, child) {
-        final uniqueSections = (localVer.getVersion(
+        final version = (localVer.getVersion(
           widget.versionID,
-        ))!.songStructure.toSet().toList();
+        ))!;
+
+        final uniqueSections = version.songStructure.toSet().toList();
 
         if (sect.isLoading || localVer.isLoading) {
           return Center(
@@ -162,7 +164,7 @@ class _SectionsTabState extends State<SectionsTab> {
 
                     // Open add sheet
                     GestureDetector(
-                      onTap: _openAddSheet(),
+                      onTap: _openAddSheet(version.cipherID),
                       child: Container(
                         margin: const EdgeInsets.all(8),
                         padding: const EdgeInsets.all(12),
@@ -193,12 +195,12 @@ class _SectionsTabState extends State<SectionsTab> {
     );
   }
 
-  VoidCallback _openAddSheet() {
+  VoidCallback _openAddSheet(int cipherID) {
     return () {
       showModalBottomSheet(
         context: context,
         builder: (context) {
-          return NewSectionSheet(versionID: widget.versionID);
+          return NewSectionSheet(versionID: widget.versionID, cipherID: cipherID);
         },
       );
     };

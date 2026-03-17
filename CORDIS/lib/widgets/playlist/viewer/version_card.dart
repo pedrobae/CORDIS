@@ -53,9 +53,9 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
         version = localVer.getVersion(widget.versionId)!;
       }
 
-      final cipher = ciph.getCipher(version.cipherId);
+      final cipher = ciph.getCipher(version.cipherID);
       if (cipher == null) {
-        await ciph.loadCipher(version.cipherId);
+        await ciph.loadCipher(version.cipherID);
       }
 
       await sectionProvider.loadSectionsOfVersion(widget.versionId);
@@ -78,7 +78,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
           return Center(child: CircularProgressIndicator());
         }
 
-        final cipher = ciph.getCipher(version.cipherId);
+        final cipher = ciph.getCipher(version.cipherID);
 
         if (cipher == null) {
           return Center(child: CircularProgressIndicator());
@@ -198,7 +198,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                             () => ViewCipherScreen(
                               versionType: VersionType.playlist,
                               versionID: widget.versionId,
-                              cipherID: version.cipherId,
+                              cipherID: version.cipherID,
                             ),
                             showBottomNavBar: true,
                           );

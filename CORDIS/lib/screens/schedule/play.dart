@@ -166,7 +166,7 @@ class VertPlayScheduleState extends State<VertPlaySchedule> {
 
     await localVer.loadVersion(item.contentId!);
     final version = localVer.getVersion(item.contentId!)!;
-    await ciph.loadCipher(version.cipherId);
+    await ciph.loadCipher(version.cipherID);
     await sect.loadSectionsOfVersion(item.contentId!);
   }
 
@@ -540,7 +540,7 @@ class VertPlayScheduleState extends State<VertPlaySchedule> {
           final ciph = context.read<CipherProvider>();
           final version = localVer.getVersion(item.contentId!);
           if (version == null) return '';
-          return ciph.getCipher(version.cipherId)?.title ?? '';
+          return ciph.getCipher(version.cipherID)?.title ?? '';
         }
       case PlaylistItemType.flowItem:
         if (isCloud) {

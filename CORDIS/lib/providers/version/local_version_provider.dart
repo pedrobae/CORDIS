@@ -42,7 +42,7 @@ class LocalVersionProvider extends ChangeNotifier {
   /// Returns the version if found, otherwise null
   Future<Version?> getVersionByFirebaseId(String firebaseId) async {
     for (var v in _versions.values) {
-      if (v.firebaseId == firebaseId && v.id != null) {
+      if (v.firebaseID == firebaseId && v.id != null) {
         return v;
       }
     }
@@ -53,32 +53,32 @@ class LocalVersionProvider extends ChangeNotifier {
   }
 
   Future<String?> getFirebaseIdByLocalId(int localId) async {
-    final id = _versions[localId]?.firebaseId;
+    final id = _versions[localId]?.firebaseID;
     if (id != null) {
       return id;
     }
     // Not in cache, query repository
     final version = await _repo.getVersionWithId(localId);
-    return version?.firebaseId;
+    return version?.firebaseID;
   }
 
   // === Versions of a cipher ===
   List<int> getVersionsByCipherId(int cipherId) {
     return _versions.values
-        .where((version) => version.cipherId == cipherId)
+        .where((version) => version.cipherID == cipherId)
         .map((version) => version.id!)
         .toList();
   }
 
   int getVersionsOfCipherCount(int cipherId) {
     return _versions.values
-        .where((version) => version.cipherId == cipherId)
+        .where((version) => version.cipherID == cipherId)
         .length;
   }
 
   int? getIdOfOldestVersionOfCipher(int cipherId) {
     final versions = _versions.values
-        .where((version) => version.cipherId == cipherId)
+        .where((version) => version.cipherID == cipherId)
         .toList();
     versions.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     return versions.isNotEmpty ? versions.first.id : null;
@@ -101,10 +101,10 @@ class LocalVersionProvider extends ChangeNotifier {
       }
       // Create version with the correct cipher ID
       final versionWithCipherId = _versions[-1]!.copyWith(
-        cipherId: cipherID ?? _versions[-1]!.cipherId,
+        cipherID: cipherID ?? _versions[-1]!.cipherID,
       );
 
-      if (versionWithCipherId.cipherId == -1) {
+      if (versionWithCipherId.cipherID == -1) {
         throw Exception(
           'Cannot create version: no cipherId provided and cached version has no cipherId.',
         );
@@ -115,7 +115,7 @@ class LocalVersionProvider extends ChangeNotifier {
       _versions[versionId] = versionWithCipherId.copyWith(id: versionId);
 
       debugPrint(
-        'Created a new version with id $versionId, for cipher ${cipherID ?? versionWithCipherId.cipherId}',
+        'Created a new version with id $versionId, for cipher ${cipherID ?? versionWithCipherId.cipherID}',
       );
     } catch (e) {
       _error = e.toString();
@@ -221,7 +221,7 @@ class LocalVersionProvider extends ChangeNotifier {
     try {
       // Check if version exists by its firebaseId
       final existingVersion = await _repo.getVersionWithFirebaseId(
-        version.firebaseId!,
+        version.firebaseID!,
       );
 
       if (existingVersion != null) {

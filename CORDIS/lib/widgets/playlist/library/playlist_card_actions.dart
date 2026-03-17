@@ -169,7 +169,7 @@ class PlaylistCardActionsSheet extends StatelessWidget {
           localVer.setNewVersionInCache(
             version.copyWith(
               id: -1,
-              firebaseId: '',
+              firebaseID: '',
               versionName:
                   '${version.versionName} ${AppLocalizations.of(context)!.copySuffix}',
             ),

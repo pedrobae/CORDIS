@@ -33,7 +33,14 @@ class ImportProvider extends ChangeNotifier {
     _importType = type;
   }
 
-  /// Sets the parsing strategy.
+  /// Toggles the parsing strategy between double new line and section labels.
+  void toggleParsingStrategy() {
+    _parsingStrategy = _parsingStrategy == ParsingStrategy.doubleNewLine
+        ? ParsingStrategy.sectionLabels
+        : ParsingStrategy.doubleNewLine;
+    notifyListeners();
+  }
+
   void setParsingStrategy(ParsingStrategy strategy) {
     _parsingStrategy = strategy;
     notifyListeners();

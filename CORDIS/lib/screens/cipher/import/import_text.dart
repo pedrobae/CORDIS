@@ -160,11 +160,7 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
               thumbIcon: WidgetStatePropertyAll<Icon>(Icon(Icons.circle)),
               value: imp.parsingStrategy == ParsingStrategy.sectionLabels,
               onChanged: (value) {
-                imp.setParsingStrategy(
-                  value
-                      ? ParsingStrategy.sectionLabels
-                      : ParsingStrategy.doubleNewLine,
-                );
+                imp.toggleParsingStrategy();
               },
             ),
             Text(
@@ -203,7 +199,13 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
 
       par.parseCipher(imp.importedCipher!);
 
-      // Navigate to parsing screen
+      if (widget.cipherID != -1 && widget.versionID != -1) {
+        // CLEAN THE SCREEN STACK IF COMING FROM EDITING
+        nav.pop(); // pop the import screen
+        nav.pop(); // pop the edit cipher screen - bypass change detection, since we're reopening it with the new data right after
+      }
+
+      // Navigate to edit cipher screen
       nav.push(
         () => EditCipherScreen(
           versionType: VersionType.import,
