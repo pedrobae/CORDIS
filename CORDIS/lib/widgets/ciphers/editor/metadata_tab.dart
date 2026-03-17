@@ -254,7 +254,6 @@ class _MetadataTabState extends State<MetadataTab> {
           onTap: () {
             showModalBottomSheet(
               context: context,
-              isScrollControlled: true,
               builder: (context) {
                 return SelectKeySheet();
               },

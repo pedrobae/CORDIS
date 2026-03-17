@@ -169,33 +169,51 @@ class TokenizationService {
     // Step 4: Measure tokens
     final tokenMeasurements = <ContentToken, Measurements>{};
     for (var token in tokens) {
-      if (token.type != TokenType.newline &&
-          token.type != TokenType.underline) {
-        final style = token.type == TokenType.chord
-            ? buildCtx.chordStyle
-            : buildCtx.lyricStyle;
-        final cache = posCtx.isEditMode ? buildCtx.cache : null;
-        final measured = _builder.measureText(
-          text: buildCtx.transposeChord(token.text),
-          style: style,
-          cache: cache,
-        );
-        tokenMeasurements[token] = Measurements(
-          width: measured.width,
-          height: measured.height,
-          baseline: measured.baseline,
-          size: measured.size,
-        );
-        if (posCtx.isEditMode && token.type == TokenType.chord) {
-          tokenMeasurements[token]!.size +=
-              2 *
-              TokenizationConstants
-                  .chordTokenHeightPadding; // Top + bottom visual padding
-          tokenMeasurements[token]!.width +=
-              2 *
-              TokenizationConstants
-                  .chordTokenWidthPadding; // Left + right visual padding
-        }
+      switch (token.type) {
+        case TokenType.chord:
+          tokenMeasurements[token] = _builder.measureText(
+            text: buildCtx.transposeChord(token.text),
+            style: buildCtx.chordStyle,
+            cache: buildCtx.cache,
+          );
+          if (posCtx.isEditMode && token.type == TokenType.chord) {
+            tokenMeasurements[token]!.size +=
+                2 *
+                TokenizationConstants
+                    .chordTokenHeightPadding; // Top + bottom visual padding
+            tokenMeasurements[token]!.width +=
+                2 *
+                TokenizationConstants
+                    .chordTokenWidthPadding; // Left + right visual padding
+          }
+          break;
+
+        case TokenType.space:
+        case TokenType.lyric:
+          tokenMeasurements[token] = _builder.measureText(
+            text: token.text,
+            style: buildCtx.lyricStyle,
+            cache: buildCtx.cache,
+          );
+          break;
+        case TokenType.precedingChordTarget:
+        case TokenType.separator:
+          final msr = _builder.measureText(
+            text: 'Test',
+            style: buildCtx.lyricStyle,
+            cache: buildCtx.cache,
+          );
+          tokenMeasurements[token] = Measurements(
+            width: TokenizationConstants.precedingTargetWidth,
+            height: msr.height,
+            baseline: msr.baseline,
+            size: msr.size,
+          );
+          break;
+        case TokenType.underline:
+        case TokenType.newline:
+          // These tokens are dynamic, the measurements are based on positioning.
+          break;
       }
     }
 

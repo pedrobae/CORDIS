@@ -8,10 +8,7 @@ import 'package:provider/provider.dart';
 class SelectKeySheet extends StatefulWidget {
   final bool needsSave;
 
-  const SelectKeySheet({
-    super.key,
-    this.needsSave = true,
-  });
+  const SelectKeySheet({super.key, this.needsSave = true});
 
   @override
   State<SelectKeySheet> createState() => _SelectKeySheetState();
@@ -41,13 +38,12 @@ class _SelectKeySheetState extends State<SelectKeySheet> {
       builder: (context, tp, child) {
         return Container(
           padding: EdgeInsets.all(16),
-          height: MediaQuery.of(context).size.height / 3,
           decoration: BoxDecoration(
             shape: BoxShape.rectangle,
             color: colorScheme.surface,
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.max,
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: 8,
             children: [
@@ -67,14 +63,13 @@ class _SelectKeySheetState extends State<SelectKeySheet> {
                 ],
               ),
               Expanded(
-                child: GridView.builder(
-                  itemCount: 12,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    childAspectRatio: 2,
-                  ),
-                  itemBuilder: (BuildContext context, int index) {
-                    final key = ChordHelper.keyList[index];
+                child: GridView.count(
+                  physics: NeverScrollableScrollPhysics(),
+                  crossAxisCount: 4,
+                  childAspectRatio: 2,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  children: ChordHelper.keyList.map((key) {
                     return GestureDetector(
                       onTap: () {
                         setState(() {
@@ -91,18 +86,15 @@ class _SelectKeySheetState extends State<SelectKeySheet> {
                         });
                       },
                       child: Container(
-                        margin: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           color: key == selectedKey
                               ? colorScheme.onSurface
                               : colorScheme.surface,
                           border: Border.all(
-                            color: colorScheme.shadow,
+                            color: colorScheme.onSurface,
                             width: 1,
                           ),
-                          borderRadius: BorderRadius.circular(0),
                         ),
-                        padding: const EdgeInsets.all(8),
                         child: Center(
                           child: Text(
                             key,
@@ -111,33 +103,32 @@ class _SelectKeySheetState extends State<SelectKeySheet> {
                                   ? colorScheme.surface
                                   : colorScheme.onSurface,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),
                     );
-                  },
+                  }).toList(),
                 ),
               ),
-              if (widget.needsSave) ...[
               FilledTextButton(
-                text: AppLocalizations.of(context)!.save,
+                text: AppLocalizations.of(context)!.originalKey,
                 isDark: true,
                 onPressed: () {
-                  tp.setTransposedKey(selectedKey);
+                  tp.setTransposedKey(null);
                   Navigator.of(context).pop();
                 },
-                ),
-              ] else ...[
+              ),
+              if (widget.needsSave) ...[
                 FilledTextButton(
-                  text: AppLocalizations.of(context)!.originalKey,
+                  text: AppLocalizations.of(context)!.save,
                   isDark: true,
                   onPressed: () {
-                    tp.setTransposedKey(null);
+                    tp.setTransposedKey(selectedKey);
                     Navigator.of(context).pop();
                   },
                 ),
               ],
+
               SizedBox(),
             ],
           ),
