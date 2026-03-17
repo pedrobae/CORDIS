@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:cordis/repositories/cloud/version_repository.dart';
@@ -14,6 +16,8 @@ class CloudVersionProvider extends ChangeNotifier {
   bool _isSaving = false;
   bool _isLoading = false;
   final Map<String, bool> _isDownloading = {}; // versionID -> isDownloading
+  String? _currentLoadingOperation;
+  DateTime? _loadingStartedAt;
 
   String _searchTerm = '';
 
@@ -46,8 +50,37 @@ class CloudVersionProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
+  String? get currentLoadingOperation => _currentLoadingOperation;
+  DateTime? get loadingStartedAt => _loadingStartedAt;
   String? get error => _error;
   bool isDownloading(String versionID) => _isDownloading[versionID] ?? false;
+
+  Future<T> _withTimeout<T>(
+    Future<T> operation,
+    String operationName, {
+    Duration timeout = const Duration(seconds: 20),
+  }) async {
+    try {
+      return await operation.timeout(timeout);
+    } on TimeoutException {
+      throw TimeoutException('$operationName timed out after ${timeout.inSeconds}s');
+    }
+  }
+
+  void _startLoading(String operationName) {
+    _isLoading = true;
+    _currentLoadingOperation = operationName;
+    _loadingStartedAt = DateTime.now();
+    _error = null;
+    notifyListeners();
+  }
+
+  void _finishLoading() {
+    _isLoading = false;
+    _currentLoadingOperation = null;
+    _loadingStartedAt = null;
+    notifyListeners();
+  }
 
   // ===== CREATE =====
   /// Persist the cache of an ID to the database
@@ -81,21 +114,24 @@ class CloudVersionProvider extends ChangeNotifier {
     bool forceReload = false,
     List<Cipher> localCiphers = const [],
   }) async {
-    if (_isLoading) return;
+    if (_isLoading && !forceReload) return;
 
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+    _startLoading('loadVersions');
 
     try {
       _versions.clear();
-      final cloudVersions = await _repo.getPublicVersions(
-        forceReload: forceReload,
+      final cloudVersions = await _withTimeout(
+        _repo.getPublicVersions(forceReload: forceReload),
+        'getPublicVersions',
       );
 
       for (var version in cloudVersions) {
         if (version.originalKey.isEmpty) {
-          final recognizedKey = await _recognizer.recognizeKeyCloud(version);
+          final recognizedKey = await _withTimeout(
+            _recognizer.recognizeKeyCloud(version),
+            'recognizeKeyCloud(${version.firebaseId ?? version.title})',
+            timeout: const Duration(seconds: 8),
+          );
           version = version.copyWith(originalKey: recognizedKey);
         }
         if (localCiphers.any(
@@ -112,8 +148,7 @@ class CloudVersionProvider extends ChangeNotifier {
         print('Error loading cloud versions: $e');
       }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _finishLoading();
     }
   }
 
@@ -122,27 +157,32 @@ class CloudVersionProvider extends ChangeNotifier {
       return;
     }
 
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+    _startLoading('ensureVersionIsLoaded:$firebaseId');
 
     try {
-      VersionDto? version = await _repo.getUserVersionById(firebaseId);
+      VersionDto? version = await _withTimeout(
+        _repo.getUserVersionById(firebaseId),
+        'getUserVersionById($firebaseId)',
+      );
       if (version != null) {
         if (version.originalKey.isEmpty) {
-          final recognizedKey = await _recognizer.recognizeKeyCloud(version);
+          final recognizedKey = await _withTimeout(
+            _recognizer.recognizeKeyCloud(version),
+            'recognizeKeyCloud($firebaseId)',
+            timeout: const Duration(seconds: 8),
+          );
           version = version.copyWith(originalKey: recognizedKey);
         }
         _versions[firebaseId] = version;
         notifyListeners();
       }
     } catch (e) {
+      _error = e.toString();
       if (kDebugMode) {
         print('Error ensuring cloud version in cache: $e');
       }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _finishLoading();
     }
   }
 
@@ -160,6 +200,8 @@ class CloudVersionProvider extends ChangeNotifier {
     _error = null;
     _isLoading = false;
     _isSaving = false;
+    _currentLoadingOperation = null;
+    _loadingStartedAt = null;
     _searchTerm = '';
 
     notifyListeners();
