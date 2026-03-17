@@ -89,18 +89,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             if (widget.showSecrets) ...[
               SettingsSectionHeader(
-              title: AppLocalizations.of(context)!.advancedSettings,
-              icon: Icons.settings,
-            ),
-            SizedBox(),
-            SettingsSwitchTile(
-              label: AppLocalizations.of(context)!.denseCipherCard,
-              icon: secSet.denseCipherCard ? Icons.grid_on : Icons.grid_off,
-              value: secSet.denseCipherCard,
-              onChanged: (value) {
-                secSet.toggleDenseCipherCard();
-              },
-            )
+                title: AppLocalizations.of(context)!.advancedSettings,
+                icon: Icons.settings,
+              ),
+              SizedBox(),
+              SettingsSwitchTile(
+                label: AppLocalizations.of(context)!.denseCipherCard,
+                icon: secSet.denseCipherCard ? Icons.grid_on : Icons.grid_off,
+                value: secSet.denseCipherCard,
+                onChanged: (value) {
+                  secSet.toggleDenseCipherCard();
+                },
+              ),
+              const SizedBox(height: 32),
             ],
 
             if (kDebugMode) ...[

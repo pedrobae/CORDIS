@@ -27,7 +27,7 @@ class SettingsSwitchTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(label, style: textTheme.labelLarge),
+          Text(label, style: textTheme.labelMedium),
           const Spacer(),
           Icon(icon, color: colorScheme.primary),
           const SizedBox(width: 8),

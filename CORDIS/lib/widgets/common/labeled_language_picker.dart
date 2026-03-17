@@ -30,7 +30,7 @@ class LabeledLanguagePicker extends StatelessWidget {
             ? SizedBox.shrink()
             : Text(
                 AppLocalizations.of(context)!.language,
-                style: textTheme.labelLarge,
+                style: textTheme.labelMedium,
               ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -44,7 +44,7 @@ class LabeledLanguagePicker extends StatelessWidget {
               singleLine
                   ? Text(
                       AppLocalizations.of(context)!.language,
-                      style: textTheme.labelLarge,
+                      style: textTheme.labelMedium,
                     )
                   : SizedBox.shrink(),
               Expanded(

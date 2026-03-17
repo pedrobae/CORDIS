@@ -183,9 +183,9 @@
   "about": "Sobre",
   "@about": {"description": "About navigation tab"},
 
-  "advancedSettings": "Advanced Settings",
+  "advancedSettings": "Configurações Avançadas",
   "@advancedSettings": {"description": "Title for advanced settings section"},
-  "denseCipherCard": "Dense Cipher Card",
+  "denseCipherCard": "Cartão de Cifra Compacto",
   "@denseCipherCard": {"description": "Label for dense cipher card setting"},
 
 

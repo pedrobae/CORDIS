@@ -57,44 +57,47 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  static final providers = [
-    //  APP-WIDE PROVIDERS
-    ChangeNotifierProvider(create: (_) => MyAuthProvider()),
-    ChangeNotifierProvider(create: (_) => SettingsProvider()..loadSettings()),
-    ChangeNotifierProvider(create: (_) => LayoutSetProvider()..loadSettings()),
-    ChangeNotifierProvider(create: (_) => SecretSetProvider()..loadSettings()),
-    ChangeNotifierProvider(create: (_) => AppInfoProvider()..initialize()),
-    ChangeNotifierProvider(create: (_) => BugReportProvider()),
-    ChangeNotifierProvider(create: (_) => NavigationProvider()),
-    // ADMIN DOMAIN PROVIDERS
-    ChangeNotifierProvider(create: (_) => AdminProvider()),
-    // LOCAL DOMAIN PROVIDERS
-    ChangeNotifierProvider(create: (_) => UserProvider()),
-    ChangeNotifierProvider(create: (_) => CipherProvider()),
-    ChangeNotifierProvider(create: (_) => LocalVersionProvider()),
-    ChangeNotifierProvider(create: (_) => SectionProvider()),
-    ChangeNotifierProvider(create: (_) => PlaylistProvider()),
-    ChangeNotifierProvider(create: (_) => FlowItemProvider()),
-    ChangeNotifierProvider(create: (_) => LocalScheduleProvider()),
-    // CLOUD DOMAIN PROVIDERS
-    ChangeNotifierProvider(create: (_) => CloudScheduleProvider()),
-    ChangeNotifierProvider(create: (_) => CloudVersionProvider()),
-    // IMPORT PROVIDERS
-    ChangeNotifierProvider(create: (_) => ImportProvider()),
-    ChangeNotifierProvider(create: (_) => ParserProvider()),
-    // PLAY SCHEDULE PROVIDERS
-    ChangeNotifierProvider(create: (_) => AutoScrollProvider()),
-    ChangeNotifierProvider(create: (_) => PlayScheduleStateProvider()),
-    // FUNCTIONALITY PROVIDERS
-    ChangeNotifierProvider(create: (_) => SelectionProvider()),
-    ChangeNotifierProvider(create: (_) => TranspositionProvider()),
-    ChangeNotifierProvider(create: (_) => EmailProvider()),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: providers,
+      providers: [
+        ChangeNotifierProvider(create: (_) => MyAuthProvider()),
+        ChangeNotifierProvider(
+          create: (_) => SettingsProvider()..loadSettings(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => LayoutSetProvider()..loadSettings(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SecretSetProvider()..loadSettings(),
+        ),
+        ChangeNotifierProvider(create: (_) => AppInfoProvider()..initialize()),
+        ChangeNotifierProvider(create: (_) => BugReportProvider()),
+        ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        // ADMIN DOMAIN PROVIDERS
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
+        // LOCAL DOMAIN PROVIDERS
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => CipherProvider()),
+        ChangeNotifierProvider(create: (_) => LocalVersionProvider()),
+        ChangeNotifierProvider(create: (_) => SectionProvider()),
+        ChangeNotifierProvider(create: (_) => PlaylistProvider()),
+        ChangeNotifierProvider(create: (_) => FlowItemProvider()),
+        ChangeNotifierProvider(create: (_) => LocalScheduleProvider()),
+        // CLOUD DOMAIN PROVIDERS
+        ChangeNotifierProvider(create: (_) => CloudScheduleProvider()),
+        ChangeNotifierProvider(create: (_) => CloudVersionProvider()),
+        // IMPORT PROVIDERS
+        ChangeNotifierProvider(create: (_) => ImportProvider()),
+        ChangeNotifierProvider(create: (_) => ParserProvider()),
+        // PLAY SCHEDULE PROVIDERS
+        ChangeNotifierProvider(create: (_) => AutoScrollProvider()),
+        ChangeNotifierProvider(create: (_) => PlayScheduleStateProvider()),
+        // FUNCTIONALITY PROVIDERS
+        ChangeNotifierProvider(create: (_) => SelectionProvider()),
+        ChangeNotifierProvider(create: (_) => TranspositionProvider()),
+        ChangeNotifierProvider(create: (_) => EmailProvider()),
+      ],
       child: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {
           return MaterialApp(

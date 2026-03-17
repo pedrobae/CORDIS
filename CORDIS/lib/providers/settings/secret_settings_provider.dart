@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cordis/services/settings_service.dart';
 
 class SecretSetProvider extends ChangeNotifier {
-  bool _denseCipherCard = true;
+  bool _denseCipherCard = false;
 
   // Getters
   bool get denseCipherCard => _denseCipherCard;

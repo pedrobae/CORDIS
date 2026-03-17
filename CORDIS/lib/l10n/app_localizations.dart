@@ -581,13 +581,13 @@ abstract class AppLocalizations {
   /// Title for advanced settings section
   ///
   /// In pt, this message translates to:
-  /// **'Advanced Settings'**
+  /// **'Configurações Avançadas'**
   String get advancedSettings;
 
   /// Label for dense cipher card setting
   ///
   /// In pt, this message translates to:
-  /// **'Dense Cipher Card'**
+  /// **'Cartão de Cifra Compacto'**
   String get denseCipherCard;
 
   /// Title for style settings section
