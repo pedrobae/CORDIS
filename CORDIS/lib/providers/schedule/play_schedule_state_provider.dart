@@ -1,8 +1,6 @@
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:flutter/foundation.dart';
 
-import 'package:cordis/utils/debug/build_trace.dart';
-
 /// Lightweight provider for managing PlayScheduleScreen state
 /// This allows item navigation without rebuilding expensive widget trees
 class PlayScheduleStateProvider extends ChangeNotifier {
@@ -31,18 +29,18 @@ class PlayScheduleStateProvider extends ChangeNotifier {
     if (_currentItemIndex == index) return;
 
     _currentItemIndex = index;
-    _notify('currentItemIndex=$index');
+    notifyListeners();
   }
 
   void toggleSettings() {
     _showSettings = !_showSettings;
-    _notify('toggleSettings showSettings=$_showSettings');
+    notifyListeners();
   }
 
   void setShowSettings(bool value) {
     if (_showSettings != value) {
       _showSettings = value;
-      _notify('setShowSettings value=$value');
+      notifyListeners();
     }
   }
 
@@ -50,7 +48,7 @@ class PlayScheduleStateProvider extends ChangeNotifier {
     _items = items;
     _currentItemIndex = 0;
     _isLoading = false;
-    _notify('setItems count=${items.length}');
+    notifyListeners();
   }
 
   void reset() {
@@ -58,10 +56,5 @@ class PlayScheduleStateProvider extends ChangeNotifier {
     _showSettings = false;
     _isLoading = true;
     _items = [];
-  }
-
-  void _notify(String reason) {
-    BuildTrace.event('PlayScheduleStateProvider.notifyListeners', reason);
-    notifyListeners();
   }
 }

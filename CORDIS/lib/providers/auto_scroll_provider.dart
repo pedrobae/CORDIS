@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cordis/services/settings_service.dart';
-import 'package:cordis/utils/debug/build_trace.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -41,13 +40,13 @@ class AutoScrollProvider extends ChangeNotifier {
   set currentSectionIndex(int value) {
     if (_currentSectionIndex == value) return;
     _currentSectionIndex = value;
-    _notify('currentSectionIndex=$value itemIndex=$_currentItemIndex');
+    notifyListeners();
   }
 
   set currentItemIndex(int value) {
     if (_currentItemIndex == value) return;
     _currentItemIndex = value;
-    _notify('currentItemIndex=$value sectionIndex=$_currentSectionIndex');
+    notifyListeners();
   }
 
   // ===== SETTINGS METHODS =====
@@ -57,23 +56,21 @@ class AutoScrollProvider extends ChangeNotifier {
     _currentItemIndex = 0;
     scrollModeEnabled = SettingsService.getAutoScrollEnabled();
     scrollSpeed = SettingsService.getAutoScrollSpeed();
-    _notify(
-      'loadSettings scrollModeEnabled=$scrollModeEnabled scrollSpeed=$scrollSpeed',
-    );
+    notifyListeners();
   }
 
   /// Updates scroll speed and saves to settings
   void setScrollSpeed(double value) {
     scrollSpeed = value;
     SettingsService.setAutoScrollSpeed(value);
-    _notify('setScrollSpeed value=$value');
+    notifyListeners();
   }
 
   void toggleScrollMode() {
     scrollModeEnabled = !scrollModeEnabled;
     stopAutoScroll();
     SettingsService.setAutoScrollEnabled(scrollModeEnabled);
-    _notify('toggleScrollMode enabled=$scrollModeEnabled');
+    notifyListeners();
   }
 
   GlobalKey registerItem(int itemIndex) {
@@ -108,7 +105,7 @@ class AutoScrollProvider extends ChangeNotifier {
     _timerStartTime = null;
     _timerProgress.value = 0.0;
     isAutoScrolling = false;
-    _notify('stopAutoScroll');
+    notifyListeners();
   }
 
   /// Starts the auto-scroll timer
@@ -119,9 +116,7 @@ class AutoScrollProvider extends ChangeNotifier {
     if (_sectionCount == 0) return;
 
     isAutoScrolling = true;
-    _notify(
-      'startAutoScroll itemIndex=$_currentItemIndex sectionIndex=$_currentSectionIndex sectionCount=$_sectionCount',
-    );
+    notifyListeners();
 
     _progressTimer?.cancel();
     _progressTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
@@ -312,11 +307,6 @@ class AutoScrollProvider extends ChangeNotifier {
     autoScrollTimer?.cancel();
     autoScrollTimer = null;
     isAutoScrolling = false;
-  }
-
-  void _notify(String reason) {
-    BuildTrace.event('AutoScrollProvider.notifyListeners', reason);
-    notifyListeners();
   }
 
   // ===== CLEANUP =====

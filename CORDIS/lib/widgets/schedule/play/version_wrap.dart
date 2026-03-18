@@ -7,7 +7,6 @@ import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
-import 'package:cordis/utils/debug/build_trace.dart';
 import 'package:cordis/utils/section_constants.dart';
 import 'package:cordis/widgets/ciphers/viewer/annotation_card.dart';
 import 'package:cordis/widgets/ciphers/viewer/section_card.dart';
@@ -43,10 +42,7 @@ class VersionWrap extends StatelessWidget {
       ),
       builder: (context, value, child) {
         final (wrapDirection, _, _, _) = value;
-        BuildTrace.rebuild(
-          'VersionWrap.build',
-          details: 'itemIndex=$itemIndex versionID=$versionID wrapDirection=$wrapDirection',
-        );
+
         return Padding(
           padding: EdgeInsets.only(
             left: wrapDirection == Axis.vertical ? 16.0 : 0.0,
@@ -70,10 +66,7 @@ class VersionWrap extends StatelessWidget {
       CipherProvider
     >(
       builder: (context, localVer, cloudVer, ciph, child) {
-        BuildTrace.rebuild(
-          'VersionWrap.header',
-          details: 'itemIndex=$itemIndex versionID=$versionID',
-        );
+
         final textTheme = Theme.of(context).textTheme;
 
         String title;
@@ -162,11 +155,6 @@ class VersionWrap extends StatelessWidget {
                   !isTransition(sectionCode))),
         )
         .toList();
-
-    BuildTrace.rebuild(
-      'VersionWrap.sectionCards',
-      details: 'itemIndex=$itemIndex versionID=$versionID filteredSections=${filteredStructure.length}',
-    );
 
     final scroll = context.read<AutoScrollProvider>();
 

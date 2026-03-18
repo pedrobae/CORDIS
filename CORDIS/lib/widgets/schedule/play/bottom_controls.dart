@@ -6,7 +6,6 @@ import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/schedule/play_schedule_state_provider.dart';
 import 'package:cordis/providers/settings/layout_settings_provider.dart';
-import 'package:cordis/utils/debug/build_trace.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -47,16 +46,13 @@ class _BottomControlsState extends State<BottomControls> {
     );
 
     _scroll.stopAutoScroll();
-    _scroll.currentSectionIndex =
-        0;
+    _scroll.currentSectionIndex = 0;
     _scroll.currentItemIndex = index;
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
-    BuildTrace.rebuild('BottomControls.build');
 
     return Container(
       decoration: BoxDecoration(
@@ -79,10 +75,6 @@ class _BottomControlsState extends State<BottomControls> {
               itemCount: playState.itemCount,
             ),
             builder: (context, s, child) {
-              BuildTrace.rebuild(
-                'BottomControls.selector',
-                details: 'currentIndex=${s.currentIndex} itemCount=${s.itemCount} direction=${s.scrollDirection}',
-              );
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.max,
@@ -158,10 +150,6 @@ class _BottomControlsState extends State<BottomControls> {
       child: Selector<PlayScheduleStateProvider, PlaylistItem?>(
         selector: (_, s) => s.nextItem,
         builder: (context, nextItem, child) {
-          BuildTrace.rebuild(
-            'BottomControls.nextTitle',
-            details: 'currentIndex=$currentIndex itemCount=$itemCount nextType=${nextItem?.type}',
-          );
           String nextTitle = '';
           if (currentIndex < itemCount - 1 && nextItem != null) {
             nextTitle = _getItemTitle(nextItem);
