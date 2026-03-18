@@ -115,6 +115,12 @@ class _StyleSettingsState extends State<StyleSettings> {
                         style: textTheme.labelLarge,
                       ),
                     ),
+                    Text(
+                      '${(_localCardWidthMult! * 100).round()}%',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                     Slider(
                       value: _localCardWidthMult!,
                       min: 0.2,

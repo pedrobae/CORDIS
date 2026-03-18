@@ -27,9 +27,9 @@ import 'package:cordis/providers/section_provider.dart';
 import 'package:flutter/rendering.dart';
 import 'package:cordis/widgets/ciphers/viewer/structure_list.dart';
 import 'package:cordis/widgets/schedule/play/auto_scroll_indicator.dart';
-import 'package:cordis/widgets/settings/auto_scroll_settings.dart';
-import 'package:cordis/widgets/settings/content_filters.dart';
-import 'package:cordis/widgets/settings/style_settings.dart';
+import 'package:cordis/widgets/settings/sheet_auto_scroll.dart';
+import 'package:cordis/widgets/settings/sheet_filters.dart';
+import 'package:cordis/widgets/settings/sheet_style.dart';
 
 class PlaySchedule extends StatefulWidget {
   final dynamic scheduleId;

@@ -187,7 +187,8 @@ class _LoginScreenState extends State<LoginScreen> {
           isDisabled: auth.isLoading,
           onPressed: () => _emailSignIn(),
         ),
-        if (!Platform.isIOS) _buildGoogleSignInButton(),
+        if (!Platform.isIOS && RemoteConfigService.isRegistrationEnabled)
+          _buildGoogleSignInButton(),
         _buildShareCodeButton(auth),
       ],
     );
