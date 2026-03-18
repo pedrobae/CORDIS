@@ -81,7 +81,7 @@ class SectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void cacheSectionCopy(dynamic versionId) {
+  void cacheCopyOfVersion(dynamic versionId) {
     final sections = _sections[versionId];
     if (sections == null) return;
 
@@ -95,6 +95,23 @@ class SectionProvider extends ChangeNotifier {
     _hasUnsavedChanges = true;
 
     notifyListeners();
+  }
+
+  String? cacheCopyOfSection({
+    required dynamic versionId,
+    required String sectionCode,
+  }) {
+    final section = _sections[versionId]?[sectionCode];
+    if (section == null) return null;
+
+    final newCode = _assignNumbering(versionId, '', section.contentCode);
+
+    final newSection = section.copyWith(contentCode: newCode);
+    _sections[versionId]![newSection.contentCode] = newSection;
+
+    _hasUnsavedChanges = true;
+    notifyListeners();
+    return newCode;
   }
 
   ///Create sections for a new version from -1 cache

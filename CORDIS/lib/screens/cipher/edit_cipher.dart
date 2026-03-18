@@ -184,7 +184,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
 
     await cipherProvider.loadCipher(widget.cipherID);
     await sectionProvider.loadSectionsOfVersion(widget.versionID);
-    sectionProvider.cacheSectionCopy(widget.versionID);
+    sectionProvider.cacheCopyOfVersion(widget.versionID);
   }
 
   @override

@@ -300,14 +300,24 @@ class _TokenContentCardState extends State<TokenContentCard> {
               ),
               // create copy
               FilledTextButton(
-                text: AppLocalizations.of(context)!.createPlaceholder(AppLocalizations.of(context)!.copy),
+                text: AppLocalizations.of(
+                  context,
+                )!.createPlaceholder(AppLocalizations.of(context)!.copy),
                 trailingIcon: Icons.chevron_right,
                 isDiscrete: true,
                 onPressed: () {
-                  context.read<LocalVersionProvider>().addSectionToStruct(
-                    widget.versionID,
-                    widget.sectionCode,
+                  Navigator.pop(context); // Close the bottom sheet
+                  final sect = context.read<SectionProvider>();
+                  final newCode = sect.cacheCopyOfSection(
+                    versionId: widget.versionID,
+                    sectionCode: widget.sectionCode,
                   );
+                  if (newCode != null) {
+                    context.read<LocalVersionProvider>().addSectionToStruct(
+                      widget.versionID,
+                      newCode,
+                    );
+                  }
                 },
               ),
               // delete
