@@ -30,6 +30,7 @@ import 'package:cordis/widgets/schedule/play/auto_scroll_indicator.dart';
 import 'package:cordis/widgets/settings/sheet_auto_scroll.dart';
 import 'package:cordis/widgets/settings/sheet_filters.dart';
 import 'package:cordis/widgets/settings/sheet_style.dart';
+import 'package:cordis/utils/debug/build_trace.dart';
 
 class PlaySchedule extends StatefulWidget {
   final dynamic scheduleId;
@@ -42,7 +43,7 @@ class PlaySchedule extends StatefulWidget {
 
 class PlayScheduleState extends State<PlaySchedule> {
   late final bool isCloud = widget.scheduleId is String;
-  late final bool isWide = MediaQuery.of(context).size.width > 600;
+  bool get isWide => MediaQuery.of(context).size.width > 600;
 
   late final PlayScheduleStateProvider _state;
   late final AutoScrollProvider _scroll;
@@ -51,6 +52,14 @@ class PlayScheduleState extends State<PlaySchedule> {
   @override
   void initState() {
     super.initState();
+    BuildTrace.reset(prefix: 'PlaySchedule');
+    BuildTrace.reset(prefix: 'VersionWrap');
+    BuildTrace.reset(prefix: 'FlowFlex');
+    BuildTrace.reset(prefix: 'BottomControls');
+    BuildTrace.event(
+      'PlaySchedule.initState',
+      'scheduleId=${widget.scheduleId} isCloud=$isCloud',
+    );
     _state = context.read<PlayScheduleStateProvider>();
     _scroll = context.read<AutoScrollProvider>();
 
@@ -58,6 +67,7 @@ class PlayScheduleState extends State<PlaySchedule> {
     _scrollController.addListener(_scrollListener);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      BuildTrace.event('PlaySchedule.postFrame', 'reset state and load data');
       _scroll.clearCache();
       _state.reset();
 
@@ -67,6 +77,7 @@ class PlayScheduleState extends State<PlaySchedule> {
 
   @override
   void dispose() {
+    BuildTrace.event('PlaySchedule.dispose', 'disposing play screen');
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     _state.reset();
@@ -107,6 +118,11 @@ class PlayScheduleState extends State<PlaySchedule> {
   Future<void> _loadData() async {
     if (widget.scheduleId == null) throw Exception("Schedule ID is required");
 
+    BuildTrace.event(
+      'PlaySchedule.loadData',
+      'scheduleId=${widget.scheduleId} isCloud=$isCloud',
+    );
+
     if (!isCloud) {
       await _loadLocal();
     } else {
@@ -116,6 +132,8 @@ class PlayScheduleState extends State<PlaySchedule> {
 
   Future<void> _loadLocal() async {
     if (!mounted) return;
+
+    BuildTrace.event('PlaySchedule.loadLocal', 'loading local schedule');
 
     final localSch = context.read<LocalScheduleProvider>();
     final play = context.read<PlaylistProvider>();
@@ -128,8 +146,6 @@ class PlayScheduleState extends State<PlaySchedule> {
     await play.loadPlaylist(schedule.playlistId);
 
     final items = play.getPlaylist(schedule.playlistId)!.items;
-    _state.setItems(items);
-    _scroll.currentItemIndex = 0;
     for (final item in items) {
       switch (item.type) {
         case PlaylistItemType.version:
@@ -144,10 +160,17 @@ class PlayScheduleState extends State<PlaySchedule> {
           break;
       }
     }
+
+    _state.setItems(items);
+    _scroll.currentItemIndex = 0;
+
+    BuildTrace.event('PlaySchedule.loadLocal', 'loaded ${items.length} items');
   }
 
   Future<void> _loadCloud() async {
     if (!mounted) return;
+
+    BuildTrace.event('PlaySchedule.loadCloud', 'loading cloud schedule');
 
     final cloudSch = context.read<CloudScheduleProvider>();
     final cloudVer = context.read<CloudVersionProvider>();
@@ -160,9 +183,6 @@ class PlayScheduleState extends State<PlaySchedule> {
     }
 
     final items = schedule.items;
-    _state.setItems(items);
-    _scroll.currentItemIndex = 0;
-
     for (var item in items) {
       switch (item.type) {
         case PlaylistItemType.version:
@@ -181,11 +201,21 @@ class PlayScheduleState extends State<PlaySchedule> {
           break;
       }
     }
+
+    _state.setItems(items);
+    _scroll.currentItemIndex = 0;
+
+    BuildTrace.event('PlaySchedule.loadCloud', 'loaded ${items.length} items');
   }
 
   @override
   Widget build(BuildContext context) {
     final cloudSch = context.read<CloudScheduleProvider>();
+
+    BuildTrace.rebuild(
+      'PlaySchedule.build',
+      details: 'scheduleId=${widget.scheduleId} isWide=$isWide',
+    );
 
     return Column(
       children: [
@@ -212,6 +242,11 @@ class PlayScheduleState extends State<PlaySchedule> {
                     (state.itemCount, state.isLoading, laySet.scrollDirection),
                 builder: (context, s, child) {
                   final (itemCount, isLoading, scrollDirection) = s;
+                  BuildTrace.rebuild(
+                    'PlaySchedule.listView',
+                    details:
+                        'itemCount=$itemCount isLoading=$isLoading direction=$scrollDirection',
+                  );
                   if (isLoading) {
                     return const Center(child: CircularProgressIndicator());
                   }
@@ -228,6 +263,9 @@ class PlayScheduleState extends State<PlaySchedule> {
                   return SingleChildScrollView(
                     controller: _scrollController,
                     scrollDirection: scrollDirection,
+                    padding: scrollDirection == Axis.vertical
+                        ? const EdgeInsets.only(bottom: 16, left: 8, right: 8)
+                        : const EdgeInsets.only(right: 16, top: 8, bottom: 8),
                     child: Flex(
                       direction: scrollDirection,
                       children: _buildItems(),
@@ -254,6 +292,10 @@ class PlayScheduleState extends State<PlaySchedule> {
   }
 
   List<Widget> _buildItems() {
+    BuildTrace.rebuild(
+      'PlaySchedule.items',
+      details: 'itemCount=${_state.itemCount}',
+    );
     final items = <Widget>[];
     for (int i = 0; i < _state.itemCount; i++) {
       final item = _state.getItemAt(i);
@@ -306,6 +348,10 @@ class PlayScheduleState extends State<PlaySchedule> {
     return Selector<PlayScheduleStateProvider, PlaylistItem?>(
       selector: (_, state) => state.currentItem,
       builder: (context, item, child) {
+        BuildTrace.rebuild(
+          'PlaySchedule.structBar',
+          details: 'itemType=${item?.type} showSettings=${_state.showSettings}',
+        );
         if (item == null) return const SizedBox.shrink();
         if (item.type == PlaylistItemType.flowItem) {
           return Align(
@@ -353,6 +399,10 @@ class PlayScheduleState extends State<PlaySchedule> {
                     Selector<PlayScheduleStateProvider, bool>(
                       selector: (_, state) => state.showSettings,
                       builder: (context, showSettings, child) {
+                        BuildTrace.rebuild(
+                          'PlaySchedule.mobileSettingsToggle',
+                          details: 'showSettings=$showSettings',
+                        );
                         return GestureDetector(
                           onTap: () {
                             _state.toggleSettings();
@@ -385,6 +435,10 @@ class PlayScheduleState extends State<PlaySchedule> {
             Selector<PlayScheduleStateProvider, bool>(
               selector: (_, state) => state.showSettings,
               builder: (context, showSettings, child) {
+                BuildTrace.rebuild(
+                  'PlaySchedule.settingsRow',
+                  details: 'showSettings=$showSettings',
+                );
                 if (!showSettings) return const SizedBox.shrink();
                 return Container(
                   padding: const EdgeInsets.symmetric(

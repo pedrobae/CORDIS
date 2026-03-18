@@ -3,6 +3,7 @@ import 'package:cordis/models/domain/playlist/flow_item.dart';
 import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/settings/layout_settings_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
+import 'package:cordis/utils/debug/build_trace.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -35,6 +36,10 @@ class FlowFlex extends StatelessWidget {
       },
       builder: (context, value, child) {
         final (flowItem, lyricStyle) = value;
+        BuildTrace.rebuild(
+          'FlowFlex.build',
+          details: 'itemIndex=$itemIndex flowID=${flowItem?.id ?? flowID} fontSize=${lyricStyle.fontSize}',
+        );
         if (flowItem == null) {
           return Center(child: CircularProgressIndicator());
         }

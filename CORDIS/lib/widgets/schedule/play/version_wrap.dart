@@ -3,11 +3,11 @@ import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/providers/auto_scroll_provider.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/settings/layout_settings_provider.dart';
-import 'package:cordis/providers/schedule/play_schedule_state_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/utils/date_utils.dart';
+import 'package:cordis/utils/debug/build_trace.dart';
 import 'package:cordis/utils/section_constants.dart';
 import 'package:cordis/widgets/ciphers/viewer/annotation_card.dart';
 import 'package:cordis/widgets/ciphers/viewer/section_card.dart';
@@ -26,23 +26,27 @@ class VersionWrap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector5<
-      PlayScheduleStateProvider,
+    return Selector4<
       LayoutSetProvider,
       LocalVersionProvider,
       CloudVersionProvider,
       SectionProvider,
-      (Axis, Map<LayoutFilter, bool>, int, int, int)
+      (Axis, Map<LayoutFilter, bool>, int, int)
     >(
-      selector: (context, state, laySet, localVer, cloudVer, sect) => (
+      selector: (context, laySet, localVer, cloudVer, sect) => (
         laySet.wrapDirection,
         laySet.layoutFilters,
-        localVer.versions.length,
-        cloudVer.versions.length,
-        sect.loadedVersionsCount,
+        versionID is String
+            ? (cloudVer.getVersion(versionID)?.songStructure.length ?? -1)
+            : (localVer.getVersion(versionID)?.songStructure.length ?? -1),
+        sect.getSections(versionID).length,
       ),
       builder: (context, value, child) {
-        final (wrapDirection, _, _, _, _) = value;
+        final (wrapDirection, _, _, _) = value;
+        BuildTrace.rebuild(
+          'VersionWrap.build',
+          details: 'itemIndex=$itemIndex versionID=$versionID wrapDirection=$wrapDirection',
+        );
         return Padding(
           padding: EdgeInsets.only(
             left: wrapDirection == Axis.vertical ? 16.0 : 0.0,
@@ -66,6 +70,10 @@ class VersionWrap extends StatelessWidget {
       CipherProvider
     >(
       builder: (context, localVer, cloudVer, ciph, child) {
+        BuildTrace.rebuild(
+          'VersionWrap.header',
+          details: 'itemIndex=$itemIndex versionID=$versionID',
+        );
         final textTheme = Theme.of(context).textTheme;
 
         String title;
@@ -155,6 +163,11 @@ class VersionWrap extends StatelessWidget {
         )
         .toList();
 
+    BuildTrace.rebuild(
+      'VersionWrap.sectionCards',
+      details: 'itemIndex=$itemIndex versionID=$versionID filteredSections=${filteredStructure.length}',
+    );
+
     final scroll = context.read<AutoScrollProvider>();
 
     final sectionWidgets = <Widget>[_buildHeader()];
@@ -164,14 +177,17 @@ class VersionWrap extends StatelessWidget {
 
       final code = filteredStructure[i];
 
-      final section = versionID is String
-          ? () {
+        final section =
+          sect.getSection(versionID, code) ??
+          (versionID is String
+            ? () {
               final sectionMap = cloudVer
-                  .getVersion(versionID)!
-                  .sections[code]!;
+                .getVersion(versionID)
+                ?.sections[code];
+              if (sectionMap == null) return null;
               return Section.fromFirestore(sectionMap);
             }()
-          : sect.getSection(versionID, code);
+            : null);
 
       if (section == null) {
         sectionWidgets.add(const SizedBox.shrink());
