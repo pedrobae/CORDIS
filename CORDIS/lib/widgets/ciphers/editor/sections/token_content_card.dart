@@ -43,7 +43,10 @@ class _TokenContentCardState extends State<TokenContentCard> {
     });
   }
 
-  List<ContentToken> _tokensForContent(String content, {required bool triggerBuild}) {
+  List<ContentToken> _tokensForContent(
+    String content, {
+    required bool triggerBuild,
+  }) {
     final shouldRetokenize =
         _activeTokens == null || (!_isDragging && _activeContent != content);
 
@@ -82,6 +85,9 @@ class _TokenContentCardState extends State<TokenContentCard> {
     int index = 0;
     for (var token in _activeTokens!) {
       if (token == target) break;
+      index++;
+    }
+    if (target.type == TokenType.postSeparator) {
       index++;
     }
     _activeTokens!.insert(index, draggable);

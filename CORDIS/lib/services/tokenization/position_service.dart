@@ -116,13 +116,21 @@ class PositionService {
             cursor.chordX - TokenizationConstants.chordTokenWidthPadding,
             cursor.lyricsX,
           );
-          cursor.lyricsX = xOffset + ctx.posCtx.chordLyricSpacing;
-          cursor.chordX = xOffset + ctx.posCtx.chordLyricSpacing;
+          if (ctx.posCtx.isEditMode) {
+            cursor.chordX =
+                xOffset +
+                TokenizationConstants.targetWidth +
+                2 * ctx.posCtx.minChordSpacing +
+                TokenizationConstants.chordTokenWidthPadding;
+          } else {
+            cursor.chordX = xOffset + ctx.posCtx.minChordSpacing;
+          }
           positions.setPosition(
             token,
             xOffset + ctx.posCtx.minChordSpacing,
             cursor.yOffset,
           );
+
           charIndex++;
           break;
 
@@ -130,6 +138,7 @@ class PositionService {
           cursor.lyricsX = ctx.precedingOffset + ctx.posCtx.minChordSpacing;
           cursor.chordX = ctx.precedingOffset + ctx.posCtx.minChordSpacing;
           cursor.foundPreSeparator = true;
+
           positions.setPosition(
             token,
             ctx.precedingOffset - TokenizationConstants.targetWidth,
@@ -140,10 +149,11 @@ class PositionService {
 
         case TokenType.chord:
           if (cursor.lyricsX < cursor.chordX) {
-            final hasLyricAfterChord = _hasLyricAfterInWord(word, token);
+            final hasLyricAfter = _hasLyricAfterInWord(word, token);
+            final hasLyricBefore = _hasLyricBeforeInWord(word, token);
             final underlineWidth = cursor.chordX - cursor.lyricsX;
 
-            if (hasLyricAfterChord && underlineWidth > 0) {
+            if (hasLyricAfter && hasLyricBefore && underlineWidth > 0) {
               final underlineToken = ContentToken(
                 text: '',
                 type: TokenType.underline,
@@ -346,7 +356,24 @@ class PositionService {
         }
         continue;
       }
+      if (token.type == TokenType.lyric) {
+        return true;
+      }
+    }
 
+    return false;
+  }
+
+  /// Checks whether there is a lyric token after [chordToken] in the same word.
+  bool _hasLyricBeforeInWord(TokenWord word, ContentToken chordToken) {
+    bool foundChord = false;
+    for (var token in word.tokens.reversed) {
+      if (!foundChord) {
+        if (token == chordToken) {
+          foundChord = true;
+        }
+        continue;
+      }
       if (token.type == TokenType.lyric) {
         return true;
       }

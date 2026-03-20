@@ -9,8 +9,6 @@ class TokenizationConstants {
   static const double chordTokenWidthPadding = 10.0;
 
   /// DRAG TARGET FEEDBACK
-  static const int dragFeedbackTokensBefore = 5;
-  static const int dragFeedbackTokensAfter = 10;
   static const double dragFeedbackCutoutWidth = 130.0;
   static const double dragFeedbackCutoutPadding = 4.0;
 }
