@@ -43,13 +43,20 @@ class _TokenContentCardState extends State<TokenContentCard> {
     });
   }
 
-  List<ContentToken> _tokensForContent(String content) {
+  List<ContentToken> _tokensForContent(String content, {required bool triggerBuild}) {
     final shouldRetokenize =
         _activeTokens == null || (!_isDragging && _activeContent != content);
 
     if (shouldRetokenize) {
-      _activeTokens = _tokenizer.tokenize(content);
-      _activeContent = content;
+      if (triggerBuild) {
+        setState(() {
+          _activeTokens = _tokenizer.tokenize(content);
+          _activeContent = content;
+        });
+      } else {
+        _activeTokens = _tokenizer.tokenize(content);
+        _activeContent = content;
+      }
     }
 
     return _activeTokens!;
@@ -65,6 +72,8 @@ class _TokenContentCardState extends State<TokenContentCard> {
       sectionCode: widget.sectionCode,
       content: newContent,
     );
+
+    _tokensForContent(newContent, triggerBuild: true);
   }
 
   void _addChord(ContentToken draggable, ContentToken target) {
@@ -106,7 +115,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final tokens = _tokensForContent(section.contentText);
+        _tokensForContent(section.contentText, triggerBuild: false);
 
         return Container(
           decoration: BoxDecoration(
@@ -208,7 +217,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
                       final content = _tokenizer.createContent(
                         content: section.contentText,
-                        initialTokens: tokens,
+                        initialTokens: _activeTokens,
                         posCtx: PositioningContext(
                           underLineColor: colorScheme.onSurface,
                           maxWidth: constraints.maxWidth,
