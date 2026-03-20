@@ -206,7 +206,7 @@ class TokenizationService {
             text: buildCtx.transposeChord(token.text),
             style: buildCtx.chordStyle,
             cache: buildCtx.cache,
-            isChordToken: posCtx.isEditMode
+            isChordToken: posCtx.isEditMode,
           );
           break;
 
@@ -229,13 +229,13 @@ class TokenizationService {
             text: buildCtx.transposeChord(token.text),
             style: buildCtx.chordStyle,
             cache: buildCtx.cache,
-            isChordToken: posCtx.isEditMode
+            isChordToken: posCtx.isEditMode,
           );
           tokenMeasurements[token] = Measurements(
             width: TokenizationConstants.targetWidth,
             height: msr.height + chordMsr.height + posCtx.chordLyricSpacing,
             baseline: msr.baseline,
-            size: msr.size + chordMsr.size
+            size: msr.size + chordMsr.size,
           );
           break;
         case TokenType.underline:
@@ -316,11 +316,12 @@ class TokenizationService {
         case TokenType.space:
         case TokenType.lyric:
           return contentFilters[ContentFilter.lyrics]!;
-        case TokenType.postSeparator:
-        case TokenType.preSeparator:
+
         case TokenType.underline:
           return false;
         case TokenType.newline:
+        case TokenType.postSeparator:
+        case TokenType.preSeparator:
           // Returns true if any content is shown
           return contentFilters[ContentFilter.chords]! ||
               contentFilters[ContentFilter.lyrics]!;

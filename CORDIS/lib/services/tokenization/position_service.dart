@@ -112,7 +112,10 @@ class PositionService {
 
       switch (token.type) {
         case TokenType.postSeparator:
-          final xOffset = max(cursor.chordX - TokenizationConstants.chordTokenWidthPadding , cursor.lyricsX);
+          final xOffset = max(
+            cursor.chordX - TokenizationConstants.chordTokenWidthPadding,
+            cursor.lyricsX,
+          );
           cursor.lyricsX = xOffset + ctx.posCtx.chordLyricSpacing;
           cursor.chordX = xOffset + ctx.posCtx.chordLyricSpacing;
           positions.setPosition(
@@ -312,7 +315,9 @@ class PositionService {
         for (var token in word.tokens) {
           if (token.type == TokenType.preSeparator) {
             foundSeparator = true;
-            lineChordX += TokenizationConstants.targetWidth;
+            if (ctx.isEditMode) {
+              lineChordX += TokenizationConstants.targetWidth;
+            }
             break;
           } else if (token.type == TokenType.chord) {
             // Accumulate all widths
