@@ -88,7 +88,7 @@ build/
 # Platform builds
 CORDIS/android/.gradle/
 CORDIS/android/local.properties
-CORDIS/ios/Flutter/flutter_export_environment.sh
+CORDIS/ios/Flutter
 CORDIS/windows/flutter/ephemeral/
 CORDIS/linux/flutter/ephemeral/
 CORDIS/macos/Flutter/ephemeral/
