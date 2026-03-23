@@ -165,7 +165,7 @@ class PlaylistProvider extends ChangeNotifier {
       if (playlist != null) {
         await _playlistRepository.upsertPlaylistMetadata(playlist);
       }
-
+      int position = 0;
       for (var item in playlist!.items) {
         switch (item.type) {
           case PlaylistItemType.version:
@@ -177,14 +177,18 @@ class PlaylistProvider extends ChangeNotifier {
             } else {
               await _playlistRepository.updatePlaylistVersionPosition(
                 item.id!,
-                item.position,
+                position,
               );
             }
             break;
           case PlaylistItemType.flowItem:
-            // Handled in FlowItemProvider, no need to update here
+            await _playlistRepository.updateFlowItemPosition(
+              item.contentId!,
+              position,
+            );
             break;
         }
+        position++;
       }
 
       await loadPlaylist(playlistID);

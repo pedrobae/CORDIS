@@ -1,3 +1,4 @@
+import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/user/my_auth_provider.dart';
@@ -253,10 +254,13 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                     final sel = context.read<SelectionProvider>();
                     final localVer = context.read<LocalVersionProvider>();
                     final sect = context.read<SectionProvider>();
+                    final flow = context.read<FlowItemProvider>();
 
                     nav.push(
                       () => ViewPlaylistScreen(playlistId: playlist.id),
-                      changeDetector: () => play.hasUnsavedChanges,
+                      changeDetector: () {
+                        return play.hasUnsavedChanges || flow.hasUnsavedChanges;
+                      },
                       onChangeDiscarded: () async {
                         debugPrint('PLAYLIST VIEW - discarding Changes');
                         play.loadPlaylist(playlist.id);
@@ -267,6 +271,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                         }
                         sel.clearNewlyAddedVersionIds();
                         play.clearUnsavedChanges();
+                        flow.clearUnsavedChanges();
                       },
                       showBottomNavBar: true,
                     );

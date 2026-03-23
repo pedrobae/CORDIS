@@ -1,3 +1,4 @@
+import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:flutter/material.dart';
@@ -46,12 +47,15 @@ class PlaylistCard extends StatelessWidget {
           onTap: () {
             final localVer = context.read<LocalVersionProvider>();
             final sect = context.read<SectionProvider>();
+            final flow = context.read<FlowItemProvider>();
 
             sel.isSelectionMode
                 ? null
                 : nav.push(
                     () => ViewPlaylistScreen(playlistId: playlistID),
-                    changeDetector: () => play.hasUnsavedChanges,
+                    changeDetector: () {
+                      return play.hasUnsavedChanges || flow.hasUnsavedChanges;
+                    },
                     onChangeDiscarded: () async {
                       debugPrint('PLAYLIST VIEW - discarding Changes');
                       play.loadPlaylist(playlist.id);
@@ -61,6 +65,7 @@ class PlaylistCard extends StatelessWidget {
                         await sect.deleteSectionsOfVersion(id);
                       }
                       play.clearUnsavedChanges();
+                      flow.clearUnsavedChanges();
                       sel.clearNewlyAddedVersionIds();
                     },
                     showBottomNavBar: true,
@@ -146,10 +151,14 @@ class PlaylistCard extends StatelessWidget {
                     onPressed: () {
                       final localVer = context.read<LocalVersionProvider>();
                       final sect = context.read<SectionProvider>();
+                      final flow = context.read<FlowItemProvider>();
 
                       nav.push(
                         () => ViewPlaylistScreen(playlistId: playlistID),
-                        changeDetector: () => play.hasUnsavedChanges,
+                        changeDetector: () {
+                          return play.hasUnsavedChanges ||
+                              flow.hasUnsavedChanges;
+                        },
                         onChangeDiscarded: () async {
                           debugPrint('PLAYLIST VIEW - discarding Changes');
                           play.loadPlaylist(playlist.id);
@@ -159,6 +168,7 @@ class PlaylistCard extends StatelessWidget {
                             await sect.deleteSectionsOfVersion(id);
                           }
                           play.clearUnsavedChanges();
+                          flow.clearUnsavedChanges();
                           sel.clearNewlyAddedVersionIds();
                         },
                         showBottomNavBar: true,

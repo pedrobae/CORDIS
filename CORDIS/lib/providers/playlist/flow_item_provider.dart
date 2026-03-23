@@ -214,4 +214,9 @@ class FlowItemProvider extends ChangeNotifier {
     _isDeleting = false;
     notifyListeners();
   }
+
+  void clearUnsavedChanges() {
+    _hasUnsavedChanges = false;
+    notifyListeners();
+  }
 }

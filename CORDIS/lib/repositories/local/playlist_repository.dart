@@ -2,19 +2,6 @@ import 'package:cordis/helpers/database.dart';
 import 'package:cordis/models/domain/playlist/playlist.dart';
 import 'package:cordis/models/domain/playlist/playlist_item.dart';
 
-// class Playlist {
-//   final int id;
-//   final String name;
-//   final String? firebaseId;
-//   final String? description;
-//   final int createdBy;
-//   final bool? isPublic;
-//   final DateTime? createdAt;
-//   final DateTime? updatedAt;
-//   final List<String> collaborators;
-//   final String? shareCode;
-//   final List<PlaylistItem> items;
-
 class PlaylistRepository {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
 
@@ -26,10 +13,7 @@ class PlaylistRepository {
 
     return await db.transaction((txn) async {
       // 1. Insert the playlist (basic info only)
-      final playlistId = await txn.insert(
-        'playlist',
-        playlist.toSqlite(),
-      );
+      final playlistId = await txn.insert('playlist', playlist.toSqlite());
 
       // 2. Insert playlist items if any
       for (final item in playlist.items) {
@@ -69,7 +53,7 @@ class PlaylistRepository {
 
       /// Gets all items of a playlist in order
       final versionItems = await _getVersionItemsOfPlaylist(playlist.id);
-      final textItems = await _getTextItemsOfPlaylist(playlist.id);
+      final textItems = await _getFlowItemsOfPlaylist(playlist.id);
 
       // Combine and sort all items by position
       final allItemResults = [...versionItems, ...textItems]
@@ -96,7 +80,7 @@ class PlaylistRepository {
 
     /// Gets all items of a playlist in order
     final versionItems = await _getVersionItemsOfPlaylist(playlistId);
-    final textItems = await _getTextItemsOfPlaylist(playlistId);
+    final textItems = await _getFlowItemsOfPlaylist(playlistId);
 
     // Combine and sort all items by position
     final allItemResults = [...versionItems, ...textItems]
@@ -188,21 +172,18 @@ class PlaylistRepository {
     });
   }
 
-  /// Adds a version to a specific position in the playlist (used when importing)
-  Future<void> addVersionToPlaylistAtPosition(
+  Future<void> addVersionToPlaylistAt(
     int playlistId,
     int versionID,
     int position,
   ) async {
     final db = await _databaseHelper.database;
 
-    await db.transaction((txn) async {
-      // Insert version relationship at the desired position
-      await txn.insert('playlist_version', {
-        'version_id': versionID,
-        'playlist_id': playlistId,
-        'position': position,
-      });
+    // Insert version relationship
+    await db.insert('playlist_version', {
+      'version_id': versionID,
+      'playlist_id': playlistId,
+      'position': position,
     });
   }
 
@@ -221,79 +202,19 @@ class PlaylistRepository {
     );
   }
 
-  /// Removes a version from a playlist by playlist version ID
-  Future<void> removeVersionFromPlaylist(int itemId) async {
+  Future<void> updateFlowItemPosition(int flowItemId, int newPosition) async {
     final db = await _databaseHelper.database;
 
-    await db.transaction((txn) async {
-      // Remove version relationship
-      await txn.delete(
-        'playlist_version',
-        where: 'id = ?',
-        whereArgs: [itemId],
-      );
-    });
-  }
-
-  // ===== UNIFIED PLAYLIST ITEMS =====
-  /// Saves playlist items from a list
-  /// Used for reordering items in a playlist
-  Future<void> savePlaylistOrder(
-    int playlistId,
-    List<PlaylistItem> items,
-  ) async {
-    final db = await _databaseHelper.database;
-
-    await db.transaction((txn) async {
-      for (var i = 0; i < items.length; i++) {
-        final item = items[i];
-        final tempPosition = -(i + 1000);
-
-        switch (item.type) {
-          case PlaylistItemType.version:
-            await txn.update(
-              'playlist_version',
-              {'position': tempPosition},
-              where: 'id = ?',
-              whereArgs: [item.id!],
-            );
-            break;
-
-          case PlaylistItemType.flowItem:
-            await txn.update(
-              'flow_item',
-              {'position': tempPosition},
-              where: 'id = ?',
-              whereArgs: [item.contentId],
-            );
-            break;
-        }
-      }
-
-      for (var item in items) {
-        switch (item.type) {
-          case PlaylistItemType.version:
-            await txn.update(
-              'playlist_version',
-              {'position': item.position},
-              where: 'id = ?',
-              whereArgs: [item.id!],
-            );
-            break;
-          case PlaylistItemType.flowItem:
-            await txn.update(
-              'flow_item',
-              {'position': item.position},
-              where: 'id = ?',
-              whereArgs: [item.contentId],
-            );
-        }
-      }
-    });
+    await db.update(
+      'flow_item',
+      {'position': newPosition},
+      where: 'id = ?',
+      whereArgs: [flowItemId],
+    );
   }
 
   /// Gets text items of a playlist
-  Future<List<PlaylistItem>> _getTextItemsOfPlaylist(int playlistId) async {
+  Future<List<PlaylistItem>> _getFlowItemsOfPlaylist(int playlistId) async {
     final db = await _databaseHelper.database;
 
     final flowItemResults = await db.rawQuery(
@@ -350,192 +271,5 @@ class PlaylistRepository {
         versionFirebaseId: firebaseId,
       );
     }).toList();
-  }
-
-  /// Gets version item ID in a playlist by playlist and version IDs
-  /// Returns null if not found
-  Future<int?> getPlaylistVersionId(
-    int playlistId,
-    int versionId, {
-    int? position,
-  }) async {
-    final db = await _databaseHelper.database;
-
-    final result = await db.query(
-      'playlist_version',
-      columns: ['id'],
-      where:
-          'playlist_id = ? AND version_id = ?${position != null ? ' AND position = ?' : ''}',
-      whereArgs: [playlistId, versionId, ?position],
-    );
-
-    if (result.isNotEmpty) {
-      return result.first['id'] as int;
-    } else {
-      return null;
-    }
-  }
-
-  /// Prunes playlist items present in the provided lists
-  /// Used during sync to remove items no longer in the cloud playlist
-  Future<void> prunePlaylistItems(
-    int playlistId,
-    List<int> textItemIds,
-    List<int> versionItemIds,
-  ) async {
-    final db = await _databaseHelper.database;
-
-    // Prune versions
-    if (versionItemIds.isNotEmpty) {
-      final versionPlaceholders = List.filled(
-        versionItemIds.length,
-        '?',
-      ).join(', ');
-      await db.delete(
-        'playlist_version',
-        where: 'id IN ($versionPlaceholders)',
-        whereArgs: [...versionItemIds],
-      );
-    }
-
-    // Prune text sections
-    if (textItemIds.isNotEmpty) {
-      final textPlaceholders = List.filled(textItemIds.length, '?').join(', ');
-      await db.delete(
-        'flow_item',
-        where: 'playlist_id = ? AND id IN ($textPlaceholders)',
-        whereArgs: [playlistId, ...textItemIds],
-      );
-    }
-  }
-
-  // ===== UTILS =====
-  /// Sync entire playlist with all its items in a single transaction
-  /// This prevents database locking issues during bulk sync operations
-  Future<int> syncPlaylistWithTransaction(
-    Playlist playlist,
-    List<Map<String, dynamic>> versionSectionItems,
-    List<Map<String, dynamic>> textSectionItems,
-    List<int> textItemsToPrune,
-    List<int> versionItemsToPrune,
-  ) async {
-    final db = await _databaseHelper.database;
-    late int playlistId;
-
-    await db.transaction((txn) async {
-      // 1. Upsert playlist
-      final existingResult = await txn.query(
-        'playlist',
-        columns: ['id'],
-        where: 'name = ?',
-        whereArgs: [playlist.name],
-      );
-
-      if (existingResult.isNotEmpty) {
-        // Update existing playlist
-        playlistId = existingResult.first['id'] as int;
-        await txn.update(
-          'playlist',
-          {'name': playlist.name},
-          where: 'id = ?',
-          whereArgs: [playlistId],
-        );
-      } else {
-        // Insert new playlist
-        playlistId = await txn.insert(
-          'playlist',
-          playlist.toSqlite() as Map<String, Object?>,
-        );
-      }
-
-      // 2. Prune old items
-      if (versionItemsToPrune.isNotEmpty) {
-        final versionPlaceholders = List.filled(
-          versionItemsToPrune.length,
-          '?',
-        ).join(', ');
-        await txn.delete(
-          'playlist_version',
-          where: 'id IN ($versionPlaceholders)',
-          whereArgs: [...versionItemsToPrune],
-        );
-      }
-
-      if (textItemsToPrune.isNotEmpty) {
-        final textPlaceholders = List.filled(
-          textItemsToPrune.length,
-          '?',
-        ).join(', ');
-        await txn.delete(
-          'flow_item',
-          where: 'playlist_id = ? AND id IN ($textPlaceholders)',
-          whereArgs: [playlistId, ...textItemsToPrune],
-        );
-      }
-
-      // 3. Upsert text items
-      for (final item in textSectionItems) {
-        final existingTextResult = await txn.query(
-          'flow_item',
-          columns: ['id'],
-          where: 'firebase_id = ?',
-          whereArgs: [item['firebaseContentId']],
-        );
-
-        if (existingTextResult.isNotEmpty) {
-          // Update existing text item
-          await txn.update(
-            'flow_item',
-            {
-              'title': item['title'],
-              'content': item['content'],
-              'position': item['position'],
-            },
-            where: 'firebase_id = ?',
-            whereArgs: [item['firebaseContentId']],
-          );
-        } else {
-          // Insert new text item
-          await txn.insert('flow_item', {
-            'added_by': item['addedBy'],
-            'firebase_id': item['firebaseContentId'],
-            'playlist_id': playlistId,
-            'title': item['title'],
-            'content': item['content'],
-            'position': item['position'],
-          });
-        }
-      }
-
-      // 4. Upsert version items
-      for (final item in versionSectionItems) {
-        // Check if this version is already in the playlist
-        final existingVersionResult = await txn.query(
-          'playlist_version',
-          columns: ['id'],
-          where: 'playlist_id = ? AND version_id = ?',
-          whereArgs: [playlistId, item['contentId']],
-        );
-
-        if (existingVersionResult.isNotEmpty) {
-          // Update existing version item position
-          await txn.update(
-            'playlist_version',
-            {'position': item['position']},
-            where: 'id = ?',
-            whereArgs: [existingVersionResult.first['id']],
-          );
-        } else {
-          // Insert new version item
-          await txn.insert('playlist_version', {
-            'version_id': item['contentId'],
-            'playlist_id': playlistId,
-            'position': item['position'],
-          });
-        }
-      }
-    });
-
-    return playlistId;
   }
 }
