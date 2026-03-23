@@ -165,7 +165,10 @@ class CloudScheduleProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _repo.deleteSchedule(scheduleId, userId);
+      if (userId == _schedules[scheduleId]!.ownerFirebaseId) {
+        await _repo.deleteSchedule(scheduleId, userId);
+      }
+
       _schedules.remove(scheduleId);
     } catch (e) {
       _error = e.toString();

@@ -52,49 +52,40 @@ class RoleCard extends StatelessWidget {
                 ),
               ),
               // ACTIONS
-              SizedBox(
-                width: 60,
-                child: FilledTextButton(
-                  text: AppLocalizations.of(context)!.assign,
-                  isDense: true,
-                  isDark: true,
-                  onPressed: () => _openAssignMemberSheet(context, role),
-                ),
+              FilledTextButton(
+                text: AppLocalizations.of(context)!.assign,
+                isDense: true,
+                isDark: true,
+                onPressed: () => _openAssignMemberSheet(context, role),
               ),
-              SizedBox(
-                width: 60,
-                child: FilledTextButton(
-                  text: AppLocalizations.of(context)!.editPlaceholder(''),
-                  isDense: true,
-                  onPressed: () => _openEditRoleSheet(context, role),
-                ),
+              FilledTextButton(
+                text: AppLocalizations.of(context)!.editPlaceholder(''),
+                isDense: true,
+                onPressed: () => _openEditRoleSheet(context, role),
               ),
-              SizedBox(
-                width: 60,
-                child: FilledTextButton(
-                  text: AppLocalizations.of(context)!.delete,
-                  isDense: true,
-                  onPressed: () {
-                    if (scheduleId is String) {
-                      return; // Prevent deletion of cloud schedule roles
-                    }
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (context) {
-                        return DeleteConfirmationSheet(
-                          itemType: AppLocalizations.of(context)!.role,
-                          onConfirm: () {
-                            scheduleProvider.deleteRole(
-                              scheduleId,
-                              role.id,
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-                ),
+              FilledTextButton(
+                text: AppLocalizations.of(context)!.delete,
+                isDense: true,
+                onPressed: () {
+                  if (scheduleId is String) {
+                    return; // Prevent deletion of cloud schedule roles
+                  }
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) {
+                      return DeleteConfirmationSheet(
+                        itemType: AppLocalizations.of(context)!.role,
+                        onConfirm: () {
+                          scheduleProvider.deleteRole(
+                            scheduleId,
+                            role.id,
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
               ),
             ],
           ),
