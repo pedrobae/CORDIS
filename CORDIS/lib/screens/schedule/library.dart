@@ -21,22 +21,20 @@ class _ScheduleLibraryScreenState extends State<ScheduleLibraryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final localScheduleProvider = context.read<LocalScheduleProvider>();
-      final cloudScheduleProvider = context.read<CloudScheduleProvider>();
-      final cloudVersionProvider = context.read<CloudVersionProvider>();
+      final localSch = context.read<LocalScheduleProvider>();
+      final cloudSch = context.read<CloudScheduleProvider>();
+      final cloudVer = context.read<CloudVersionProvider>();
 
       if (mounted) {
-        await Future.wait([
-          cloudScheduleProvider.loadSchedules(
-            context.read<MyAuthProvider>().id!,
-          ),
-          localScheduleProvider.loadSchedules(),
-        ]);
+        await cloudSch.loadSchedules(
+          context.read<MyAuthProvider>().id!,
+        );
+        await localSch.loadSchedules();
 
         if (mounted) {
-          for (var schedule in cloudScheduleProvider.schedules.values) {
+          for (var schedule in cloudSch.schedules.values) {
             for (var versionEntry in schedule.playlist.versions.entries) {
-              cloudVersionProvider.setVersion(
+              cloudVer.setVersion(
                 versionEntry.key,
                 versionEntry.value,
               );

@@ -108,6 +108,7 @@ class CloudVersionProvider extends ChangeNotifier {
     _versions[firebaseId] = version;
     notifyListeners();
   }
+  
   // ===== READ =====
   /// Loads public versions from Firestore
   Future<void> loadVersions({

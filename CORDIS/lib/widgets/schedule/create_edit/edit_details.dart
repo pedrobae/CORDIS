@@ -21,14 +21,13 @@ class _EditDetailsState extends State<EditDetails> {
   final nameController = TextEditingController();
   final locationController = TextEditingController();
   final roomVenueController = TextEditingController();
-  late DateTime selectedDate;
+  final dateController = TextEditingController();
   late TimeOfDay selectedTime;
 
   @override
   void initState() {
     super.initState();
 
-    selectedDate = DateTime.now();
     selectedTime = TimeOfDay.now();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -44,7 +43,7 @@ class _EditDetailsState extends State<EditDetails> {
         nameController.text = schedule.name;
         locationController.text = schedule.location;
         roomVenueController.text = schedule.roomVenue ?? '';
-        selectedDate = schedule.date;
+        dateController.text = DateTimeUtils.formatDate(schedule.date);
         selectedTime = schedule.time;
       }
       _addListeners();
@@ -189,7 +188,7 @@ class _EditDetailsState extends State<EditDetails> {
         Text(label, style: textTheme.labelLarge),
         TextFormField(
           validator: validator,
-          initialValue: DateTimeUtils.formatDate(selectedDate),
+          controller: dateController,
           readOnly: true,
           decoration: InputDecoration(
             hintText: label,
@@ -210,7 +209,9 @@ class _EditDetailsState extends State<EditDetails> {
     return () async {
       final localSch = context.read<LocalScheduleProvider>();
 
-      final initialDate = selectedDate;
+      final initialDate = dateController.text.isNotEmpty
+          ? DateTimeUtils.parseDateTime(dateController.text)
+          : DateTime.now();
       final firstDate = DateTime.now().subtract(const Duration(days: 365));
       final lastDate = DateTime.now().add(const Duration(days: 365));
 
@@ -223,10 +224,7 @@ class _EditDetailsState extends State<EditDetails> {
 
       if (pickedDate != null) {
         localSch.cacheDate(widget.scheduleID, pickedDate);
-
-        setState(() {
-          selectedDate = pickedDate;
-        });
+        dateController.text = DateTimeUtils.formatDate(pickedDate);
       }
     };
   }

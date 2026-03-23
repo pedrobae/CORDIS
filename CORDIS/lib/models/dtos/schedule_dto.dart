@@ -123,22 +123,6 @@ class ScheduleDto {
     };
   }
 
-  factory ScheduleDto.fromCache(Map<String, dynamic> json) {
-    return ScheduleDto(
-      firebaseId: json['firebaseId'] as String?,
-      ownerFirebaseId: json['ownerId'] as String,
-      name: json['name'] as String,
-      datetime: Timestamp.fromMillisecondsSinceEpoch(json['datetime'] as int),
-      location: json['location'] as String,
-      roomVenue: json['roomVenue'] as String?,
-      playlist: PlaylistDto.fromCache(json['playlist'] as Map<String, dynamic>),
-      roles: (json['roles'] as List)
-          .map((role) => RoleDto.fromFirestore(role))
-          .toList(),
-      shareCode: json['shareCode'] as String? ?? generateShareCode(),
-    );
-  }
-
   Schedule toDomain({required int playlistLocalId}) {
     final dateTime = datetime.toDate();
     final schedule = Schedule(

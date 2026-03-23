@@ -1,23 +1,17 @@
+import 'package:cordis/providers/user/my_auth_provider.dart';
+import 'package:cordis/services/sync_service.dart';
 import 'package:flutter/material.dart';
-import 'package:cordis/helpers/codes.dart';
 
 import 'package:cordis/l10n/app_localizations.dart';
 
-import 'package:cordis/models/domain/playlist/flow_item.dart';
-import 'package:cordis/models/domain/playlist/playlist_item.dart';
 import 'package:cordis/models/domain/schedule.dart';
-import 'package:cordis/models/dtos/version_dto.dart';
 import 'package:flutter/services.dart';
 
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/auto_scroll_provider.dart';
-import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
-import 'package:cordis/providers/playlist/flow_item_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
-import 'package:cordis/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordis/providers/schedule/local_schedule_provider.dart';
-import 'package:cordis/providers/version/local_version_provider.dart';
 
 import 'package:cordis/screens/playlist/view_playlist.dart';
 import 'package:cordis/screens/schedule/play.dart';
@@ -417,63 +411,18 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
   }
 
   void _publishSchedule() {
-    final cloudSch = context.read<CloudScheduleProvider>();
+    final syncService = ScheduleSyncService();
+
     final localSch = context.read<LocalScheduleProvider>();
-    final play = context.read<PlaylistProvider>();
-    final localVer = context.read<LocalVersionProvider>();
-    final ciph = context.read<CipherProvider>();
-    final flow = context.read<FlowItemProvider>();
+    final auth = context.read<MyAuthProvider>();
 
-    final domainSchedule = localSch.getSchedule(widget.scheduleId)!;
-    final domainPlaylist = play.getPlaylist(domainSchedule.playlistId)!;
-    // Build Item DTOs
-    final itemOrder = <String>[];
-    final flowItems = <String, FlowItem>{};
-    final versions = <String, VersionDto>{};
-    for (var item in domainPlaylist.items) {
-      switch (item.type) {
-        case PlaylistItemType.version:
-          final version = localVer.getVersion(item.contentId!);
+    final schedule = localSch.getSchedule(widget.scheduleId);
 
-          if (version == null) break;
-          String firebaseId;
-          if (version.firebaseID == null) {
-            firebaseId = generateFirebaseId();
-            localVer.updateVersion(version.copyWith(firebaseID: firebaseId));
-          } else {
-            firebaseId = version.firebaseID!;
-          }
-
-          final cipher = ciph.getCipher(version.cipherID);
-
-          if (cipher == null) break;
-          versions['v:$firebaseId'] = version.toDto(cipher);
-          break;
-        case PlaylistItemType.flowItem:
-          final flowItem = flow.getFlowItem(item.contentId!);
-          if (flowItem == null) break;
-
-          String firebaseId;
-          if (flowItem.firebaseId.isEmpty) {
-            firebaseId = generateFirebaseId();
-          } else {
-            firebaseId = flowItem.firebaseId;
-          }
-          flowItems['f:$firebaseId'] = flowItem;
-          break;
-      }
+    if (schedule == null) {
+      debugPrint('Error: Schedule not found for publishing');
+      return;
     }
 
-    cloudSch.publishSchedule(
-      domainSchedule.toDto(
-        domainPlaylist.toDto(
-          itemOrder: itemOrder,
-          flowItems: flowItems,
-          versions: versions,
-        ),
-      ),
-    );
-
-    localSch.publishSchedule(widget.scheduleId);
+    syncService.upsertToCloud(schedule, auth.id!);
   }
 }

@@ -128,11 +128,7 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
   Widget _buildStepContent() {
     return switch (widget.creationStep) {
       1 => const Expanded(child: PlaylistLibraryScreen()),
-      2 => Expanded(
-        child: EditDetails(
-          scheduleID: -1,
-        ),
-      ),
+      2 => Expanded(child: EditDetails(scheduleID: -1)),
       3 => const Expanded(child: EditRoles(scheduleId: -1)),
       _ => const SizedBox.shrink(),
     };
@@ -162,7 +158,7 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
           isDisabled: sel.selectedItemIds.length != 1,
           isDark: true,
         );
-      }
+      },
     );
   }
 
@@ -174,39 +170,26 @@ class _CreateScheduleScreenState extends State<CreateScheduleScreen> {
   ) {
     switch (widget.creationStep) {
       case 1:
-        _handleStep1(localSch, nav, auth, sel);
+        localSch.cacheBrandNewSchedule(sel.selectedItemIds.first, auth.id!);
+        nav.push(
+          () => CreateScheduleScreen(creationStep: 2),
+          showBottomNavBar: true,
+        );
       case 2:
-        _handleStep2(localSch, nav);
+        nav.push(
+          () => CreateScheduleScreen(creationStep: 3),
+          showBottomNavBar: true,
+        );
+
       case 3:
-        _handleStep3(localSch, nav, auth);
+        localSch.createFromCache(auth.id!).then((success) {
+          if (success && mounted) {
+            sel.disableSelectionMode();
+            nav.attemptPop(context, route: NavigationRoute.schedule);
+          }
+        });
       default:
         null;
     }
-  }
-
-  void _handleStep1(
-    LocalScheduleProvider localSch,
-    NavigationProvider nav,
-    MyAuthProvider auth,
-    SelectionProvider sel,
-  ) {
-    localSch.cacheBrandNewSchedule(sel.selectedItemIds.first, auth.id!);
-    nav.push(() => CreateScheduleScreen(creationStep: 2), showBottomNavBar: true);
-  }
-
-  void _handleStep2(LocalScheduleProvider localSch, NavigationProvider nav) {
-    nav.push(() => CreateScheduleScreen(creationStep: 3), showBottomNavBar: true);
-  }
-
-  void _handleStep3(
-    LocalScheduleProvider localSch,
-    NavigationProvider nav,
-    MyAuthProvider auth,
-  ) {
-    localSch.createFromCache(auth.id!).then((success) {
-      if (success && mounted) {
-        nav.attemptPop(context, route: NavigationRoute.schedule);
-      }
-    });
   }
 }

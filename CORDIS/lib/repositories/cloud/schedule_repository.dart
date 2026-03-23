@@ -1,7 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cordis/helpers/guard.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
-import 'package:cordis/services/cache_service.dart';
 import 'package:cordis/services/firestore_service.dart';
 import 'package:cordis/utils/timezone_utils.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -13,8 +12,6 @@ class CloudScheduleRepository {
 
   final FirestoreService _firestoreService = FirestoreService();
   final GuardHelper _guardHelper = GuardHelper();
-
-  final CacheService _cacheService = CacheService();
 
   CloudScheduleRepository();
   // ===== CREATE =====
@@ -50,20 +47,6 @@ class CloudScheduleRepository {
     String firebaseUserId, {
     bool forceFetch = false,
   }) async {
-    /// DISABLED CACHE FOR NOW, DUE TO SYNCING ISSUES, REFACTOR IF NEEDED IN THE FUTURE
-    // final now = DateTime.now().toUtc();
-
-    // final (lastLoad, cachedSchedules) = await getCache(firebaseUserId);
-
-    // if (!forceFetch &&
-    //     now.isBefore(
-    //       (lastLoad).add(Duration(days: 7)), // CHECK FOR NEW SCHEDULES WEEKLY
-    //     )) {
-    //   if (cachedSchedules.isNotEmpty) {
-    //     debugPrint('LOADING CACHED SCHEDULES FOR USER $firebaseUserId.');
-    //     return cachedSchedules;
-    //   }
-    // }
     return await _withErrorHandling('fetch_user_schedules', () async {
       final querySnapshot = await _firestoreService
           .fetchDocumentsContainingValue(
@@ -115,22 +98,32 @@ class CloudScheduleRepository {
   // ===== UPDATE =====
 
   /// Update an existing schedule in Firestore on the changes map
-  Future<void> updateSchedule(String ownerId, ScheduleDto schedule) async {
+  Future<String> upsertSchedule(String ownerId, ScheduleDto schedule) async {
     return await _withErrorHandling('update_schedule', () async {
       await _guardHelper.requireAuth();
       await _guardHelper.requireOwnership(ownerId);
 
-      await _firestoreService.updateDocument(
-        collectionPath: 'schedules',
-        documentId: schedule.firebaseId!,
-        data: schedule.toFirestore(),
-        merge: false,
-      );
+      String? id = schedule.firebaseId;
+
+      if (id == null) {
+        id = await _firestoreService.createDocument(
+          collectionPath: 'schedules',
+          data: schedule.toFirestore(),
+        );
+      } else {
+        await _firestoreService.updateDocument(
+          collectionPath: 'schedules',
+          documentId: id,
+          data: schedule.toFirestore(),
+          merge: false,
+        );
+      }
 
       await FirebaseAnalytics.instance.logEvent(
         name: 'updated_schedule',
-        parameters: {'scheduleId': schedule.firebaseId!},
+        parameters: {'scheduleId': id},
       );
+      return id;
     });
   }
 
@@ -139,9 +132,7 @@ class CloudScheduleRepository {
     return await _withErrorHandling('join_via_share_code', () async {
       await _guardHelper.requireAuth();
 
-      final functions = FirebaseFunctions.instanceFor(
-        region: _functionsRegion,
-      );
+      final functions = FirebaseFunctions.instanceFor(region: _functionsRegion);
 
       final result = await functions.httpsCallable('joinScheduleWithCode').call(
         <String, dynamic>{'shareCode': shareCode},
@@ -202,12 +193,5 @@ class CloudScheduleRepository {
 
       rethrow;
     }
-  }
-
-  // ===== CACHE INITIALIZATION =====
-  Future<(DateTime, List<ScheduleDto>)> getCache(String userId) async {
-    final schedules = await _cacheService.loadCloudSchedules(userId);
-    final lastLoad = await _cacheService.loadLastScheduleLoad();
-    return (lastLoad ?? DateTime(2000), schedules);
   }
 }

@@ -262,10 +262,7 @@ class ScheduleSyncService {
 
   /// =========================================================================
   /// Syncs changes to a published playlist into firestore
-  Future<void> scheduleToCloud(
-    Schedule schedule,
-    String ownerFirebaseID,
-  ) async {
+  Future<void> upsertToCloud(Schedule schedule, String ownerFirebaseID) async {
     debugPrint(
       'Syncing schedule ${schedule.id} to cloud for owner $ownerFirebaseID',
     );
@@ -276,7 +273,7 @@ class ScheduleSyncService {
 
     // Build Item DTOs
     final itemOrder = <String>[];
-    final flowItems = <String, FlowItem>{};
+    final flowItems = <String, Map<String, dynamic>>{};
     final versions = <String, VersionDto>{};
     for (var item in domainPlaylist.items) {
       switch (item.type) {
@@ -299,21 +296,29 @@ class ScheduleSyncService {
           final flowItem = await (_flowRepo.getFlowItem(item.contentId!));
 
           if (flowItem == null) break;
-          flowItems[flowItem.firebaseId] = flowItem;
+          flowItems[flowItem.firebaseId] = flowItem.toFirestore();
           itemOrder.add('f:${flowItem.firebaseId}');
           break;
       }
     }
 
-    await _cloudRepo.updateSchedule(
+    final firebaseId = await _cloudRepo.upsertSchedule(
       ownerFirebaseID,
       schedule.toDto(
-        domainPlaylist.toDto(
+        PlaylistDto(
+          name: domainPlaylist.name,
           itemOrder: itemOrder,
           flowItems: flowItems,
           versions: versions,
         ),
       ),
     );
+
+    if (schedule.firebaseId == null) {
+      debugPrint('Schedule was not published before, fetching new firebase ID');
+      await _localRepo.updateSchedule(
+        schedule.copyWith(firebaseId: firebaseId, isPublic: true),
+      );
+    }
   }
 }

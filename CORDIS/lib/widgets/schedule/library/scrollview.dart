@@ -151,15 +151,17 @@ class _ScheduleScrollViewState extends State<ScheduleScrollView> {
           child: RefreshIndicator(
             onRefresh: () async {
               await localScheduleProvider.loadSchedules();
+
               await cloudScheduleProvider.loadSchedules(
                 authProvider.id!,
                 forceFetch: true,
               );
+
               for (var schedule in cloudScheduleProvider.schedules.values) {
                 for (var version in schedule.playlist.versions.entries) {
                   if (mounted) {
                     context.read<CloudVersionProvider>().setVersion(
-                      version.key,
+                      version.key.split(':').last,
                       version.value,
                     );
                   }

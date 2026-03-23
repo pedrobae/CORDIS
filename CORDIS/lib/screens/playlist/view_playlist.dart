@@ -166,7 +166,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
       widget.playlistId,
     );
     if (schedule != null && schedule.scheduleState == ScheduleState.published) {
-      ScheduleSyncService().scheduleToCloud(schedule, auth.id!);
+      ScheduleSyncService().upsertToCloud(schedule, auth.id!);
     }
 
     nav.pop();

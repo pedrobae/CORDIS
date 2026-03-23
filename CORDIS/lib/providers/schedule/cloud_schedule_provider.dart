@@ -80,25 +80,6 @@ class CloudScheduleProvider extends ChangeNotifier {
     return nextSchedule;
   }
 
-  // ===== CREATE =====
-  Future<void> publishSchedule(ScheduleDto schedule) async {
-    if (_isSaving) return;
-
-    _isSaving = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      final newScheduleId = await _repo.publishSchedule(schedule);
-      _schedules[newScheduleId] = schedule.copyWith(firebaseId: newScheduleId);
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isSaving = false;
-      notifyListeners();
-    }
-  }
-
   // ===== READ =====
   /// Fetches all schedules from the cloud repository (user has to be a collaborator)
   Future<void> loadSchedules(String userId, {bool forceFetch = false}) async {

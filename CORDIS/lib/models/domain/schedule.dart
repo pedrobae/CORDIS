@@ -121,7 +121,7 @@ class Schedule {
   }
 
   ScheduleDto toDto(PlaylistDto playlist) {
-    final timestamp = DateTime(
+    final dateTime = DateTime(
       date.year,
       date.month,
       date.day,
@@ -132,7 +132,7 @@ class Schedule {
       firebaseId: firebaseId,
       ownerFirebaseId: ownerFirebaseId,
       name: name,
-      datetime: Timestamp.fromDate(timestamp),
+      datetime: Timestamp.fromDate(dateTime),
       location: location,
       roomVenue: roomVenue,
       shareCode: shareCode,
@@ -142,14 +142,14 @@ class Schedule {
   }
 
   Schedule mergeWith(Schedule other) {
-    final localTimestamp = DateTime(
+    final localDateTime = DateTime(
       date.year,
       date.month,
       date.day,
       time.hour,
       time.minute,
     );
-    final otherTimestamp = DateTime(
+    final otherDateTime = DateTime(
       other.date.year,
       other.date.month,
       other.date.day,
@@ -157,7 +157,7 @@ class Schedule {
       other.time.minute,
     );
 
-    bool localIsNewer = localTimestamp.isAfter(otherTimestamp);
+    bool localIsNewer = localDateTime.isAfter(otherDateTime);
 
     final Schedule source = localIsNewer ? this : other;
     final Schedule target = localIsNewer ? other : this;

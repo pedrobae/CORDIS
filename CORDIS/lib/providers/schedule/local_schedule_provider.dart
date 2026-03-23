@@ -191,7 +191,7 @@ class LocalScheduleProvider extends ChangeNotifier {
     if (schedule == null) return;
 
     try {
-      await _syncService.scheduleToCloud(schedule, ownerFirebaseId);
+      await _syncService.upsertToCloud(schedule, ownerFirebaseId);
     } catch (e) {
       _error = e.toString();
       notifyListeners();
