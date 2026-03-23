@@ -74,15 +74,9 @@ class CipherProvider extends ChangeNotifier {
     int? cipherId;
 
     try {
-      if (_ciphers[-1]!.musicKey.isEmpty) {
-        _ciphers[-1] = _ciphers[-1]!.copyWith(
-          musicKey: await _recognizer.recognizeKeyLocal(-1),
-        );
-      }
       // Insert basic cipher info and tags
       cipherId = await _cipherRepository.insertPrunedCipher(_ciphers[-1]!);
 
-      // Load the new ID into the cache
       _ciphers[cipherId] = _ciphers[-1]!.copyWith(id: cipherId);
       debugPrint('CIPHER - Created a new cipher with id $cipherId');
     } catch (e) {

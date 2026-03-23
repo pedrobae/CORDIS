@@ -278,7 +278,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
     );
   }
 
-  void _openVersionActions(BuildContext context, final version) {
+  void _openVersionActions(BuildContext context, Version version) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -286,7 +286,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
         return VersionCardActionsSheet(
           itemID: widget.itemId,
           versionID: widget.versionId,
-          cipherID: version.cipherId,
+          cipherID: version.cipherID,
           playlistID: widget.playlistId,
         );
       },

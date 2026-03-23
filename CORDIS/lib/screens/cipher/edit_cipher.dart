@@ -9,6 +9,7 @@ import 'package:cordis/providers/selection_provider.dart';
 import 'package:cordis/providers/transposition_provider.dart';
 import 'package:cordis/providers/user/my_auth_provider.dart';
 import 'package:cordis/providers/version/cloud_version_provider.dart';
+import 'package:cordis/services/key_recognizer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
@@ -406,13 +407,20 @@ class _EditCipherScreenState extends State<EditCipherScreen>
   }
 
   Future<void> _saveImportedCipher(BuildContext context) async {
-    final cipherProvider = context.read<CipherProvider>();
-    final localVersionProvider = context.read<LocalVersionProvider>();
-    final sectionProvider = context.read<SectionProvider>();
-    final navigationProvider = context.read<NavigationProvider>();
+    final ciph = context.read<CipherProvider>();
+    final localVer = context.read<LocalVersionProvider>();
+    final sect = context.read<SectionProvider>();
+    final nav = context.read<NavigationProvider>();
 
-    final cipherID = await cipherProvider.createCipher();
-    final versionID = await localVersionProvider.createVersion(
+    final recognizer = KeyRecognizerService();
+
+    if (ciph.getCipher(-1)!.musicKey.isEmpty) {
+      final key = await recognizer.recognizeKeyForNewCipher();
+      ciph.cacheMusicKey(-1, key);
+    }
+
+    final cipherID = await ciph.createCipher();
+    final versionID = await localVer.createVersion(
       cipherID: cipherID,
     );
 
@@ -420,8 +428,8 @@ class _EditCipherScreenState extends State<EditCipherScreen>
       throw Exception('Failed to create version for imported song');
     }
 
-    await sectionProvider.createSections(versionID);
-    navigationProvider.pop();
+    await sect.createSections(versionID);
+    nav.pop();
   }
 
   Future<void> _saveBrandNewCipher(BuildContext context) async {

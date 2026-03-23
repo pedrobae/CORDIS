@@ -66,6 +66,35 @@ class KeyRecognizerService {
     return _extractKey(chords);
   }
 
+  /// Recognizes the key of a new cipher that is cache only
+  Future<String> recognizeKeyForNewCipher() async {
+    final sections = await _sectionRepo.getSections(-1);
+
+    List<String> chords = [];
+    for (var section in sections.values) {
+      final text = section.contentText;
+      final chord = StringBuffer();
+      bool inChord = false;
+      for (var i = 0; i < text.length; i++) {
+        final char = text[i];
+        if (inChord) {
+          if (char == ']') {
+            inChord = false;
+            chords.add(chord.toString());
+            chord.clear();
+          } else {
+            chord.write(char);
+          }
+        } else {
+          if (char == '[') {
+            inChord = true;
+          }
+        }
+      }
+    }
+    return _extractKey(chords);
+  }
+
   /// Calculates the key based on the chords of a cipher, and updates the cipher with the new key
   /// Returns the new key
   String _extractKey(List<String> chords) {
