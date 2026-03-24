@@ -32,6 +32,8 @@ class ScheduleSyncService {
   /// Priority is given to the local version, so cloud diffs are discarded,
   /// But if the schedule doesn't exist locally, or there are empty fields, it will be created/updated with the cloud version
   Future<int> scheduleToLocal(ScheduleDto scheduleDto, {bool isPublic = true}) async {
+    debugPrint("SYNC SERVICE - starting schedule to local");
+    debugPrint("\t getting owner local id");
     final ownerUser = await _userRepo.getUserByFirebaseId(
       scheduleDto.ownerFirebaseId,
     );
@@ -42,10 +44,13 @@ class ScheduleSyncService {
       );
     }
 
+    debugPrint("\t syncing playlist");
     final playlistID = await syncPlaylist(scheduleDto.playlist, ownerUser);
 
+    debugPrint("\t syncing schedule");
     final scheduleID = await syncSchedule(scheduleDto, playlistID, isPublic);
 
+    debugPrint("\t fetching roles");
     final existingRoles = await _localRepo.getRolesForSchedule(scheduleID);
     for (var role in scheduleDto.roles) {
       Role? existingRole;
@@ -54,6 +59,7 @@ class ScheduleSyncService {
       } catch (e) {
         existingRole = null;
       }
+      debugPrint('\t\t syncing role');
       await syncRole(role, scheduleID, existingRole);
     }
 
@@ -146,6 +152,7 @@ class ScheduleSyncService {
     for (var item in playlistDto.getPlaylistItems()) {
       switch (item.type) {
         case PlaylistItemType.flowItem:
+          debugPrint("\t\tsyncing flow item");
           final flowItem = playlistDto.flowItems[item.firebaseContentId]!;
           await _flowRepo.upsertFlowItem(
             FlowItem.fromFirestore(
@@ -169,6 +176,7 @@ class ScheduleSyncService {
           break;
         case PlaylistItemType.version:
           final versionDto = playlistDto.versions[item.firebaseContentId]!;
+          debugPrint("\t\tsyncing version");
 
           await upsertPlaylistVersion(versionDto, playlistID);
           existingItems.remove(
