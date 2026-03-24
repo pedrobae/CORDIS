@@ -1,8 +1,8 @@
 import 'package:cordis/services/cache_service.dart';
 import 'package:cordis/helpers/guard.dart';
 import 'package:cordis/models/dtos/version_dto.dart';
-import 'package:cordis/services/firestore_service.dart';
-import 'package:cordis/services/auth_service.dart';
+import 'package:cordis/services/firebase/firestore_service.dart';
+import 'package:cordis/services/firebase/auth_service.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 

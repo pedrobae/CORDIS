@@ -1,5 +1,5 @@
 import 'package:cordis/models/dtos/user_dto.dart';
-import 'package:cordis/services/firestore_service.dart';
+import 'package:cordis/services/firebase/firestore_service.dart';
 
 class CloudUserRepository {
   final FirestoreService _firestoreService = FirestoreService();

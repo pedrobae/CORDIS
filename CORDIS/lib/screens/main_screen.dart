@@ -2,7 +2,7 @@ import 'package:cordis/providers/user/my_auth_provider.dart';
 import 'package:cordis/providers/user/user_provider.dart';
 import 'package:cordis/screens/playlist/edit_playlist.dart';
 import 'package:cordis/screens/splash_screen.dart';
-import 'package:cordis/services/remote_config_service.dart';
+import 'package:cordis/services/firebase/remote_config_service.dart';
 import 'package:cordis/widgets/ciphers/library/sheet_new_song.dart';
 import 'package:cordis/widgets/home/quick_action_sheet.dart';
 import 'package:cordis/widgets/schedule/library/sheet_actions.dart';

@@ -29,7 +29,7 @@ class ScheduleSyncService {
   final _sectionRepo = SectionRepository();
 
   /// Sync owner's schedule to SQLite, so it can be accessed offline and edited
-  /// Priority is given to the local version, so cloud diff are discarded,
+  /// Priority is given to the local version, so cloud diffs are discarded,
   /// But if the schedule doesn't exist locally, or there are empty fields, it will be created/updated with the cloud version
   Future<int> scheduleToLocal(ScheduleDto scheduleDto) async {
     final ownerUser = await _userRepo.getUserByFirebaseId(

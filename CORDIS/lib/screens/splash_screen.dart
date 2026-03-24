@@ -1,6 +1,6 @@
 import 'package:cordis/screens/main_screen.dart';
 import 'package:cordis/screens/user/login_screen.dart';
-import 'package:cordis/services/remote_config_service.dart';
+import 'package:cordis/services/firebase/remote_config_service.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

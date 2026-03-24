@@ -1,7 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cordis/helpers/guard.dart';
 import 'package:cordis/models/dtos/schedule_dto.dart';
-import 'package:cordis/services/firestore_service.dart';
+import 'package:cordis/services/firebase/firestore_service.dart';
 import 'package:cordis/utils/timezone_utils.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';

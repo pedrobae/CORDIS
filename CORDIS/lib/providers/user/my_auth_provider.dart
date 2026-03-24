@@ -1,7 +1,7 @@
 import 'package:cordis/models/domain/user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:cordis/services/auth_service.dart';
+import 'package:cordis/services/firebase/auth_service.dart';
 
 class MyAuthProvider extends ChangeNotifier {
   final _authService = AuthService();

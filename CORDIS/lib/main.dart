@@ -32,8 +32,8 @@ import 'package:cordis/providers/version/cloud_version_provider.dart';
 import 'package:cordis/providers/app_info_provider.dart';
 import 'package:cordis/providers/schedule/play_schedule_state_provider.dart';
 
-import 'package:cordis/services/firebase_service.dart';
-import 'package:cordis/services/remote_config_service.dart';
+import 'package:cordis/services/firebase/firebase_service.dart';
+import 'package:cordis/services/firebase/remote_config_service.dart';
 import 'package:cordis/services/settings_service.dart';
 
 void main() async {

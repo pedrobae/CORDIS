@@ -1,6 +1,6 @@
 import 'package:cordis/helpers/guard.dart';
 import 'package:cordis/models/domain/bug_report.dart';
-import 'package:cordis/services/firestore_service.dart';
+import 'package:cordis/services/firebase/firestore_service.dart';
 import 'package:flutter/foundation.dart';
 
 class BugReportRepository {
