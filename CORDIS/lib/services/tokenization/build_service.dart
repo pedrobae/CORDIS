@@ -82,7 +82,13 @@ class TokenizationBuilder {
             case TokenType.lyric:
               wordWidgets.add(
                 TokenWidget(
-                  widget: Text(token.text, style: ctx.lyricStyle),
+                  widget: SizedBox(
+                    height: ctx.lineHeight,
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Text(token.text, style: ctx.lyricStyle),
+                    ),
+                  ),
                   token: token,
                 ),
               );
