@@ -60,6 +60,7 @@ class TokenBuildContext {
 
   /// LAYOUT PARAMETERS
   final double maxWidth;
+  double? lineHeight; // calculated during layout, used for drag feedback positioning
 
   /// TRANSPOSER
   final String Function(String chord) transposeChord;
@@ -70,7 +71,7 @@ class TokenBuildContext {
   final Function(ContentToken, ContentToken)? onAddChord;
   final Function(ContentToken)? onRemoveChord;
 
-  const TokenBuildContext({
+  TokenBuildContext({
     required this.chordStyle,
     required this.lyricStyle,
     required this.contentColor,
@@ -80,6 +81,7 @@ class TokenBuildContext {
     required this.maxWidth,
     required this.cache,
     required this.transposeChord,
+    this.lineHeight,
     this.isEnabled,
     this.toggleDrag,
     this.onAddChord,

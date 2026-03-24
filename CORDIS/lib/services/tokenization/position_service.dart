@@ -48,6 +48,7 @@ class PositionService {
     }
 
     final lineHeight = chordMsr.size + lyricMsr.size + posCtx.chordLyricSpacing;
+    buildCtx.lineHeight = lineHeight;
 
     final ctx = _LayoutCtx(
       chordHeight: chordMsr.size,
@@ -211,7 +212,7 @@ class PositionService {
           positions.setPosition(
             token,
             xOffset,
-            cursor.yOffset + ctx.posCtx.chordLyricSpacing + ctx.chordHeight,
+            cursor.yOffset,
           );
           cursor.lyricsX = xOffset + msr.width + ctx.posCtx.letterSpacing;
 

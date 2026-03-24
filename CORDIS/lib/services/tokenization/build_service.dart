@@ -339,7 +339,10 @@ class TokenizationBuilder {
     required Map<ContentToken, Measurements> tokenMeasurements,
     required TokenPositionMap tokenPositions,
   }) {
-    final dragTargetChild = Text(token.text, style: ctx.lyricStyle);
+    final dragTargetChild = SizedBox(
+      height: ctx.lineHeight,
+      child: Align(alignment: Alignment.bottomCenter,child: Text(token.text, style: ctx.lyricStyle,)),
+    );
 
     return _buildGenericDragTarget(
       buildCtx: ctx,
