@@ -157,6 +157,7 @@ class CipherProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('CIPHER - Error loading cipher: $e');
     } finally {
+      _hasUnsavedChanges = false;
       _isLoading = false;
       notifyListeners();
     }

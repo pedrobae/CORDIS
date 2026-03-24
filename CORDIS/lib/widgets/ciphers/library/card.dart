@@ -247,6 +247,7 @@ class _CipherCardState extends State<CipherCard> {
                             onChangeDiscarded: () {
                               localVer.loadVersion(versionId);
                               ciph.loadCipher(widget.cipherId);
+                              sect.loadSectionsOfVersion(versionId);
                             },
                             showBottomNavBar: true,
                           );

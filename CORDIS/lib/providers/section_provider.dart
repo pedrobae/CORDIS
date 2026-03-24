@@ -144,6 +144,7 @@ class SectionProvider extends ChangeNotifier {
       }
     } finally {
       _isLoading = false;
+      _hasUnsavedChanges = false;
       notifyListeners();
     }
   }

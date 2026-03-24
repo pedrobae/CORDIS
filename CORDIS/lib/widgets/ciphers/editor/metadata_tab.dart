@@ -1,5 +1,4 @@
 import 'package:cordis/l10n/app_localizations.dart';
-import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/transposition_provider.dart';
@@ -49,16 +48,7 @@ class _MetadataTabState extends State<MetadataTab> {
   @override
   void initState() {
     super.initState();
-    for (var i = 0; i < InfoField.values.length; i++) {
-      switch (InfoField.values[i]) {
-        case InfoField.key:
-        case InfoField.tags:
-          // THESE FIELDS ARE HANDLED SEPARATELY, NOT USING TEXT CONTROLLERS
-          break;
-        default:
-          controllers[InfoField.values[i]] = TextEditingController();
-      }
-    }
+    _createControllers();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _syncWithProviderData();
       _addListeners();
@@ -71,6 +61,19 @@ class _MetadataTabState extends State<MetadataTab> {
       controller.dispose();
     }
     super.dispose();
+  }
+
+  void _createControllers() {
+    for (var i = 0; i < InfoField.values.length; i++) {
+      switch (InfoField.values[i]) {
+        case InfoField.key:
+        case InfoField.tags:
+          // THESE FIELDS ARE HANDLED SEPARATELY, NOT USING TEXT CONTROLLERS
+          break;
+        default:
+          controllers[InfoField.values[i]] = TextEditingController();
+      }
+    }
   }
 
   void _syncWithProviderData() {
@@ -86,7 +89,14 @@ class _MetadataTabState extends State<MetadataTab> {
         case VersionType.import:
           final cipher = ciph.getCipher(widget.cipherID)!;
           final version = localVer.getVersion(widget.versionID)!;
-          _syncLocalVersion(cipher, version);
+          controllers[InfoField.title]!.text = cipher.title;
+          controllers[InfoField.author]!.text = cipher.author;
+          controllers[InfoField.versionName]!.text = version.versionName;
+          controllers[InfoField.bpm]!.text = version.bpm.toString();
+          controllers[InfoField.language]!.text = cipher.language;
+          controllers[InfoField.duration]!.text = DateTimeUtils.formatDuration(
+            version.duration,
+          );
           break;
         case VersionType.brandNew:
           // Empty controllers for brand new versions
@@ -95,60 +105,52 @@ class _MetadataTabState extends State<MetadataTab> {
     }
   }
 
-  void _syncLocalVersion(Cipher cipher, Version version) {
-    controllers[InfoField.title]!.text = cipher.title;
-    controllers[InfoField.author]!.text = cipher.author;
-    controllers[InfoField.versionName]!.text = version.versionName;
-    controllers[InfoField.bpm]!.text = version.bpm.toString();
-    controllers[InfoField.language]!.text = cipher.language;
-    controllers[InfoField.duration]!.text = DateTimeUtils.formatDuration(
-      version.duration,
-    );
-    // KEY FIELD IS HANDLED BY TRANSPOSITION PROVIDER
-    // TAGS CONTROLLER IS NOT USED, ADDING TAGS IS HANDLED BY A BOTTOM SHEET
-  }
-
   void _addListeners() {
     final ciph = context.read<CipherProvider>();
     final localVer = context.read<LocalVersionProvider>();
-
-    for (var field in InfoField.values) {
+    
+    for (var entry in controllers.entries) {
+      final field = entry.key;
+      final controller = entry.value;
       switch (field) {
-        case InfoField.key:
-        case InfoField.tags:
-          // THESE FIELDS ARE HANDLED SEPARATELY, NOT USING TEXT CONTROLLERS
+        case InfoField.title:
+          controller.addListener(
+            () => ciph.cacheUpdates(widget.cipherID, title: controller.text),
+          );
+          break;
+        case InfoField.author:
+          controller.addListener(
+            () => ciph.cacheUpdates(widget.cipherID, author: controller.text),
+          );
+          break;
+        case InfoField.versionName:
+          controller.addListener(
+            () => localVer.cacheUpdates(
+              widget.versionID,
+              versionName: controller.text,
+            ),
+          );
+          break;
+        case InfoField.language:
+          controller.addListener(
+            () =>
+                ciph.cacheUpdates(widget.versionID, language: controller.text),
+          );
+          break;
+        case InfoField.bpm:
+          controller.addListener(() {
+            final bpm = int.tryParse(controller.text) ?? 0;
+            localVer.cacheUpdates(widget.versionID, bpm: bpm);
+          });
+          break;
+        case InfoField.duration:
+          controller.addListener(() {
+            final duration = DateTimeUtils.parseDuration(controller.text);
+            localVer.cacheUpdates(widget.versionID, duration: duration);
+          });
           break;
         default:
-          controllers[field]!.addListener(() {
-            final text = controllers[field]!.text;
-            switch (field) {
-              case InfoField.title:
-                ciph.cacheUpdates(widget.cipherID, title: text);
-                break;
-
-              case InfoField.author:
-                ciph.cacheUpdates(widget.cipherID, author: text);
-                break;
-              case InfoField.versionName:
-                localVer.cacheUpdates(widget.versionID, versionName: text);
-                break;
-              case InfoField.language:
-                ciph.cacheUpdates(widget.cipherID, language: text);
-                break;
-              case InfoField.bpm:
-                final bpm = int.tryParse(text) ?? 0;
-                localVer.cacheUpdates(widget.versionID, bpm: bpm);
-                break;
-              case InfoField.duration:
-                final duration = DateTimeUtils.parseDuration(text);
-                localVer.cacheUpdates(widget.versionID, duration: duration);
-                break;
-              case InfoField.tags:
-              case InfoField.key:
-                // THESE FIELDS ARE HANDLED SEPARATELY, NOT USING TEXT CONTROLLERS
-                break;
-            }
-          });
+          break;
       }
     }
   }

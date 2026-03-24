@@ -179,6 +179,7 @@ class LocalVersionProvider extends ChangeNotifier {
       debugPrint('Error loading version by id: $e');
     } finally {
       _isLoading = false;
+      _hasUnsavedChanges = false;
       notifyListeners();
     }
   }
