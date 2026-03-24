@@ -44,6 +44,8 @@ class PlayScheduleState extends State<PlaySchedule> {
   late final bool isCloud = widget.scheduleId is String;
   bool get isWide => MediaQuery.of(context).size.width > 600;
 
+  bool _isLoading = true;
+
   late final PlayScheduleStateProvider _state;
   late final AutoScrollProvider _scroll;
   late final ScrollController _scrollController;
@@ -63,6 +65,11 @@ class PlayScheduleState extends State<PlaySchedule> {
       _state.reset();
 
       await _loadData();
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     });
   }
 
@@ -365,6 +372,12 @@ class PlayScheduleState extends State<PlaySchedule> {
                           : item.contentId,
                     ),
                   ),
+                  if (_isLoading)
+                    SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: CircularProgressIndicator(color: colorScheme.primary),
+                    ),
                   if (isWide)
                     ..._buildSettingsButtons()
                   else ...[
