@@ -79,7 +79,6 @@ class RepeatSectionSheet extends StatelessWidget {
                       return GestureDetector(
                         onTap: () {
                           localVer.addSectionToStruct(versionID, sectionCode);
-                          Navigator.of(context).pop();
                         },
                         child: Container(
                           decoration: BoxDecoration(
