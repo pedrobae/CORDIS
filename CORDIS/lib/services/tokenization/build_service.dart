@@ -20,7 +20,7 @@ class TokenizationBuilder {
     cache ??= {};
     final key =
         '$text|${style.fontFamily}|${style.fontSize}|'
-        '${style.fontWeight?.index}|${style.letterSpacing}';
+        '${style.fontWeight?.value}|${style.letterSpacing}';
     return cache.putIfAbsent(key, () {
       final textPainter = TextPainter(
         text: TextSpan(text: text, style: style),
