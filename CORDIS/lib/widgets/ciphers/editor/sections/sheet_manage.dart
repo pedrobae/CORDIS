@@ -8,15 +8,15 @@ import "package:cordis/widgets/ciphers/editor/sections/reorderable_structure.dar
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 
-class RepeatSectionSheet extends StatefulWidget {
+class ManageSheet extends StatefulWidget {
   final int versionID;
-  const RepeatSectionSheet({super.key, required this.versionID});
+  const ManageSheet({super.key, required this.versionID});
 
   @override
-  State<RepeatSectionSheet> createState() => _RepeatSectionSheetState();
+  State<ManageSheet> createState() => _ManageSheetState();
 }
 
-class _RepeatSectionSheetState extends State<RepeatSectionSheet> {
+class _ManageSheetState extends State<ManageSheet> {
   void Function()? _scrollToEnd;
 
   @override

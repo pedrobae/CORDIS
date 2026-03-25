@@ -86,10 +86,6 @@ class SectionRepository {
 
   Future<void> deleteSections(int versionID) async {
     final db = await _databaseHelper.database;
-    await db.delete(
-      'section',
-      where: 'version_id = ?',
-      whereArgs: [versionID],
-    );
+    await db.delete('section', where: 'version_id = ?', whereArgs: [versionID]);
   }
 }

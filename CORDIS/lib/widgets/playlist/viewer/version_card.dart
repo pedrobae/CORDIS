@@ -17,7 +17,6 @@ import 'package:cordis/screens/cipher/view_cipher.dart';
 import 'package:cordis/utils/date_utils.dart';
 
 import 'package:cordis/widgets/common/custom_reorderable_delayed.dart';
-import 'package:cordis/widgets/common/filled_text_button.dart';
 import 'package:cordis/widgets/playlist/viewer/version_card_actions.dart';
 
 class PlaylistVersionCard extends StatefulWidget {
@@ -54,10 +53,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
         version = localVer.getVersion(widget.versionId);
 
         if (version == null) {
-          debugPrint(
-            'PLAYLIST VIEW - VersionCard - version ${widget.versionId} could not be loaded.',
-          );
-          return;
+          throw Exception('Failed to load version with ID ${widget.versionId}');
         }
       }
 
@@ -107,119 +103,109 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
             border: Border.all(color: colorScheme.surfaceContainerLowest),
             borderRadius: BorderRadius.circular(0),
           ),
-          padding: const EdgeInsets.only(left: 8),
           margin: const EdgeInsets.only(bottom: 16),
           child: Row(
-            spacing: 8,
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
             children: [
               CustomReorderableDelayed(
                 delay: Duration(milliseconds: 100),
                 index: widget.index,
-                child: Icon(Icons.drag_indicator),
+                child: Container(
+                  // Container to paint and enable hitbox for the icon
+                  color: Colors.transparent,
+                  height: 93,
+                  child: Icon(Icons.drag_indicator, size: 30),
+                ),
               ),
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: BorderDirectional(
-                      start: BorderSide(
-                        color: colorScheme.surfaceContainerLowest,
-                        width: 1,
+                child: GestureDetector(
+                  onTap: () {
+                    nav.push(
+                      () => ViewCipherScreen(
+                        versionType: VersionType.playlist,
+                        versionID: widget.versionId,
+                        cipherID: sel.version!.cipherID,
+                      ),
+                      showBottomNavBar: true,
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: BorderDirectional(
+                        start: BorderSide(
+                          color: colorScheme.surfaceContainerLowest,
+                          width: 1,
+                        ),
                       ),
                     ),
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    spacing: 8,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              spacing: 4,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      spacing: 4,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          sel.cipher!.title,
+                          style: theme.textTheme.titleMedium,
+                          softWrap: true,
+                        ),
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  sel.cipher!.title,
-                                  style: theme.textTheme.titleMedium,
-                                  softWrap: true,
+                                  '${AppLocalizations.of(context)!.musicKey}: ',
+                                  style: theme.textTheme.bodyMedium,
                                 ),
-                                Wrap(
-                                  spacing: 8,
-                                  children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          '${AppLocalizations.of(context)!.musicKey}: ',
-                                          style: theme.textTheme.bodyMedium,
-                                        ),
-                                        Text(
-                                          sel.version!.transposedKey ??
-                                              sel.cipher!.musicKey,
-                                          style: theme.textTheme.bodyMedium,
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          '${AppLocalizations.of(context)!.bpm}: ',
-                                          style: theme.textTheme.bodyMedium,
-                                        ),
-                                        Text(
-                                          sel.version!.bpm.toString(),
-                                          style: theme.textTheme.bodyMedium,
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      DateTimeUtils.formatDuration(
-                                        sel.version!.duration,
-                                      ),
-                                      style: theme.textTheme.bodyMedium,
-                                    ),
-                                  ],
-                                ),
-                                // REORDERABLE SECTION CHIPS
-                                _buildReorderableSectionChips(
-                                  sel.version!,
-                                  songStructure,
+                                Text(
+                                  sel.version!.transposedKey ??
+                                      sel.cipher!.musicKey,
+                                  style: theme.textTheme.bodyMedium,
                                 ),
                               ],
                             ),
-                          ),
-                          IconButton(
-                            iconSize: 30,
-                            icon: Icon(Icons.more_vert_rounded),
-                            onPressed: () {
-                              _openVersionActions(context, sel.version!);
-                            },
-                          ),
-                        ],
-                      ),
-                      FilledTextButton(
-                        text: AppLocalizations.of(context)!.viewPlaceholder(
-                          AppLocalizations.of(context)!.cipher,
-                        ),
-                        isDense: true,
-                        isDiscrete: true,
-                        onPressed: () {
-                          nav.push(
-                            () => ViewCipherScreen(
-                              versionType: VersionType.playlist,
-                              versionID: widget.versionId,
-                              cipherID: sel.version!.cipherID,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${AppLocalizations.of(context)!.bpm}: ',
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                                Text(
+                                  sel.version!.bpm.toString(),
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                              ],
                             ),
-                            showBottomNavBar: true,
-                          );
-                        },
-                      ),
-                    ],
+                            Text(
+                              DateTimeUtils.formatDuration(
+                                sel.version!.duration,
+                              ),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                        // REORDERABLE SECTION CHIPS
+                        _buildReorderableSectionChips(
+                          sel.version!,
+                          songStructure,
+                        ),
+                      ],
+                    ),
                   ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  _openVersionActions(context, sel.version!);
+                },
+                child: Container(
+                  // Container to paint and enable hitbox for the icon
+                  color: Colors.transparent,
+                  height: 93,
+                  child: Icon(Icons.more_vert_rounded, size: 30),
                 ),
               ),
             ],

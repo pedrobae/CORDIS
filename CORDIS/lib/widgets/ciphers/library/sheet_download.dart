@@ -1,6 +1,8 @@
 import 'package:cordis/l10n/app_localizations.dart';
 
 import 'package:cordis/models/domain/cipher/cipher.dart';
+import 'package:cordis/models/domain/cipher/section.dart';
+import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/widgets/common/labeled_text_field.dart';
 
 import 'package:provider/provider.dart';
@@ -50,6 +52,7 @@ class _DownloadVersionSheetState extends State<DownloadVersionSheet> {
     final ciph = context.read<CipherProvider>();
     final localVer = context.read<LocalVersionProvider>();
     final cloudVer = context.read<CloudVersionProvider>();
+    final sect = context.read<SectionProvider>();
 
     return Container(
       decoration: BoxDecoration(
@@ -110,18 +113,31 @@ class _DownloadVersionSheetState extends State<DownloadVersionSheet> {
                     if (cloudVersion == null) return;
 
                     // UPSERT CIPHER
-                    final cipherId = await ciph.upsertCipher(
+                    final cipherID = await ciph.upsertCipher(
                       Cipher.fromVersionDto(cloudVersion),
                     );
 
                     // UPSERT VERSION
                     final versionID = await localVer.upsertVersion(
-                      cloudVersion.toDomain(cipherId: cipherId),
+                      cloudVersion.toDomain(cipherId: cipherID),
                     );
 
                     cloudVer.removeVersion(widget.versionId);
+
+                    sect.setNewSectionsInCache(
+                      versionID,
+                      cloudVersion.sections.map(
+                        (code, section) => MapEntry(
+                          code,
+                          Section.fromFirestore(section, versionID),
+                        ),
+                      ),
+                    );
+
+                    await sect.createSections(versionID, originKey: versionID);
+
                     localVer.loadVersion(versionID);
-                    ciph.loadCipher(cipherId);
+                    ciph.loadCipher(cipherID);
 
                     cloudVer.toggleIsDownloading(widget.versionId);
                     // close sheet

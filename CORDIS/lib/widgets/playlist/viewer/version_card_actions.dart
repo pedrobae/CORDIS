@@ -1,16 +1,14 @@
+import 'package:cordis/widgets/ciphers/editor/sections/sheet_manage.dart';
 import 'package:flutter/material.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 
-import 'package:cordis/models/domain/cipher/version.dart';
 
 import 'package:provider/provider.dart';
-import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/user/my_auth_provider.dart';
 import 'package:cordis/providers/user/user_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/providers/playlist/playlist_provider.dart';
 
-import 'package:cordis/screens/cipher/edit_cipher.dart';
 
 import 'package:cordis/widgets/common/delete_confirmation.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
@@ -34,7 +32,6 @@ class VersionCardActionsSheet extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    final nav = context.read<NavigationProvider>();
     final auth = context.read<MyAuthProvider>();
     final user = context.read<UserProvider>();
     final play = context.read<PlaylistProvider>();
@@ -71,20 +68,7 @@ class VersionCardActionsSheet extends StatelessWidget {
             text: AppLocalizations.of(context)!.editPlaceholder(''),
             isDiscrete: true,
             trailingIcon: Icons.chevron_right,
-            onPressed: () {
-              nav.push(
-                () => EditCipherScreen(
-                  versionType: VersionType.playlist,
-                  versionID: versionID,
-                  cipherID: cipherID,
-                  isEnabled: false,
-                ),
-                changeDetector: () => localVer.hasUnsavedChanges,
-                onChangeDiscarded: () => localVer.loadVersion(versionID),
-                showBottomNavBar: true,
-              );
-              Navigator.of(context).pop();
-            },
+            onPressed: () => _showManageSheet(context),
           ),
 
           // duplicate
@@ -131,6 +115,19 @@ class VersionCardActionsSheet extends StatelessWidget {
           SizedBox(),
         ],
       ),
+    );
+  }
+
+  void _showManageSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.75,
+      ),
+      builder: (context) {
+        return ManageSheet(versionID: versionID);
+      },
     );
   }
 }

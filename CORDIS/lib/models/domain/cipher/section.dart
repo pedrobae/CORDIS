@@ -40,6 +40,17 @@ class Section {
       'content_color': colorToHex(contentColor),
     };
   }
+
+  factory Section.fromFirestore(SectionDto dto, int versionID) {
+    return Section(
+      versionID: versionID,
+      contentType: dto.contentType,
+      contentCode: dto.contentCode,
+      contentText: dto.contentText,
+      contentColor: colorFromHex(dto.color),
+    );
+  }
+
   SectionDto toFirestore() {
     return SectionDto(
       contentCode: contentCode,

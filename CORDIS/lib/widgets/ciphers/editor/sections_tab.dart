@@ -214,7 +214,7 @@ class _SectionsTabState extends State<SectionsTab> {
           maxHeight: MediaQuery.of(context).size.height * 0.75,
         ),
         builder: (context) {
-          return RepeatSectionSheet(versionID: widget.versionID);
+          return ManageSheet(versionID: widget.versionID);
         },
       );
     };

@@ -2,6 +2,7 @@ import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
 import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
+import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/view_cipher.dart';
 import 'package:cordis/widgets/common/filled_text_button.dart';
@@ -70,6 +71,9 @@ class SelectVersionSheet extends StatelessWidget {
                   trailingIcon: Icons.chevron_right,
                   isDiscrete: true,
                   onPressed: () {
+                    final sect = context.read<SectionProvider>();
+
+                    sect.loadSectionsOfVersion(versionID);
                     Navigator.of(context).pop(); // Close the bottom sheet
                     nav.push(
                       () => ViewCipherScreen(

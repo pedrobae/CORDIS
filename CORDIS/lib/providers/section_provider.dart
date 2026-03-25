@@ -11,14 +11,13 @@ class SectionProvider extends ChangeNotifier {
 
   Map<dynamic, Map<String, Section>> _sections =
       {}; // versionId -> (sectionCode -> Section) -1 versionId for new/importing versions
-  bool _isLoading = false;
+  Map<dynamic, bool> _isLoadingVersion = {}; // versionId -> isLoading
   bool _isSaving = false;
   bool _hasUnsavedChanges = false;
   final List<MapEntry<int, String>> _cachedDeletions = [];
 
   String? _error;
 
-  bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
   bool get hasUnsavedChanges => _hasUnsavedChanges;
 
@@ -115,14 +114,14 @@ class SectionProvider extends ChangeNotifier {
   }
 
   ///Create sections for a new version from -1 cache
-  Future<void> createSections(int newVersionId) async {
-    final sections = _sections[-1];
+  Future<void> createSections(int newVersionId, {int originKey = -1}) async {
+    final sections = _sections[originKey];
     for (final code in sections!.keys) {
       await _repo.insertSection(
         sections[code]!.copyWith(versionID: newVersionId),
       );
     }
-    _sections.remove(-1);
+    _sections.remove(originKey);
     _hasUnsavedChanges = false;
     notifyListeners();
   }
@@ -130,20 +129,21 @@ class SectionProvider extends ChangeNotifier {
   // ====== READ =====
   /// Load sections for a given version from the database
   Future<void> loadSectionsOfVersion(int versionId) async {
-    if (_isLoading) return;
+    if (_isLoadingVersion[versionId] == true) return;
 
-    _isLoading = true;
+    _isLoadingVersion[versionId] = true;
     notifyListeners();
 
     try {
       _sections[versionId] = await _repo.getSections(versionId);
+      debugPrint("Loaded version $versionId: SECTION count - ${_sections[versionId]!.length}");
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {
         print('⚠️ Failed to load sections: $e');
       }
     } finally {
-      _isLoading = false;
+      _isLoadingVersion[versionId] = false;
       _hasUnsavedChanges = false;
       notifyListeners();
     }
@@ -303,7 +303,7 @@ class SectionProvider extends ChangeNotifier {
   /// Clear all sections from cache
   void clearCache() {
     _sections = {};
-    _isLoading = false;
+    _isLoadingVersion = {};
     _isSaving = false;
     notifyListeners();
   }

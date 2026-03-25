@@ -7,7 +7,8 @@ class LocalVersionProvider extends ChangeNotifier {
   final Map<int, Version> _versions = {}; // Cached versions localID -> Version
   final List<int> _cachedDeletions = [];
 
-  bool _isLoading = false;
+  final Map<int, bool> _isLoadingVersion = {}; // versionId -> isLoading
+
   bool _isSaving = false;
 
   String? _error;
@@ -17,7 +18,6 @@ class LocalVersionProvider extends ChangeNotifier {
   // Getters
   Map<int, Version> get versions => _versions;
 
-  bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
 
   String? get error => _error;
@@ -139,32 +139,28 @@ class LocalVersionProvider extends ChangeNotifier {
   // ===== READ =====
   /// Load all versions of a cipher into cache, used for version selector and cipher expansion
   Future<void> loadVersionsOfCipher(int cipherId) async {
-    if (_isLoading) return;
-
     try {
       _error = null;
-      _isLoading = true;
       notifyListeners();
 
       final versionList = await _repo.getVersions(cipherId);
       for (final version in versionList) {
         _versions[version.id!] = version;
       }
-      debugPrint('Loaded ${versionList.length} versions of cipher $cipherId');
+      debugPrint('Loaded cipher $cipherId: VERSIONS - ${versionList.map((v) => v.id).toList()}');
     } catch (e) {
       _error = e.toString();
       debugPrint('Error loading versions of cipher: $e');
     } finally {
-      _isLoading = false;
       notifyListeners();
     }
   }
 
   /// Load a version into cache by its local ID
   Future<void> loadVersion(int versionId) async {
-    if (_isLoading) return;
+    if (_isLoadingVersion[versionId] == true) return;
 
-    _isLoading = true;
+    _isLoadingVersion[versionId] = true;
     _error = null;
     notifyListeners();
 
@@ -182,7 +178,7 @@ class LocalVersionProvider extends ChangeNotifier {
       _error = e.toString();
       debugPrint('Error loading version by id: $e');
     } finally {
-      _isLoading = false;
+      _isLoadingVersion[versionId] = false;
       _hasUnsavedChanges = false;
       notifyListeners();
     }
@@ -190,12 +186,12 @@ class LocalVersionProvider extends ChangeNotifier {
 
   /// Fetches a version directly from SQLite
   Future<Version?> fetchVersion(int versionID) async {
-    if (_isLoading) return null;
+    if (_isLoadingVersion[versionID] == true) return null;
 
     Version? version;
 
     try {
-      _isLoading = true;
+      _isLoadingVersion[versionID] = true;
       _error = null;
       notifyListeners();
 
@@ -203,7 +199,7 @@ class LocalVersionProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
     } finally {
-      _isLoading = false;
+      _isLoadingVersion[versionID] = false;
       notifyListeners();
     }
 
@@ -423,7 +419,7 @@ class LocalVersionProvider extends ChangeNotifier {
 
   void clearCache() {
     _versions.clear();
-    _isLoading = false;
+    _isLoadingVersion.clear();
     _isSaving = false;
     _error = null;
     _hasUnsavedChanges = false;
