@@ -198,7 +198,7 @@ class _CipherCardState extends State<CipherCard> {
                         // ACTIONS SHEET
                         IconButton(
                           onPressed: () =>
-                              _openCipherActionsSheet(context, sel),
+                              _openCipherActionsSheet(),
                           icon: Icon(Icons.more_vert),
                         ),
                       ],
@@ -213,7 +213,6 @@ class _CipherCardState extends State<CipherCard> {
                       onPressed: () async {
                         if (sel.isSelectionMode) {
                           await _createAndAddVersionToPlaylist(
-                            context,
                             version,
                           );
 
@@ -230,28 +229,24 @@ class _CipherCardState extends State<CipherCard> {
                         }
                       },
                       onLongPress: () async {
-                        if (sel.isSelectionMode) {
-                          sel.select(versionId);
-                        } else {
-                          nav.push(
-                            () => EditCipherScreen(
-                              cipherID: widget.cipherId,
-                              versionID: versionId,
-                              versionType: VersionType.local,
-                            ),
-                            changeDetector: () {
-                              return localVer.hasUnsavedChanges ||
-                                  sect.hasUnsavedChanges ||
-                                  ciph.hasUnsavedChanges;
-                            },
-                            onChangeDiscarded: () {
-                              localVer.loadVersion(versionId);
-                              ciph.loadCipher(widget.cipherId);
-                              sect.loadSectionsOfVersion(versionId);
-                            },
-                            showBottomNavBar: true,
-                          );
-                        }
+                        nav.push(
+                          () => EditCipherScreen(
+                            cipherID: widget.cipherId,
+                            versionID: versionId,
+                            versionType: VersionType.local,
+                          ),
+                          changeDetector: () {
+                            return localVer.hasUnsavedChanges ||
+                                sect.hasUnsavedChanges ||
+                                ciph.hasUnsavedChanges;
+                          },
+                          onChangeDiscarded: () {
+                            localVer.loadVersion(versionId);
+                            ciph.loadCipher(widget.cipherId);
+                            sect.loadSectionsOfVersion(versionId);
+                          },
+                          showBottomNavBar: true,
+                        );
                       },
                     ),
                   ],
@@ -265,7 +260,6 @@ class _CipherCardState extends State<CipherCard> {
   }
 
   Future<void> _createAndAddVersionToPlaylist(
-    BuildContext context,
     Version version,
   ) async {
     final play = context.read<PlaylistProvider>();
@@ -301,10 +295,8 @@ class _CipherCardState extends State<CipherCard> {
     play.cacheAddVersion(sel.targetId!, newVersionID);
   }
 
-  void _openCipherActionsSheet(
-    BuildContext context,
-    SelectionProvider selectionProvider,
-  ) {
+  void _openCipherActionsSheet() {
+    final sel = context.read<SelectionProvider>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -315,7 +307,7 @@ class _CipherCardState extends State<CipherCard> {
           builder: (context) {
             return CipherCardActionsSheet(
               cipherId: widget.cipherId,
-              versionType: selectionProvider.isSelectionMode
+              versionType: sel.isSelectionMode
                   ? VersionType.playlist
                   : VersionType.local,
             );

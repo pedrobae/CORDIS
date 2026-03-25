@@ -32,11 +32,14 @@ class PlaylistCard extends StatelessWidget {
     final nav = context.read<NavigationProvider>();
     final play = context.read<PlaylistProvider>();
 
-    return Selector<PlaylistProvider, Playlist?>(
-      selector: (context, play) {
-        return play.getPlaylist(playlistID);
+    return Selector2<PlaylistProvider, SelectionProvider, (Playlist?, bool)>(
+      selector: (context, play, sel) {
+        return (play.getPlaylist(playlistID), sel.isSelected(playlistID));
       },
-      builder: (context, playlist, child) {
+      builder: (context, data, child) {
+        final playlist = data.$1;
+        final isSelected = data.$2;
+
         if (playlist == null) {
           return Center(child: CircularProgressIndicator());
         }
@@ -50,7 +53,7 @@ class PlaylistCard extends StatelessWidget {
             final flow = context.read<FlowItemProvider>();
 
             sel.isSelectionMode
-                ? null
+                ? sel.toggleSelection(playlistID, exclusive: true)
                 : nav.push(
                     () => ViewPlaylistScreen(playlistId: playlistID),
                     changeDetector: () {
@@ -83,21 +86,15 @@ class PlaylistCard extends StatelessWidget {
                   children: [
                     // SELECTION CHECKBOX
                     sel.isSelectionMode
-                        ? Checkbox(
-                            value: sel.isSelected(playlistID),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                            onChanged: (isSelected) {
-                              if (isSelected == null) return;
-
-                              if (isSelected) {
-                                sel.select(playlistID);
-                              } else {
-                                sel.deselect(playlistID);
-                              }
-                            },
-                          )
+                        ? isSelected
+                              ? Icon(
+                                  Icons.check_box,
+                                  color: colorScheme.primary,
+                                )
+                              : Icon(
+                                  Icons.check_box_outline_blank,
+                                  color: colorScheme.shadow,
+                                )
                         : const SizedBox.shrink(),
 
                     // INFO

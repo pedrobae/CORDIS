@@ -32,13 +32,15 @@ class SelectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void select(dynamic item) {
-    _selectedItemIds.add(item);
-    notifyListeners();
-  }
-
-  void deselect(dynamic item) {
-    _selectedItemIds.remove(item);
+  void toggleSelection(dynamic item, {bool exclusive = false}) {
+    if (_selectedItemIds.contains(item)) {
+      _selectedItemIds.remove(item);
+    } else {
+      if (exclusive) {
+        _selectedItemIds.clear();
+      }
+      _selectedItemIds.add(item);
+    }
     notifyListeners();
   }
 
