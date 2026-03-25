@@ -82,6 +82,12 @@ class NavigationProvider extends ChangeNotifier {
     BuildContext context, {
     NavigationRoute? route,
   }) async {
+    if (_screenOnForeground != null) {
+      _screenOnForeground = null;
+      notifyListeners();
+      return;
+    }
+
     final hasChanges =
         _screenStack.isNotEmpty && _screenStack.last.changeDetector();
 

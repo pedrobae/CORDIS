@@ -5,14 +5,43 @@ import 'package:flutter/material.dart';
 import 'package:cordis/widgets/common/custom_reorderable_delayed.dart';
 import 'package:provider/provider.dart';
 
-class ReorderableStructure extends StatelessWidget {
+
+class ReorderableStructure extends StatefulWidget {
   final int versionID;
   final bool showDelete;
+  final void Function(void Function())? onInit;
+  
   const ReorderableStructure({
     super.key,
     required this.versionID,
     this.showDelete = true,
+    this.onInit,
   });
+
+  @override
+  State<ReorderableStructure> createState() => _ReorderableStructureState();
+}
+
+class _ReorderableStructureState extends State<ReorderableStructure> {
+  final _scrollController = ScrollController();
+
+  void scrollToEnd() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.onInit != null) {
+      widget.onInit!(scrollToEnd);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +51,7 @@ class ReorderableStructure extends StatelessWidget {
 
     return Selector<LocalVersionProvider, List<String>>(
       selector: (context, localVer) {
-        return localVer.getVersion(versionID)!.songStructure;
+        return localVer.getSongStructure(widget.versionID);
       },
       builder: (context, songStructure, child) {
         return Container(
@@ -45,9 +74,10 @@ class ReorderableStructure extends StatelessWidget {
                       Material(type: MaterialType.transparency, child: child),
                   buildDefaultDragHandles: false,
                   scrollDirection: Axis.horizontal,
+                  scrollController: _scrollController,
                   itemCount: songStructure.length,
                   onReorder: (oldIndex, newIndex) => localVer
-                      .reorderSongStructure(versionID, oldIndex, newIndex),
+                      .reorderSongStructure(widget.versionID, oldIndex, newIndex),
                   itemBuilder: (context, index) {
                     return _buildItem(context, index, songStructure);
                   },
@@ -69,7 +99,7 @@ class ReorderableStructure extends StatelessWidget {
 
     final sectionCode = songStructure[index];
     final color =
-        sect.getSection(versionID, sectionCode)?.contentColor ?? Colors.grey;
+        sect.getSection(widget.versionID, sectionCode)?.contentColor ?? Colors.grey;
 
     final codeCount = songStructure.where((code) => code == sectionCode).length;
 
@@ -77,7 +107,6 @@ class ReorderableStructure extends StatelessWidget {
       delay: Duration(milliseconds: 100),
       key: ValueKey('$sectionCode-$index'),
       index: index,
-
       child: Stack(
         children: [
           Container(
@@ -100,15 +129,15 @@ class ReorderableStructure extends StatelessWidget {
               ),
             ),
           ),
-          if (showDelete)
+          if (widget.showDelete)
             Positioned(
               top: -3,
               right: 1, // Right margin is 4
               child: GestureDetector(
                 onTap: () {
-                  localVer.removeSection(versionID, index);
+                  localVer.removeSection(widget.versionID, index);
                   if (codeCount == 1) {
-                    sect.cacheDeletion(versionID, sectionCode);
+                    sect.cacheDeletion(widget.versionID, sectionCode);
                   }
                 },
                 child: Container(

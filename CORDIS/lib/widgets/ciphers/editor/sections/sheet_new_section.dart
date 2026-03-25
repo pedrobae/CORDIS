@@ -1,5 +1,6 @@
 import 'package:cordis/l10n/app_localizations.dart';
 import 'package:cordis/providers/navigation_provider.dart';
+import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/screens/cipher/import/import_pdf.dart';
 import 'package:cordis/screens/cipher/import/import_text.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/sheet_select_type.dart';
@@ -9,19 +10,18 @@ import 'package:provider/provider.dart';
 
 class NewSectionSheet extends StatelessWidget {
   final int versionID;
-  final int cipherID;
 
-  const NewSectionSheet({
-    super.key,
-    required this.versionID,
-    required this.cipherID,
-  });
+  const NewSectionSheet({super.key, required this.versionID});
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
+    final cipherID = context
+        .read<LocalVersionProvider>()
+        .getVersion(versionID)!
+        .cipherID;
     final nav = context.read<NavigationProvider>();
 
     return Container(

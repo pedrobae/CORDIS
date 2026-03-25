@@ -35,6 +35,10 @@ class LocalVersionProvider extends ChangeNotifier {
     return _versions[versionID];
   }
 
+  List<String> getSongStructure(int versionID) {
+    return _versions[versionID]?.songStructure ?? [];
+  }
+
   /// Checks if a version exists locally by its Firebase ID
   /// Returns the version if found, otherwise null
   Future<Version?> getVersionByFirebaseId(String firebaseId) async {
@@ -289,8 +293,13 @@ class LocalVersionProvider extends ChangeNotifier {
   void reorderSongStructure(int versionId, int oldIndex, int newIndex) {
     if (newIndex > oldIndex) newIndex--;
 
-    final item = _versions[versionId]!.songStructure.removeAt(oldIndex);
-    _versions[versionId]!.songStructure.insert(newIndex, item);
+    final newStruct = List<String>.from(_versions[versionId]!.songStructure);
+    final item = newStruct.removeAt(oldIndex);
+    newStruct.insert(newIndex, item);
+
+    _versions[versionId] = _versions[versionId]!.copyWith(
+      songStructure: newStruct,
+    );
     _hasUnsavedChanges = true;
     notifyListeners();
     return;
@@ -359,7 +368,12 @@ class LocalVersionProvider extends ChangeNotifier {
   /// ===== CREATE =====
   // Add a new section
   void addSectionToStruct(int versionId, String contentCode) {
-    _versions[versionId]!.songStructure.add(contentCode);
+    final newStruct = List<String>.from(_versions[versionId]!.songStructure);
+    newStruct.add(contentCode);
+
+    _versions[versionId] = _versions[versionId]!.copyWith(
+      songStructure: newStruct,
+    );
     _hasUnsavedChanges = true;
     notifyListeners();
   }
@@ -371,29 +385,38 @@ class LocalVersionProvider extends ChangeNotifier {
     required String oldCode,
     required String newCode,
   }) {
-    final songStructure = _versions[versionId]!.songStructure;
-
     // Iterate through the song structure and update the section code
-    for (int i = 0; i < _versions[versionId]!.songStructure.length; i++) {
-      if (songStructure[i] == oldCode) {
-        songStructure[i] = newCode;
+    final newStruct = List<String>.from(_versions[versionId]!.songStructure);
+    for (int i = 0; i < newStruct.length; i++) {
+      if (newStruct[i] == oldCode) {
+        newStruct[i] = newCode;
       }
     }
+
+    _versions[versionId] = _versions[versionId]!.copyWith(
+      songStructure: newStruct,
+    );
     _hasUnsavedChanges = true;
     notifyListeners();
   }
 
   /// ===== DELETE =====
   void removeSectionsByCode(int versionId, String contentCode) {
-    _versions[versionId]!.songStructure.removeWhere(
-      (code) => code == contentCode,
+    final newStruct = List<String>.from(_versions[versionId]!.songStructure);
+    newStruct.removeWhere((code) => code == contentCode);
+    _versions[versionId] = _versions[versionId]!.copyWith(
+      songStructure: newStruct,
     );
     _hasUnsavedChanges = true;
     notifyListeners();
   }
 
   void removeSection(int versionID, int index) {
-    _versions[versionID]!.songStructure.removeAt(index);
+    final newStruct = List<String>.from(_versions[versionID]!.songStructure);
+    newStruct.removeAt(index);
+    _versions[versionID] = _versions[versionID]!.copyWith(
+      songStructure: newStruct,
+    );
     _hasUnsavedChanges = true;
     notifyListeners();
   }

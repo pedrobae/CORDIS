@@ -5,9 +5,16 @@ import "package:cordis/widgets/ciphers/editor/sections/reorderable_structure.dar
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 
-class RepeatSectionSheet extends StatelessWidget {
+class RepeatSectionSheet extends StatefulWidget {
   final int versionID;
   const RepeatSectionSheet({super.key, required this.versionID});
+
+  @override
+  State<RepeatSectionSheet> createState() => _RepeatSectionSheetState();
+}
+
+class _RepeatSectionSheetState extends State<RepeatSectionSheet> {
+    void Function()? _scrollToEnd;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +25,7 @@ class RepeatSectionSheet extends StatelessWidget {
 
     return Selector<LocalVersionProvider, List<String>>(
       selector: (context, localVer) {
-        return localVer.getVersion(versionID)!.songStructure;
+        return localVer.getSongStructure(widget.versionID);
       },
       builder: (context, songStructure, child) {
         return Container(
@@ -45,18 +52,10 @@ class RepeatSectionSheet extends StatelessWidget {
                     children: [
                       SizedBox(height: 8),
                       Text(
-                        AppLocalizations.of(context)!.duplicatePlaceholder(
+                        AppLocalizations.of(context)!.managePlaceholder(
                           AppLocalizations.of(context)!.section,
                         ),
                         style: textTheme.titleMedium,
-                      ),
-                      Text(
-                        AppLocalizations.of(
-                          context,
-                        )!.duplicateSectionInstruction,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.shadow,
-                        ),
                       ),
                     ],
                   ),
@@ -71,7 +70,9 @@ class RepeatSectionSheet extends StatelessWidget {
                   ),
                 ],
               ),
-              ReorderableStructure(versionID: versionID),
+              ReorderableStructure(versionID: widget.versionID, onInit: (scrollToEnd) {
+                _scrollToEnd = scrollToEnd;
+              },),
               Expanded(
                 child: ListView(
                   children: [
@@ -80,15 +81,20 @@ class RepeatSectionSheet extends StatelessWidget {
                         builder: (context) {
                           final sect = context.read<SectionProvider>();
                           final section = sect.getSection(
-                            versionID,
+                            widget.versionID,
                             sectionCode,
                           )!;
                           return GestureDetector(
                             onTap: () {
                               localVer.addSectionToStruct(
-                                versionID,
+                                widget.versionID,
                                 sectionCode,
                               );
+                              if (_scrollToEnd != null) {
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  _scrollToEnd!();
+                                });
+                              }
                             },
                             child: Container(
                               decoration: BoxDecoration(

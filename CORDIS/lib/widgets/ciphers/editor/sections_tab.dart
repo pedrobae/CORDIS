@@ -1,13 +1,10 @@
 import 'package:cordis/l10n/app_localizations.dart';
-import 'package:cordis/models/domain/cipher/cipher.dart';
 import 'package:cordis/models/domain/cipher/version.dart';
-import 'package:cordis/providers/cipher/cipher_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/chord_palette.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/sheet_new_section.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/sheet_manage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cordis/providers/section_provider.dart';
 import 'package:cordis/providers/version/local_version_provider.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/reorderable_structure.dart';
 import 'package:cordis/widgets/ciphers/editor/sections/token_content_card.dart';
@@ -36,28 +33,15 @@ class _SectionsTabState extends State<SectionsTab> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Selector3<
-      SectionProvider,
+    return Selector<
       LocalVersionProvider,
-      CipherProvider,
-      ({Version? version, Cipher? cipher})
+      List<String>
     >(
-      selector: (context, sect, localVer, ciph) {
-        final version = localVer.getVersion(widget.versionID);
-        final cipher = version != null
-            ? ciph.getCipher(version.cipherID)
-            : null;
-        return (version: version, cipher: cipher);
+      selector: (context, localVer) {
+        return localVer.getSongStructure(widget.versionID);
       },
-      builder: (context, s, child) {
-        final version = s.version;
-        final uniqueSections = version?.songStructure.toSet().toList() ?? [];
-
-        if (s.version == null || s.cipher == null) {
-          return Center(
-            child: CircularProgressIndicator(color: colorScheme.primary),
-          );
-        }
+      builder: (context, songStructure, child) {
+        final uniqueSections = songStructure.toSet().toList();
 
         return Stack(
           children: [
@@ -177,7 +161,7 @@ class _SectionsTabState extends State<SectionsTab> {
 
                     // Open add sheet
                     GestureDetector(
-                      onTap: _openAddSheet(version!.cipherID),
+                      onTap: _openAddSheet(),
                       child: Container(
                         margin: const EdgeInsets.all(8),
                         padding: const EdgeInsets.all(12),
@@ -208,14 +192,13 @@ class _SectionsTabState extends State<SectionsTab> {
     );
   }
 
-  VoidCallback _openAddSheet(int cipherID) {
+  VoidCallback _openAddSheet() {
     return () {
       showModalBottomSheet(
         context: context,
         builder: (context) {
           return NewSectionSheet(
             versionID: widget.versionID,
-            cipherID: cipherID,
           );
         },
       );
