@@ -190,6 +190,8 @@
   "@chordColor": {"description": "Label for chord color setting"},
   "contentFilters": "Content Filters",
   "@contentFilters": {"description": "Title for content filters settings section"},
+  "repeatSections": "Repeat Sections",
+  "@repeatSections": {"description": "Label for repeat sections filter setting"},
 
   "cardWidth": "Card Width",
   "@cardWidth": {"description": "Label for card width setting"},

@@ -66,6 +66,12 @@ class ContentFilters extends StatelessWidget {
                 value: settings.layoutFilters[LayoutFilter.transitions] ?? false,
                 onChanged: (_) => settings.toggleTransitions(),
               ),
+              _buildFilterToggle(
+                context,
+                label: AppLocalizations.of(context)!.repeatSections,
+                value: settings.layoutFilters[LayoutFilter.repeatSections] ?? false,
+                onChanged: (_) => settings.toggleRepeatSections(),
+              ),
               SizedBox(),
             ],
           ),

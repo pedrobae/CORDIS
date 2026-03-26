@@ -29,19 +29,37 @@ class VersionWrap extends StatelessWidget {
       LocalVersionProvider,
       CloudVersionProvider,
       SectionProvider,
-      ({
-        Axis wrapDirection,
-        Map<LayoutFilter, bool> layoutFilters,
-        List<String> songStructure,
-      })
+      ({Axis wrapDirection, List<String> filteredStructure})
     >(
-      selector: (context, laySet, localVer, cloudVer, sect) => (
-        wrapDirection: laySet.wrapDirection,
-        layoutFilters: laySet.layoutFilters,
-        songStructure: versionID is String
-            ? (cloudVer.getVersion(versionID)?.songStructure ?? [])
-            : (localVer.getVersion(versionID)?.songStructure ?? []),
-      ),
+      selector: (context, laySet, localVer, cloudVer, sect) {
+        final layoutFilters = laySet.layoutFilters;
+
+        final songStructure = versionID is String
+            ? cloudVer.getVersion(versionID)!.songStructure
+            : localVer.getSongStructure(versionID);
+
+        final filteredStructure = <String>[];
+        for (var code in songStructure) {
+          if (layoutFilters[LayoutFilter.annotations] == false &&
+              isAnnotation(code)) {
+            continue;
+          }
+          if (layoutFilters[LayoutFilter.transitions] == false &&
+              isTransition(code)) {
+            continue;
+          }
+          if (layoutFilters[LayoutFilter.repeatSections] == false &&
+              filteredStructure.contains(code)) {
+            continue;
+          }
+          filteredStructure.add(code);
+        }
+
+        return (
+          wrapDirection: laySet.wrapDirection,
+          filteredStructure: filteredStructure,
+        );
+      },
       builder: (context, s, child) {
         return Padding(
           padding: EdgeInsets.only(
@@ -52,11 +70,7 @@ class VersionWrap extends StatelessWidget {
             direction: s.wrapDirection,
             runSpacing: 8,
             spacing: 8,
-            children: _buildSectionCards(
-              context,
-              s.songStructure,
-              s.layoutFilters,
-            ),
+            children: _buildSectionCards(context, s.filteredStructure),
           ),
         );
       },
@@ -123,24 +137,13 @@ class VersionWrap extends StatelessWidget {
 
   List<Widget> _buildSectionCards(
     BuildContext context,
-    List<String> songStructure,
-    Map<LayoutFilter, bool> layoutFilters,
+    List<String> filteredStructure,
   ) {
     if (versionID == null) return [const SizedBox.shrink()];
 
     final scroll = context.read<AutoScrollProvider>();
     final sect = context.read<SectionProvider>();
     final cloudVer = context.read<CloudVersionProvider>();
-
-    final filteredStructure = songStructure
-        .where(
-          (sectionCode) =>
-              ((layoutFilters[LayoutFilter.annotations]! ||
-                  !isAnnotation(sectionCode)) &&
-              (layoutFilters[LayoutFilter.transitions]! ||
-                  !isTransition(sectionCode))),
-        )
-        .toList();
 
     final sectionWidgets = <Widget>[_buildHeader(context)];
 

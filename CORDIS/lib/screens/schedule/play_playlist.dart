@@ -26,11 +26,7 @@ class PlayPlaylist extends StatefulWidget {
   final PlaylistDto? playlistDto;
   final bool canEdit;
 
-  const PlayPlaylist({
-    super.key,
-    this.playlistDto,
-    this.canEdit = false,
-  });
+  const PlayPlaylist({super.key, this.playlistDto, this.canEdit = false});
 
   @override
   State<PlayPlaylist> createState() => _PlayPlaylistState();
@@ -218,9 +214,7 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
 
   Widget _buildStructBar() {
     final colorScheme = Theme.of(context).colorScheme;
-
     final nav = context.read<NavigationProvider>();
-
     return Selector<PlayScheduleStateProvider, PlaylistItem?>(
       selector: (_, state) => state.currentItem,
       builder: (context, item, child) {

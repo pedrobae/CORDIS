@@ -67,24 +67,24 @@ class _StructureListState extends State<StructureList> {
       selector: (context, laySet, localVer, cloudVer) {
         if (widget.versionID == null) return [];
 
-        List<String> songStructure;
-        if (widget.versionID is int) {
-          songStructure =
-              localVer.getVersion(widget.versionID)?.songStructure ?? [];
-        } else {
-          songStructure =
-              cloudVer.getVersion(widget.versionID)?.songStructure ?? [];
+        final songStructure = widget.versionID is String
+            ? cloudVer.getVersion(widget.versionID)!.songStructure
+            : localVer.getSongStructure(widget.versionID);
+
+        final filteredStructure = <String>[];
+        for (var code in songStructure) {
+          if (laySet.layoutFilters[LayoutFilter.annotations] == false &&
+              isAnnotation(code)) {
+            continue;
+          }
+          if (laySet.layoutFilters[LayoutFilter.transitions] == false &&
+              isTransition(code)) {
+            continue;
+          }
+          filteredStructure.add(code);
         }
 
-        return songStructure
-            .where(
-              (sectionCode) =>
-                  ((laySet.layoutFilters[LayoutFilter.annotations]! ||
-                      !isAnnotation(sectionCode)) &&
-                  (laySet.layoutFilters[LayoutFilter.transitions]! ||
-                      !isTransition(sectionCode))),
-            )
-            .toList();
+        return filteredStructure;
       },
       builder: (context, filteredStructure, child) {
         return Padding(

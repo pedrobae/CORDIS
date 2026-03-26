@@ -3,7 +3,7 @@ import 'package:cordis/services/settings_service.dart';
 
 enum ContentFilter { chords, lyrics }
 
-enum LayoutFilter { annotations, transitions }
+enum LayoutFilter { annotations, transitions, repeatSections }
 
 class LayoutSetProvider extends ChangeNotifier {
   double fontSize = 16;
@@ -19,6 +19,7 @@ class LayoutSetProvider extends ChangeNotifier {
   bool _showLyrics = true;
   bool _showAnnotations = true;
   bool _showTransitions = true;
+  bool _showRepeatSections = true;
 
   Map<ContentFilter, bool> get contentFilters => {
     ContentFilter.chords: _showChords,
@@ -28,6 +29,7 @@ class LayoutSetProvider extends ChangeNotifier {
   Map<LayoutFilter, bool> get layoutFilters => {
     LayoutFilter.annotations: _showAnnotations,
     LayoutFilter.transitions: _showTransitions,
+    LayoutFilter.repeatSections: _showRepeatSections,
   };
 
   /// Initialize with stored settings
@@ -38,6 +40,7 @@ class LayoutSetProvider extends ChangeNotifier {
     _showChords = SettingsService.getShowChords();
     _showLyrics = SettingsService.getShowLyrics();
     _showAnnotations = SettingsService.getShowNotes();
+    _showRepeatSections = SettingsService.getShowRepeatSections();
     _showTransitions = SettingsService.getShowTransitions();
     showSectionHeaders = SettingsService.getShowSectionHeaders();
     cardWidthMult = SettingsService.getCardWidthMult();
@@ -98,6 +101,12 @@ class LayoutSetProvider extends ChangeNotifier {
   void toggleTransitions() {
     _showTransitions = !_showTransitions;
     SettingsService.setShowTransitions(_showTransitions);
+    notifyListeners();
+  }
+
+  void toggleRepeatSections() {
+    _showRepeatSections = !_showRepeatSections;
+    SettingsService.setShowRepeatSections(_showRepeatSections);
     notifyListeners();
   }
 

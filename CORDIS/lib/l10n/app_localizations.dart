@@ -620,6 +620,12 @@ abstract class AppLocalizations {
   /// **'Filtros de Conteúdo'**
   String get contentFilters;
 
+  /// Label for repeat sections filter setting
+  ///
+  /// In pt, this message translates to:
+  /// **'Seções Repetidas'**
+  String get repeatSections;
+
   /// Label for card width setting
   ///
   /// In pt, this message translates to:

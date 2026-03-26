@@ -293,6 +293,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get contentFilters => 'Filtros de Conteúdo';
 
   @override
+  String get repeatSections => 'Seções Repetidas';
+
+  @override
   String get cardWidth => 'Largura da Seção';
 
   @override

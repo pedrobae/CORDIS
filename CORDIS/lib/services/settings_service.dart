@@ -25,6 +25,7 @@ class SettingsService {
   static const String _keyShowNotes = 'layout_show_notes';
   static const String _keyShowTransitions = 'layout_show_transitions';
   static const String _keyShowTextSections = 'layout_show_text_sections';
+  static const String _keyShowRepeatSections = 'layout_show_repeat_sections';
 
   // Auto Scroll Settings Keys
   static const String _keyAutoScrollEnabled = 'layout_auto_scroll_enabled';
@@ -220,6 +221,16 @@ class SettingsService {
   /// Get show text sections
   static bool getShowTextSections() {
     return _preferences.getBool(_keyShowTextSections) ?? true;
+  }
+  
+  /// Save show repeat sections
+  static Future<void> setShowRepeatSections(bool show) async {
+    await _preferences.setBool(_keyShowRepeatSections, show);
+  }
+
+  /// Get show repeat sections
+  static bool getShowRepeatSections() {
+    return _preferences.getBool(_keyShowRepeatSections) ?? true;
   }
 
 

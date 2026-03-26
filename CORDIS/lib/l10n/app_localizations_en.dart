@@ -290,6 +290,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contentFilters => 'Content Filters';
 
   @override
+  String get repeatSections => 'Repeat Sections';
+
+  @override
   String get cardWidth => 'Card Width';
 
   @override
