@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>used for image importing (not implemented)</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>used for image importing (not implemented)</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
