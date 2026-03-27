@@ -79,60 +79,62 @@ class CloudScheduleCard extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // SCHEDULE NAME
-                            Row(
-                              spacing: 8,
-                              children: [
-                                Text(
-                                  s.schedule!.name,
-                                  style: theme.textTheme.titleMedium,
-                                ),
-                                StatusChip(
-                                  schedule: s.schedule!.toDomain(
-                                    playlistLocalId: -1,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // SCHEDULE NAME
+                              Row(
+                                spacing: 8,
+                                children: [
+                                  Text(
+                                    s.schedule!.name,
+                                    style: theme.textTheme.titleMedium,
                                   ),
-                                ),
-                              ],
-                            ),
-
-                            // WHEN & WHERE
-                            Wrap(
-                              spacing: 16.0,
-                              children: [
-                                Text(
-                                  DateTimeUtils.formatDate(
-                                    s.schedule!.datetime.toDate(),
+                                  StatusChip(
+                                    schedule: s.schedule!.toDomain(
+                                      playlistLocalId: -1,
+                                    ),
                                   ),
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                Text(
-                                  DateTimeUtils.formatTime(
-                                    s.schedule!.datetime.toDate(),
+                                ],
+                              ),
+                          
+                              // WHEN & WHERE
+                              Wrap(
+                                spacing: 16.0,
+                                children: [
+                                  Text(
+                                    DateTimeUtils.formatDate(
+                                      s.schedule!.datetime.toDate(),
+                                    ),
+                                    style: theme.textTheme.bodyMedium,
                                   ),
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                Text(
-                                  s.schedule!.location,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-
-                            // PLAYLIST INFO
-                            Text(
-                              '${AppLocalizations.of(context)!.playlist}: ${s.schedule!.playlist.name}',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-
-                            // YOUR ROLE INFO
-                            Text(
-                              '${AppLocalizations.of(context)!.role}: $userRole',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                          ],
+                                  Text(
+                                    DateTimeUtils.formatTime(
+                                      s.schedule!.datetime.toDate(),
+                                    ),
+                                    style: theme.textTheme.bodyMedium,
+                                  ),
+                                  Text(
+                                    s.schedule!.location,
+                                    style: theme.textTheme.bodyMedium,
+                                  ),
+                                ],
+                              ),
+                          
+                              // PLAYLIST INFO
+                              Text(
+                                '${AppLocalizations.of(context)!.playlist}: ${s.schedule!.playlist.name}',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                          
+                              // YOUR ROLE INFO
+                              Text(
+                                '${AppLocalizations.of(context)!.role}: $userRole',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
                         ),
                         if (s.isSyncing) const CloudDownloadIndicator(),
                         IconButton(
