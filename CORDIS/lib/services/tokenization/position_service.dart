@@ -209,11 +209,7 @@ class PositionService {
           if (ctx.posCtx.isEditMode && !ctx.loggedLyricYDebug) {
             ctx.loggedLyricYDebug = true;
           }
-          positions.setPosition(
-            token,
-            xOffset,
-            cursor.yOffset,
-          );
+          positions.setPosition(token, xOffset, cursor.yOffset);
           cursor.lyricsX = xOffset + msr.width + ctx.posCtx.letterSpacing;
 
           charIndex++;
@@ -275,22 +271,10 @@ class PositionService {
   /// Handles line breaking and oversized words using position information.
   ContentTokenized applyPositionsToWidgets(
     OrganizedWidgets contentWidgets,
-    Map<ContentToken, Measurements> tokenMeasurements,
     TokenPositionMap positionMap,
-    PositioningContext posCtx,
     TokenBuildContext buildCtx,
   ) {
-    final chordMsr = _builder.measureText(
-      text: 'teste',
-      style: buildCtx.chordStyle,
-    );
-    if (posCtx.isEditMode) {
-      chordMsr.size += 2 * TokenizationConstants.chordTokenHeightPadding;
-    }
-
     final tokenWidgets = <Positioned>[];
-    double maxY = chordMsr.size + posCtx.chordLyricSpacing;
-    // Iterate through widgets and tokens together to get both widget and position
     for (var widgetLine in contentWidgets.lines) {
       for (var widgetWord in widgetLine.words) {
         for (var tokenWidget in widgetWord.widgets) {
@@ -306,12 +290,11 @@ class PositionService {
           tokenWidgets.add(
             Positioned(left: x, top: y, child: tokenWidget.widget),
           );
-
-          // Track max Y for total height
-          maxY = max(maxY, y + tokenMeasurements[tokenWidget.token]!.height);
         }
       }
     }
+
+    final maxY = positionMap.maxY + buildCtx.lineHeight!;
 
     return ContentTokenized(tokenWidgets, maxY);
   }

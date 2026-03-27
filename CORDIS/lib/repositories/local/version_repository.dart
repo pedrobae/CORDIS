@@ -101,15 +101,6 @@ class LocalVersionRepository {
     );
   }
 
-  /// Updates specific field(s) of a version
-  Future<void> updateFieldOfVersion(
-    int versionId,
-    Map<String, dynamic> field,
-  ) async {
-    final db = await _databaseHelper.database;
-    await db.update('version', field, where: 'id = ?', whereArgs: [versionId]);
-  }
-
   // ===== DELETE =====
   /// Deletes version by its local ID,
   /// if it leaves the cipher without any versions, deletes the cipher as well and returns its index

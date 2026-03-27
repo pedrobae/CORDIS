@@ -265,16 +265,22 @@ class ScheduleSyncService {
         final cloudSection = versionDto.sections[existingSection.contentCode];
 
         if (cloudSection == null) {
-          // Section was removed in the cloud version, delete it locally
+          // Section doesnt exist in the cloud version, delete it locally
           await _sectionRepo.deleteSection(
-            existingSection.id!,
+            existingSection.versionID,
             existingSection.contentCode,
           );
+          await _versionRepo.updateVersion(
+            existingVersion.copyWith(
+              songStructure: existingVersion.songStructure
+                ..remove(existingSection.contentCode),
+            ),
+          );
+        } else {
+          await _sectionRepo.upsertSection(
+            cloudSection.toDomain(versionID: existingVersion.id!),
+          );
         }
-
-        await _sectionRepo.upsertSection(
-          cloudSection!.toDomain(versionID: existingVersion.id!),
-        );
       }
     } else {
       // Version doesn't exist locally, insert it and add it to the playlist

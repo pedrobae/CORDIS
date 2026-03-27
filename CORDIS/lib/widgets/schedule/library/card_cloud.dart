@@ -34,30 +34,16 @@ class CloudScheduleCard extends StatelessWidget {
 
     return Selector<
       CloudScheduleProvider,
-      ({ScheduleDto? schedule, bool isLoading, bool isSyncing})
+      ({ScheduleDto? schedule, bool isSyncing})
     >(
       selector: (context, cloudSch) => (
         schedule: cloudSch.getSchedule(scheduleId),
-        isLoading: cloudSch.isLoading,
         isSyncing: cloudSch.syncingStatus(scheduleId),
       ),
-      builder: (context, selection, child) {
-        // LOADING STATE
-        if (selection.isLoading || selection.schedule == null) {
-          return Center(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CircularProgressIndicator(color: colorScheme.primary),
-                Icon(Icons.cloud, size: 20, color: colorScheme.primary),
-              ],
-            ),
-          );
-        }
-
+      builder: (context, s, child) {
         String userRole = AppLocalizations.of(context)!.generalMember;
 
-        for (var role in selection.schedule!.roles) {
+        for (var role in s.schedule!.roles) {
           if (role.users.any((user) => user.firebaseId == auth.id)) {
             userRole = role.name;
             break;
@@ -101,11 +87,11 @@ class CloudScheduleCard extends StatelessWidget {
                               spacing: 8,
                               children: [
                                 Text(
-                                  selection.schedule!.name,
+                                  s.schedule!.name,
                                   style: theme.textTheme.titleMedium,
                                 ),
                                 StatusChip(
-                                  schedule: selection.schedule!.toDomain(
+                                  schedule: s.schedule!.toDomain(
                                     playlistLocalId: -1,
                                   ),
                                 ),
@@ -118,18 +104,18 @@ class CloudScheduleCard extends StatelessWidget {
                               children: [
                                 Text(
                                   DateTimeUtils.formatDate(
-                                    selection.schedule!.datetime.toDate(),
+                                    s.schedule!.datetime.toDate(),
                                   ),
                                   style: theme.textTheme.bodyMedium,
                                 ),
                                 Text(
                                   DateTimeUtils.formatTime(
-                                    selection.schedule!.datetime.toDate(),
+                                    s.schedule!.datetime.toDate(),
                                   ),
                                   style: theme.textTheme.bodyMedium,
                                 ),
                                 Text(
-                                  selection.schedule!.location,
+                                  s.schedule!.location,
                                   style: theme.textTheme.bodyMedium,
                                 ),
                               ],
@@ -137,7 +123,7 @@ class CloudScheduleCard extends StatelessWidget {
 
                             // PLAYLIST INFO
                             Text(
-                              '${AppLocalizations.of(context)!.playlist}: ${selection.schedule!.playlist.name}',
+                              '${AppLocalizations.of(context)!.playlist}: ${s.schedule!.playlist.name}',
                               style: theme.textTheme.bodyMedium,
                             ),
 
@@ -148,7 +134,7 @@ class CloudScheduleCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                        if (selection.isSyncing) const CloudDownloadIndicator(),
+                        if (s.isSyncing) const CloudDownloadIndicator(),
                         IconButton(
                           onPressed: () => _openScheduleActionsSheet(context),
                           icon: Icon(Icons.more_vert),

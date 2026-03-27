@@ -255,4 +255,8 @@ class TokenPositionMap {
   void merge(TokenPositionMap other) {
     _positions.addAll(other._positions);
   }
+
+  double get maxY {
+    return _positions.values.map((offset) => offset.dy).reduce((a, b) => a > b ? a : b);
+  }
 }

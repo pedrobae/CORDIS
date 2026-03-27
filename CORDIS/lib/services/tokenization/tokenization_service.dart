@@ -353,9 +353,7 @@ class TokenizationService {
     // Step 7: Apply positions to widgets (shared)
     final positionedContent = _positioner.applyPositionsToWidgets(
       contentWidgets,
-      tokenMeasurements,
       tokenPositions,
-      posCtx,
       buildCtx,
     );
 
