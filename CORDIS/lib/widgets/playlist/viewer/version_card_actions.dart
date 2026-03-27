@@ -119,6 +119,7 @@ class VersionCardActionsSheet extends StatelessWidget {
   }
 
   void _showManageSheet(BuildContext context) {
+    Navigator.of(context).pop();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

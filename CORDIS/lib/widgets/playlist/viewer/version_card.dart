@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cordis/models/domain/cipher/cipher.dart';
+import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:flutter/material.dart';
 import 'package:cordis/l10n/app_localizations.dart';
 
@@ -223,61 +224,67 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
 
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: 25),
-      child: ReorderableListView.builder(
-        shrinkWrap: true,
-        proxyDecorator: (child, index, animation) =>
-            Material(type: MaterialType.transparency, child: child),
-        buildDefaultDragHandles: false,
-        physics: const ClampingScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        itemCount: songStructure.length,
-        onReorder: (oldIndex, newIndex) {
-          if (newIndex > oldIndex) newIndex--;
-          localVer.reorderSongStructure(widget.versionId, oldIndex, newIndex);
+      child: Selector<SectionProvider, Map<String, Section>>(
+        selector: (context, sect) {
+          return sect.getSections(widget.versionId);
         },
-        itemBuilder: (_, index) {
-          final sect = context.read<SectionProvider>();
-          final sectionCode = songStructure[index];
-
-          final section = sect.getSection(widget.versionId, sectionCode);
-          final color = section?.contentColor ?? Colors.grey;
-          final codeWidth = (TextPainter(
-            text: TextSpan(
-              text: sectionCode,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            textDirection: TextDirection.ltr,
-          )..layout()).size.width;
-
-          return CustomReorderableDelayed(
-            delay: Duration(milliseconds: 100),
-            key: ValueKey(
-              'ver${widget.versionId}_idx_${widget.index}_sect_${sectionCode}_idx_$index',
-            ),
-            index: index,
-            child: Container(
-              height: 25,
-              width: max(25, codeWidth + 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(0),
-                color: color.withValues(alpha: 0.8),
-                border: BoxBorder.all(color: color, width: 2),
-              ),
-              margin: const EdgeInsets.only(right: 4),
-              child: Center(
-                child: Text(
-                  strutStyle: StrutStyle(forceStrutHeight: true),
-                  sectionCode,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+        builder: (context, sections, child) {
+          return ReorderableListView.builder(
+            shrinkWrap: true,
+            proxyDecorator: (child, index, animation) =>
+                Material(type: MaterialType.transparency, child: child),
+            buildDefaultDragHandles: false,
+            physics: const ClampingScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            itemCount: songStructure.length,
+            onReorder: (oldIndex, newIndex) {
+              if (newIndex > oldIndex) newIndex--;
+              localVer.reorderSongStructure(widget.versionId, oldIndex, newIndex);
+            },
+            itemBuilder: (_, index) {
+              final sectionCode = songStructure[index];
+              final section = sections[sectionCode];
+          
+              final color = section?.contentColor ?? Colors.grey;
+              final codeWidth = (TextPainter(
+                text: TextSpan(
+                  text: sectionCode,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                textDirection: TextDirection.ltr,
+              )..layout()).size.width;
+          
+              return CustomReorderableDelayed(
+                delay: Duration(milliseconds: 100),
+                key: ValueKey(
+                  'ver${widget.versionId}_idx_${widget.index}_sect_${sectionCode}_idx_$index',
+                ),
+                index: index,
+                child: Container(
+                  height: 25,
+                  width: max(25, codeWidth + 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(0),
+                    color: color.withValues(alpha: 0.8),
+                    border: BoxBorder.all(color: color, width: 2),
+                  ),
+                  margin: const EdgeInsets.only(right: 4),
+                  child: Center(
+                    child: Text(
+                      strutStyle: StrutStyle(forceStrutHeight: true),
+                      sectionCode,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           );
-        },
+        }
       ),
     );
   }

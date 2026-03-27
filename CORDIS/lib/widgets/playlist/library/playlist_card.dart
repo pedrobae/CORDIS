@@ -57,7 +57,10 @@ class PlaylistCard extends StatelessWidget {
                 : nav.push(
                     () => ViewPlaylistScreen(playlistId: playlistID),
                     changeDetector: () {
-                      return play.hasUnsavedChanges || flow.hasUnsavedChanges;
+                      return play.hasUnsavedChanges ||
+                          flow.hasUnsavedChanges ||
+                          localVer.hasUnsavedChanges ||
+                          sect.hasUnsavedChanges;
                     },
                     onChangeDiscarded: () async {
                       debugPrint('PLAYLIST VIEW - discarding Changes');
@@ -69,6 +72,8 @@ class PlaylistCard extends StatelessWidget {
                       }
                       play.clearUnsavedChanges();
                       flow.clearUnsavedChanges();
+                      localVer.clearUnsavedChanges();
+                      sect.clearUnsavedChanges();
                       sel.clearNewlyAddedVersionIds();
                     },
                     showBottomNavBar: true,
