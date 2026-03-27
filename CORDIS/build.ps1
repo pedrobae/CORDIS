@@ -24,9 +24,9 @@ if ($versionMatch) {
     # Build APK
     flutter build apk --debug
 
-    # Rename APK to CORDIS_vX.Y.Z+A.apk (using newVersion)
+    # Rename APK to CORDEOS_vX.Y.Z+A.apk (using newVersion)
     $apkSource = "build/app/outputs/flutter-apk/app-debug.apk"
-    $apkDest = "build/app/outputs/flutter-apk/CORDIS_v$($newVersion).apk"
+    $apkDest = "build/app/outputs/flutter-apk/CORDEOS_v$($newVersion).apk"
     if (Test-Path $apkSource) {
         Move-Item -Force $apkSource $apkDest
         Write-Host "Renamed APK to: $apkDest" -ForegroundColor Green

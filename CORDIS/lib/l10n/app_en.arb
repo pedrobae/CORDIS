@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
 
-  "appName": "CORDIS",
+  "appName": "CORDEOS",
   "@appName": {"description": "Application name"},
   "appVersion": "Version: {version}",
   "@appVersion": {"description": "App version label", "placeholders": {"version": {}}},
