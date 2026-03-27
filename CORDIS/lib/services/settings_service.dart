@@ -13,11 +13,17 @@ class SettingsService {
   static const String _keyFontSize = 'layout_font_size';
   static const String _keyFontFamily = 'layout_font_family';
 
-  static const String _keyShowSectionHeaders = 'layout_show_section_headers';
   static const String _keyScrollDirection = 'layout_scroll_direction';
   static const String _keyCardWidthMult = 'layout_card_width_mult';
 
+  static const String _keyShowSectionHeaders = 'layout_show_section_headers';
   static const String _keyDenseCipherCard = 'layout_dense_cipher_card';
+
+  static const String _keyLineSpacing = 'layout_line_spacing';
+  static const String _keyLineBreakSpacing = 'layout_line_break_spacing';
+  static const String _keyChordLyricSpacing = 'layout_chord_lyric_spacing';
+  static const String _keyMinChordSpacing = 'layout_min_chord_spacing';
+  static const String _keyLetterSpacing = 'layout_letter_spacing';
 
   // Filter Settings Keys
   static const String _keyShowChords = 'layout_show_chords';
@@ -169,6 +175,47 @@ class SettingsService {
 
   static bool getDenseCipherCard() {
     return _preferences.getBool(_keyDenseCipherCard) ?? true;
+  }
+
+  // === advanced layout settings ===
+  static Future<void> setLineSpacing(double value) async {
+    await _preferences.setDouble(_keyLineSpacing, value);
+  }
+
+  static double getLineSpacing() {
+    return _preferences.getDouble(_keyLineSpacing) ?? 1.5;
+  }
+
+  static Future<void> setLineBreakSpacing(double value) async {
+    await _preferences.setDouble(_keyLineBreakSpacing, value);
+  }
+
+  static double getLineBreakSpacing() {
+    return _preferences.getDouble(_keyLineBreakSpacing) ?? 0.5;
+  }
+
+  static Future<void> setChordLyricSpacing(double value) async {
+    await _preferences.setDouble(_keyChordLyricSpacing, value);
+  }
+
+  static double getChordLyricSpacing() {
+    return _preferences.getDouble(_keyChordLyricSpacing) ?? 0.5;
+  }
+
+  static Future<void> setMinChordSpacing(double value) async {
+    await _preferences.setDouble(_keyMinChordSpacing, value);
+  }
+
+  static double getMinChordSpacing() {
+    return _preferences.getDouble(_keyMinChordSpacing) ?? 0.5;
+  }
+
+  static Future<void> setLetterSpacing(double value) async {
+    await _preferences.setDouble(_keyLetterSpacing, value);
+  }
+
+  static double getLetterSpacing() {
+    return _preferences.getDouble(_keyLetterSpacing) ?? 0.0;
   }
 
   // ====== FILTER SETTINGS ======

@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class StyleSettings extends StatefulWidget {
-  const StyleSettings({super.key});
+  final bool secret;
+
+  const StyleSettings({super.key, this.secret = false});
 
   @override
   State<StyleSettings> createState() => _StyleSettingsState();
@@ -12,6 +14,11 @@ class StyleSettings extends StatefulWidget {
 
 class _StyleSettingsState extends State<StyleSettings> {
   double? _localCardWidthMult;
+  double? _localLineSpacing;
+  double? _localLineBreakSpacing;
+  double? _localChordLyricSpacing;
+  double? _localMinChordSpacing;
+  double? _localLetterSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +27,13 @@ class _StyleSettingsState extends State<StyleSettings> {
 
     return Consumer<LayoutSetProvider>(
       builder: (context, settings, child) {
-        _localCardWidthMult ??= settings.cardWidthMult;
+        _localCardWidthMult ??= settings.cardWidthMult.clamp(0.2, 1);
+        _localLineSpacing ??= settings.lineSpacing.clamp(-5, 10);
+        _localLineBreakSpacing ??= settings.lineBreakSpacing.clamp(-5, 10);
+        _localChordLyricSpacing ??= settings.chordLyricSpacing.clamp(-5, 15);
+        _localMinChordSpacing ??= settings.minChordSpacing.clamp(-5, 5);
+        _localLetterSpacing ??= settings.letterSpacing.clamp(-3, 3);
+        
         return Container(
           decoration: BoxDecoration(
             color: colorScheme.surface,
@@ -104,6 +117,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                   ],
                 ),
               ),
+
               // CARD WIDTH SETTINGS
               _buildOption(
                 context,
@@ -211,6 +225,159 @@ class _StyleSettingsState extends State<StyleSettings> {
                   ],
                 ),
               ),
+
+              if (widget.secret) ...[
+                _buildOption(
+                  context,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.lineSpacing,
+                          style: textTheme.labelLarge,
+                        ),
+                      ),
+                      Text(
+                        _localLineSpacing!.toStringAsFixed(1),
+                        style: textTheme.labelMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Slider(
+                        value: _localLineSpacing!,
+                        min: -5,
+                        max: 10,
+                        onChanged: (v) {
+                          setState(() => _localLineSpacing = v);
+                        },
+                        onChangeEnd: (v) {
+                          settings.setLineSpacing(v);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                _buildOption(
+                  context,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.lineBreakSpacing,
+                          style: textTheme.labelLarge,
+                        ),
+                      ),
+                      Text(
+                        _localLineBreakSpacing!.toStringAsFixed(1),
+                        style: textTheme.labelMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Slider(
+                        value: _localLineBreakSpacing!,
+                        min: -5,
+                        max: 10,
+                        onChanged: (v) {
+                          setState(() => _localLineBreakSpacing = v);
+                        },
+                        onChangeEnd: (v) {
+                          settings.setLineBreakSpacing(v);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                _buildOption(
+                  context,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.chordLyricSpacing,
+                          style: textTheme.labelLarge,
+                        ),
+                      ),
+                      Text(
+                        _localChordLyricSpacing!.toStringAsFixed(1),
+                        style: textTheme.labelMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Slider(
+                        value: _localChordLyricSpacing!,
+                        min: -5,
+                        max: 15,
+                        onChanged: (v) {
+                          setState(() => _localChordLyricSpacing = v);
+                        },
+                        onChangeEnd: (v) {
+                          settings.setChordLyricSpacing(v);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                _buildOption(
+                  context,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.minChordSpacing,
+                          style: textTheme.labelLarge,
+                        ),
+                      ),
+                      Text(
+                        _localMinChordSpacing!.toStringAsFixed(1),
+                        style: textTheme.labelMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Slider(
+                        value: _localMinChordSpacing!,
+                        min: -5,
+                        max: 5,
+                        onChanged: (v) {
+                          setState(() => _localMinChordSpacing = v);
+                        },
+                        onChangeEnd: (v) {
+                          settings.setMinChordSpacing(v);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                _buildOption(
+                  context,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.letterSpacing,
+                          style: textTheme.labelLarge,
+                        ),
+                      ),
+                      Text(
+                        _localLetterSpacing!.toStringAsFixed(1),
+                        style: textTheme.labelMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Slider(
+                        value: _localLetterSpacing!,
+                        min: -3,
+                        max: 3,
+                        onChanged: (v) {
+                          setState(() => _localLetterSpacing = v);
+                        },
+                        onChangeEnd: (v) {
+                          settings.setLetterSpacing(v);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               SizedBox(),
             ],
           ),

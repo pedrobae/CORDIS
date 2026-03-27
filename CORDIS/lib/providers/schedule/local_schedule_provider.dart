@@ -184,16 +184,25 @@ class LocalScheduleProvider extends ChangeNotifier {
     }
   }
 
-  /// Uploads changes of a local schedule to the cloud.
+  /// If owner is equal to the current user
+  /// And the schedule is already public
+  /// And current date is earlier than the schedule date,
+  /// Then the schedule will be updated in the cloud.
   Future<void> uploadChangesToCloud(
     int scheduleID,
-    String ownerFirebaseId,
+    String userFirebaseId,
   ) async {
     final schedule = _schedules[scheduleID];
     if (schedule == null) return;
 
+    if (schedule.ownerFirebaseId != userFirebaseId) return;
+
+    if (!schedule.isPublic) return;
+
+    if (DateTime.now().isAfter(schedule.date)) return;
+
     try {
-      await _syncService.upsertToCloud(schedule, ownerFirebaseId);
+      await _syncService.upsertToCloud(schedule, userFirebaseId);
     } catch (e) {
       _error = e.toString();
       notifyListeners();

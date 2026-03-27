@@ -355,7 +355,9 @@ class ScheduleSyncService {
     );
 
     if (schedule.firebaseId == null) {
-      debugPrint('Schedule was not published before, fetching new firebase ID');
+      debugPrint(
+        'Schedule was created, updating local schedule with firebase ID $firebaseId',
+      );
       await _localRepo.updateSchedule(
         schedule.copyWith(firebaseId: firebaseId, isPublic: true),
       );

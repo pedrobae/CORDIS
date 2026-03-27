@@ -632,6 +632,36 @@ abstract class AppLocalizations {
   /// **'Largura da Seção'**
   String get cardWidth;
 
+  /// Label for line spacing setting
+  ///
+  /// In pt, this message translates to:
+  /// **'Espaçamento entre Linhas'**
+  String get lineSpacing;
+
+  /// Label for line break spacing setting
+  ///
+  /// In pt, this message translates to:
+  /// **'Espaçamento entre Quebras de Linha'**
+  String get lineBreakSpacing;
+
+  /// Label for chord-lyric spacing setting
+  ///
+  /// In pt, this message translates to:
+  /// **'Espaçamento entre Acorde e Letra'**
+  String get chordLyricSpacing;
+
+  /// Label for minimum chord spacing setting
+  ///
+  /// In pt, this message translates to:
+  /// **'Espaçamento Mínimo entre Acordes'**
+  String get minChordSpacing;
+
+  /// Label for letter spacing setting
+  ///
+  /// In pt, this message translates to:
+  /// **'Espaçamento entre Letras'**
+  String get letterSpacing;
+
   /// Label for small card width
   ///
   /// In pt, this message translates to:

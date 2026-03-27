@@ -1,4 +1,5 @@
 import 'package:cordis/l10n/app_localizations.dart';
+import 'package:cordis/models/domain/cipher/section.dart';
 import 'package:cordis/providers/settings/layout_settings_provider.dart';
 import 'package:cordis/providers/navigation_provider.dart';
 import 'package:cordis/providers/section_provider.dart';
@@ -111,17 +112,41 @@ class _TokenContentCardState extends State<TokenContentCard> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    final laySet = context.read<LayoutSetProvider>();
-
-    return Consumer2<SectionProvider, TranspositionProvider>(
-      builder: (context, sect, trans, child) {
-        final section = sect.getSection(widget.versionID, widget.sectionCode);
-
-        if (section == null) {
+    return Selector3<
+      SectionProvider,
+      TranspositionProvider,
+      LayoutSetProvider,
+      ({
+        Section? section,
+        Function(String) transpose,
+        double lineSpacing,
+        double lineBreakSpacing,
+        double chordLyricSpacing,
+        double minChordSpacing,
+        double letterSpacing,
+        TextStyle chordStyle,
+        TextStyle lyricStyle,
+      })
+    >(
+      selector: (context, sect, trans, laySet) {
+        return (
+          section: sect.getSection(widget.versionID, widget.sectionCode),
+          transpose: trans.transposeChord,
+          lineSpacing: laySet.lineSpacing,
+          lineBreakSpacing: laySet.lineBreakSpacing,
+          chordLyricSpacing: laySet.chordLyricSpacing,
+          minChordSpacing: laySet.minChordSpacing,
+          letterSpacing: laySet.letterSpacing,
+          chordStyle: laySet.chordTextStyle(colorScheme.surface),
+          lyricStyle: laySet.lyricTextStyle,
+        );
+      },
+      builder: (context, s, child) {
+        if (s.section == null) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        _tokensForContent(section.contentText, triggerBuild: false);
+        _tokensForContent(s.section!.contentText, triggerBuild: false);
 
         return Container(
           decoration: BoxDecoration(
@@ -154,14 +179,14 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
                     /// Section Code badge
                     SectionBadge(
-                      sectionCode: section.contentCode,
-                      sectionColor: section.contentColor,
+                      sectionCode: s.section!.contentCode,
+                      sectionColor: s.section!.contentColor,
                     ),
 
                     /// Section Type label
                     Expanded(
                       child: Text(
-                        section.contentType,
+                        s.section!.contentType,
                         style: textTheme.bodyLarge,
                       ),
                     ),
@@ -205,29 +230,33 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final buildCtx = TokenBuildContext(
-                        chordStyle: laySet.chordTextStyle(colorScheme.surface),
-                        lyricStyle: laySet.lyricTextStyle,
-                        contentColor: section.contentColor,
+                        chordStyle: s.chordStyle,
+                        lyricStyle: s.lyricStyle,
+                        contentColor: s.section!.contentColor,
                         surfaceColor: colorScheme.surface,
                         onSurfaceColor: colorScheme.onSurface,
                         chordTargetColor: colorScheme.surfaceTint,
                         isEnabled: widget.isEnabled,
                         cache: {},
                         maxWidth: constraints.maxWidth,
-                        transposeChord: (String chord) =>
-                            trans.transposeChord(chord),
+                        transposeChord: (String chord) => s.transpose(chord),
                         toggleDrag: _toggleDrag,
                         onAddChord: _addChord,
                         onRemoveChord: _removeChord,
                       );
 
                       final content = _tokenizer.createContent(
-                        content: section.contentText,
+                        content: s.section!.contentText,
                         initialTokens: _activeTokens,
                         posCtx: PositioningContext(
                           underLineColor: colorScheme.onSurface,
                           maxWidth: constraints.maxWidth,
                           isEditMode: true,
+                          lineSpacing: s.lineSpacing,
+                          lineBreakSpacing: s.lineBreakSpacing,
+                          chordLyricSpacing: s.chordLyricSpacing,
+                          minChordSpacing: s.minChordSpacing,
+                          letterSpacing: s.letterSpacing,
                         ),
                         buildCtx: buildCtx,
                       );

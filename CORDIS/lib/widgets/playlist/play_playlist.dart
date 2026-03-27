@@ -374,6 +374,11 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
           isScrollControlled: true,
           builder: (context) => StyleSettings(),
         ),
+        onLongPress: () => showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (context) => StyleSettings(secret: true,),
+        ),
         child: SizedBox(
           width: 40,
           height: 40,

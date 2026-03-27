@@ -296,6 +296,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardWidth => 'Card Width';
 
   @override
+  String get lineSpacing => 'Line Spacing';
+
+  @override
+  String get lineBreakSpacing => 'Line Break Spacing';
+
+  @override
+  String get chordLyricSpacing => 'Chord-Lyric Spacing';
+
+  @override
+  String get minChordSpacing => 'Minimum Chord Spacing';
+
+  @override
+  String get letterSpacing => 'Letter Spacing';
+
+  @override
   String get small => 'Small';
 
   @override

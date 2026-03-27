@@ -195,6 +195,17 @@
 
   "cardWidth": "Card Width",
   "@cardWidth": {"description": "Label for card width setting"},
+  "lineSpacing": "Line Spacing",
+  "@lineSpacing": {"description": "Label for line spacing setting"},
+  "lineBreakSpacing": "Line Break Spacing",
+  "@lineBreakSpacing": {"description": "Label for line break spacing setting"},
+  "chordLyricSpacing": "Chord-Lyric Spacing",
+  "@chordLyricSpacing": {"description": "Label for chord-lyric spacing setting"},
+  "minChordSpacing": "Minimum Chord Spacing",
+  "@minChordSpacing": {"description": "Label for minimum chord spacing setting"},
+  "letterSpacing": "Letter Spacing",
+  "@letterSpacing": {"description": "Label for letter spacing setting"},
+  
   "small": "Small",
   "@small": {"description": "Label for small card width"},
   "large": "Large",

@@ -187,6 +187,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
               IconButton(
                 icon: const Icon(Icons.format_paint),
                 onPressed: _showStyleSettings(),
+                onLongPress: _showStyleSettings(secret: true),
               ),
               IconButton(
                 icon: const Icon(Icons.filter_alt),
@@ -210,13 +211,13 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
     );
   }
 
-  VoidCallback _showStyleSettings() {
+  VoidCallback _showStyleSettings({bool secret = false}) {
     return () {
       showModalBottomSheet(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         context: context,
         isScrollControlled: true,
-        builder: (context) => const StyleSettings(),
+        builder: (context) => StyleSettings(secret: secret),
       );
     };
   }

@@ -204,6 +204,18 @@
 
   "cardWidth": "Largura da Seção",
   "@cardWidth": {"description": "Label for card width setting"},
+
+  "lineSpacing": "Espaçamento entre Linhas",
+  "@lineSpacing": {"description": "Label for line spacing setting"},
+  "lineBreakSpacing": "Espaçamento entre Quebras de Linha",
+  "@lineBreakSpacing": {"description": "Label for line break spacing setting"},
+  "chordLyricSpacing": "Espaçamento entre Acorde e Letra",
+  "@chordLyricSpacing": {"description": "Label for chord-lyric spacing setting"},
+  "minChordSpacing": "Espaçamento Mínimo entre Acordes",
+  "@minChordSpacing": {"description": "Label for minimum chord spacing setting"},
+  "letterSpacing": "Espaçamento entre Letras",
+  "@letterSpacing": {"description": "Label for letter spacing setting"},
+
   "small": "Pequeno",
   "@small": {"description": "Label for small card width"},
   "large": "Grande",

@@ -35,12 +35,12 @@ class PositioningContext {
   const PositioningContext({
     required this.underLineColor,
     required this.maxWidth,
-    this.lineSpacing = 3,
-    this.lineBreakSpacing = 0,
-    this.chordLyricSpacing = 0,
-    this.minChordSpacing = 4,
-    this.letterSpacing = 0,
-    this.isEditMode = false,
+    required this.lineSpacing,
+    required this.lineBreakSpacing,
+    required this.chordLyricSpacing,
+    required this.minChordSpacing,
+    required this.letterSpacing,
+    required this.isEditMode,
   });
 }
 
