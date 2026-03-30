@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/models/domain/playlist/flow_item.dart';
 import 'package:cordeos/models/domain/playlist/playlist_item.dart';
@@ -38,20 +36,17 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
   bool get isWide => MediaQuery.of(context).size.width > 600;
   bool _isLoading = true;
 
-  late Timer? _listenerThrottle;
-
   late final ScrollController _scrollController;
-  late final PlayScheduleStateProvider _play;
-  late final AutoScrollProvider _scroll;
+  late final PlayStateProvider _state;
+  late final ScrollProvider _scroll;
 
   @override
   void initState() {
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
-    _listenerThrottle = null;
 
-    _play = context.read<PlayScheduleStateProvider>();
-    _scroll = context.read<AutoScrollProvider>();
+    _state = context.read<PlayStateProvider>();
+    _scroll = context.read<ScrollProvider>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _scroll.clearCache();
@@ -66,10 +61,9 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
 
   @override
   void dispose() {
-    _listenerThrottle?.cancel();
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
-    _play.reset();
+    _state.reset();
     _scroll.clearCache();
     super.dispose();
   }
@@ -83,28 +77,58 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
     if (isManualScroll) {
       if (_scroll.scrollModeEnabled) _scroll.stopAutoScroll();
 
-      _listenerThrottle?.cancel();
-      _listenerThrottle = Timer(const Duration(milliseconds: 200), () {
-        if (!mounted || !_scrollController.hasClients) return;
+      if (!mounted || !_scrollController.hasClients) return;
 
-        // Sync current item
-        final visibleItemIndex = _scroll.syncItemFromViewport(
-          _scrollController.position.viewportDimension,
-          context.read<LayoutSetProvider>().scrollDirection,
-        );
-        if (visibleItemIndex != null &&
-            visibleItemIndex != _play.currentItemIndex) {
-          _scroll.currentSectionIndex = 0;
-          _play.currentItemIndex = visibleItemIndex;
-          _scroll.currentItemIndex = visibleItemIndex;
-        }
+      _syncFromViewPort();
+    }
+  }
 
-        // Sync current section
-        _scroll.syncSectionFromViewport(
-          _scrollController.position.viewportDimension,
-          context.read<LayoutSetProvider>().scrollDirection,
-        );
-      });
+  void _syncFromViewPort() {
+    // Sync current item
+    final visibleItemIndex = _scroll.syncItemFromViewport(
+      _scrollController.position.viewportDimension,
+      context.read<LayoutSetProvider>().scrollDirection,
+    );
+    if (visibleItemIndex != null &&
+        visibleItemIndex != _state.currentItemIndex) {
+      _scroll.currentSectionIndex = 0;
+      _state.currentItemIndex = visibleItemIndex;
+      _scroll.currentItemIndex = visibleItemIndex;
+    }
+
+    // Sync current section
+    _scroll.syncSectionFromViewport(
+      _scrollController.position.viewportDimension,
+      context.read<LayoutSetProvider>().scrollDirection,
+    );
+  }
+
+  void _scrollOneStep({required bool forward}) async {
+    if (!_scrollController.hasClients) return;
+    final laySet = context.read<LayoutSetProvider>();
+    if (laySet.scrollDirection == Axis.vertical) {
+      // VERTICAL: use provider to calculate next item index and scroll to it
+      _scroll.scrollToNextSection(forward: forward);
+      if (_scroll.currentItemIndex != _state.currentItemIndex) {
+        _state.currentItemIndex = _scroll.currentItemIndex;
+      }
+    } else {
+      // HORIZONTAL: calculate scroll offset based on card width (always constant)
+      final width = MediaQuery.of(context).size.width;
+      final scrollAmount =
+          width * laySet.cardWidthMult + 8; // card width + padding
+      final targetOffset = forward
+          ? _scrollController.offset + scrollAmount
+          : _scrollController.offset - scrollAmount;
+      await _scrollController.animateTo(
+        targetOffset.clamp(
+          _scrollController.position.minScrollExtent,
+          _scrollController.position.maxScrollExtent,
+        ),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+      _syncFromViewPort();
     }
   }
 
@@ -120,57 +144,59 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
   }
 
   Widget _buildListView() {
+    final textTheme = Theme.of(context).textTheme;
     return Stack(
       children: [
         Positioned.fill(
-          child:
-              Selector2<
-                LayoutSetProvider,
-                PlayScheduleStateProvider,
-                (Axis, int)
-              >(
-                selector: (context, laySet, state) =>
-                    (laySet.scrollDirection, state.itemCount),
-                builder: (context, s, child) {
-                  final (scrollDirection, itemCount) = s;
+          child: Selector2<LayoutSetProvider, PlayStateProvider, (Axis, int)>(
+            selector: (context, laySet, state) =>
+                (laySet.scrollDirection, state.itemCount),
+            builder: (context, s, child) {
+              final (scrollDirection, itemCount) = s;
 
-                  if (itemCount == 0) {
-                    return Center(
-                      child: Text(
-                        AppLocalizations.of(context)!.emptyPlaylist,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    );
-                  }
+              if (itemCount == 0) {
+                return Center(
+                  child: Text(
+                    AppLocalizations.of(context)!.emptyPlaylist,
+                    style: textTheme.bodyLarge,
+                  ),
+                );
+              }
 
-                  return SingleChildScrollView(
-                    controller: _scrollController,
-                    scrollDirection: scrollDirection,
-                    padding: scrollDirection == Axis.vertical
-                        ? const EdgeInsets.only(bottom: 16, left: 8, right: 8)
-                        : const EdgeInsets.only(right: 16, top: 8, bottom: 8),
-                    child: Flex(
-                      direction: scrollDirection,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: _buildItems(itemCount),
-                    ),
-                  );
-                },
-              ),
+              return SingleChildScrollView(
+                controller: _scrollController,
+                scrollDirection: scrollDirection,
+                padding: scrollDirection == Axis.vertical
+                    ? const EdgeInsets.symmetric(horizontal: 8)
+                    : const EdgeInsets.symmetric(vertical: 8),
+                child: Flex(
+                  direction: scrollDirection,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _buildItems(itemCount),
+                ),
+              );
+            },
+          ),
         ),
+        // auto scroll indicator
         Positioned(
           bottom: 8,
           right: 8,
-          child: Consumer<AutoScrollProvider>(
-            builder: (context, scrollProvider, _) {
+          child: Selector<ScrollProvider, bool>(
+            selector: (context, scrollProvider) =>
+                scrollProvider.scrollModeEnabled,
+            builder: (context, scrollModeEnabled, _) {
               return Visibility(
-                visible: scrollProvider.scrollModeEnabled,
+                visible: scrollModeEnabled,
                 maintainState: true,
                 child: AutoScrollIndicator(),
               );
             },
           ),
         ),
+
+        // invisible large scroll button overlays that only absorb tap events
+        _buildTransparentButtons(),
       ],
     );
   }
@@ -183,7 +209,7 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
       items.add(
         Container(
           key: key,
-          child: Selector<PlayScheduleStateProvider, PlaylistItem?>(
+          child: Selector<PlayStateProvider, PlaylistItem?>(
             selector: (context, play) => play.getItemAt(i),
             builder: (context, item, child) {
               if (item == null) {
@@ -221,10 +247,100 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
     return items;
   }
 
+  Widget _buildTransparentButtons() {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Selector3<
+      ScrollProvider,
+      LayoutSetProvider,
+      PlayStateProvider,
+      ({bool transparentButtons, bool isVertical, bool showButtons})
+    >(
+      selector: (context, scroll, laySet, playState) => (
+        transparentButtons: scroll.transparentButtons,
+        isVertical: laySet.scrollDirection == Axis.vertical,
+        showButtons: playState.showButtons,
+      ),
+      builder: (context, s, _) {
+        if (!s.transparentButtons) {
+          return Positioned(top: 0, left: 0, child: SizedBox.shrink());
+        }
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            const buttonSpacing = 16.0;
+            final effectiveWidth = constraints.maxWidth - buttonSpacing;
+            final effectiveHeight = constraints.maxHeight - buttonSpacing;
+            final halfWidth = effectiveWidth / 2;
+            final halfHeight = effectiveHeight / 2;
+            return Flex(
+              spacing: buttonSpacing,
+              direction: s.isVertical ? Axis.vertical : Axis.horizontal,
+              children: [
+                // Back/Up button area
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    _scrollOneStep(forward: false);
+                  },
+                  child: Container(
+                    decoration: s.showButtons
+                        ? BoxDecoration(
+                            color: colorScheme.surfaceTint.withAlpha(63),
+                            borderRadius: BorderRadius.circular(8),
+                          )
+                        : null,
+                    width: s.isVertical ? constraints.maxWidth : halfWidth,
+                    height: s.isVertical ? halfHeight : constraints.maxHeight,
+                    child: s.showButtons
+                        ? Icon(
+                            s.isVertical
+                                ? Icons.arrow_upward_rounded
+                                : Icons.arrow_back_rounded,
+                            color: colorScheme.primary.withAlpha(127),
+                            size: 80,
+                          )
+                        : null,
+                  ),
+                ),
+                // Forward/Down button area
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    _scrollOneStep(forward: true);
+                  },
+                  child: Container(
+                    decoration: s.showButtons
+                        ? BoxDecoration(
+                            color: colorScheme.surfaceTint.withAlpha(127),
+                            borderRadius: BorderRadius.circular(8),
+                          )
+                        : null,
+                    width: s.isVertical ? constraints.maxWidth : halfWidth,
+                    height: s.isVertical ? halfHeight : constraints.maxHeight,
+                    child: s.showButtons
+                        ? Icon(
+                            s.isVertical
+                                ? Icons.arrow_downward_rounded
+                                : Icons.arrow_forward_rounded,
+                            color: colorScheme.primary.withAlpha(127),
+                            size: 80,
+                          )
+                        : null,
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildStructBar() {
     final colorScheme = Theme.of(context).colorScheme;
     final nav = context.read<NavigationProvider>();
-    return Selector<PlayScheduleStateProvider, PlaylistItem?>(
+    return Selector<PlayStateProvider, PlaylistItem?>(
       selector: (_, state) => state.currentItem,
       builder: (context, item, child) {
         if (item == null) return const SizedBox.shrink();
@@ -292,11 +408,11 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
 
                   // settings toggle (narrow, view only)
                   if (!isWide && !widget.canEdit)
-                    Selector<PlayScheduleStateProvider, bool>(
+                    Selector<PlayStateProvider, bool>(
                       selector: (_, state) => state.showSettings,
                       builder: (context, showSettings, child) {
                         return GestureDetector(
-                          onTap: () => _play.toggleSettings(),
+                          onTap: () => _state.toggleSettings(),
                           child: SizedBox(
                             width: 40,
                             height: 40,
@@ -335,7 +451,7 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
                 ],
               ),
             ),
-            Selector<PlayScheduleStateProvider, bool>(
+            Selector<PlayStateProvider, bool>(
               selector: (_, state) => state.showSettings,
               builder: (context, showSettings, child) {
                 if (!showSettings && !widget.canEdit) {
@@ -379,7 +495,7 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
         onLongPress: () => showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          builder: (context) => StyleSettings(secret: true,),
+          builder: (context) => StyleSettings(secret: true),
         ),
         child: SizedBox(
           width: 40,
@@ -408,7 +524,7 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
               maxHeight: MediaQuery.of(context).size.height * 0.75,
             ),
             builder: (context) {
-              return ManageSheet(versionID: _play.currentItem!.contentId!);
+              return ManageSheet(versionID: _state.currentItem!.contentId!);
             },
           ),
           child: SizedBox(
@@ -442,7 +558,7 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
       final sect = context.read<SectionProvider>();
       final nav = context.read<NavigationProvider>();
 
-      for (var item in _play.items) {
+      for (var item in _state.items) {
         switch (item.type) {
           case PlaylistItemType.version:
             // Save version changes

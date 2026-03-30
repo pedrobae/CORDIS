@@ -31,7 +31,7 @@ class SectionCard extends StatelessWidget {
 
     return Selector2<
       LayoutSetProvider,
-      AutoScrollProvider,
+      ScrollProvider,
       ({bool isCurrent, bool showSectionHeaders, double cardWidthMult})
     >(
       selector: (context, laySet, scroll) => (
@@ -41,14 +41,13 @@ class SectionCard extends StatelessWidget {
             (scroll.currentItemIndex == itemIndex)),
         cardWidthMult: laySet.cardWidthMult,
       ),
-      child: TokenView(chordPro: sectionText),
-      builder: (context, selection, child) {
-        final showSectionHeaders = selection.showSectionHeaders;
+      builder: (context, s, child) {
+        final showSectionHeaders = s.showSectionHeaders;
         final Color dimmedSectionColor =
             Color.lerp(sectionColor, colorScheme.surface, 0.82) ?? sectionColor;
 
         return SizedBox(
-          width: width * selection.cardWidthMult,
+          width: width * s.cardWidthMult,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: showSectionHeaders
@@ -60,7 +59,7 @@ class SectionCard extends StatelessWidget {
                     : sectionColor,
               ),
               borderRadius: BorderRadius.circular(0),
-              boxShadow: selection.isCurrent
+              boxShadow: s.isCurrent
                   ? [BoxShadow(color: colorScheme.primary, blurRadius: 8)]
                   : null,
             ),
@@ -98,6 +97,7 @@ class SectionCard extends StatelessWidget {
           ),
         );
       },
+      child: TokenView(chordPro: sectionText),
     );
   }
 }

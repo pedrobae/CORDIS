@@ -320,7 +320,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get large => 'Grande';
 
   @override
-  String get autoScrollSettings => 'Configurações de Rolagem Automática';
+  String get scrollSettings => 'Configurações de Rolagem';
+
+  @override
+  String get transparentScrollButtons => 'Botões Transparentes de Rolagem ';
 
   @override
   String get autoScroll => 'Rolagem Automática';

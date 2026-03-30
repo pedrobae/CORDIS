@@ -3,21 +3,34 @@ import 'package:flutter/foundation.dart';
 
 /// Lightweight provider for managing PlayScheduleScreen state
 /// This allows item navigation without rebuilding expensive widget trees
-class PlayScheduleStateProvider extends ChangeNotifier {
+class PlayStateProvider extends ChangeNotifier {
   int _currentItemIndex = 0;
-  bool _showSettings = false;
-  List<PlaylistItem> _items = [];
   int _itemCount = 0;
+  List<PlaylistItem> _items = [];
+
+  bool _showSettings = false;
+  bool _showButtons = false;
 
   int get currentItemIndex => _currentItemIndex;
-  bool get showSettings => _showSettings;
-  PlaylistItem? get currentItem =>
-      _items.isNotEmpty ? _items[_currentItemIndex] : null;
-  PlaylistItem? get nextItem => (_currentItemIndex < _items.length - 1)
-      ? _items[_currentItemIndex + 1]
-      : null;
-  List<PlaylistItem> get items => _items;
   int get itemCount => _itemCount;
+  PlaylistItem? get currentItem {
+    if (_currentItemIndex >= 0 && _currentItemIndex < _items.length) {
+      return _items[_currentItemIndex];
+    }
+    return null;
+  }
+
+  PlaylistItem? get nextItem {
+    if (_currentItemIndex + 1 >= 0 && _currentItemIndex + 1 < _items.length) {
+      return _items[_currentItemIndex + 1];
+    }
+    return null;
+  }
+
+  List<PlaylistItem> get items => _items;
+
+  bool get showSettings => _showSettings;
+  bool get showButtons => _showButtons;
 
   PlaylistItem? getItemAt(int index) {
     if (index < 0 || index >= _items.length) return null;
@@ -58,6 +71,16 @@ class PlayScheduleStateProvider extends ChangeNotifier {
     _currentItemIndex = 0;
     _itemCount = 0;
     _showSettings = false;
+    _showButtons = false;
     _items = [];
+  }
+
+  void showButtonsTemporarily() {
+    _showButtons = true;
+    notifyListeners();
+    Future.delayed(const Duration(seconds: 3), () {
+      _showButtons = false;
+      notifyListeners();
+    });
   }
 }

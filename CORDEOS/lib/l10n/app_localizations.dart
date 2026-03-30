@@ -674,11 +674,17 @@ abstract class AppLocalizations {
   /// **'Grande'**
   String get large;
 
-  /// Title for auto-scroll settings section
+  /// Title for scroll settings section
   ///
   /// In pt, this message translates to:
-  /// **'Configurações de Rolagem Automática'**
-  String get autoScrollSettings;
+  /// **'Configurações de Rolagem'**
+  String get scrollSettings;
+
+  /// Label for transparent scroll buttons setting
+  ///
+  /// In pt, this message translates to:
+  /// **'Botões Transparentes de Rolagem '**
+  String get transparentScrollButtons;
 
   /// Auto-scroll toggle label
   ///

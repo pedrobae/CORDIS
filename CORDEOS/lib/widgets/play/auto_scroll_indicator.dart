@@ -9,10 +9,10 @@ class AutoScrollIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Selector<AutoScrollProvider, bool>(
+    return Selector<ScrollProvider, bool>(
       selector: (_, scroll) => scroll.isAutoScrolling,
       builder: (context, isAutoScrolling, child) {
-        final scrollProvider = context.read<AutoScrollProvider>();
+        final scrollProvider = context.read<ScrollProvider>();
         return GestureDetector(
           onTap: () {
             scrollProvider.toggleAutoScroll();

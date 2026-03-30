@@ -33,9 +33,11 @@ class SettingsService {
   static const String _keyShowTextSections = 'layout_show_text_sections';
   static const String _keyShowRepeatSections = 'layout_show_repeat_sections';
 
-  // Auto Scroll Settings Keys
+  // Scroll Settings Keys
   static const String _keyAutoScrollEnabled = 'layout_auto_scroll_enabled';
   static const String _keyAutoScrollSpeed = 'layout_auto_scroll_speed';
+  static const String _keyTransparentScrollButtons =
+      'layout_transparent_scroll_buttons';
 
   // Notification Settings Keys
   static const String _keyNotificationsEnabled = 'notifications_enabled';
@@ -146,7 +148,8 @@ class SettingsService {
 
   /// Get scroll direction
   static Axis getScrollDirection() {
-    final value = _preferences.getString(_keyScrollDirection) ?? Axis.vertical.toString();
+    final value =
+        _preferences.getString(_keyScrollDirection) ?? Axis.vertical.toString();
     return Axis.values.firstWhere(
       (axis) => axis.toString() == value,
       orElse: () => Axis.vertical,
@@ -269,7 +272,7 @@ class SettingsService {
   static bool getShowTextSections() {
     return _preferences.getBool(_keyShowTextSections) ?? true;
   }
-  
+
   /// Save show repeat sections
   static Future<void> setShowRepeatSections(bool show) async {
     await _preferences.setBool(_keyShowRepeatSections, show);
@@ -280,8 +283,7 @@ class SettingsService {
     return _preferences.getBool(_keyShowRepeatSections) ?? true;
   }
 
-
-  // === AUTO SCROLL SETTINGS ===
+  // === SCROLL SETTINGS ===
   /// Save auto scroll enabled
   static Future<void> setAutoScrollEnabled(bool enabled) async {
     await _preferences.setBool(_keyAutoScrollEnabled, enabled);
@@ -292,7 +294,6 @@ class SettingsService {
     return _preferences.getBool(_keyAutoScrollEnabled) ?? false;
   }
 
-
   /// Save auto scroll speed
   static Future<void> setAutoScrollSpeed(double speed) async {
     await _preferences.setDouble(_keyAutoScrollSpeed, speed);
@@ -301,6 +302,16 @@ class SettingsService {
   /// Get auto scroll speed
   static double getAutoScrollSpeed() {
     return _preferences.getDouble(_keyAutoScrollSpeed) ?? 1.0;
+  }
+
+  /// Save transparent scroll buttons
+  static Future<void> setTransparentScrollButtons(bool transparent) async {
+    await _preferences.setBool(_keyTransparentScrollButtons, transparent);
+  }
+
+  /// Get transparent scroll buttons
+  static bool getTransparentScrollButtons() {
+    return _preferences.getBool(_keyTransparentScrollButtons) ?? false;
   }
 
   // === NOTIFICATION SETTINGS ===

@@ -317,7 +317,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get large => 'Large';
 
   @override
-  String get autoScrollSettings => 'Auto-Scroll Settings';
+  String get scrollSettings => 'Scroll Settings';
+
+  @override
+  String get transparentScrollButtons => 'Transparent Scroll Buttons';
 
   @override
   String get autoScroll => 'Auto-Scroll';

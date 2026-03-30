@@ -52,7 +52,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
 
   void _scrollListener() {
     if (!_scrollController.hasClients) return;
-    final scroll = context.read<AutoScrollProvider>();
+    final scroll = context.read<ScrollProvider>();
 
     scroll.currentItemIndex = 0;
 

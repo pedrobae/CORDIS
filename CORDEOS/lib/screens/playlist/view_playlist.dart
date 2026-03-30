@@ -61,7 +61,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
                 onPressed: () {
                   final localVer = context.read<LocalVersionProvider>();
                   final sect = context.read<SectionProvider>();
-                  final state = context.read<PlayScheduleStateProvider>();
+                  final state = context.read<PlayStateProvider>();
 
                   state.setItemCount(playlist.items.length);
                   for (var item in playlist.items) {

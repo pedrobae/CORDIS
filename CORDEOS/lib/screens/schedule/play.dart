@@ -57,7 +57,7 @@ class PlayScheduleState extends State<PlaySchedule> {
     final ciph = context.read<CipherProvider>();
     final sect = context.read<SectionProvider>();
     final flow = context.read<FlowItemProvider>();
-    final state = context.read<PlayScheduleStateProvider>();
+    final state = context.read<PlayStateProvider>();
 
     final schedule = localSch.getSchedule(widget.scheduleId)!;
     await play.loadPlaylist(schedule.playlistId);
@@ -89,7 +89,7 @@ class PlayScheduleState extends State<PlaySchedule> {
     final cloudSch = context.read<CloudScheduleProvider>();
     final cloudVer = context.read<CloudVersionProvider>();
     final sect = context.read<SectionProvider>();
-    final state = context.read<PlayScheduleStateProvider>();
+    final state = context.read<PlayStateProvider>();
 
     final schedule = cloudSch.getSchedule(widget.scheduleId);
 

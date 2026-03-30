@@ -63,8 +63,8 @@ class VersionWrap extends StatelessWidget {
       builder: (context, s, child) {
         return Padding(
           padding: EdgeInsets.only(
-            left: s.wrapDirection == Axis.vertical ? 16.0 : 0.0,
-            top: s.wrapDirection == Axis.horizontal ? 16.0 : 0.0,
+            left: s.wrapDirection == Axis.vertical ? 8.0 : 0.0,
+            top: s.wrapDirection == Axis.horizontal ? 8.0 : 0.0,
           ),
           child: Wrap(
             direction: s.wrapDirection,
@@ -145,7 +145,7 @@ class VersionWrap extends StatelessWidget {
   ) {
     if (versionID == null) return [const SizedBox.shrink()];
 
-    final scroll = context.read<AutoScrollProvider>();
+    final scroll = context.read<ScrollProvider>();
     final sect = context.read<SectionProvider>();
     final cloudVer = context.read<CloudVersionProvider>();
 

@@ -212,8 +212,10 @@
   "@large": {"description": "Label for large card width"},
 
 
-  "autoScrollSettings": "Auto-Scroll Settings",
-  "@autoScrollSettings": {"description": "Title for auto-scroll settings section"},
+  "scrollSettings": "Scroll Settings",
+  "@scrollSettings": {"description": "Title for scroll settings section"},
+  "transparentScrollButtons": "Transparent Scroll Buttons",
+  "@transparentScrollButtons": {"description": "Label for transparent scroll buttons setting"},
   "autoScroll": "Auto-Scroll",
   "@autoScroll": {"description": "Label for auto-scroll toggle setting"},
   "autoScrollSpeed": "Scroll Speed",

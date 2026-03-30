@@ -55,8 +55,8 @@ class _StructureListState extends State<StructureList> {
 
   @override
   Widget build(BuildContext context) {
-    final scroll = context.read<AutoScrollProvider>();
-    final state = context.read<PlayScheduleStateProvider>();
+    final scroll = context.read<ScrollProvider>();
+    final state = context.read<PlayStateProvider>();
 
     return Selector3<
       LayoutSetProvider,
@@ -104,7 +104,7 @@ class _StructureListState extends State<StructureList> {
                       textAlign: TextAlign.center,
                     ),
                   )
-                : Selector<AutoScrollProvider, int>(
+                : Selector<ScrollProvider, int>(
                     selector: (context, provider) =>
                         provider.currentSectionIndex,
                     child: SingleChildScrollView(
@@ -173,7 +173,7 @@ class _StructureSectionButton extends StatelessWidget {
     return RepaintBoundary(
       child:
           Selector2<
-            AutoScrollProvider,
+            ScrollProvider,
             SectionProvider,
             ({Section? section, bool highlighted})
           >(

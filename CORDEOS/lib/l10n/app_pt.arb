@@ -221,8 +221,10 @@
   "large": "Grande",
   "@large": {"description": "Label for large card width"},
 
-  "autoScrollSettings": "Configurações de Rolagem Automática",
-  "@autoScrollSettings": {"description": "Title for auto-scroll settings section"},
+  "scrollSettings": "Configurações de Rolagem",
+  "@scrollSettings": {"description": "Title for scroll settings section"},
+  "transparentScrollButtons": "Botões Transparentes de Rolagem ",
+  "@transparentScrollButtons": {"description": "Label for transparent scroll buttons setting"},
   "autoScroll": "Rolagem Automática",
   "@autoScroll": {"description": "Auto-scroll toggle label"},
   "autoScrollSpeed": "Velocidade de Rolagem Automática",

@@ -4,8 +4,8 @@ import 'package:cordeos/services/settings_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class AutoScrollProvider extends ChangeNotifier {
-  AutoScrollProvider() {
+class ScrollProvider extends ChangeNotifier {
+  ScrollProvider() {
     _loadSettings();
   }
 
@@ -14,6 +14,7 @@ class AutoScrollProvider extends ChangeNotifier {
 
   bool isAutoScrolling = false;
   bool scrollModeEnabled = false;
+  bool transparentButtons = false;
 
   int _currentItemIndex = 0;
   int _currentSectionIndex = 0;
@@ -55,6 +56,7 @@ class AutoScrollProvider extends ChangeNotifier {
     _currentSectionIndex = 0;
     _currentItemIndex = 0;
     scrollModeEnabled = SettingsService.getAutoScrollEnabled();
+    transparentButtons = SettingsService.getTransparentScrollButtons();
     scrollSpeed = SettingsService.getAutoScrollSpeed();
     notifyListeners();
   }
@@ -70,6 +72,12 @@ class AutoScrollProvider extends ChangeNotifier {
     scrollModeEnabled = !scrollModeEnabled;
     stopAutoScroll();
     SettingsService.setAutoScrollEnabled(scrollModeEnabled);
+    notifyListeners();
+  }
+
+  void toggleTransparentButtons() {
+    transparentButtons = !transparentButtons;
+    SettingsService.setTransparentScrollButtons(transparentButtons);
     notifyListeners();
   }
 
@@ -160,16 +168,40 @@ class AutoScrollProvider extends ChangeNotifier {
     });
   }
 
+  /// Scrolls to the next section
+  void scrollToNextSection({required bool forward}) {
+    if (_sectionCount == 0) return;
+
+    final nextSectionIndex = currentSectionIndex + (forward ? 1 : -1);
+    if (nextSectionIndex < _sectionCount && nextSectionIndex >= 0) {
+      scrollToItemSection(
+        itemIndex: _currentItemIndex,
+        sectionIndex: nextSectionIndex,
+      );
+      _currentSectionIndex = nextSectionIndex;
+    } else {
+      final nextItemIndex = _currentItemIndex + (forward ? 1 : -1);
+      if (nextItemIndex < _itemKeys.length && nextItemIndex >= 0) {
+        final resetIndex = forward
+            ? 0
+            : _sectionKeys[nextItemIndex]!.length - 1;
+        scrollToItemSection(itemIndex: nextItemIndex, sectionIndex: resetIndex);
+      }
+      // End of playlist - do nothing
+    }
+  }
+
   /// Scrolls to the section at the given index using its GlobalKey
   /// Scrolls to the section at the given indexes using its GlobalKey
   void scrollToItemSection({
-    required int itemIndex,
+    required int? itemIndex,
     required int sectionIndex,
   }) {
-    if (_sectionKeys[itemIndex] == null) return;
-    if (_sectionKeys[itemIndex]![sectionIndex] == null) return;
+    final itemIdx = itemIndex ?? _currentItemIndex;
+    if (_sectionKeys[itemIdx] == null) return;
+    if (_sectionKeys[itemIdx]![sectionIndex] == null) return;
 
-    final sectionKey = _sectionKeys[itemIndex]![sectionIndex];
+    final sectionKey = _sectionKeys[itemIdx]![sectionIndex];
     final context = sectionKey!.currentContext;
 
     if (context != null && context.mounted) {
@@ -181,7 +213,7 @@ class AutoScrollProvider extends ChangeNotifier {
       );
     }
 
-    _currentItemIndex = itemIndex;
+    _currentItemIndex = itemIdx;
     currentSectionIndex = sectionIndex;
   }
 
@@ -225,14 +257,15 @@ class AutoScrollProvider extends ChangeNotifier {
     }
 
     int loopCount = 0;
-    while (hasItemsPost || hasItemsPre || loopCount > 100) {
+    while ((hasItemsPost || hasItemsPre) && loopCount <= 100) {
+      indexOffset++;
       loopCount++;
       if (checkPreNext) {
-        currentIndex = currentIndex - indexOffset;
-        indexOffset++;
-
         if (hasItemsPost) {
+          currentIndex = currentIndex - indexOffset;
           checkPreNext = false;
+        } else {
+          currentIndex--;
         }
 
         if (currentIndex < 0) {
@@ -244,10 +277,11 @@ class AutoScrollProvider extends ChangeNotifier {
           return currentIndex;
         }
       } else {
-        currentIndex = currentIndex + indexOffset;
-
         if (hasItemsPre) {
+          currentIndex = currentIndex + indexOffset;
           checkPreNext = true;
+        } else {
+          currentIndex++;
         }
 
         if (currentIndex >= _itemKeys.length) {
@@ -283,7 +317,7 @@ class AutoScrollProvider extends ChangeNotifier {
         ? box.localToGlobal(Offset.zero).dy + box.size.height
         : box.localToGlobal(Offset.zero).dx + box.size.width;
 
-    if (itemFront < viewportHeight * 0.20 && itemBack > viewportHeight * 0.80) {
+    if (itemFront < viewportHeight * 0.30 && itemBack > viewportHeight * 0.70) {
       return true;
     }
 
@@ -291,38 +325,94 @@ class AutoScrollProvider extends ChangeNotifier {
   }
 
   void syncSectionFromViewport(double viewportHeight, Axis scrollAxis) {
-    final currentContext =
-        _sectionKeys[_currentItemIndex]?[currentSectionIndex]?.currentContext;
-
-    final currentBox = currentContext?.findRenderObject() as RenderBox?;
-    if (currentBox == null) return;
-
-    final currentEdge = scrollAxis == Axis.vertical
-        ? currentBox.localToGlobal(Offset.zero).dy
-        : currentBox.localToGlobal(Offset.zero).dx;
-
-    if (currentEdge > viewportHeight * 0.10 &&
-        currentEdge < viewportHeight * 0.40) {
+    if (percentageOnScreen(currentSectionIndex, viewportHeight, scrollAxis) >
+        0.8) {
       return;
     }
+    bool hasSectionsPre = true;
+    bool hasSectionsPost = true;
+    int currentIndex = currentSectionIndex;
+    int indexOffset = 0;
+    bool checkPreNext = true;
+    int loopCount = 0;
+    while ((hasSectionsPost || hasSectionsPre) && loopCount <= 20) {
+      indexOffset++;
+      loopCount++;
+      if (checkPreNext) {
+        if (hasSectionsPost) {
+          currentIndex = currentIndex - indexOffset;
+          checkPreNext = false;
+        } else {
+          currentIndex--;
+        }
 
-    for (final entry in currentItemSectionKeys.entries) {
-      final sectionContext = entry.value.currentContext;
-      if (sectionContext == null) continue;
+        if (currentIndex < 0) {
+          hasSectionsPre = false;
+          continue;
+        }
 
-      final box = sectionContext.findRenderObject() as RenderBox?;
-      if (box == null) continue;
+        if (percentageOnScreen(currentIndex, viewportHeight, scrollAxis) >
+            0.8) {
+          currentSectionIndex = currentIndex;
+          return;
+        }
+      } else {
+        if (hasSectionsPre) {
+          currentIndex = currentIndex + indexOffset;
+          checkPreNext = true;
+        } else {
+          currentIndex++;
+        }
 
-      final sectionEdge = scrollAxis == Axis.vertical
-          ? box.localToGlobal(Offset.zero).dy
-          : box.localToGlobal(Offset.zero).dx;
+        if (currentIndex >= _sectionCount) {
+          hasSectionsPost = false;
+          continue;
+        }
 
-      if (sectionEdge > viewportHeight * 0.10 &&
-          sectionEdge < viewportHeight * 0.40) {
-        currentSectionIndex = entry.key;
-        return;
+        if (percentageOnScreen(currentIndex, viewportHeight, scrollAxis) >
+            0.8) {
+          currentSectionIndex = currentIndex;
+          return;
+        }
       }
     }
+    return;
+  }
+
+  // Calculates the percentage of the section that is visible on screen
+  // Returns a value between 0.0 and 1.0 representing the percentage of that is visible on screen
+  double percentageOnScreen(
+    int sectionIndex,
+    double viewportHeight,
+    Axis scrollAxis,
+  ) {
+    final context =
+        _sectionKeys[_currentItemIndex]?[sectionIndex]?.currentContext;
+
+    final box = context?.findRenderObject() as RenderBox?;
+    if (box == null) return 0.0;
+
+    final sectionSize = scrollAxis == Axis.vertical
+        ? box.size.height
+        : box.size.width;
+
+    final sectionFront = scrollAxis == Axis.vertical
+        ? box.localToGlobal(Offset.zero).dy
+        : box.localToGlobal(Offset.zero).dx;
+
+    final sectionBack = scrollAxis == Axis.vertical
+        ? box.localToGlobal(Offset.zero).dy + box.size.height
+        : box.localToGlobal(Offset.zero).dx + box.size.width;
+
+    double boundStart = scrollAxis == Axis.vertical ? 150 : 0;
+
+    final sectionVisiblePercentage =
+        ((sectionBack.clamp(boundStart, viewportHeight) -
+                    sectionFront.clamp(boundStart, viewportHeight)) /
+                sectionSize)
+            .clamp(0.0, 1.0);
+
+    return sectionVisiblePercentage;
   }
 
   Map<int, int> get _activeLineCounts =>

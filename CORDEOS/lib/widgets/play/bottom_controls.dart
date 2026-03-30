@@ -20,14 +20,14 @@ class BottomControls extends StatefulWidget {
 }
 
 class _BottomControlsState extends State<BottomControls> {
-  late final PlayScheduleStateProvider _state;
-  late final AutoScrollProvider _scroll;
+  late final PlayStateProvider _state;
+  late final ScrollProvider _scroll;
 
   @override
   void initState() {
     super.initState();
-    _state = context.read<PlayScheduleStateProvider>();
-    _scroll = context.read<AutoScrollProvider>();
+    _state = context.read<PlayStateProvider>();
+    _scroll = context.read<ScrollProvider>();
   }
 
   Future<void> _scrollToItem(int index) async {
@@ -65,7 +65,7 @@ class _BottomControlsState extends State<BottomControls> {
       width: MediaQuery.of(context).size.width,
       child:
           Selector2<
-            PlayScheduleStateProvider,
+            PlayStateProvider,
             LayoutSetProvider,
             ({int currentIndex, Axis scrollDirection, int itemCount})
           >(
@@ -147,7 +147,7 @@ class _BottomControlsState extends State<BottomControls> {
 
     return SizedBox(
       width: MediaQuery.of(context).size.width / 2,
-      child: Selector<PlayScheduleStateProvider, PlaylistItem?>(
+      child: Selector<PlayStateProvider, PlaylistItem?>(
         selector: (_, s) => s.nextItem,
         builder: (context, nextItem, child) {
           String nextTitle = '';

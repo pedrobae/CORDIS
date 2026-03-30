@@ -91,8 +91,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ImportProvider()),
         ChangeNotifierProvider(create: (_) => ParserProvider()),
         // PLAY SCHEDULE PROVIDERS
-        ChangeNotifierProvider(create: (_) => AutoScrollProvider()),
-        ChangeNotifierProvider(create: (_) => PlayScheduleStateProvider()),
+        ChangeNotifierProvider(create: (_) => ScrollProvider()),
+        ChangeNotifierProvider(create: (_) => PlayStateProvider()),
         // FUNCTIONALITY PROVIDERS
         ChangeNotifierProvider(create: (_) => SelectionProvider()),
         ChangeNotifierProvider(create: (_) => TranspositionProvider()),

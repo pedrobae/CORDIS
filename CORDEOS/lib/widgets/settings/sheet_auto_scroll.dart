@@ -1,6 +1,7 @@
 import 'package:cordeos/l10n/app_localizations.dart';
 
 import 'package:cordeos/providers/auto_scroll_provider.dart';
+import 'package:cordeos/providers/schedule/play_schedule_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,11 +20,20 @@ class _AutoScrollSettingsState extends State<AutoScrollSettings> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Selector<AutoScrollProvider, (bool, double)>(
-      selector: (_, p) => (p.scrollModeEnabled, p.scrollSpeed),
-      builder: (context, _, child) {
-        final autoScroll = context.read<AutoScrollProvider>();
-        _localScrollSpeed ??= autoScroll.scrollSpeed;
+    final scroll = context.read<ScrollProvider>();
+    final state = context.read<PlayStateProvider>();
+
+    return Selector<
+      ScrollProvider,
+      ({bool transparentButtons, bool scrollModeEnabled, double scrollSpeed})
+    >(
+      selector: (_, p) => (
+        transparentButtons: p.transparentButtons,
+        scrollModeEnabled: p.scrollModeEnabled,
+        scrollSpeed: p.scrollSpeed,
+      ),
+      builder: (context, s, child) {
+        _localScrollSpeed ??= s.scrollSpeed;
         return Container(
           decoration: BoxDecoration(
             color: colorScheme.surface,
@@ -41,13 +51,32 @@ class _AutoScrollSettingsState extends State<AutoScrollSettings> {
                 children: [
                   Expanded(
                     child: Text(
-                      AppLocalizations.of(context)!.autoScrollSettings,
+                      AppLocalizations.of(context)!.scrollSettings,
                       style: textTheme.titleMedium,
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              // TRANSPARENT BUTTONS
+              // toggle
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(AppLocalizations.of(context)!.transparentScrollButtons),
+                  Switch(
+                    trackOutlineColor: WidgetStateColor.fromMap({
+                      WidgetState.selected: colorScheme.primary,
+                      WidgetState.any: colorScheme.shadow,
+                    }),
+                    value: s.transparentButtons,
+                    onChanged: (value) {
+                      scroll.toggleTransparentButtons();
+                      state.showButtonsTemporarily();
+                    },
                   ),
                 ],
               ),
@@ -63,9 +92,9 @@ class _AutoScrollSettingsState extends State<AutoScrollSettings> {
                       WidgetState.selected: colorScheme.primary,
                       WidgetState.any: colorScheme.shadow,
                     }),
-                    value: autoScroll.scrollModeEnabled,
+                    value: scroll.scrollModeEnabled,
                     onChanged: (value) {
-                      autoScroll.toggleScrollMode();
+                      scroll.toggleScrollMode();
                     },
                   ),
                 ],
@@ -80,7 +109,7 @@ class _AutoScrollSettingsState extends State<AutoScrollSettings> {
                       setState(() => _localScrollSpeed = value);
                     },
                     onChangeEnd: (value) {
-                      autoScroll.setScrollSpeed(value);
+                      scroll.setScrollSpeed(value);
                     },
                     min: 0.5,
                     max: 1.5,
@@ -88,8 +117,8 @@ class _AutoScrollSettingsState extends State<AutoScrollSettings> {
                     label: _localScrollSpeed! < 0.85
                         ? AppLocalizations.of(context)!.slow
                         : _localScrollSpeed! < 1.15
-                            ? AppLocalizations.of(context)!.normal
-                            : AppLocalizations.of(context)!.fast,
+                        ? AppLocalizations.of(context)!.normal
+                        : AppLocalizations.of(context)!.fast,
                   ),
                 ],
               ),

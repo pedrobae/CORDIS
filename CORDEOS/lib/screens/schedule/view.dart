@@ -173,7 +173,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
         IconButton(
           icon: Icon(Icons.play_circle, size: 32),
           onPressed: () async {
-            final scroll = context.read<AutoScrollProvider>();
+            final scroll = context.read<ScrollProvider>();
             await SystemChrome.setEnabledSystemUIMode(
               SystemUiMode.immersiveSticky,
             );
