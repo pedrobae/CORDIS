@@ -101,35 +101,33 @@ class PlaylistCard extends StatelessWidget {
               
                   // INFO
                   Expanded(
-                    child: Container(
-                      child: Column(
-                        spacing: 2.0,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(playlist.name, style: textTheme.titleMedium),
-                          Row(
-                            spacing: 8,
-                            children: [
-                              Text(
-                                itemCount != 1
-                                    ? '$itemCount ${AppLocalizations.of(context)!.pluralPlaceholder(
-                                        AppLocalizations.of(context)!.item, //
-                                      )}'
-                                    : '$itemCount ${AppLocalizations.of(context)!.item}',
-                                style: textTheme.bodyMedium,
-                              ),
-                              itemCount > 0
-                                  ? Text(
-                                      playlist.getTotalDuration() != Duration.zero
-                                          ? '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(playlist.getTotalDuration())}'
-                                          : '',
-                                      style: textTheme.bodyMedium,
-                                    )
-                                  : const SizedBox.shrink(),
-                            ],
-                          ),
-                        ],
-                      ),
+                    child: Column(
+                      spacing: 2.0,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(playlist.name, style: textTheme.titleMedium),
+                        Row(
+                          spacing: 8,
+                          children: [
+                            Text(
+                              itemCount != 1
+                                  ? '$itemCount ${AppLocalizations.of(context)!.pluralPlaceholder(
+                                      AppLocalizations.of(context)!.item, //
+                                    )}'
+                                  : '$itemCount ${AppLocalizations.of(context)!.item}',
+                              style: textTheme.bodyMedium,
+                            ),
+                            itemCount > 0
+                                ? Text(
+                                    playlist.getTotalDuration() != Duration.zero
+                                        ? '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(playlist.getTotalDuration())}'
+                                        : '',
+                                    style: textTheme.bodyMedium,
+                                  )
+                                : const SizedBox.shrink(),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                   // ACTIONS

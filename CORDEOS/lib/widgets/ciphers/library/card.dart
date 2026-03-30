@@ -135,7 +135,7 @@ class _CipherCardState extends State<CipherCard> {
                         children: [
                           // TITLE
                           Text(s.cipher!.title, style: textTheme.titleMedium),
-
+                
                           // INFO
                           Row(
                             spacing: 16.0,
@@ -168,28 +168,28 @@ class _CipherCardState extends State<CipherCard> {
                                   : Text('-'),
                             ],
                           ),
-
+                
                           // STRUCTURE LIST
                           if (!isDense)
-                            ConstrainedBox(
-                              constraints: BoxConstraints(maxHeight: 25),
+                            SizedBox(
+                              height: 25,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: s.version!.songStructure.length,
                                 itemBuilder: (_, index) {
                                   final sect = context.read<SectionProvider>();
-
+                
                                   final sectionCode =
                                       s.version!.songStructure[index];
-
+                
                                   final section = sect.getSection(
                                     widget.versionID,
                                     sectionCode,
                                   );
-
+                
                                   final color =
                                       section?.contentColor ?? Colors.grey;
-
+                
                                   // Painter for sections with large codes
                                   final textPainter = TextPainter(
                                     text: TextSpan(
@@ -202,7 +202,7 @@ class _CipherCardState extends State<CipherCard> {
                                     maxLines: 1,
                                     textDirection: TextDirection.ltr,
                                   )..layout();
-
+                
                                   return Container(
                                     height: 25,
                                     width: max(25, textPainter.size.width + 8),
@@ -231,7 +231,7 @@ class _CipherCardState extends State<CipherCard> {
                         ],
                       ),
                     ),
-
+                
                     // ACTIONS SHEET
                     GestureDetector(
                       onTap: _openCipherActionsSheet(s.cipher!.id),
