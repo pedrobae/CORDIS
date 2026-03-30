@@ -22,6 +22,7 @@ class CloudScheduleProvider extends ChangeNotifier {
   bool _isSaving = false;
 
   final Map<String, bool> _isSyncing = {};
+  final Map<String, DateTime> _lastSyncTimes = {};
 
   // ===== GETTERS =====
   Map<String, ScheduleDto> get schedules => _schedules;
@@ -110,7 +111,11 @@ class CloudScheduleProvider extends ChangeNotifier {
     // Owner schedule sync can be slow and should not block the screen loader.
     for (final schedule in _schedules.values.toList()) {
       if (schedule.ownerFirebaseId == userId && schedule.firebaseId != null) {
-        unawaited(_syncOwnedSchedule(schedule));
+        if (forceFetch || _oldSync(schedule.firebaseId!)) {
+          unawaited(_syncOwnedSchedule(schedule));
+        } else {
+          _schedules.remove(schedule.firebaseId!);
+        }
       }
     }
   }
@@ -123,6 +128,7 @@ class CloudScheduleProvider extends ChangeNotifier {
 
     try {
       await _syncService.scheduleToLocal(schedule);
+      _lastSyncTimes[scheduleId] = DateTime.now();
       _schedules.remove(scheduleId);
     } catch (e) {
       debugPrint('Error syncing owned schedule $scheduleId: $e');
@@ -222,6 +228,12 @@ class CloudScheduleProvider extends ChangeNotifier {
       notifyListeners();
     }
     return success;
+  }
+
+  bool _oldSync(String scheduleId) {
+    return (_lastSyncTimes[scheduleId] == null ||
+        DateTime.now().difference(_lastSyncTimes[scheduleId]!) >
+            const Duration(minutes: 30));
   }
 
   // ===== SEARCH & FILTER =====
