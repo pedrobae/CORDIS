@@ -177,7 +177,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       text: AppLocalizations.of(context)!.reloadInterface,
       tooltip: AppLocalizations.of(context)!.reloadInterfaceSubtitle,
       trailingIcon: Icons.chevron_right,
-      onPressed: _reloadAllData,
+      onPressed: _reloadMainData,
       isDiscrete: true,
     );
   }
@@ -207,8 +207,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
 
-      await _reloadAllData();
-
       // Check mounted again after async operations
       if (!mounted) return;
 
@@ -224,6 +222,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
+
+      await _reloadMainData();
+
     } catch (e) {
       if (!mounted) return;
 
@@ -247,7 +248,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await cacheService.clearAllCaches();
   }
 
-  Future<void> _reloadAllData() async {
+  Future<void> _reloadMainData() async {
     try {
       // Clear all provider caches first
       context.read<CipherProvider>().clearCache();
@@ -262,13 +263,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context.read<CloudScheduleProvider>().clearCache();
       await _clearCache();
       if (!mounted) return;
-      // Force reload all providers from database
+
       await Future.wait([
         context.read<CipherProvider>().loadCiphers(forceReload: true),
-        context.read<CloudVersionProvider>().loadVersions(
-          forceReload: true,
-          localCiphers: context.read<CipherProvider>().ciphers.values.toList(),
-        ),
         context.read<PlaylistProvider>().loadPlaylists(),
         context.read<UserProvider>().loadUsers(),
         context.read<LocalScheduleProvider>().loadSchedules(),

@@ -81,15 +81,16 @@ class CloudScheduleCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               // SCHEDULE NAME
-                              Row(
+                              Wrap(
                                 spacing: 8,
                                 children: [
                                   Text(
                                     s.schedule!.name,
                                     style: theme.textTheme.titleMedium,
+                                    softWrap: true,
                                   ),
                                   StatusChip(
                                     schedule: s.schedule!.toDomain(

@@ -91,20 +91,21 @@ class ScheduleCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             // SCHEDULE NAME
-                            Row(
+                            Wrap(
                               spacing: 8,
                               children: [
                                 Text(
                                   selection.schedule!.name,
                                   style: theme.textTheme.titleMedium,
+                                  softWrap: true,
                                 ),
                                 StatusChip(schedule: selection.schedule!),
                               ],
                             ),
-                  
+
                             // WHEN & WHERE
                             Wrap(
                               spacing: 16.0,
@@ -126,7 +127,7 @@ class ScheduleCard extends StatelessWidget {
                                 ),
                               ],
                             ),
-                  
+
                             // PLAYLIST INFO
                             selection.playlist != null
                                 ? Text(
@@ -134,7 +135,7 @@ class ScheduleCard extends StatelessWidget {
                                     style: theme.textTheme.bodyMedium,
                                   )
                                 : SizedBox.shrink(),
-                  
+
                             // YOUR ROLE INFO
                             Text(
                               '${AppLocalizations.of(context)!.role}: $userRole',
@@ -201,7 +202,7 @@ class ScheduleCard extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            spacing: 8,
+            spacing: 16,
             children: [
               // HEADER
               Row(
@@ -219,16 +220,42 @@ class ScheduleCard extends StatelessWidget {
               ),
 
               // ACTIONS
+              // edit
+              FilledTextButton(
+                text: AppLocalizations.of(
+                  context,
+                )!.editPlaceholder(AppLocalizations.of(context)!.schedule),
+                trailingIcon: Icons.chevron_right,
+                isDark: true,
+                onPressed: () {
+                  final nav = context.read<NavigationProvider>();
+                  nav.push(
+                    () => ViewScheduleScreen(scheduleId: scheduleId),
+                    showBottomNavBar: true,
+                  );
+                },
+              ),
               // duplicate
               FilledTextButton(
                 text: AppLocalizations.of(context)!.duplicatePlaceholder(''),
                 tooltip: AppLocalizations.of(
                   context,
                 )!.duplicateTooltip(AppLocalizations.of(context)!.setup),
-                onPressed: () =>
-                    _openDuplicateScheduleSheet(context, scheduleId),
                 trailingIcon: Icons.chevron_right,
-                isDiscrete: true,
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (BuildContext context) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
+                        child: DuplicateScheduleSheet(scheduleId: scheduleId),
+                      );
+                    },
+                  );
+                },
               ),
 
               // delete
@@ -237,7 +264,6 @@ class ScheduleCard extends StatelessWidget {
                 tooltip: AppLocalizations.of(context)!.deleteScheduleTooltip,
                 trailingIcon: Icons.chevron_right,
                 isDangerous: true,
-                isDiscrete: true,
                 onPressed: () {
                   showModalBottomSheet(
                     context: context,
@@ -254,24 +280,9 @@ class ScheduleCard extends StatelessWidget {
                 },
               ),
 
-              SizedBox(height: 16),
+              SizedBox(),
             ],
           ),
-        );
-      },
-    );
-  }
-
-  void _openDuplicateScheduleSheet(BuildContext context, int scheduleId) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: DuplicateScheduleSheet(scheduleId: scheduleId),
         );
       },
     );

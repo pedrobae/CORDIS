@@ -68,10 +68,16 @@ class ScrollProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleScrollMode() {
+  void toggleAutoScrollMode() {
     scrollModeEnabled = !scrollModeEnabled;
     stopAutoScroll();
     SettingsService.setAutoScrollEnabled(scrollModeEnabled);
+    notifyListeners();
+  }
+
+  void disableAutoScrollMode() {
+    scrollModeEnabled = false;
+    stopAutoScroll();
     notifyListeners();
   }
 

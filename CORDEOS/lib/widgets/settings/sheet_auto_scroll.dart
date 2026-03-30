@@ -94,7 +94,7 @@ class _AutoScrollSettingsState extends State<AutoScrollSettings> {
                     }),
                     value: scroll.scrollModeEnabled,
                     onChanged: (value) {
-                      scroll.toggleScrollMode();
+                      scroll.toggleAutoScrollMode();
                     },
                   ),
                 ],
