@@ -15,7 +15,6 @@ import 'package:cordeos/screens/playlist/view_playlist.dart';
 
 import 'package:cordeos/utils/date_utils.dart';
 
-import 'package:cordeos/widgets/common/filled_text_button.dart';
 import 'package:cordeos/widgets/playlist/library/playlist_card_actions.dart';
 
 class PlaylistCard extends StatelessWidget {
@@ -34,7 +33,10 @@ class PlaylistCard extends StatelessWidget {
 
     return Selector2<PlaylistProvider, SelectionProvider, (Playlist?, bool)>(
       selector: (context, play, sel) {
-        return (play.getPlaylist(playlistID), sel.isSelected(playlistID));
+        return (
+          play.getPlaylist(playlistID),
+          sel.isSelected(playlistID),
+        );
       },
       builder: (context, data, child) {
         final playlist = data.$1;
@@ -84,26 +86,22 @@ class PlaylistCard extends StatelessWidget {
               border: Border.all(color: colorScheme.surfaceContainerLowest),
             ),
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    // SELECTION CHECKBOX
-                    sel.isSelectionMode
-                        ? isSelected
-                              ? Icon(
-                                  Icons.check_box,
-                                  color: colorScheme.primary,
-                                )
-                              : Icon(
-                                  Icons.check_box_outline_blank,
-                                  color: colorScheme.shadow,
-                                )
-                        : const SizedBox.shrink(),
-
-                    // INFO
-                    Expanded(
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  // SELECTION CHECKBOX
+                  sel.isSelectionMode
+                      ? isSelected
+                            ? Icon(Icons.check_box, color: colorScheme.primary)
+                            : Icon(
+                                Icons.check_box_outline_blank,
+                                color: colorScheme.shadow,
+                              )
+                      : const SizedBox.shrink(),
+              
+                  // INFO
+                  Expanded(
+                    child: Container(
                       child: Column(
                         spacing: 2.0,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,16 +116,14 @@ class PlaylistCard extends StatelessWidget {
                                         AppLocalizations.of(context)!.item, //
                                       )}'
                                     : '$itemCount ${AppLocalizations.of(context)!.item}',
-                                style: textTheme.bodyMedium!.copyWith(
-                                  color: colorScheme.shadow,
-                                ),
+                                style: textTheme.bodyMedium,
                               ),
                               itemCount > 0
                                   ? Text(
-                                      '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(playlist.getTotalDuration())}',
-                                      style: textTheme.bodyMedium!.copyWith(
-                                        color: colorScheme.shadow,
-                                      ),
+                                      playlist.getTotalDuration() != Duration.zero
+                                          ? '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(playlist.getTotalDuration())}'
+                                          : '',
+                                      style: textTheme.bodyMedium,
                                     )
                                   : const SizedBox.shrink(),
                             ],
@@ -135,49 +131,23 @@ class PlaylistCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    // ACTIONS
-                    sel.isSelectionMode
-                        ? const SizedBox.shrink()
-                        : IconButton(
-                            onPressed: () => _openPlaylistActionsSheet(context),
-                            icon: Icon(Icons.more_vert),
-                          ),
-                  ],
-                ),
-                if (!sel.isSelectionMode)
-                  FilledTextButton(
-                    text: AppLocalizations.of(
-                      context,
-                    )!.viewPlaceholder(AppLocalizations.of(context)!.playlist),
-                    isDense: true,
-                    onPressed: () {
-                      final localVer = context.read<LocalVersionProvider>();
-                      final sect = context.read<SectionProvider>();
-                      final flow = context.read<FlowItemProvider>();
-
-                      nav.push(
-                        () => ViewPlaylistScreen(playlistId: playlistID),
-                        changeDetector: () {
-                          return play.hasUnsavedChanges ||
-                              flow.hasUnsavedChanges;
-                        },
-                        onChangeDiscarded: () async {
-                          debugPrint('PLAYLIST VIEW - discarding Changes');
-                          play.loadPlaylist(playlist.id);
-                          for (var id in sel.newlyAddedVersionIds) {
-                            debugPrint('\t - deleting version with id $id');
-                            await localVer.deleteVersion(id);
-                            await sect.deleteSectionsOfVersion(id);
-                          }
-                          play.clearUnsavedChanges();
-                          flow.clearUnsavedChanges();
-                          sel.clearNewlyAddedVersionIds();
-                        },
-                        showBottomNavBar: true,
-                      );
-                    },
                   ),
-              ],
+                  // ACTIONS
+                  sel.isSelectionMode
+                      ? const SizedBox.shrink()
+                      : GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _openPlaylistActionsSheet(context),
+                        child: SizedBox(
+                          height: double.infinity,
+                          width: 40,
+                          child: Icon(
+                              Icons.more_vert,
+                            ),
+                        ),
+                      ),
+                ],
+              ),
             ),
           ),
         );

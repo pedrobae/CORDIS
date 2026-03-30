@@ -65,119 +65,121 @@ class ScheduleCard extends StatelessWidget {
           }
         }
 
-        return Container(
-          padding: const EdgeInsets.all(8.0),
-          margin: const EdgeInsets.symmetric(vertical: 4.0),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: colorScheme.surfaceContainerLowest,
-              width: 1,
+        return GestureDetector(
+          onTap: () {
+            nav.push(
+              () => ViewScheduleScreen(scheduleId: scheduleId),
+              showBottomNavBar: true,
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(8.0),
+            margin: const EdgeInsets.symmetric(vertical: 4.0),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: colorScheme.surfaceContainerLowest,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(0),
             ),
-            borderRadius: BorderRadius.circular(0),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 8,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // SCHEDULE NAME
-                        Row(
-                          spacing: 8,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 8,
+              children: [
+                IntrinsicHeight(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              selection.schedule!.name,
-                              style: theme.textTheme.titleMedium,
+                            // SCHEDULE NAME
+                            Row(
+                              spacing: 8,
+                              children: [
+                                Text(
+                                  selection.schedule!.name,
+                                  style: theme.textTheme.titleMedium,
+                                ),
+                                StatusChip(schedule: selection.schedule!),
+                              ],
                             ),
-                            StatusChip(schedule: selection.schedule!),
-                          ],
-                        ),
-
-                        // WHEN & WHERE
-                        Wrap(
-                          spacing: 16.0,
-                          children: [
+                  
+                            // WHEN & WHERE
+                            Wrap(
+                              spacing: 16.0,
+                              children: [
+                                Text(
+                                  DateTimeUtils.formatDate(
+                                    selection.schedule!.date,
+                                  ),
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                                Text(
+                                  DateTimeUtils.formatTime(
+                                    selection.schedule!.date,
+                                  ),
+                                ),
+                                Text(
+                                  selection.schedule!.location,
+                                  style: theme.textTheme.bodyMedium!,
+                                ),
+                              ],
+                            ),
+                  
+                            // PLAYLIST INFO
+                            selection.playlist != null
+                                ? Text(
+                                    '${AppLocalizations.of(context)!.playlist}: ${selection.playlist!.name}',
+                                    style: theme.textTheme.bodyMedium,
+                                  )
+                                : SizedBox.shrink(),
+                  
+                            // YOUR ROLE INFO
                             Text(
-                              DateTimeUtils.formatDate(
-                                selection.schedule!.date,
-                              ),
+                              '${AppLocalizations.of(context)!.role}: $userRole',
                               style: theme.textTheme.bodyMedium,
                             ),
-                            Text(
-                              DateTimeUtils.formatTime(
-                                selection.schedule!.date,
-                              ),
-                            ),
-                            Text(
-                              selection.schedule!.location,
-                              style: theme.textTheme.bodyMedium!,
-                            ),
                           ],
                         ),
-
-                        // PLAYLIST INFO
-                        selection.playlist != null
-                            ? Text(
-                                '${AppLocalizations.of(context)!.playlist}: ${selection.playlist!.name}',
-                                style: theme.textTheme.bodyMedium,
-                              )
-                            : SizedBox.shrink(),
-
-                        // YOUR ROLE INFO
-                        Text(
-                          '${AppLocalizations.of(context)!.role}: $userRole',
-                          style: theme.textTheme.bodyMedium,
+                      ),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _openScheduleActionsSheet(context),
+                        child: SizedBox(
+                          width: 40,
+                          height: double.infinity,
+                          child: Icon(Icons.more_vert),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    onPressed: () => _openScheduleActionsSheet(context),
-                    icon: Icon(Icons.more_vert),
-                  ),
-                ],
-              ),
-              // BOTTOM BUTTONS
-              //view
-              FilledTextButton(
-                isDark: true,
-                isDense: true,
-                text: AppLocalizations.of(
-                  context,
-                )!.viewPlaceholder(AppLocalizations.of(context)!.schedule),
-                onPressed: () {
-                  nav.push(
-                    () => ViewScheduleScreen(scheduleId: scheduleId),
-                    showBottomNavBar: true,
-                  );
-                },
-              ),
-              //share
-              if (selection.schedule!.ownerFirebaseId == auth.id &&
-                  selection.schedule!.scheduleState == ScheduleState.published)
-                FilledTextButton(
-                  text: AppLocalizations.of(context)!.share,
-                  isDense: true,
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (BuildContext context) {
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom,
-                          ),
-                          child: ShareScheduleSheet(scheduleId: scheduleId),
-                        );
-                      },
-                    );
-                  },
                 ),
-            ],
+                //share
+                if (selection.schedule!.ownerFirebaseId == auth.id &&
+                    selection.schedule!.scheduleState ==
+                        ScheduleState.published)
+                  FilledTextButton(
+                    text: AppLocalizations.of(context)!.share,
+                    isDense: true,
+                    isDark: true,
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (BuildContext context) {
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                            ),
+                            child: ShareScheduleSheet(scheduleId: scheduleId),
+                          );
+                        },
+                      );
+                    },
+                  ),
+              ],
+            ),
           ),
         );
       },

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cordeos/models/domain/cipher/cipher.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
 
@@ -20,7 +21,6 @@ import 'package:cordeos/screens/cipher/view_cipher.dart';
 import 'package:cordeos/utils/date_utils.dart';
 
 import 'package:cordeos/widgets/ciphers/library/sheet_actions.dart';
-import 'package:cordeos/widgets/common/filled_text_button.dart';
 
 class CipherCard extends StatefulWidget {
   final int versionID;
@@ -54,206 +54,196 @@ class _CipherCardState extends State<CipherCard> {
 
     final nav = context.read<NavigationProvider>();
     final sel = context.read<SelectionProvider>();
-    final sect = context.read<SectionProvider>();
 
     if (widget.versionID == -1) {
       return SizedBox.shrink();
     }
 
-    return Consumer2<CipherProvider, LocalVersionProvider>(
-      builder: (context, ciph, localVer, child) {
+    return Selector2<
+      CipherProvider,
+      LocalVersionProvider,
+      ({Cipher? cipher, Version? version})
+    >(
+      selector: (context, ciph, localVer) {
+        final version = localVer.getVersion(widget.versionID);
+        final cipher = version != null
+            ? ciph.getCipher(version.cipherID)
+            : null;
+        return (cipher: cipher, version: version);
+      },
+      builder: (context, s, child) {
+        if (s.version == null || s.cipher == null) {
+          return Center(child: CircularProgressIndicator());
+        }
+
         // Card content
         return Padding(
           padding: const EdgeInsets.only(bottom: 8.0), // Spacing between cards
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: colorScheme.surfaceContainerLowest),
-            ),
-            padding: const EdgeInsets.all(8.0),
-            child: Builder(
-              builder: (context) {
-                final version = localVer.getVersion(widget.versionID);
+          child: GestureDetector(
+            onTap: () async {
+              if (sel.isSelectionMode) {
+                await _createAndAddVersionToPlaylist(s.version!);
 
-                if (version == null) {
-                  return Center(child: CircularProgressIndicator());
-                }
+                nav.pop();
+              } else {
+                nav.push(
+                  () => ViewCipherScreen(
+                    cipherID: s.cipher!.id,
+                    versionID: widget.versionID,
+                    versionType: VersionType.local,
+                  ),
+                  showBottomNavBar: true,
+                );
+              }
+            },
+            onLongPress: () async {
+              final localVer = context.read<LocalVersionProvider>();
+              final sect = context.read<SectionProvider>();
+              final ciph = context.read<CipherProvider>();
 
-                final cipher = ciph.getCipher(version.cipherID);
-
-                if (cipher == null) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+              nav.push(
+                () => EditCipherScreen(
+                  cipherID: s.cipher!.id,
+                  versionID: widget.versionID,
+                  versionType: VersionType.local,
+                ),
+                changeDetector: () {
+                  return localVer.hasUnsavedChanges ||
+                      sect.hasUnsavedChanges ||
+                      ciph.hasUnsavedChanges;
+                },
+                onChangeDiscarded: () {
+                  localVer.loadVersion(widget.versionID);
+                  ciph.loadCipher(s.cipher!.id);
+                  sect.loadSectionsOfVersion(widget.versionID);
+                },
+                showBottomNavBar: true,
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: colorScheme.surfaceContainerLowest),
+              ),
+              padding: const EdgeInsets.all(8.0),
+              child: IntrinsicHeight(
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            spacing: 2.0,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    Expanded(
+                      child: Column(
+                        spacing: 2.0,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // TITLE
+                          Text(s.cipher!.title, style: textTheme.titleMedium),
+
+                          // INFO
+                          Row(
+                            spacing: 16.0,
                             children: [
-                              // TITLE
-                              Text(cipher.title, style: textTheme.titleMedium),
-
-                              // INFO
-                              Row(
-                                spacing: 16.0,
-                                children: [
-                                  Text(
-                                    '${AppLocalizations.of(context)!.musicKey}: ${version.transposedKey ?? cipher.musicKey}',
-                                    style: textTheme.bodyMedium,
-                                  ),
-                                  version.bpm != 0
-                                      ? Text(
-                                          AppLocalizations.of(
-                                            context,
-                                          )!.bpmWithPlaceholder(
-                                            version.bpm.toString(),
-                                          ),
-                                          style: textTheme.bodyMedium,
-                                        )
-                                      : Text('-'),
-                                  version.duration != Duration.zero
-                                      ? Text(
-                                          AppLocalizations.of(
-                                            context,
-                                          )!.durationWithPlaceholder(
-                                            DateTimeUtils.formatDuration(
-                                              version.duration,
-                                            ),
-                                          ),
-                                          style: textTheme.bodyMedium,
-                                        )
-                                      : Text('-'),
-                                ],
+                              Text(
+                                '${AppLocalizations.of(context)!.musicKey}: ${s.version!.transposedKey ?? s.cipher!.musicKey}',
+                                style: textTheme.bodyMedium,
                               ),
-
-                              // STRUCTURE LIST
-                              if (!isDense)
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(maxHeight: 25),
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: version.songStructure.length,
-                                    itemBuilder: (_, index) {
-                                      final sect = context
-                                          .read<SectionProvider>();
-
-                                      final sectionCode =
-                                          version.songStructure[index];
-
-                                      final section = sect.getSection(
-                                        widget.versionID,
-                                        sectionCode,
-                                      );
-
-                                      final color =
-                                          section?.contentColor ?? Colors.grey;
-
-                                      // Painter for sections with large codes
-                                      final textPainter = TextPainter(
-                                        text: TextSpan(
-                                          text: sectionCode,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                              s.version!.bpm != 0
+                                  ? Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.bpmWithPlaceholder(
+                                        s.version!.bpm.toString(),
+                                      ),
+                                      style: textTheme.bodyMedium,
+                                    )
+                                  : Text('-'),
+                              s.version!.duration != Duration.zero
+                                  ? Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.durationWithPlaceholder(
+                                        DateTimeUtils.formatDuration(
+                                          s.version!.duration,
                                         ),
-                                        maxLines: 1,
-                                        textDirection: TextDirection.ltr,
-                                      )..layout();
-
-                                      return Container(
-                                        height: 25,
-                                        width: max(
-                                          25,
-                                          textPainter.size.width + 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                          color: color,
-                                        ),
-                                        margin: const EdgeInsets.only(right: 3),
-                                        child: Center(
-                                          child: Text(
-                                            strutStyle: StrutStyle(
-                                              forceStrutHeight: true,
-                                            ),
-                                            sectionCode,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              // SPACER
-                              SizedBox(height: 8),
+                                      ),
+                                      style: textTheme.bodyMedium,
+                                    )
+                                  : Text('-'),
                             ],
                           ),
-                        ),
 
-                        // ACTIONS SHEET
-                        IconButton(
-                          onPressed: () => _openCipherActionsSheet(cipher.id),
-                          icon: Icon(Icons.more_vert),
-                        ),
-                      ],
+                          // STRUCTURE LIST
+                          if (!isDense)
+                            ConstrainedBox(
+                              constraints: BoxConstraints(maxHeight: 25),
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: s.version!.songStructure.length,
+                                itemBuilder: (_, index) {
+                                  final sect = context.read<SectionProvider>();
+
+                                  final sectionCode =
+                                      s.version!.songStructure[index];
+
+                                  final section = sect.getSection(
+                                    widget.versionID,
+                                    sectionCode,
+                                  );
+
+                                  final color =
+                                      section?.contentColor ?? Colors.grey;
+
+                                  // Painter for sections with large codes
+                                  final textPainter = TextPainter(
+                                    text: TextSpan(
+                                      text: sectionCode,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    maxLines: 1,
+                                    textDirection: TextDirection.ltr,
+                                  )..layout();
+
+                                  return Container(
+                                    height: 25,
+                                    width: max(25, textPainter.size.width + 8),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(6),
+                                      color: color,
+                                    ),
+                                    margin: const EdgeInsets.only(right: 3),
+                                    child: Center(
+                                      child: Text(
+                                        strutStyle: StrutStyle(
+                                          forceStrutHeight: true,
+                                        ),
+                                        sectionCode,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
 
-                    // VIEW / ADD TO PLAYLIST
-                    FilledTextButton(
-                      text: (sel.isSelectionMode)
-                          ? AppLocalizations.of(context)!.addToPlaylist
-                          : AppLocalizations.of(context)!.viewPlaceholder(''),
-                      isDense: true,
-                      onPressed: () async {
-                        if (sel.isSelectionMode) {
-                          await _createAndAddVersionToPlaylist(version);
-
-                          nav.pop();
-                        } else {
-                          nav.push(
-                            () => ViewCipherScreen(
-                              cipherID: cipher.id,
-                              versionID: widget.versionID,
-                              versionType: VersionType.local,
-                            ),
-                            showBottomNavBar: true,
-                          );
-                        }
-                      },
-                      onLongPress: () async {
-                        nav.push(
-                          () => EditCipherScreen(
-                            cipherID: cipher.id,
-                            versionID: widget.versionID,
-                            versionType: VersionType.local,
-                          ),
-                          changeDetector: () {
-                            return localVer.hasUnsavedChanges ||
-                                sect.hasUnsavedChanges ||
-                                ciph.hasUnsavedChanges;
-                          },
-                          onChangeDiscarded: () {
-                            localVer.loadVersion(widget.versionID);
-                            ciph.loadCipher(cipher.id);
-                            sect.loadSectionsOfVersion(widget.versionID);
-                          },
-                          showBottomNavBar: true,
-                        );
-                      },
+                    // ACTIONS SHEET
+                    GestureDetector(
+                      onTap: _openCipherActionsSheet(s.cipher!.id),
+                      child: SizedBox(
+                        height: double.infinity,
+                        width: 40,
+                        child: Icon(Icons.more_vert),
+                      ),
                     ),
                   ],
-                );
-              },
+                ),
+              ),
             ),
           ),
         );
@@ -295,25 +285,27 @@ class _CipherCardState extends State<CipherCard> {
     play.cacheAddVersion(sel.targetId!, newVersionID);
   }
 
-  void _openCipherActionsSheet(int cipherID) {
-    final sel = context.read<SelectionProvider>();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return BottomSheet(
-          shape: LinearBorder(),
-          onClosing: () {},
-          builder: (context) {
-            return CipherCardActionsSheet(
-              cipherId: cipherID,
-              versionType: sel.isSelectionMode
-                  ? VersionType.playlist
-                  : VersionType.local,
-            );
-          },
-        );
-      },
-    );
+  VoidCallback _openCipherActionsSheet(int cipherID) {
+    return () {
+      final sel = context.read<SelectionProvider>();
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return BottomSheet(
+            shape: LinearBorder(),
+            onClosing: () {},
+            builder: (context) {
+              return CipherCardActionsSheet(
+                cipherId: cipherID,
+                versionType: sel.isSelectionMode
+                    ? VersionType.playlist
+                    : VersionType.local,
+              );
+            },
+          );
+        },
+      );
+    };
   }
 }
