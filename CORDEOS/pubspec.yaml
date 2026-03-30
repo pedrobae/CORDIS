@@ -1,0 +1,184 @@
+name: cordeos
+description: "Chord Map Application."
+publish_to: 'none'
+
+version: 1.4.4+33
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_localizations:
+    sdk: flutter
+
+  intl: ^0.20.2
+  path: ^1.9.1
+  path_provider: ^2.1.5
+
+  shared_preferences: ^2.5.4
+  provider: ^6.1.5+1
+  sqflite: ^2.4.2
+
+  webview_flutter: ^4.13.1
+  visibility_detector: ^0.4.0+2
+  flutter_svg: ^2.2.4
+  cupertino_icons: ^1.0.8
+  flutter_launcher_icons: ^0.14.4
+  
+  flutter_speed_dial: ^7.0.0
+  numberpicker: ^2.1.2
+
+  firebase_core: ^4.5.0
+  cloud_firestore: ^6.1.3
+  firebase_auth: ^6.2.0
+  firebase_storage: ^13.1.0
+  firebase_remote_config: ^6.1.0
+  firebase_analytics: ^12.1.3
+  google_sign_in: ^6.3.0
+  cloud_functions: ^6.0.7
+  firebase_app_check: ^0.4.1+5
+
+  file_picker: ^8.3.7
+  syncfusion_flutter_pdf: ^31.2.18
+  collection: ^1.19.1
+
+  timezone: ^0.9.4
+  country_picker: ^2.0.27
+  package_info_plus: ^8.3.1
+  font_awesome_flutter: ^10.12.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.6.3
+  build_runner: ^2.12.2
+  flutter_lints: ^6.0.0
+  fl_chart: ^0.69.2
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logos/app_icon_512.png"
+  adaptive_icon_foreground: "assets/logos/app_icon_512.png"
+  adaptive_icon_background: "#FFFFFF"
+  remove_alpha_ios: true
+
+flutter:
+  generate: true
+  uses-material-design: true
+  assets:
+    - assets/logos/
+    - assets/graphics/
+
+  fonts:
+    - family: Asimovian
+      fonts:
+        - asset: assets/fonts/Asimovian-Regular.ttf
+          weight: 400
+
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans-VariableFont_wdth_wght.ttf
+        - asset: assets/fonts/OpenSans-Italic-VariableFont_wdth_wght.ttf
+          style: italic
+
+    - family: Atkinson
+      fonts:
+        - asset: assets/fonts/AtkinsonHyperlegible-Regular.ttf
+        - asset: assets/fonts/AtkinsonHyperlegible-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/AtkinsonHyperlegible-Italic.ttf
+          style: italic
+        - asset: assets/fonts/AtkinsonHyperlegible-BoldItalic.ttf
+          weight: 700
+          style: italic
+
+    - family: Caveat
+      fonts:
+        - asset: assets/fonts/Caveat-VariableFont_wght.ttf
+
+    - family: FormaDJRMicro
+      fonts:
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-Regular-Testing.otf
+          weight: 400
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-Italic-Testing.otf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-Medium-Testing.otf
+          weight: 500
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-MediumItalic-Testing.otf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-Bold-Testing.otf
+          weight: 700
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-BoldItalic-Testing.otf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-ExtraBold-Testing.otf
+          weight: 800
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-ExtraBoldItalic-Testing.otf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-Black-Testing.otf
+          weight: 900
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-BlackItalic-Testing.otf
+          weight: 900
+          style: italic
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-Light-Testing.otf
+          weight: 300
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-LightItalic-Testing.otf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-ExtraLight-Testing.otf
+          weight: 200
+        - asset: assets/fonts/formaDJRMicro/FormaDJRMicro-ExtraLightItalic-Testing.otf
+          weight: 200
+          style: italic
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
