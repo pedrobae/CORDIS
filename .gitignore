@@ -1,12 +1,10 @@
-CORDIS/macos/Flutter/GeneratedPluginRegistrant.swift
-CORDIS/windows/flutter/generated_plugin_registrant.cc
-CORDIS/windows/flutter/generated_plugins.cmake
-CORDIS/debug_imports_local
+CORDEOS/macos/Flutter/GeneratedPluginRegistrant.swift
+CORDEOS/windows/flutter/generated_plugin_registrant.cc
+CORDEOS/windows/flutter/generated_plugins.cmake
+CORDEOS/debug_imports_local
 
 # Config files (contain sensitive/local data)
-CORDIS/lib/config/**/*_debug_config.dart
-CORDIS/lib/config/**/*_local_config.dart
-CORDIS/lib/firebase_options.dart
+CORDEOS/lib/config/firebase_debug_config.dart
 
 # Miscellaneous
 *.class
@@ -36,14 +34,14 @@ migrate_working_dir/
 #.vscode/
 
 # Flutter/Dart/Pub related
-CORDIS/**/doc/api/
-CORDIS/ios/Flutter/.last_build_id
-CORDIS/.dart_tool/
-CORDIS/.flutter-plugins
-CORDIS/.flutter-plugins-dependencies
-CORDIS/.pub-cache/
-CORDIS/.pub/
-CORDIS/build/
+CORDEOS/**/doc/api/
+CORDEOS/ios/Flutter/.last_build_id
+CORDEOS/.dart_tool/
+CORDEOS/.flutter-plugins
+CORDEOS/.flutter-plugins-dependencies
+CORDEOS/.pub-cache/
+CORDEOS/.pub/
+CORDEOS/build/
 
 # Symbolication related
 app.*.symbols
@@ -52,9 +50,9 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
-CORDIS/android/app/debug
-CORDIS/android/app/profile
-CORDIS/android/app/release
+CORDEOS/android/app/debug
+CORDEOS/android/app/profile
+CORDEOS/android/app/release
 # Environment Variables
 .env
 .env.local
@@ -86,18 +84,18 @@ build/
 *.dSYM
 
 # Platform builds
-CORDIS/android/.gradle/
-CORDIS/android/local.properties
-CORDIS/ios/Flutter
-CORDIS/windows/flutter/ephemeral/
-CORDIS/linux/flutter/ephemeral/
-CORDIS/macos/Flutter/ephemeral/
+CORDEOS/android/.gradle/
+CORDEOS/android/local.properties
+CORDEOS/ios/Flutter
+CORDEOS/windows/flutter/ephemeral/
+CORDEOS/linux/flutter/ephemeral/
+CORDEOS/macos/Flutter/ephemeral/
 
 # Generated files
-CORDIS/lib/generated_plugin_registrant.dart
-CORDIS/.dart_tool/
-CORDIS/.flutter-plugins
-CORDIS/.flutter-plugins-dependencies
+CORDEOS/lib/generated_plugin_registrant.dart
+CORDEOS/.dart_tool/
+CORDEOS/.flutter-plugins
+CORDEOS/.flutter-plugins-dependencies
 
 # Firebase
 functions/node_modules/
