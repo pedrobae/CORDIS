@@ -254,6 +254,7 @@ class LocalScheduleProvider extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      _hasUnsavedChanges = false;
       notifyListeners();
     }
   }
