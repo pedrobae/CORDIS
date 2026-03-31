@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: textTheme.headlineSmall,
               ),
               Text(
-                AppLocalizations.of(context)!.getStartedMessage,
+                AppLocalizations.of(context)!.noUpcomingSchedules,
                 style: textTheme.bodyLarge,
               ),
             ],

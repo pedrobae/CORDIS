@@ -1916,11 +1916,11 @@ abstract class AppLocalizations {
   /// **'Vamos Começar'**
   String get getStarted;
 
-  /// Instructional message to get started with the app
+  /// Message displayed when there are no upcoming schedules
   ///
   /// In pt, this message translates to:
-  /// **'Comece criando ou importando sua primeira cifra.'**
-  String get getStartedMessage;
+  /// **'Nenhuma agenda programada.'**
+  String get noUpcomingSchedules;
 
   /// By/author preposition
   ///

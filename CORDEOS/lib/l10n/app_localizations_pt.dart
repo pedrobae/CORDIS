@@ -1017,8 +1017,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get getStarted => 'Vamos Começar';
 
   @override
-  String get getStartedMessage =>
-      'Comece criando ou importando sua primeira cifra.';
+  String get noUpcomingSchedules => 'Nenhuma agenda programada.';
 
   @override
   String get by => 'por';

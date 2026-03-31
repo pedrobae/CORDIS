@@ -672,8 +672,8 @@
   "@welcome": {"description": "Generic welcome message"},
   "getStarted": "Get Started",
   "@getStarted": {"description": "Get started button label"},
-  "getStartedMessage": "Get started by creating or importing your first song map.",
-  "@getStartedMessage": {"description": "Instructional message to get started with the app"},
+  "noUpcomingSchedules": "No upcoming schedules.",
+  "@noUpcomingSchedules": {"description": "Message displayed when there are no upcoming schedules"},
 
   "by": "by",
   "@by": {"description": "By/author preposition"},

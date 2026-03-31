@@ -1010,8 +1010,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get getStarted => 'Get Started';
 
   @override
-  String get getStartedMessage =>
-      'Get started by creating or importing your first song map.';
+  String get noUpcomingSchedules => 'No upcoming schedules.';
 
   @override
   String get by => 'by';

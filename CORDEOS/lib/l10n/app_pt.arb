@@ -675,8 +675,8 @@
   "@welcome": {"description": "Generic welcome message"},
   "getStarted": "Vamos Começar",
   "@getStarted": {"description": "Get started button label"},
-  "getStartedMessage": "Comece criando ou importando sua primeira cifra.",
-  "@getStartedMessage": {"description": "Instructional message to get started with the app"},
+  "noUpcomingSchedules": "Nenhuma agenda programada.",
+  "@noUpcomingSchedules": {"description": "Message displayed when there are no upcoming schedules"},
 
   "by": "por",
   "@by": {"description": "By/author preposition"},
