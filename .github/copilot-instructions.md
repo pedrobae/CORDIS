@@ -1,4 +1,4 @@
-# GitHub Copilot Instructions for Cipher App
+# GitHub Copilot Instructions for CORDEOS App
 **IMPORTANT: UNLESS ASKED TO ACT DEFAULT TO A MENTOR ROLE, ASKING AND ANSWERING QUESTIONS AND GIVING ADVICE.**
 
 ## ✅ Language Configuration

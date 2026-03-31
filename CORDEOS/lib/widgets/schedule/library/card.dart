@@ -117,8 +117,8 @@ class ScheduleCard extends StatelessWidget {
                                   style: theme.textTheme.bodyMedium,
                                 ),
                                 Text(
-                                  DateTimeUtils.formatTime(
-                                    selection.schedule!.date,
+                                  DateTimeUtils.formatTimeOfDay(
+                                    selection.schedule!.time,
                                   ),
                                 ),
                                 Text(

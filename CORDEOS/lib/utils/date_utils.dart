@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class DateTimeUtils {
   static String formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
@@ -6,6 +8,12 @@ class DateTimeUtils {
   static String formatTime(DateTime date) {
     final hours = date.hour.toString().padLeft(2, '0');
     final minutes = date.minute.toString().padLeft(2, '0');
+    return '$hours:$minutes';
+  }
+
+  static String formatTimeOfDay(TimeOfDay time) {
+    final hours = time.hour.toString().padLeft(2, '0');
+    final minutes = time.minute.toString().padLeft(2, '0');
     return '$hours:$minutes';
   }
 

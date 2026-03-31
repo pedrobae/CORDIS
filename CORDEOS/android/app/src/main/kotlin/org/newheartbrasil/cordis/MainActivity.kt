@@ -1,4 +1,4 @@
-package org.newheartbrasil.cordis
+package org.newheartbrasil.cordeos
 
 import io.flutter.embedding.android.FlutterActivity
 
