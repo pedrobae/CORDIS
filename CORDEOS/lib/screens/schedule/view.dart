@@ -412,10 +412,9 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                         context,
                       )!.publishPlaceholder(''),
                       isDark: true,
-                      onPressed: () {
-                        _publishSchedule();
+                      onPressed: () async {
                         Navigator.of(context).pop();
-                        context.read<NavigationProvider>().pop();
+                        await _publishSchedule();
                       },
                     ),
                     FilledTextButton(
@@ -442,7 +441,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
     return count;
   }
 
-  void _publishSchedule() async {
+  Future<void> _publishSchedule() async {
     setState(() {
       _isPublishing = true;
     });
