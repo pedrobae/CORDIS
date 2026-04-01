@@ -1,7 +1,6 @@
 import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/models/domain/cipher/version.dart';
 import 'package:cordeos/providers/cipher/cipher_provider.dart';
-import 'package:cordeos/providers/transposition_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/utils/date_utils.dart';
 import 'package:cordeos/widgets/ciphers/editor/metadata.dart/add_tag_sheet.dart';
@@ -108,7 +107,7 @@ class _MetadataTabState extends State<MetadataTab> {
   void _addListeners() {
     final ciph = context.read<CipherProvider>();
     final localVer = context.read<LocalVersionProvider>();
-    
+
     for (var entry in controllers.entries) {
       final field = entry.key;
       final controller = entry.value;
@@ -246,43 +245,73 @@ class _MetadataTabState extends State<MetadataTab> {
       spacing: 8,
       children: [
         Text(_getLabel(field), style: theme.textTheme.labelMedium),
-        GestureDetector(
-          onTap: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return SelectKeySheet(
-                  selectingOriginalKey:
-                      (widget.versionType == VersionType.brandNew ||
-                      widget.versionType == VersionType.import),
-                );
-              },
+        Selector2<
+          LocalVersionProvider,
+          CipherProvider,
+          ({String? transposedKey, String? originalKey})
+        >(
+          selector: (context, localVer, ciph) {
+            final cipher = ciph.getCipher(widget.cipherID);
+            final version = localVer.getVersion(widget.versionID);
+            return (
+              transposedKey: version?.transposedKey,
+              originalKey: cipher?.musicKey,
             );
           },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-            decoration: BoxDecoration(
-              border: Border.all(color: colorScheme.shadow, width: 1),
-              borderRadius: BorderRadius.circular(0),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Consumer<TranspositionProvider>(
-                  builder: (context, tp, child) {
-                    return Text(
-                      tp.transposedKey ?? AppLocalizations.of(context)!.keyHint,
+          builder: (context, keys, child) {
+            return GestureDetector(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+                    return SelectKeySheet(
+                      initialKey: keys.transposedKey,
+                      originalKey: keys.originalKey ?? '',
+                      onKeySelected: (key) {
+                        if (widget.versionType == VersionType.brandNew ||
+                            widget.versionType == VersionType.import) {
+                          context.read<CipherProvider>().cacheMusicKey(
+                            widget.cipherID,
+                            key,
+                          );
+                        } else {
+                          context.read<LocalVersionProvider>().cacheUpdates(
+                            widget.versionID,
+                            transposedKey: key,
+                          );
+                        }
+                      },
+                    );
+                  },
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 11,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: colorScheme.shadow, width: 1),
+                  borderRadius: BorderRadius.circular(0),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      keys.transposedKey ??
+                          keys.originalKey ??
+                          AppLocalizations.of(context)!.keyHint,
                       style: TextStyle(
                         color: colorScheme.onSurface,
                         fontSize: 16,
                       ),
-                    );
-                  },
+                    ),
+                    Icon(Icons.arrow_drop_down, color: colorScheme.onSurface),
+                  ],
                 ),
-                Icon(Icons.arrow_drop_down, color: colorScheme.onSurface),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ],
     );

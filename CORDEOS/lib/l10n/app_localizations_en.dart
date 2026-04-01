@@ -896,6 +896,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get playlistVersion => 'Playlist Version';
+
+  @override
   String playlistVersionName(Object playlistName) {
     return '$playlistName\'s Version';
   }
@@ -1064,7 +1067,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bpmHint => 'Enter tempo in BPM';
 
   @override
-  String get durationHint => 'Enter the Estimated Time (MM:SS)';
+  String get durationHint => 'Enter the Duration';
 
   @override
   String get languageHint => 'Pick a language';

@@ -591,6 +591,8 @@
   "@importedFrom": {"description": "Text indicating the source from which the song was imported", "placeholders": {"importType": {}}},
   "addSongToLibrary": "Add Song to Library",
   "@addSongToLibrary": {"description": "Add song to library button label"},
+  "playlistVersion": "Playlist Version",
+  "@playlistVersion": {"description": "Label for a playlist version"},
   "playlistVersionName": "{playlistName}'s Version",
   "@playlistVersionName": {"description": "Default name for a playlist's new version", "placeholders": {"playlistName": {}}},
 
@@ -702,7 +704,7 @@
   "@authorHint": {"description": "Hint text for author name input"},
   "versionNameHint": "Enter a version name",
   "@versionNameHint":  {"description":  "Hint text for version name input"},
-  "durationHint": "Enter the Estimated Time (MM:SS)",
+  "durationHint": "Enter the Duration",
   "@durationHint": {"description": "Hint text for duration input"},
   "bpmHint": "Enter tempo in BPM",
   "@bpmHint": {"description": "Hint text for BPM input"},

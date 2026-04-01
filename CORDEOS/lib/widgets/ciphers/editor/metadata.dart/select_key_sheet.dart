@@ -1,28 +1,33 @@
 import 'package:cordeos/helpers/chords/chords.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
-import 'package:cordeos/providers/transposition_provider.dart';
 import 'package:cordeos/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class SelectKeySheet extends StatefulWidget {
-  final bool selectingOriginalKey;
   final bool needsSave;
+  final String? initialKey;
+  final String originalKey;
+  final Function(String) onKeySelected;
 
-  const SelectKeySheet({super.key, this.needsSave = true, this.selectingOriginalKey = false});
+  const SelectKeySheet({
+    super.key,
+    this.needsSave = true,
+    this.initialKey,
+    required this.originalKey,
+    required this.onKeySelected,
+  });
 
   @override
   State<SelectKeySheet> createState() => _SelectKeySheetState();
 }
 
 class _SelectKeySheetState extends State<SelectKeySheet> {
-  String? selectedKey;
+  late String selectedKey;
 
   @override
   void initState() {
     super.initState();
-    final tp = context.read<TranspositionProvider>();
-    selectedKey = widget.selectingOriginalKey ? tp.originalKey : tp.transposedKey;
+    selectedKey = widget.initialKey ?? widget.originalKey;
   }
 
   @override
@@ -35,110 +40,110 @@ class _SelectKeySheetState extends State<SelectKeySheet> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Consumer<TranspositionProvider>(
-      builder: (context, tp, child) {
-        return Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            shape: BoxShape.rectangle,
-            color: colorScheme.surface,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 8,
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        color: colorScheme.surface,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 8,
+        children: [
+          // HEADER
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // HEADER
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.keyHint,
-                    style: textTheme.titleMedium,
-                  ),
-                  CloseButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
+              Text(
+                AppLocalizations.of(context)!.keyHint,
+                style: textTheme.titleMedium,
               ),
-              Expanded(
-                child: GridView.count(
-                  physics: NeverScrollableScrollPhysics(),
-                  crossAxisCount: 4,
-                  childAspectRatio: 2,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  children: ChordHelper.keyList.map((key) {
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (widget.needsSave) {
-                            if (selectedKey == key) {
-                              selectedKey = null;
-                            } else {
-                              selectedKey = key;
-                            }
-                          } else {
-                            if (widget.selectingOriginalKey) {
-                              tp.setOriginalKey(key);
-                            } else {
-                              tp.setTransposedKey(key);
-                            }
-                            Navigator.of(context).pop();
-                          }
-                        });
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: key == selectedKey
-                              ? colorScheme.onSurface
-                              : colorScheme.surface,
-                          border: Border.all(
-                            color: colorScheme.onSurface,
-                            width: 1,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            key,
-                            style: textTheme.titleMedium?.copyWith(
-                              color: key == selectedKey
-                                  ? colorScheme.surface
-                                  : colorScheme.onSurface,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              FilledTextButton(
-                text: AppLocalizations.of(context)!.originalKey,
-                isDark: true,
+              CloseButton(
                 onPressed: () {
-                  tp.setTransposedKey(null);
                   Navigator.of(context).pop();
                 },
               ),
-              if (widget.needsSave) ...[
-                FilledTextButton(
-                  text: AppLocalizations.of(context)!.save,
-                  isDark: true,
-                  onPressed: () {
-                    tp.setTransposedKey(selectedKey);
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-
-              SizedBox(),
             ],
           ),
-        );
-      },
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final spacing = 8.0;
+
+              final itemWidth = (constraints.maxWidth - (3 * spacing)) / 4;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: ChordHelper.keyList.map((key) {
+                  return GestureDetector(
+                    onTap: () {
+                      if (widget.needsSave) {
+                        setState(() {
+                          if (selectedKey == key) {
+                            selectedKey = widget.originalKey;
+                          } else {
+                            selectedKey = key;
+                          }
+                        });
+                      } else {
+                        if (selectedKey == key) {
+                          widget.onKeySelected(widget.originalKey);
+                        } else {
+                          widget.onKeySelected(key);
+                        }
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: key == selectedKey
+                            ? colorScheme.onSurface
+                            : colorScheme.surface,
+                        border: Border.all(
+                          color: colorScheme.onSurface,
+                          width: 1,
+                        ),
+                      ),
+                      width: itemWidth,
+                      height: itemWidth / 2,
+                      child: Center(
+                        child: Text(
+                          key,
+                          style: textTheme.titleMedium?.copyWith(
+                            color: key == selectedKey
+                                ? colorScheme.surface
+                                : colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+          if (widget.originalKey != '')
+            FilledTextButton(
+              text: AppLocalizations.of(context)!.originalKey,
+              isDark: true,
+              onPressed: () {
+                widget.onKeySelected(widget.originalKey);
+                Navigator.of(context).pop();
+              },
+            ),
+          if (widget.needsSave) ...[
+            FilledTextButton(
+              text: AppLocalizations.of(context)!.save,
+              isDark: true,
+              onPressed: () {
+                widget.onKeySelected(selectedKey);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+          SizedBox(),
+        ],
+      ),
     );
   }
 }

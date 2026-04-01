@@ -594,6 +594,8 @@
   "@pasteTextPrompt": {"description": "Prompt to paste cipher text"},
   "importedFrom": "Cifra importada de {importType}",
   "@importedFrom": {"description": "Text indicating the source from which the song was imported", "placeholders": {"importType": {}}},
+  "playlistVersion": "Versão da Playlist",
+  "@playlistVersion": {"description": "Label for a playlist version"},
   "playlistVersionName": "Versão do {playlistName}",
   "@playlistVersionName": {"description": "Default name for a playlist's new version", "placeholders": {"playlistName": {}}},
 
@@ -708,7 +710,7 @@
   "@versionNameHint":  {"description":  "Hint text for version name input"},
   "bpmHint": "Insira o tempo em BPM",
   "@bpmHint": {"description": "Hint text for BPM input"},
-  "durationHint": "Insira a duração em MM:SS",
+  "durationHint": "Insira a duração",
   "@durationHint": {"description": "Hint text for duration input"},
   "languageHint": "Escolha um idioma",
   "@languageHint": {"description": "Hint text for song language input"},

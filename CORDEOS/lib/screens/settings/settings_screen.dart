@@ -77,6 +77,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
             _buildLanguageButton(set),
+            if (widget.showSecrets) ...[
+              SettingsSwitchTile(
+                label: AppLocalizations.of(context)!.denseCipherCard,
+                icon: secSet.denseCipherCard ? Icons.grid_on : Icons.grid_off,
+                value: secSet.denseCipherCard,
+                onChanged: (value) {
+                  secSet.toggleDenseCipherCard();
+                },
+              ),
+            ],
             const SizedBox(height: 32),
 
             SettingsSectionHeader(
@@ -86,23 +96,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             SizedBox(),
             _buildDebugButton(nav),
             const SizedBox(height: 32),
-
-            if (widget.showSecrets) ...[
-              SettingsSectionHeader(
-                title: AppLocalizations.of(context)!.advancedSettings,
-                icon: Icons.settings,
-              ),
-              SizedBox(),
-              SettingsSwitchTile(
-                label: AppLocalizations.of(context)!.denseCipherCard,
-                icon: secSet.denseCipherCard ? Icons.grid_on : Icons.grid_off,
-                value: secSet.denseCipherCard,
-                onChanged: (value) {
-                  secSet.toggleDenseCipherCard();
-                },
-              ),
-              const SizedBox(height: 32),
-            ],
 
             if (kDebugMode) ...[
               SettingsSectionHeader(

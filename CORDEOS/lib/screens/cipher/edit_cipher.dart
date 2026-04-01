@@ -4,7 +4,6 @@ import 'package:cordeos/models/domain/cipher/version.dart';
 import 'package:cordeos/providers/cipher/import_provider.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/cipher/parser_provider.dart';
-import 'package:cordeos/providers/transposition_provider.dart';
 import 'package:cordeos/providers/user/my_auth_provider.dart';
 import 'package:cordeos/providers/version/cloud_version_provider.dart';
 import 'package:cordeos/services/key_recognizer_service.dart';
@@ -305,23 +304,10 @@ class _EditCipherScreenState extends State<EditCipherScreen>
   }
 
   Future<void> _save(BuildContext context) async {
-    // Cache transposed key
-    _cacheKey();
-
     await _saveSingleVersion(context);
 
     // Clear unsaved changes flags
     if (context.mounted) _clearUnsavedChanges(context);
-  }
-
-  void _cacheKey() {
-    final tp = context.read<TranspositionProvider>();
-    final localVer = context.read<LocalVersionProvider>();
-
-    if (widget.versionType != VersionType.import &&
-        widget.versionType != VersionType.brandNew) {
-      localVer.cacheUpdates(widget.versionID, transposedKey: tp.transposedKey);
-    }
   }
 
   Future<void> _saveSingleVersion(BuildContext context) async {

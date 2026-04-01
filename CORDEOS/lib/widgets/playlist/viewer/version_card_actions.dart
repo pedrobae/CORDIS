@@ -127,7 +127,7 @@ class VersionCardActionsSheet extends StatelessWidget {
         maxHeight: MediaQuery.of(context).size.height * 0.75,
       ),
       builder: (context) {
-        return ManageSheet(versionID: versionID);
+        return ManageSheet(versionID: versionID, playlistMode: true,);
       },
     );
   }

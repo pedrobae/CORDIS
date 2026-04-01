@@ -6,12 +6,12 @@ import 'package:numberpicker/numberpicker.dart';
 
 class DurationPickerField extends StatefulWidget {
   final TextEditingController controller;
-  final String label;
+  final String? label;
 
   const DurationPickerField({
     super.key,
     required this.controller,
-    required this.label,
+    this.label,
   });
 
   @override
@@ -39,7 +39,7 @@ class _DurationPickerFieldState extends State<DurationPickerField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 4,
       children: [
-        Text(widget.label, style: textTheme.labelMedium),
+        if (widget.label != null) Text(widget.label!, style: textTheme.labelMedium),
         GestureDetector(
           onTap: () async {
             _openDurationPicker(context);
@@ -52,6 +52,7 @@ class _DurationPickerFieldState extends State<DurationPickerField> {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              spacing: 8,
               children: [
                 ListenableBuilder(
                   listenable: widget.controller,

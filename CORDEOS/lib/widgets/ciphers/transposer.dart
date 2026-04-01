@@ -24,7 +24,13 @@ class Transposer extends StatelessWidget {
                   showModalBottomSheet(
                     context: context,
                     builder: (context) {
-                      return SelectKeySheet(needsSave: false);
+                      return SelectKeySheet(
+                        initialKey: tp.transposedKey,
+                        originalKey: tp.originalKey,
+                        onKeySelected: (key) {
+                          tp.setTransposedKey(key);
+                        },
+                      );
                     },
                   );
                 },

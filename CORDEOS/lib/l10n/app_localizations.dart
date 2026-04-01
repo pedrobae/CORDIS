@@ -1700,6 +1700,12 @@ abstract class AppLocalizations {
   /// **'Cifra importada de {importType}'**
   String importedFrom(Object importType);
 
+  /// Label for a playlist version
+  ///
+  /// In pt, this message translates to:
+  /// **'Versão da Playlist'**
+  String get playlistVersion;
+
   /// Default name for a playlist's new version
   ///
   /// In pt, this message translates to:
@@ -2003,7 +2009,7 @@ abstract class AppLocalizations {
   /// Hint text for duration input
   ///
   /// In pt, this message translates to:
-  /// **'Insira a duração em MM:SS'**
+  /// **'Insira a duração'**
   String get durationHint;
 
   /// Hint text for song language input
