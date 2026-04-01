@@ -65,8 +65,7 @@ class _StructureListState extends State<StructureList> {
       ({List<String> filteredStructure, bool tapEnabled})
     >(
       selector: (context, laySet, localVer, cloudVer) {
-        final tapEnabled =
-            laySet.layoutFilters[LayoutFilter.repeatSections] == true;
+        final tapEnabled = laySet.showRepeatSections == true;
 
         if (widget.versionID == null) {
           return (filteredStructure: [], tapEnabled: tapEnabled);
@@ -78,12 +77,10 @@ class _StructureListState extends State<StructureList> {
 
         final filteredStructure = <String>[];
         for (var code in songStructure) {
-          if (laySet.layoutFilters[LayoutFilter.annotations] == false &&
-              isAnnotation(code)) {
+          if (laySet.showAnnotations == false && isAnnotation(code)) {
             continue;
           }
-          if (laySet.layoutFilters[LayoutFilter.transitions] == false &&
-              isTransition(code)) {
+          if (laySet.showTransitions == false && isTransition(code)) {
             continue;
           }
           filteredStructure.add(code);

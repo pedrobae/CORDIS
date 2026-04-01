@@ -32,23 +32,19 @@ class VersionWrap extends StatelessWidget {
       ({Axis wrapDirection, List<String> filteredStructure})
     >(
       selector: (context, laySet, localVer, cloudVer, sect) {
-        final layoutFilters = laySet.layoutFilters;
-
         final songStructure = versionID is String
             ? cloudVer.getVersion(versionID)!.songStructure
             : localVer.getSongStructure(versionID);
 
         final filteredStructure = <String>[];
         for (var code in songStructure) {
-          if (layoutFilters[LayoutFilter.annotations] == false &&
-              isAnnotation(code)) {
+          if (laySet.showAnnotations == false && isAnnotation(code)) {
             continue;
           }
-          if (layoutFilters[LayoutFilter.transitions] == false &&
-              isTransition(code)) {
+          if (laySet.showTransitions == false && isTransition(code)) {
             continue;
           }
-          if (layoutFilters[LayoutFilter.repeatSections] == false &&
+          if (laySet.showRepeatSections == false &&
               filteredStructure.contains(code)) {
             continue;
           }

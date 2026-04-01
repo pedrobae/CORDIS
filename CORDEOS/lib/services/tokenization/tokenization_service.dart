@@ -1,4 +1,3 @@
-import 'package:cordeos/providers/settings/layout_settings_provider.dart';
 import 'package:cordeos/services/tokenization/build_service.dart';
 import 'package:cordeos/services/tokenization/helper_classes.dart';
 import 'package:cordeos/services/tokenization/position_service.dart';
@@ -203,7 +202,8 @@ class TokenizationService {
     required TokenBuildContext buildCtx,
     List<ContentToken>? initialTokens,
     // View mode parameters
-    Map<ContentFilter, bool>? contentFilters,
+    required bool showChords,
+    required bool showLyrics,
   }) {
     // Step 1: Tokenize content (shared)
     List<ContentToken> tokens = initialTokens ?? tokenize(content);
@@ -217,7 +217,7 @@ class TokenizationService {
     // Step 2: Apply mode-specific processing
     if (posCtx.isEditMode) {
     } else {
-      tokens = filterTokens(tokens, contentFilters!);
+      tokens = filterTokens(tokens, showChords: showChords, showLyrics: showLyrics);
     }
 
     // Step 3: Organize tokens
@@ -365,16 +365,17 @@ class TokenizationService {
   /// Allows showing/hiding chords and lyrics independently.
   /// Visual tokens (newline, underline, precedingChordTarget) are shown if any content is visible.
   List<ContentToken> filterTokens(
-    List<ContentToken> tokens,
-    Map<ContentFilter, bool> contentFilters,
-  ) {
+    List<ContentToken> tokens, {
+    required bool showChords,
+    required bool showLyrics,
+  }) {
     return tokens.where((token) {
       switch (token.type) {
         case TokenType.chord:
-          return contentFilters[ContentFilter.chords]!;
+          return showChords;
         case TokenType.space:
         case TokenType.lyric:
-          return contentFilters[ContentFilter.lyrics]!;
+          return showLyrics;
 
         case TokenType.underline:
           return false;
@@ -383,8 +384,7 @@ class TokenizationService {
         case TokenType.preSeparator:
         case TokenType.chordTarget:
           // Returns true if any content is shown
-          return contentFilters[ContentFilter.chords]! ||
-              contentFilters[ContentFilter.lyrics]!;
+          return showChords || showLyrics;
       }
     }).toList();
   }

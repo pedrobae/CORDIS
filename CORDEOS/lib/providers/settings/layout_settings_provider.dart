@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cordeos/services/settings_service.dart';
 
-enum ContentFilter { chords, lyrics }
-
-enum LayoutFilter { annotations, transitions, repeatSections }
-
 class LayoutSetProvider extends ChangeNotifier {
   double fontSize = 16;
   String fontFamily = 'OpenSans';
@@ -27,19 +23,11 @@ class LayoutSetProvider extends ChangeNotifier {
   bool _showTransitions = true;
   bool _showRepeatSections = true;
 
-  Map<ContentFilter, bool> get contentFilters => {
-    ContentFilter.chords: _showChords,
-    ContentFilter.lyrics: _showLyrics,
-  };
-
-  Map<LayoutFilter, bool> get layoutFilters => {
-    LayoutFilter.annotations: _showAnnotations,
-    LayoutFilter.transitions: _showTransitions,
-    LayoutFilter.repeatSections: _showRepeatSections,
-
-    bool get showChords => _showChords;
-    bool get showLyrics => _showLyrics;
-  };
+  bool get showChords => _showChords;
+  bool get showLyrics => _showLyrics;
+  bool get showAnnotations => _showAnnotations;
+  bool get showTransitions => _showTransitions;
+  bool get showRepeatSections => _showRepeatSections;
 
   /// Initialize with stored settings
   Future<void> loadSettings() async {
@@ -136,7 +124,7 @@ class LayoutSetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleNotes() {
+  void toggleAnnotations() {
     _showAnnotations = !_showAnnotations;
     SettingsService.setShowNotes(_showAnnotations);
     notifyListeners();

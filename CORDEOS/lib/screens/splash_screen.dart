@@ -22,6 +22,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _navigateToNextScreen(BuildContext context, bool isAuthenticated) {
     if (_hasNavigated) return;
+    final ciph = context.read<CipherProvider>();
+    final play = context.read<PlaylistProvider>();
+
     _hasNavigated = true;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -32,12 +35,12 @@ class _SplashScreenState extends State<SplashScreen> {
         // first frame of MainScreen never blocks on SQLite reads.
         setState(() => _isPreloading = true);
         try {
-          await context.read<CipherProvider>().loadCiphers();
-          await context.read<PlaylistProvider>().loadPlaylists();
+          await ciph.loadCiphers();
+          await play.loadPlaylists();
         } catch (_) {
           // Preload failures must not block navigation.
         }
-        if (!mounted) return;
+        if (!context.mounted) return;
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const MainScreen()),
         );

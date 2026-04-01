@@ -259,6 +259,8 @@ class _TokenContentCardState extends State<TokenContentCard> {
                           letterSpacing: s.letterSpacing,
                         ),
                         buildCtx: buildCtx,
+                        showChords: true,
+                        showLyrics: true,
                       );
 
                       return SizedBox(

@@ -60,9 +60,9 @@ class _TokenViewState extends State<TokenView> {
         );
       },
       builder: (context, s, child) {
-        // Access the transposer via read() — safe inside builder, not watch().
-        final transposeChord =
-            context.read<TranspositionProvider>().transposeChord;
+        final transposeChord = context
+            .read<TranspositionProvider>()
+            .transposeChord;
         return LayoutBuilder(
           builder: (context, constraints) {
             // Build a cache key from every input that affects tokenization layout.
@@ -75,7 +75,7 @@ class _TokenViewState extends State<TokenView> {
                 '|${s.letterSpacing}'
                 '|${s.showChords}|${s.showLyrics}'
                 '|${s.chordStyle.fontSize}|${s.chordStyle.fontFamily}'
-                '|${colorScheme.primary.value}|${colorScheme.onSurface.value}';
+                '|${colorScheme.primary.toARGB32()}|${colorScheme.onSurface.toARGB32()}';
 
             if (cacheKey == _cacheKey && _cachedContent != null) {
               return SizedBox(
@@ -100,10 +100,8 @@ class _TokenViewState extends State<TokenView> {
                 letterSpacing: s.letterSpacing,
                 isEditMode: false,
               ),
-              contentFilters: {
-                ContentFilter.chords: s.showChords,
-                ContentFilter.lyrics: s.showLyrics,
-              },
+              showChords: s.showChords,
+              showLyrics: s.showLyrics,
               buildCtx: TokenBuildContext(
                 chordStyle: s.chordStyle,
                 lyricStyle: s.lyricStyle,
