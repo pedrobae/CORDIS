@@ -91,7 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             SettingsSectionHeader(
               title: AppLocalizations.of(context)!.support,
-              icon: Icons.support_agent,
+              icon: Icons.contact_support,
             ),
             SizedBox(),
             _buildDebugButton(nav),

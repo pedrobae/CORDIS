@@ -171,13 +171,6 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   spacing: 8,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    /// Drag Handle icon
-                    Icon(
-                      Icons.drag_indicator,
-                      size: 28,
-                      color: colorScheme.shadow,
-                    ),
-
                     /// Section Code badge
                     SectionBadge(
                       sectionCode: s.section!.contentCode,
@@ -331,9 +324,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
               ),
               // merge
               FilledTextButton(
-                text: AppLocalizations.of(
-                  context,
-                )!.mergePlaceholder(''),
+                text: AppLocalizations.of(context)!.mergePlaceholder(''),
                 trailingIcon: Icons.chevron_right,
                 isDiscrete: true,
                 onPressed: () {

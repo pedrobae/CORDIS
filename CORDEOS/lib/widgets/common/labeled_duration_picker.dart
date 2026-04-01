@@ -8,11 +8,7 @@ class DurationPickerField extends StatefulWidget {
   final TextEditingController controller;
   final String? label;
 
-  const DurationPickerField({
-    super.key,
-    required this.controller,
-    this.label,
-  });
+  const DurationPickerField({super.key, required this.controller, this.label});
 
   @override
   State<DurationPickerField> createState() => _DurationPickerFieldState();
@@ -39,7 +35,8 @@ class _DurationPickerFieldState extends State<DurationPickerField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 4,
       children: [
-        if (widget.label != null) Text(widget.label!, style: textTheme.labelMedium),
+        if (widget.label != null)
+          Text(widget.label!, style: textTheme.labelMedium),
         GestureDetector(
           onTap: () async {
             _openDurationPicker(context);
@@ -51,21 +48,23 @@ class _DurationPickerFieldState extends State<DurationPickerField> {
               borderRadius: BorderRadius.circular(0),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               spacing: 8,
               children: [
                 ListenableBuilder(
                   listenable: widget.controller,
                   builder: (context, child) {
-                    return Text(
-                      widget.controller.text.isEmpty
-                          ? AppLocalizations.of(context)!.durationHint
-                          : widget.controller.text,
-                      style: TextStyle(
-                        color: widget.controller.text.isEmpty
-                            ? colorScheme.shadow
-                            : colorScheme.onSurface,
-                        fontSize: 16,
+                    return Expanded(
+                      child: Text(
+                        widget.controller.text.isEmpty
+                            ? AppLocalizations.of(context)!.durationHint
+                            : widget.controller.text,
+                        style: TextStyle(
+                          color: widget.controller.text.isEmpty
+                              ? colorScheme.shadow
+                              : colorScheme.onSurface,
+                          fontSize: 16,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     );
                   },
