@@ -129,16 +129,19 @@ class _ManageSheetState extends State<ManageSheet> {
                 ],
               ),
               // VERSION METADATA
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                spacing: 16,
-                children: [
-                  Expanded(
-                    child: DurationPickerField(controller: _durationController),
-                  ),
-                  Expanded(child: _buildKeySelector()),
-                ],
-              ),
+              if (widget.playlistMode)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  spacing: 16,
+                  children: [
+                    Expanded(
+                      child: DurationPickerField(
+                        controller: _durationController,
+                      ),
+                    ),
+                    Expanded(child: _buildKeySelector()),
+                  ],
+                ),
 
               // REORDERABLE STRUCTURE
               ReorderableStructure(

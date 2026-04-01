@@ -491,12 +491,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Insira o texto da seção, em formato chordPro. (letra[acorde])';
 
   @override
-  String get duplicateSectionInstruction =>
-      'Selecione uma seção existente para repetir.';
+  String get duplicateSectionTooltip => 'Repetir a seção no Mapa da Música';
 
   @override
-  String get selectSectionInstruction =>
-      'Escolha uma estrutura para sua nova seção.';
+  String get copySectionTooltip => 'Cria uma nova seção com o mesmo conteúdo';
 
   @override
   String get cipherEditorTitle => 'Editor de Cifras';
@@ -995,6 +993,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get clear => 'Limpar';
+
+  @override
+  String mergePlaceholder(Object object) {
+    return 'Mesclar $object';
+  }
 
   @override
   String get delete => 'Excluir';

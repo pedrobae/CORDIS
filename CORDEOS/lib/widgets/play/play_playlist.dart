@@ -4,7 +4,7 @@ import 'package:cordeos/models/domain/playlist/playlist_item.dart';
 import 'package:cordeos/models/dtos/playlist_dto.dart';
 import 'package:cordeos/providers/auto_scroll_provider.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
-import 'package:cordeos/providers/schedule/play_schedule_state_provider.dart';
+import 'package:cordeos/providers/playlist/play_state_provider.dart';
 import 'package:cordeos/providers/section_provider.dart';
 import 'package:cordeos/providers/settings/layout_settings_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';

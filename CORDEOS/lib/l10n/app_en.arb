@@ -333,11 +333,10 @@
   "@sectionText": {"description": "Hint text for section text input"},
   "sectionTextHint": "Enter the section text in chordPro format, (lyrics[chord])",
   "@sectionTextHint": {"description": "Hint text for section text input, in chordPro format"},
-  "duplicateSectionInstruction": "Select an existing section to repeat.",
-  "@duplicateSectionInstruction": {"description": "Instruction for duplicating an existing section"},
-  "selectSectionInstruction": "Choose a structure for your new section.",
-  "@selectSectionInstruction": {"description": "Instruction to select a section for editing"},
-
+  "duplicateSectionTooltip": "Repeat the section on the Song Map",
+  "@duplicateSectionTooltip": {"description": "Tooltip for duplicate section action"},
+  "copySectionTooltip": "Create a new section with the same content",
+  "@copySectionTooltip": {"description": "Tooltip for copy section action"},
 
 
   "cipherEditorTitle": "Song Editor",
@@ -658,6 +657,8 @@
   "@assign": {"description": "Assign button label"},
   "clear": "Clear",
   "@clear": {"description": "Clear button label"},
+  "mergePlaceholder": "Merge {object}",
+  "@mergePlaceholder": {"description": "Merge button label with placeholder", "placeholders": {"object": {}}},
 
   
   "delete": "Delete",

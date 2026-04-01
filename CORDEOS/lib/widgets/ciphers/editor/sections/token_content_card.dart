@@ -1,5 +1,6 @@
 import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/models/domain/cipher/section.dart';
+import 'package:cordeos/providers/cipher/edit_sections_state_provider.dart';
 import 'package:cordeos/providers/settings/layout_settings_provider.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/section_provider.dart';
@@ -328,12 +329,27 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   );
                 },
               ),
+              // merge
+              FilledTextButton(
+                text: AppLocalizations.of(
+                  context,
+                )!.mergePlaceholder(''),
+                trailingIcon: Icons.chevron_right,
+                isDiscrete: true,
+                onPressed: () {
+                  Navigator.pop(context); // Close the bottom sheet
+                  final state = context.read<EditSectionsStateProvider>();
+                  state.enableMergeOverlay();
+                  state.toggleMergeSection(widget.sectionCode);
+                },
+              ),
               // create copy
               FilledTextButton(
                 text: AppLocalizations.of(
                   context,
                 )!.createPlaceholder(AppLocalizations.of(context)!.copy),
                 trailingIcon: Icons.chevron_right,
+                tooltip: AppLocalizations.of(context)!.copySectionTooltip,
                 isDiscrete: true,
                 onPressed: () {
                   Navigator.pop(context); // Close the bottom sheet
@@ -356,6 +372,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   context,
                 )!.duplicatePlaceholder(AppLocalizations.of(context)!.section),
                 trailingIcon: Icons.chevron_right,
+                tooltip: AppLocalizations.of(context)!.duplicateSectionTooltip,
                 isDiscrete: true,
                 onPressed: () {
                   Navigator.pop(context); // Close the bottom sheet

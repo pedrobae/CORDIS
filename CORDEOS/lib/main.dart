@@ -1,5 +1,6 @@
 import 'package:cordeos/providers/auto_scroll_provider.dart';
 import 'package:cordeos/providers/bug_report_provider.dart';
+import 'package:cordeos/providers/cipher/edit_sections_state_provider.dart';
 import 'package:cordeos/providers/settings/secret_settings_provider.dart';
 import 'package:cordeos/providers/transposition_provider.dart';
 import 'package:cordeos/screens/splash_screen.dart';
@@ -30,7 +31,7 @@ import 'package:cordeos/providers/user/user_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/providers/version/cloud_version_provider.dart';
 import 'package:cordeos/providers/app_info_provider.dart';
-import 'package:cordeos/providers/schedule/play_schedule_state_provider.dart';
+import 'package:cordeos/providers/playlist/play_state_provider.dart';
 
 import 'package:cordeos/services/firebase/firebase_service.dart';
 import 'package:cordeos/services/firebase/remote_config_service.dart';
@@ -90,9 +91,10 @@ class MyApp extends StatelessWidget {
         // IMPORT PROVIDERS
         ChangeNotifierProvider(create: (_) => ImportProvider()),
         ChangeNotifierProvider(create: (_) => ParserProvider()),
-        // PLAY SCHEDULE PROVIDERS
+        // STATE PROVIDERS
         ChangeNotifierProvider(create: (_) => ScrollProvider()),
         ChangeNotifierProvider(create: (_) => PlayStateProvider()),
+        ChangeNotifierProvider(create: (_) => EditSectionsStateProvider()),
         // FUNCTIONALITY PROVIDERS
         ChangeNotifierProvider(create: (_) => SelectionProvider()),
         ChangeNotifierProvider(create: (_) => TranspositionProvider()),

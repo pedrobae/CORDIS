@@ -488,12 +488,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter the section text in chordPro format, (lyrics[chord])';
 
   @override
-  String get duplicateSectionInstruction =>
-      'Select an existing section to repeat.';
+  String get duplicateSectionTooltip => 'Repeat the section on the Song Map';
 
   @override
-  String get selectSectionInstruction =>
-      'Choose a structure for your new section.';
+  String get copySectionTooltip => 'Create a new section with the same content';
 
   @override
   String get cipherEditorTitle => 'Song Editor';
@@ -989,6 +987,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clear => 'Clear';
+
+  @override
+  String mergePlaceholder(Object object) {
+    return 'Merge $object';
+  }
 
   @override
   String get delete => 'Delete';

@@ -3,7 +3,7 @@ import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/screens/cipher/import/import_pdf.dart';
 import 'package:cordeos/screens/cipher/import/import_text.dart';
-import 'package:cordeos/widgets/ciphers/editor/sections/sheet_select_type.dart';
+import 'package:cordeos/widgets/ciphers/editor/sections/select_type.dart';
 import 'package:cordeos/widgets/common/filled_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

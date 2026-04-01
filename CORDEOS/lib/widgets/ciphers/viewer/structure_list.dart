@@ -1,5 +1,5 @@
 import 'package:cordeos/models/domain/cipher/section.dart';
-import 'package:cordeos/providers/schedule/play_schedule_state_provider.dart';
+import 'package:cordeos/providers/playlist/play_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
 

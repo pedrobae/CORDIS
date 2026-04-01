@@ -70,10 +70,6 @@ class SelectType extends StatelessWidget {
                 AppLocalizations.of(context)!.selectSectionType,
                 style: textTheme.titleLarge,
               ),
-              Text(
-                AppLocalizations.of(context)!.selectSectionInstruction,
-                style: textTheme.bodyLarge,
-              ),
             ],
           ),
 

@@ -341,11 +341,10 @@
   "@sectionText": {"description": "Hint text for section text input"},
   "sectionTextHint": "Insira o texto da seção, em formato chordPro. (letra[acorde])",
   "@sectionTextHint": {"description": "Hint text for section text input, in chordPro format"},
-  "duplicateSectionInstruction": "Selecione uma seção existente para repetir.",
-  "@duplicateSectionInstruction": {"description": "Instruction for duplicating an existing section"},
-  "selectSectionInstruction": "Escolha uma estrutura para sua nova seção.",
-  "@selectSectionInstruction": {"description": "Instruction to select a section for editing"},
-
+  "duplicateSectionTooltip": "Repetir a seção no Mapa da Música",
+  "@duplicateSectionTooltip": {"description": "Tooltip for duplicate section action"},
+  "copySectionTooltip": "Cria uma nova seção com o mesmo conteúdo",
+  "@copySectionTooltip": {"description": "Tooltip for copy section action"},
 
   "cipherEditorTitle": "Editor de Cifras",
   "@cipherEditorTitle": {"description": "Title for the cipher/song editor screen"},
@@ -661,6 +660,8 @@
   "@assign": {"description": "Assign button label"},
   "clear": "Limpar",
   "@clear": {"description": "Clear button label"},
+  "mergePlaceholder": "Mesclar {object}",
+  "@mergePlaceholder": {"description": "Merge button label with placeholder", "placeholders": {"object": {}}},
   
 
   "delete": "Excluir",

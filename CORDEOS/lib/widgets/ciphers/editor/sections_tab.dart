@@ -1,6 +1,8 @@
 import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/models/domain/cipher/version.dart';
+import 'package:cordeos/providers/cipher/edit_sections_state_provider.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/chord_palette.dart';
+import 'package:cordeos/widgets/ciphers/editor/sections/merge_structure.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/sheet_new_section.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/sheet_manage.dart';
 import 'package:flutter/material.dart';
@@ -26,17 +28,12 @@ class SectionsTab extends StatefulWidget {
 }
 
 class _SectionsTabState extends State<SectionsTab> {
-  bool paletteIsOpen = false;
-
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Selector<
-      LocalVersionProvider,
-      List<String>
-    >(
+    return Selector<LocalVersionProvider, List<String>>(
       selector: (context, localVer) {
         return localVer.getSongStructure(widget.versionID);
       },
@@ -122,69 +119,89 @@ class _SectionsTabState extends State<SectionsTab> {
               ),
             ),
             if (widget.isEnabled)
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  verticalDirection: VerticalDirection.up,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (paletteIsOpen) ...[
-                      ChordPalette(versionId: widget.versionID),
-                    ],
-                    // Palette FAB
-                    if (widget.isEnabled)
-                      GestureDetector(
-                        onTap: _togglePalette,
-                        child: Container(
-                          margin: const EdgeInsets.all(8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: colorScheme.onSurface,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: colorScheme.surfaceContainerLowest,
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            paletteIsOpen ? Icons.close : Icons.music_note,
-                            size: 28,
-                            color: colorScheme.surface,
-                          ),
-                        ),
-                      ),
-
-                    // Open add sheet
-                    GestureDetector(
-                      onTap: _openAddSheet(),
-                      child: Container(
-                        margin: const EdgeInsets.all(8),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: colorScheme.onSurface,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: colorScheme.surfaceContainerLowest,
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.add,
-                          size: 28,
-                          color: colorScheme.surface,
-                        ),
-                      ),
-                    ),
-                  ],
+              Selector<
+                EditSectionsStateProvider,
+                ({bool paletteIsOpen, bool mergeOverlayIsOpen})
+              >(
+                selector: (context, state) => (
+                  paletteIsOpen: state.paletteIsOpen,
+                  mergeOverlayIsOpen: state.mergeOverlayIsOpen,
                 ),
+                builder: (context, s, child) {
+                  return Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      verticalDirection: VerticalDirection.up,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (s.paletteIsOpen)
+                          ChordPalette(versionId: widget.versionID),
+
+                        if (s.mergeOverlayIsOpen)
+                          MergeStructure(versionID: widget.versionID),
+
+                        // Palette FAB
+                        if (widget.isEnabled)
+                          GestureDetector(
+                            onTap: () {
+                              context
+                                  .read<EditSectionsStateProvider>()
+                                  .togglePalette();
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: colorScheme.onSurface,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: colorScheme.surfaceContainerLowest,
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                s.paletteIsOpen
+                                    ? Icons.close
+                                    : Icons.music_note,
+                                size: 28,
+                                color: colorScheme.surface,
+                              ),
+                            ),
+                          ),
+
+                        // Open add sheet
+                        GestureDetector(
+                          onTap: _openAddSheet(),
+                          child: Container(
+                            margin: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: colorScheme.onSurface,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colorScheme.surfaceContainerLowest,
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.add,
+                              size: 28,
+                              color: colorScheme.surface,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
           ],
         );
@@ -197,9 +214,7 @@ class _SectionsTabState extends State<SectionsTab> {
       showModalBottomSheet(
         context: context,
         builder: (context) {
-          return NewSectionSheet(
-            versionID: widget.versionID,
-          );
+          return NewSectionSheet(versionID: widget.versionID);
         },
       );
     };
@@ -218,11 +233,5 @@ class _SectionsTabState extends State<SectionsTab> {
         },
       );
     };
-  }
-
-  void _togglePalette() {
-    setState(() {
-      paletteIsOpen = !paletteIsOpen;
-    });
   }
 }

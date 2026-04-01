@@ -1010,17 +1010,17 @@ abstract class AppLocalizations {
   /// **'Insira o texto da seção, em formato chordPro. (letra[acorde])'**
   String get sectionTextHint;
 
-  /// Instruction for duplicating an existing section
+  /// Tooltip for duplicate section action
   ///
   /// In pt, this message translates to:
-  /// **'Selecione uma seção existente para repetir.'**
-  String get duplicateSectionInstruction;
+  /// **'Repetir a seção no Mapa da Música'**
+  String get duplicateSectionTooltip;
 
-  /// Instruction to select a section for editing
+  /// Tooltip for copy section action
   ///
   /// In pt, this message translates to:
-  /// **'Escolha uma estrutura para sua nova seção.'**
-  String get selectSectionInstruction;
+  /// **'Cria uma nova seção com o mesmo conteúdo'**
+  String get copySectionTooltip;
 
   /// Title for the cipher/song editor screen
   ///
@@ -1885,6 +1885,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Limpar'**
   String get clear;
+
+  /// Merge button label with placeholder
+  ///
+  /// In pt, this message translates to:
+  /// **'Mesclar {object}'**
+  String mergePlaceholder(Object object);
 
   /// Delete button label
   ///
