@@ -22,8 +22,6 @@ class TokenProvider extends ChangeNotifier {
 
   bool _isDragging = false;
   bool get isDragging => _isDragging;
-  bool _hasChanges = false;
-  bool get hasChanges => _hasChanges;
   // ═══════════════════════════════════════════════════════════════════════════
   // CACHES
   // ═══════════════════════════════════════════════════════════════════════════
@@ -260,6 +258,8 @@ class TokenProvider extends ChangeNotifier {
     required Color onContentColor,
     required bool isEnabled,
     required bool isEditMode,
+    required Function(ContentToken, ContentToken) onAddChord,
+    required Function(ContentToken) onRemoveChord,
   }) {
     final OrganizedWidgets contentWidgets = _builder.buildEditWidgets(
       tokens: getTokens(key)!,
@@ -277,8 +277,8 @@ class TokenProvider extends ChangeNotifier {
       contentColor: contentColor,
       onContentColor: onContentColor,
       isEnabled: isEnabled,
-      onAddChord: _addChord(key),
-      onRemoveChord: removeChord(key),
+      onAddChord: onAddChord,
+      onRemoveChord: onRemoveChord,
       toggleDrag: _toggleDragging(),
     );
 
@@ -329,37 +329,6 @@ class TokenProvider extends ChangeNotifier {
   // ═══════════════════════════════════════════════════════════════════════════
   // CONTENT EDITING
   // ═══════════════════════════════════════════════════════════════════════════
-  /// Adds a chord at the specified position, modifying the token cache and invalidating downstream caches
-  /// Position is the index of the token to which the chord should be attached
-  Function(ContentToken, ContentToken) _addChord(TokenCacheKey key) {
-    return (ContentToken targetToken, ContentToken chordToken) {
-      _hasChanges = true;
-      final cache = getTokens(key);
-      if (cache == null) return;
-      // Insert chord token immediately before the target token
-      final index = cache.indexOf(targetToken);
-      if (index >= 0 && index < cache.length) {
-        cache.insert(index, chordToken);
-      }
-      // Invalidate downstream caches
-      _organizedCache.remove(tokenCacheKey(key));
-      _positionCache.remove(positionCacheKey(key, true));
-    };
-  }
-
-  Function(ContentToken) removeChord(TokenCacheKey key) {
-    return (ContentToken draggable) {
-      _hasChanges = true;
-      final cache = getTokens(key);
-      if (cache == null) return;
-
-      final index = cache.indexOf(draggable);
-      if (index >= 0 && index < cache.length) {
-        cache.removeAt(index);
-      }
-    };
-  }
-
   VoidCallback _toggleDragging() {
     return () {
       _isDragging = !_isDragging;

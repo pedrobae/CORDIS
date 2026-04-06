@@ -345,8 +345,10 @@ class PositionService {
                 measurements[measurementKey(
                       token.text,
                       chordStyle,
-                      isChordToken: true,
-                    )]?.width ?? 0.0;
+                      isChordToken: isEditMode,
+                    )]
+                    ?.width ??
+                0.0;
           } else {
             lineLyricX +=
                 measurements[measurementKey(

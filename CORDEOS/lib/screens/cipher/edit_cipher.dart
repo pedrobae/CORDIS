@@ -5,12 +5,9 @@ import 'package:cordeos/providers/cipher/edit_sections_state_provider.dart';
 import 'package:cordeos/providers/cipher/import_provider.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/cipher/parser_provider.dart';
-import 'package:cordeos/providers/settings/layout_settings_provider.dart';
-import 'package:cordeos/providers/token_cache_provider.dart';
 import 'package:cordeos/providers/user/my_auth_provider.dart';
 import 'package:cordeos/providers/version/cloud_version_provider.dart';
 import 'package:cordeos/services/key_recognizer_service.dart';
-import 'package:cordeos/utils/token_cache_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordeos/providers/cipher/cipher_provider.dart';
@@ -323,32 +320,6 @@ class _EditCipherScreenState extends State<EditCipherScreen>
     final localVer = context.read<LocalVersionProvider>();
     final sect = context.read<SectionProvider>();
     final nav = context.read<NavigationProvider>();
-
-    final tokenProv = context.read<TokenProvider>();
-
-    if (tokenProv.hasChanges) {
-      final sections = sect.getSections(widget.versionID);
-      
-      final laySet = context.read<LayoutSetProvider>();
-      for (var section in sections.values) {
-        final key = TokenCacheKey(
-          content: section.contentText,
-          showChords: laySet.showChords,
-          showLyrics: laySet.showLyrics,
-          chordLyricSpacing: laySet.chordLyricSpacing,
-          lineBreakSpacing: laySet.lineBreakSpacing,
-          lineSpacing: laySet.lineSpacing,
-          letterSpacing: laySet.letterSpacing,
-          minChordSpacing: laySet.minChordSpacing,
-        );
-        final content = tokenProv.getContent(key);
-        sect.cacheContent(
-          versionID: widget.versionID,
-          sectionCode: section.contentCode,
-          content: content,
-        );
-      }
-    }
 
     final cipher = ciph.getCipher(widget.cipherID);
     if (cipher == null || cipher.musicKey.isEmpty) {

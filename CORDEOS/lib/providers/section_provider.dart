@@ -181,6 +181,7 @@ class SectionProvider extends ChangeNotifier {
   }) {
     _sections[versionID]![sectionCode]!.contentText = content;
     _hasUnsavedChanges = true;
+    notifyListeners();
   }
 
   void renameSectionKey(

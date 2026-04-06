@@ -39,19 +39,59 @@ class TokenContentCard extends StatefulWidget {
 
 class _TokenContentCardState extends State<TokenContentCard> {
   late TokenProvider _tokenProv;
-  late TokenCacheKey _tokensKey;
+  TokenCacheKey? _tokensKey;
 
   @override
   void initState() {
     super.initState();
     _tokenProv = context.read<TokenProvider>();
-    final sect = context.read<SectionProvider>();
+  }
 
-    _tokensKey = TokenCacheKey(
-      content:
-          sect.getSection(widget.versionID, widget.sectionCode)?.contentText ??
-          '',
-    );
+  Function(ContentToken, ContentToken) _addChord(TokenCacheKey key) {
+    return (draggedChord, targetToken) {
+      final sect = context.read<SectionProvider>();
+      final tokenProv = context.read<TokenProvider>();
+
+      final tokens = tokenProv.getTokens(key);
+
+      if (tokens == null) return;
+
+      final index = tokens.indexWhere((t) => t == targetToken);
+      if (index == -1) return;
+      tokens.insert(index, draggedChord);
+
+      final updatedContent = tokenProv.getContent(key);
+
+      sect.cacheContent(
+        versionID: widget.versionID,
+        sectionCode: widget.sectionCode,
+        content: updatedContent,
+      );
+    };
+  }
+
+  Function(ContentToken) _removeChord(TokenCacheKey key) {
+    return (contentToken) {
+      final sect = context.read<SectionProvider>();
+      final tokenProv = context.read<TokenProvider>();
+
+      final tokens = tokenProv.getTokens(key);
+
+      if (tokens == null) return;
+
+      final index = tokens.indexWhere((t) => t == contentToken);
+      if (index == -1) return;
+
+      tokens.removeAt(index);
+
+      final updatedContent = tokenProv.getContent(key);
+
+      sect.cacheContent(
+        versionID: widget.versionID,
+        sectionCode: widget.sectionCode,
+        content: updatedContent,
+      );
+    };
   }
 
   @override
@@ -61,14 +101,17 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Selector<SectionProvider, Section?>(
+    return Selector<SectionProvider, ({Section? section, String? contentText})>(
       selector: (context, sect) {
-        return sect.getSection(widget.versionID, widget.sectionCode);
+        final section = sect.getSection(widget.versionID, widget.sectionCode);
+        return (section: section, contentText: section?.contentText);
       },
-      builder: (context, section, child) {
-        if (section == null) {
+      builder: (context, s, child) {
+        if (s.section == null) {
           return const Center(child: CircularProgressIndicator());
         }
+
+        _tokensKey = TokenCacheKey(content: s.contentText ?? '');
 
         return Container(
           decoration: BoxDecoration(
@@ -94,14 +137,14 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   children: [
                     /// Section Code badge
                     SectionBadge(
-                      sectionCode: section.contentCode,
-                      sectionColor: section.contentColor,
+                      sectionCode: s.section!.contentCode,
+                      sectionColor: s.section!.contentColor,
                     ),
 
                     /// Section Type label
                     Expanded(
                       child: Text(
-                        section.contentType,
+                        s.section!.contentType,
                         style: textTheme.bodyLarge,
                       ),
                     ),
@@ -113,7 +156,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                     >(
                       selector: (context, tokenProv) => (
                         isDragging: tokenProv.isDragging,
-                        removeChord: tokenProv.removeChord(_tokensKey),
+                        removeChord: _removeChord(_tokensKey!),
                       ),
                       builder: (context, s, child) {
                         return s.isDragging
@@ -178,15 +221,15 @@ class _TokenContentCardState extends State<TokenContentCard> {
                         builder: (context, filter, child) {
                           final trans = context.read<TranspositionProvider>();
                           // PHASE 1: Ensure tokens are cached & organized for this content + filters
-                          _tokensKey.showChords = filter.showChords;
-                          _tokensKey.showLyrics = filter.showLyrics;
-                          _tokensKey.transposedKey = filter.transposedKey;
-                          
+                          _tokensKey!.showChords = filter.showChords;
+                          _tokensKey!.showLyrics = filter.showLyrics;
+                          _tokensKey!.transposedKey = filter.transposedKey;
+
                           _tokenProv.tokenize(
-                            _tokensKey,
+                            _tokensKey!,
                             transposeChord: trans.transposeChord,
                           );
-                          _tokenProv.organize(_tokensKey);
+                          _tokenProv.organize(_tokensKey!);
                           return Selector2<
                             LayoutSetProvider,
                             TranspositionProvider,
@@ -203,13 +246,13 @@ class _TokenContentCardState extends State<TokenContentCard> {
                             ),
                             builder: (context, measure, child) {
                               // PHASE 2: Ensure measurements are cached for this content + style
-                              _tokensKey.chordLyricSpacing =
+                              _tokensKey!.chordLyricSpacing =
                                   measure.chordLyricSpacing;
                               _tokenProv.measureTokens(
                                 chordStyle: measure.chordStyle,
                                 lyricStyle: measure.lyricStyle,
                                 isEditMode: true,
-                                key: _tokensKey,
+                                key: _tokensKey!,
                               );
 
                               return Selector<
@@ -234,32 +277,34 @@ class _TokenContentCardState extends State<TokenContentCard> {
                                 },
                                 builder: (context, l, child) {
                                   // PHASE 3: Calculate and cache widget positions based on width constraints
-                                  _tokensKey.maxWidth = l.maxWidth;
-                                  _tokensKey.letterSpacing = l.letterSpacing;
-                                  _tokensKey.lineSpacing = l.lineSpacing;
-                                  _tokensKey.lineBreakSpacing =
+                                  _tokensKey!.maxWidth = l.maxWidth;
+                                  _tokensKey!.letterSpacing = l.letterSpacing;
+                                  _tokensKey!.lineSpacing = l.lineSpacing;
+                                  _tokensKey!.lineBreakSpacing =
                                       l.lineBreakSpacing;
-                                  _tokensKey.minChordSpacing =
+                                  _tokensKey!.minChordSpacing =
                                       l.minChordSpacing;
 
                                   _tokenProv.calculatePositions(
-                                    key: _tokensKey,
+                                    key: _tokensKey!,
                                     isEditMode: true,
                                     lyricStyle: measure.lyricStyle,
                                     chordStyle: measure.chordStyle,
                                   );
 
                                   final content = _tokenProv.buildEditWidgets(
-                                    key: _tokensKey,
+                                    key: _tokensKey!,
                                     lyricStyle: measure.lyricStyle,
                                     chordStyle: measure.chordStyle,
-                                    contentColor: section.contentColor,
+                                    contentColor: s.section!.contentColor,
                                     chordTargetColor: colorScheme.surfaceTint,
                                     surfaceColor: colorScheme.surface,
                                     onSurfaceColor: colorScheme.onSurface,
-                                    onContentColor: colorScheme.onSurface,
+                                    onContentColor: colorScheme.surface,
                                     isEnabled: widget.isEnabled,
                                     isEditMode: true,
+                                    onAddChord: _addChord(_tokensKey!),
+                                    onRemoveChord: _removeChord(_tokensKey!),
                                   );
 
                                   return SizedBox(
