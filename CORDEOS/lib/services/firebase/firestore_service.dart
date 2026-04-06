@@ -417,10 +417,30 @@ class FirestoreService {
           .where(orderField, isGreaterThanOrEqualTo: Timestamp.now())
           .orderBy(orderField)
           .limit(limit)
-          .get(const GetOptions(source: Source.server));
+          .get()
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () {
+              debugPrint("FIRESTORE - query timed out, retrying without server constraint");
+              throw TimeoutException('Firestore query timed out');
+            },
+          );
       debugPrint("FIRESTORE - finished querying doc containing value");
       return querySnapshot.docs;
+    } on TimeoutException {
+      // Retry with cache fallback
+      debugPrint("FIRESTORE - retrying with cache");
+      final querySnapshot = await _firestore
+          .collection(collectionPath)
+          .where(field, arrayContains: value)
+          .where(orderField, isGreaterThanOrEqualTo: Timestamp.now())
+          .orderBy(orderField)
+          .limit(limit)
+          .get(const GetOptions(source: Source.cache));
+      debugPrint("FIRESTORE - finished querying from cache");
+      return querySnapshot.docs;
     } catch (e) {
+      debugPrint("FIRESTORE - query error: $e");
       rethrow;
     }
   }

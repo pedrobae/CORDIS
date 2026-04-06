@@ -169,7 +169,7 @@ class SettingsService {
   }
 
   static double getCardWidthMult() {
-    return _preferences.getDouble(_keyCardWidthMult) ?? 0.9;
+    return _preferences.getDouble(_keyCardWidthMult) ?? 1.0;
   }
 
   static Future<void> setDenseCipherCard(bool value) async {
@@ -186,7 +186,7 @@ class SettingsService {
   }
 
   static double getLineSpacing() {
-    return _preferences.getDouble(_keyLineSpacing) ?? 1.5;
+    return _preferences.getDouble(_keyLineSpacing) ?? 0.0;
   }
 
   static Future<void> setLineBreakSpacing(double value) async {
@@ -194,7 +194,7 @@ class SettingsService {
   }
 
   static double getLineBreakSpacing() {
-    return _preferences.getDouble(_keyLineBreakSpacing) ?? 0.5;
+    return _preferences.getDouble(_keyLineBreakSpacing) ?? 0.0;
   }
 
   static Future<void> setChordLyricSpacing(double value) async {
@@ -202,7 +202,7 @@ class SettingsService {
   }
 
   static double getChordLyricSpacing() {
-    return _preferences.getDouble(_keyChordLyricSpacing) ?? 0.5;
+    return _preferences.getDouble(_keyChordLyricSpacing) ?? 0.0;
   }
 
   static Future<void> setMinChordSpacing(double value) async {
@@ -210,7 +210,7 @@ class SettingsService {
   }
 
   static double getMinChordSpacing() {
-    return _preferences.getDouble(_keyMinChordSpacing) ?? 0.5;
+    return _preferences.getDouble(_keyMinChordSpacing) ?? 4.0;
   }
 
   static Future<void> setLetterSpacing(double value) async {
@@ -291,7 +291,7 @@ class SettingsService {
 
   /// Get auto scroll enabled
   static bool getAutoScrollEnabled() {
-    return _preferences.getBool(_keyAutoScrollEnabled) ?? false;
+    return _preferences.getBool(_keyAutoScrollEnabled) ?? true;
   }
 
   /// Save auto scroll speed

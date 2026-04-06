@@ -9,9 +9,9 @@ class LayoutSetProvider extends ChangeNotifier {
 
   Axis get wrapDirection =>
       scrollDirection == Axis.vertical ? Axis.horizontal : Axis.vertical;
-  double cardWidthMult = 0.9;
+  double cardWidthMult = 1.0;
 
-  double lineSpacing = 3;
+  double lineSpacing = 0;
   double lineBreakSpacing = 0;
   double chordLyricSpacing = 0;
   double minChordSpacing = 4;

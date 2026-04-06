@@ -21,7 +21,7 @@ class DatabaseHelper {
 
       final db = await openDatabase(
         path,
-        version: 17,
+        version: 18,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade, // Handle migrations
       );
@@ -179,7 +179,6 @@ class DatabaseHelper {
         playlist_id INTEGER NOT NULL,
         name TEXT NOT NULL,
         date TEXT NOT NULL,
-        time TEXT NOT NULL,
         location TEXT,
         room_venue TEXT,
         annotations TEXT,
@@ -395,6 +394,10 @@ class DatabaseHelper {
       await db.execute('ALTER TABLE user ADD COLUMN country TEXT');
       await db.execute('ALTER TABLE user ADD COLUMN language TEXT');
       await db.execute('ALTER TABLE user ADD COLUMN time_zone TEXT');
+    }
+    if (oldVersion < 18) {
+      // REMOVE TIME COLUMN FROM SCHEDULE TABLE
+      await db.execute('ALTER TABLE schedule DROP COLUMN time');
     }
   }
 
