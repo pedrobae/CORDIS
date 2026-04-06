@@ -10,6 +10,7 @@ import 'package:cordeos/config/firebase_debug_config.dart';
 class FirebaseService {
   static final FirebaseService _instance = FirebaseService._internal();
   factory FirebaseService() => _instance;
+  
   FirebaseService._internal();
 
   static bool _initialized = false;

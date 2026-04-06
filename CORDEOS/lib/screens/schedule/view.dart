@@ -452,6 +452,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
     }
 
     await syncService.upsertScheduleToCloud(schedule, auth.id!);
+    await localSch.loadSchedule(widget.scheduleId);
 
     setState(() {
       _isPublishing = false;
