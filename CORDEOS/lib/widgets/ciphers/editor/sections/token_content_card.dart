@@ -111,7 +111,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        _tokensKey = TokenCacheKey(content: s.contentText ?? '');
+        _tokensKey = TokenCacheKey(content: s.contentText ?? '', isEditMode: true);
 
         return Container(
           decoration: BoxDecoration(
@@ -251,7 +251,6 @@ class _TokenContentCardState extends State<TokenContentCard> {
                               _tokenProv.measureTokens(
                                 chordStyle: measure.chordStyle,
                                 lyricStyle: measure.lyricStyle,
-                                isEditMode: true,
                                 key: _tokensKey!,
                               );
 
@@ -287,7 +286,6 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
                                   _tokenProv.calculatePositions(
                                     key: _tokensKey!,
-                                    isEditMode: true,
                                     lyricStyle: measure.lyricStyle,
                                     chordStyle: measure.chordStyle,
                                   );
@@ -302,7 +300,6 @@ class _TokenContentCardState extends State<TokenContentCard> {
                                     onSurfaceColor: colorScheme.onSurface,
                                     onContentColor: colorScheme.surface,
                                     isEnabled: widget.isEnabled,
-                                    isEditMode: true,
                                     onAddChord: _addChord(_tokensKey!),
                                     onRemoveChord: _removeChord(_tokensKey!),
                                   );

@@ -35,7 +35,7 @@ class SectionCard extends StatelessWidget {
     final tokenProv = context.read<TokenProvider>();
     final trans = context.read<TranspositionProvider>();
 
-    final layoutKey = TokenCacheKey(content: sectionText);
+    final layoutKey = TokenCacheKey(content: sectionText, isEditMode: false);
     return Selector2<
       LayoutSetProvider,
       TranspositionProvider,
@@ -51,7 +51,7 @@ class SectionCard extends StatelessWidget {
         layoutKey.showChords = filter.showChords;
         layoutKey.showLyrics = filter.showLyrics;
         layoutKey.transposedKey = filter.transposedKey;
-        
+
         tokenProv.tokenize(layoutKey, transposeChord: trans.transposeChord);
         tokenProv.organize(layoutKey);
         return Selector<
@@ -74,7 +74,6 @@ class SectionCard extends StatelessWidget {
             tokenProv.measureTokens(
               chordStyle: measure.chordStyle,
               lyricStyle: measure.lyricStyle,
-              isEditMode: false,
               key: layoutKey,
             );
 
@@ -107,7 +106,6 @@ class SectionCard extends StatelessWidget {
 
                 tokenProv.calculatePositions(
                   key: layoutKey,
-                  isEditMode: false,
                   lyricStyle: measure.lyricStyle,
                   chordStyle: measure.chordStyle,
                 );

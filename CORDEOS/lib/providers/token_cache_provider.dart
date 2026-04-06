@@ -42,14 +42,14 @@ class TokenProvider extends ChangeNotifier {
   /// Phase 3: content|style|layout → positions
   final Map<String, TokenPositionMap> _positionCache = {};
   TokenPositionMap? getCachedPositions(TokenCacheKey key, bool isEditMode) =>
-      _positionCache[positionCacheKey(key, isEditMode)];
+      _positionCache[positionCacheKey(key)];
 
   double _chordHeight = 0;
   double _lyricHeight = 0;
-  double lineHeight(TokenCacheKey key, bool isEditMode) {
+  double lineHeight(TokenCacheKey key) {
     return _lyricHeight +
         key.chordLyricSpacing! +
-        (isEditMode
+        (key.isEditMode
             ? _chordHeight + 2 * TokenizationConstants.chordTokenHeightPadding
             : _chordHeight);
   }
@@ -106,7 +106,6 @@ class TokenProvider extends ChangeNotifier {
   void measureTokens({
     required TextStyle chordStyle,
     required TextStyle lyricStyle,
-    required bool isEditMode,
     required TokenCacheKey key,
   }) {
     final tokens = getTokens(key);
@@ -120,7 +119,7 @@ class TokenProvider extends ChangeNotifier {
             final msr = _builder.measureText(
               text: token.text,
               style: chordStyle,
-              isChordToken: isEditMode,
+              isChordToken: key.isEditMode,
             );
             _chordHeight = msr.height;
           }
@@ -128,7 +127,7 @@ class TokenProvider extends ChangeNotifier {
           final msrKey = measurementKey(
             token.text,
             chordStyle,
-            isChordToken: isEditMode,
+            isChordToken: key.isEditMode,
           );
           if (_measurementCache.containsKey(msrKey)) {
             break;
@@ -136,7 +135,7 @@ class TokenProvider extends ChangeNotifier {
           final msr = _builder.measureText(
             text: token.text,
             style: chordStyle,
-            isChordToken: isEditMode,
+            isChordToken: key.isEditMode,
           );
 
           _measurementCache[msrKey] = msr;
@@ -211,11 +210,10 @@ class TokenProvider extends ChangeNotifier {
   /// Uses cache where available, computes and caches where needed.
   void calculatePositions({
     required TokenCacheKey key,
-    required bool isEditMode,
     required TextStyle lyricStyle,
     required TextStyle chordStyle,
   }) {
-    final cacheKey = positionCacheKey(key, isEditMode);
+    final cacheKey = positionCacheKey(key);
     if (_positionCache.containsKey(cacheKey)) {
       return;
     }
@@ -230,10 +228,10 @@ class TokenProvider extends ChangeNotifier {
       chordLyricSpacing: key.chordLyricSpacing!,
       minChordSpacing: key.minChordSpacing!,
       letterSpacing: key.letterSpacing!,
-      lineHeight: lineHeight(key, isEditMode),
+      lineHeight: lineHeight(key),
       chordHeight: _chordHeight,
       lyricHeight: _lyricHeight,
-      isEditMode: isEditMode,
+      isEditMode: key.isEditMode,
       lyricStyle: lyricStyle,
       chordStyle: chordStyle,
     );
@@ -257,7 +255,6 @@ class TokenProvider extends ChangeNotifier {
     required Color contentColor,
     required Color onContentColor,
     required bool isEnabled,
-    required bool isEditMode,
     required Function(ContentToken, ContentToken) onAddChord,
     required Function(ContentToken) onRemoveChord,
   }) {
@@ -269,7 +266,7 @@ class TokenProvider extends ChangeNotifier {
       chordStyle: chordStyle,
       lyricStyle: lyricStyle,
       maxWidth: key.maxWidth!,
-      lineHeight: lineHeight(key, true),
+      lineHeight: lineHeight(key),
       chordHeight: _chordHeight,
       chordTargetColor: chordTargetColor,
       surfaceColor: surfaceColor,
@@ -285,9 +282,9 @@ class TokenProvider extends ChangeNotifier {
     final positionedContent = _positioner.applyPositionsToWidgets(
       contentWidgets,
       getCachedPositions(key, true)!,
-      lineHeight(key, true),
+      lineHeight(key),
       _chordHeight,
-      isEditMode,
+      key.isEditMode,
     );
     return positionedContent;
   }
@@ -299,12 +296,13 @@ class TokenProvider extends ChangeNotifier {
     required Color textColor,
     required Color chordColor,
   }) {
+
     final contentWidgets = _builder.buildViewWidgets(
       tokens: getTokens(key)!,
       organizedTokens: getOrganized(key)!,
       chordStyle: chordStyle,
       lyricStyle: lyricStyle,
-      lineHeight: lineHeight(key, false),
+      lineHeight: lineHeight(key),
       textColor: textColor,
       chordColor: chordColor,
       measurements: _measurementCache,
@@ -313,7 +311,7 @@ class TokenProvider extends ChangeNotifier {
     final positionedContent = _positioner.applyPositionsToWidgets(
       contentWidgets,
       getCachedPositions(key, false)!,
-      lineHeight(key, false),
+      lineHeight(key),
       _chordHeight,
       false,
     );

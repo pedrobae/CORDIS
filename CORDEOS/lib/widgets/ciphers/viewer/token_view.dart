@@ -26,7 +26,7 @@ class TokenView extends StatelessWidget {
       key: layoutKey,
       lyricStyle: laySet.lyricTextStyle,
       chordStyle: laySet.chordTextStyle,
-      textColor: colorScheme.surface,
+      textColor: colorScheme.onSurface,
       chordColor: colorScheme.primary,
     );
 

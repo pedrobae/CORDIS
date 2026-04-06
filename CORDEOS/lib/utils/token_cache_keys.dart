@@ -16,6 +16,7 @@ class TokenCacheKey {
   double? letterSpacing;
   bool? showChords;
   bool? showLyrics;
+  bool isEditMode;
   String? transposedKey;
 
   TokenCacheKey({
@@ -29,6 +30,7 @@ class TokenCacheKey {
     this.showChords,
     this.showLyrics,
     this.transposedKey,
+    this.isEditMode = false,
   });
 
   @override
@@ -44,6 +46,7 @@ class TokenCacheKey {
         other.letterSpacing == letterSpacing &&
         other.showChords == showChords &&
         other.showLyrics == showLyrics &&
+        other.isEditMode == isEditMode &&
         other.transposedKey == transposedKey;
   }
 
@@ -59,6 +62,7 @@ class TokenCacheKey {
     showChords,
     showLyrics,
     transposedKey,
+    isEditMode,
   );
 }
 
@@ -68,9 +72,13 @@ class TokenCacheKey {
 
 /// Token cache key: content + filters + transposition
 String tokenCacheKey(TokenCacheKey k) =>
-    '${k.content}|chords:${k.showChords}|lyrics:${k.showLyrics}|${k.transposedKey}';
+    '${k.content}|chords:${k.showChords}|lyrics:${k.showLyrics}|${k.transposedKey}|editMode:${k.isEditMode}';
 
-String measurementKey(String text, TextStyle style, {bool isChordToken = false}) =>
+String measurementKey(
+  String text,
+  TextStyle style, {
+  bool isChordToken = false,
+}) =>
     '$text|${style.fontFamily}|${style.fontSize}|${style.fontWeight?.value}${isChordToken ? '|chordToken' : ''}';
 
 String separatorKey(TextStyle chordStyle, TextStyle lyricStyle) =>
@@ -84,7 +92,7 @@ String chordTargetKey(
     'CT|$text|${chordStyle.fontFamily}|${chordStyle.fontSize}|${lyricStyle.fontSize}';
 
 /// Position cache key: token key + layout params
-String positionCacheKey(TokenCacheKey k, bool isEditMode) {
+String positionCacheKey(TokenCacheKey k) {
   return '${ //
   tokenCacheKey(k)}|w:${ //
   k.maxWidth}|ls:${ //
@@ -92,5 +100,5 @@ String positionCacheKey(TokenCacheKey k, bool isEditMode) {
   k.lineBreakSpacing}|cls:${ //
   k.chordLyricSpacing}|mcs:${ //
   k.minChordSpacing}|lts:${ //
-  k.letterSpacing}${isEditMode ? '|editMode' : ''}';
+  k.letterSpacing}';
 }
