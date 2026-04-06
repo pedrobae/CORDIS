@@ -52,9 +52,4 @@ class FirebaseService {
 
   /// Global Storage instance
   FirebaseStorage get storage => FirebaseStorage.instance;
-
-  /// Handle/Log errors for Firebase operations
-  static void logError(String message, dynamic error) {
-    debugPrint('Firebase Error: $message - $error');
-  }
 }

@@ -355,7 +355,7 @@ class ScheduleSyncService {
     debugPrint("Built scheduleDto");
 
     try {
-      if (schedule.firebaseId == null) {
+      if (schedule.firebaseId == null || schedule.firebaseId!.isEmpty) {
         final newID = await _cloudRepo.publishSchedule(scheduleDto);
         debugPrint(
           'Schedule was created, updating local schedule with firebase ID $newID',

@@ -25,7 +25,6 @@ class FirestoreService {
       timeoutTimer.cancel();
       return docRef.id;
     } catch (e) {
-      FirebaseService.logError('Failed to create document', e);
       rethrow;
     }
   }
@@ -47,7 +46,6 @@ class FirestoreService {
       return docRef.id;
     } catch (e) {
       debugPrint(e.toString());
-      FirebaseService.logError('Failed to create sub-collection document', e);
       rethrow;
     }
   }
@@ -70,7 +68,6 @@ class FirestoreService {
       final querySnapshot = await query.get();
       return querySnapshot.docs;
     } catch (e) {
-      FirebaseService.logError('Failed to fetch documents', e);
       rethrow;
     }
   }
@@ -91,7 +88,6 @@ class FirestoreService {
           .get();
       return querySnapshot.docs;
     } catch (e) {
-      FirebaseService.logError('Failed to fetch sub-collection documents', e);
       rethrow;
     }
   }
@@ -114,7 +110,6 @@ class FirestoreService {
         return null;
       }
     } catch (e) {
-      FirebaseService.logError('Failed to fetch document by field', e);
       rethrow;
     }
   }
@@ -131,7 +126,6 @@ class FirestoreService {
           .get();
       return docSnapshot.exists ? docSnapshot : null;
     } catch (e) {
-      FirebaseService.logError('Failed to fetch document by ID', e);
       rethrow;
     }
   }
@@ -152,10 +146,6 @@ class FirestoreService {
           .get();
       return docSnapshot.exists ? docSnapshot : null;
     } catch (e) {
-      FirebaseService.logError(
-        'Failed to fetch sub-collection document by ID',
-        e,
-      );
       rethrow;
     }
   }
@@ -175,7 +165,6 @@ class FirestoreService {
           .doc(documentId)
           .set(data, SetOptions(merge: merge));
     } catch (e) {
-      FirebaseService.logError('Failed to set document', e);
       rethrow;
     }
   }
@@ -197,7 +186,6 @@ class FirestoreService {
           .doc(documentId)
           .set(data, SetOptions(merge: true));
     } catch (e) {
-      FirebaseService.logError('Failed to update sub-collection document', e);
       rethrow;
     }
   }
@@ -211,7 +199,6 @@ class FirestoreService {
     try {
       await _firestore.collection(collectionPath).doc(documentId).delete();
     } catch (e) {
-      FirebaseService.logError('Failed to delete document', e);
       rethrow;
     }
   }
@@ -230,7 +217,6 @@ class FirestoreService {
           .doc(documentId)
           .delete();
     } catch (e) {
-      FirebaseService.logError('Failed to delete sub-collection document', e);
       rethrow;
     }
   }
@@ -267,7 +253,6 @@ class FirestoreService {
       final querySnapshot = await query.get();
       return querySnapshot.docs;
     } catch (e) {
-      FirebaseService.logError('Falha ao buscar documentos por tokens', e);
       rethrow;
     }
   }
@@ -299,7 +284,6 @@ class FirestoreService {
       final querySnapshot = await query.get();
       return querySnapshot.docs;
     } catch (e) {
-      FirebaseService.logError('Falha ao buscar documentos por prefixo', e);
       rethrow;
     }
   }
@@ -369,7 +353,6 @@ class FirestoreService {
 
       return combinedResults.take(limit).toList();
     } catch (e) {
-      FirebaseService.logError('Falha na busca multi-campo', e);
       rethrow;
     }
   }
@@ -415,7 +398,6 @@ class FirestoreService {
 
       return results;
     } catch (e) {
-      FirebaseService.logError('Falha na busca em cascata', e);
       rethrow;
     }
   }
@@ -439,7 +421,6 @@ class FirestoreService {
       debugPrint("FIRESTORE - finished querying doc containing value");
       return querySnapshot.docs;
     } catch (e) {
-      FirebaseService.logError('Failed to query collection', e);
       rethrow;
     }
   }
