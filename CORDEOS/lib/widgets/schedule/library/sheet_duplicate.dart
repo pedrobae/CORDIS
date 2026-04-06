@@ -45,15 +45,15 @@ class _DuplicateScheduleSheetState extends State<DuplicateScheduleSheet> {
 
       if (widget.scheduleId is int) {
         final schedule = localScheduleProvider.getSchedule(widget.scheduleId)!;
-        nameController.text = '${schedule.name} (${AppLocalizations.of(context)!.copy})';
+        nameController.text =
+            '${schedule.name} (${AppLocalizations.of(context)!.copy})';
         dateController.text = DateTimeUtils.formatDate(schedule.date);
-        startTimeController.text = DateTimeUtils.formatTime(
-          DateTime(schedule.time.hour, schedule.time.minute),
-        );
+        startTimeController.text = DateTimeUtils.formatTime(schedule.date);
         locationController.text = schedule.location;
       } else {
         final schedule = cloudScheduleProvider.getSchedule(widget.scheduleId)!;
-        nameController.text = '${schedule.name} (${AppLocalizations.of(context)!.copy})';
+        nameController.text =
+            '${schedule.name} (${AppLocalizations.of(context)!.copy})';
         dateController.text = DateTimeUtils.formatDate(
           schedule.datetime.toDate(),
         );
@@ -233,7 +233,7 @@ class _DuplicateScheduleSheetState extends State<DuplicateScheduleSheet> {
           roomVenue: roomVenueController.text,
           shareCode: generateShareCode(),
         ),
-        isPublic: false
+        isPublic: false,
       );
       localSch.loadSchedule(scheduleID);
       cloudSch.stopSyncing(widget.scheduleId);

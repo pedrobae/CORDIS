@@ -94,7 +94,6 @@ class LocalScheduleProvider extends ChangeNotifier {
       ownerFirebaseId: ownerFirebaseId,
       name: '',
       date: DateTime.now(),
-      time: TimeOfDay.now(),
       location: '',
       playlistId: playlistId,
       roles: [],
@@ -163,10 +162,8 @@ class LocalScheduleProvider extends ChangeNotifier {
           int.parse(date.split('/')[2]),
           int.parse(date.split('/')[1]),
           int.parse(date.split('/')[0]),
-        ),
-        time: TimeOfDay(
-          hour: int.parse(startTime.split(':')[0]),
-          minute: int.parse(startTime.split(':')[1]),
+          int.parse(startTime.split(':')[0]),
+          int.parse(startTime.split(':')[1]),
         ),
         location: location,
         roomVenue: roomVenue,
@@ -350,7 +347,15 @@ class LocalScheduleProvider extends ChangeNotifier {
     final schedule = _schedules[scheduleID];
     if (schedule == null) return;
 
-    _schedules[scheduleID] = schedule.copyWith(time: time);
+    final newDate = DateTime(
+      schedule.date.year,
+      schedule.date.month,
+      schedule.date.day,
+      time.hour,
+      time.minute,
+    );
+
+    _schedules[scheduleID] = schedule.copyWith(date: newDate);
     _hasUnsavedChanges = true;
 
     notifyListeners();
@@ -478,11 +483,7 @@ class LocalScheduleProvider extends ChangeNotifier {
 
     for (var scheduleID in filteredScheduleIDs) {
       final schedule = _schedules[scheduleID]!;
-      if (schedule.date.isAfter(DateTime.now()) ||
-          (schedule.date.isAtSameMomentAs(DateTime.now()) &&
-              (schedule.time.hour > TimeOfDay.now().hour ||
-                  (schedule.time.hour == TimeOfDay.now().hour &&
-                      schedule.time.minute > TimeOfDay.now().minute)))) {
+      if (schedule.date.isAfter(DateTime.now())) {
         futureSchedules.add(scheduleID);
       }
     }
@@ -494,11 +495,7 @@ class LocalScheduleProvider extends ChangeNotifier {
     for (var scheduleID in filteredScheduleIDs) {
       final schedule = _schedules[scheduleID]!;
 
-      if (schedule.date.isBefore(DateTime.now()) ||
-          (schedule.date.isAtSameMomentAs(DateTime.now()) &&
-              (schedule.time.hour < TimeOfDay.now().hour ||
-                  (schedule.time.hour == TimeOfDay.now().hour &&
-                      schedule.time.minute < TimeOfDay.now().minute)))) {
+      if (schedule.date.isBefore(DateTime.now())) {
         pastSchedules.add(scheduleID);
       }
     }

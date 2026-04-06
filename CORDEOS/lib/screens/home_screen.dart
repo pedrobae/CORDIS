@@ -68,9 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final nextCloud = cloudSch.getNextSchedule();
 
     if (nextLocal != null && nextCloud != null) {
-      return nextLocal.time.isBefore(
-            TimeOfDay.fromDateTime(nextCloud.datetime.toDate()),
-          )
+      return nextLocal.date.isBefore(nextCloud.datetime.toDate())
           ? nextLocal
           : nextCloud;
     }

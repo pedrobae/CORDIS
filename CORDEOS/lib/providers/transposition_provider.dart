@@ -35,7 +35,6 @@ class TranspositionProvider extends ChangeNotifier {
   void clearTransposer() {
     _transposedKey = null;
     _originalKey = '';
-    notifyListeners();
   }
 
   void transposeUp() {

@@ -3,7 +3,6 @@ import 'package:cordeos/helpers/codes.dart';
 import 'package:cordeos/models/domain/user.dart';
 import 'package:cordeos/models/dtos/playlist_dto.dart';
 import 'package:cordeos/models/dtos/schedule_dto.dart';
-import 'package:flutter/material.dart';
 
 enum ScheduleState { draft, published, completed }
 
@@ -13,7 +12,6 @@ class Schedule {
   final String ownerFirebaseId;
   final String name;
   final DateTime date;
-  final TimeOfDay time;
   final String location;
   final String? roomVenue;
   final String? annotations;
@@ -28,7 +26,6 @@ class Schedule {
     required this.ownerFirebaseId,
     required this.name,
     required this.date,
-    required this.time,
     required this.location,
     this.roomVenue,
     required this.playlistId,
@@ -62,10 +59,6 @@ class Schedule {
       ownerFirebaseId: map['owner_firebase_id'] as String,
       name: map['name'] as String,
       date: DateTime.parse(map['date'] as String),
-      time: TimeOfDay(
-        hour: int.parse((map['time'] as String).split(':')[0]),
-        minute: int.parse((map['time'] as String).split(':')[1]),
-      ),
       location: map['location'] as String,
       roomVenue: map['room_venue'] as String?,
       playlistId: map['playlist_id'] as int,
@@ -82,8 +75,6 @@ class Schedule {
       'owner_firebase_id': ownerFirebaseId,
       'name': name,
       'date': date.toIso8601String(),
-      'time':
-          '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
       'location': location,
       'room_venue': roomVenue,
       'playlist_id': playlistId,
@@ -99,7 +90,6 @@ class Schedule {
     String? ownerFirebaseId,
     String? name,
     DateTime? date,
-    TimeOfDay? time,
     String? location,
     String? roomVenue,
     int? playlistId,
@@ -114,7 +104,6 @@ class Schedule {
       ownerFirebaseId: ownerFirebaseId ?? this.ownerFirebaseId,
       name: name ?? this.name,
       date: date ?? this.date,
-      time: time ?? this.time,
       location: location ?? this.location,
       roomVenue: roomVenue ?? this.roomVenue,
       playlistId: playlistId ?? this.playlistId,
@@ -126,18 +115,11 @@ class Schedule {
   }
 
   ScheduleDto toDto(PlaylistDto playlist) {
-    final dateTime = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
     return ScheduleDto(
       firebaseId: firebaseId,
       ownerFirebaseId: ownerFirebaseId,
       name: name,
-      datetime: Timestamp.fromDate(dateTime),
+      datetime: Timestamp.fromDate(date),
       location: location,
       roomVenue: roomVenue,
       shareCode: shareCode,
@@ -147,22 +129,7 @@ class Schedule {
   }
 
   Schedule mergeWith(Schedule other) {
-    final localDateTime = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
-    final otherDateTime = DateTime(
-      other.date.year,
-      other.date.month,
-      other.date.day,
-      other.time.hour,
-      other.time.minute,
-    );
-
-    bool localIsNewer = localDateTime.isAfter(otherDateTime);
+    bool localIsNewer = date.isAfter(other.date);
 
     final Schedule source = localIsNewer ? this : other;
     final Schedule target = localIsNewer ? other : this;
@@ -173,9 +140,6 @@ class Schedule {
       ownerFirebaseId: source.ownerFirebaseId,
       name: source.name.isNotEmpty ? source.name : target.name,
       date: source.date != DateTime(1970) ? source.date : target.date,
-      time: source.time != TimeOfDay(hour: 0, minute: 0)
-          ? source.time
-          : target.time,
       location: source.location.isNotEmpty ? source.location : target.location,
       roomVenue: (source.roomVenue != null && source.roomVenue!.isNotEmpty)
           ? source.roomVenue

@@ -1,4 +1,3 @@
-
 import 'package:cordeos/models/domain/cipher/version.dart';
 import 'package:cordeos/providers/auto_scroll_provider.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
@@ -38,11 +37,13 @@ class ViewCipherScreen extends StatefulWidget {
 class _ViewCipherScreenState extends State<ViewCipherScreen>
     with SingleTickerProviderStateMixin {
   late ScrollController _scrollController;
+  late TranspositionProvider _trans;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _trans = context.read<TranspositionProvider>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
       _setOriginalKey();
@@ -102,7 +103,6 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
   }
 
   void _setOriginalKey() {
-    final trans = context.read<TranspositionProvider>();
     final cloudVer = context.read<CloudVersionProvider>();
     final localVer = context.read<LocalVersionProvider>();
     final ciph = context.read<CipherProvider>();
@@ -120,8 +120,8 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
       originalKey = cipher!.musicKey;
       transposedKey = version?.transposedKey;
     }
-    trans.setOriginalKey(originalKey);
-    trans.setTransposedKey(transposedKey);
+    _trans.setOriginalKey(originalKey);
+    _trans.setTransposedKey(transposedKey);
   }
 
   @override
@@ -129,6 +129,7 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
 
+    _trans.clearTransposer();
     super.dispose();
   }
 

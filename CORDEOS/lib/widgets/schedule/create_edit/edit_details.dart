@@ -1,4 +1,5 @@
 import 'package:cordeos/l10n/app_localizations.dart';
+import 'package:cordeos/models/domain/schedule.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/schedule/local_schedule_provider.dart';
 import 'package:cordeos/providers/user/my_auth_provider.dart';
@@ -22,13 +23,10 @@ class _EditDetailsState extends State<EditDetails> {
   final locationController = TextEditingController();
   final roomVenueController = TextEditingController();
   final dateController = TextEditingController();
-  late TimeOfDay selectedTime;
 
   @override
   void initState() {
     super.initState();
-
-    selectedTime = TimeOfDay.now();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final localScheduleProvider = context.read<LocalScheduleProvider>();
@@ -44,7 +42,6 @@ class _EditDetailsState extends State<EditDetails> {
         locationController.text = schedule.location;
         roomVenueController.text = schedule.roomVenue ?? '';
         dateController.text = DateTimeUtils.formatDate(schedule.date);
-        selectedTime = schedule.time;
       }
       _addListeners();
     });
@@ -82,6 +79,12 @@ class _EditDetailsState extends State<EditDetails> {
     super.dispose();
   }
 
+  bool _scheduleIsValid(Schedule? schedule) {
+    return schedule != null &&
+        schedule.name.isNotEmpty &&
+        schedule.location.isNotEmpty;
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -104,11 +107,18 @@ class _EditDetailsState extends State<EditDetails> {
         actions: [
           IconButton(
             onPressed: () {
-              localSch.saveSchedule(widget.scheduleID);
-              localSch.uploadChangesToCloud(widget.scheduleID, auth.id!);
-              nav.pop();
+              // validate details
+              final schedule = localSch.getSchedule(widget.scheduleID);
+
+              if (_scheduleIsValid(schedule)) {
+                localSch.saveSchedule(widget.scheduleID);
+                localSch.uploadChangesToCloud(widget.scheduleID, auth.id!);
+                nav.pop();
+              } else {
+                // feedback to user about missing fields
+              }
             },
-            icon: Icon(Icons.save, size: 30,),
+            icon: Icon(Icons.save, size: 30),
           ),
         ],
       ),
@@ -186,20 +196,32 @@ class _EditDetailsState extends State<EditDetails> {
       spacing: 8,
       children: [
         Text(label, style: textTheme.labelLarge),
-        TextFormField(
-          validator: validator,
-          controller: dateController,
-          readOnly: true,
-          decoration: InputDecoration(
-            hintText: label,
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: colorScheme.surfaceContainerLowest),
+        GestureDetector(
+          onTap: _showDatePicker(),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: colorScheme.shadow, width: 1),
               borderRadius: BorderRadius.circular(0),
             ),
-            visualDensity: VisualDensity.compact,
-            suffixIcon: const Icon(Icons.calendar_today),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Selector<LocalScheduleProvider, String>(
+                  selector: (context, localSch) {
+                    final date = localSch.getSchedule(widget.scheduleID)?.date;
+                    return date != null
+                        ? DateTimeUtils.formatDate(date)
+                        : DateTimeUtils.formatDate(DateTime.now());
+                  },
+                  builder: (context, formattedTime, child) {
+                    return Text(formattedTime, style: textTheme.bodyLarge);
+                  },
+                ),
+                Icon(Icons.calendar_today, color: colorScheme.primary),
+              ],
+            ),
           ),
-          onTap: _showDatePicker(),
         ),
       ],
     );
@@ -233,29 +255,40 @@ class _EditDetailsState extends State<EditDetails> {
     required String label,
     String? Function(String?)? validator,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        Text(label, style: Theme.of(context).textTheme.labelLarge),
-        TextFormField(
-          validator: validator,
-          initialValue: DateTimeUtils.formatTime(
-            DateTime(0, 0, 0, selectedTime.hour, selectedTime.minute),
-          ),
-          readOnly: true,
-          decoration: InputDecoration(
-            hintText: label,
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.surfaceContainerLowest,
-              ),
+        Text(label, style: textTheme.labelLarge),
+        GestureDetector(
+          onTap: _showTimePicker(),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: colorScheme.shadow, width: 1),
               borderRadius: BorderRadius.circular(0),
             ),
-            visualDensity: VisualDensity.compact,
-            suffixIcon: Icon(Icons.access_time),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Selector<LocalScheduleProvider, String>(
+                  selector: (context, localSch) {
+                    final date = localSch.getSchedule(widget.scheduleID)?.date;
+                    return date != null
+                        ? DateTimeUtils.formatTime(date)
+                        : DateTimeUtils.formatTime(DateTime.now());
+                  },
+                  builder: (context, formattedTime, child) {
+                    return Text(formattedTime, style: textTheme.bodyLarge);
+                  },
+                ),
+                Icon(Icons.access_time, color: colorScheme.primary),
+              ],
+            ),
           ),
-          onTap: _showTimePicker(),
         ),
       ],
     );
@@ -267,7 +300,11 @@ class _EditDetailsState extends State<EditDetails> {
     return () async {
       final pickedTime = await showTimePicker(
         context: context,
-        initialTime: selectedTime,
+        initialTime: localSch.getSchedule(widget.scheduleID)?.date != null
+            ? TimeOfDay.fromDateTime(
+                localSch.getSchedule(widget.scheduleID)!.date,
+              )
+            : TimeOfDay.now(),
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
@@ -280,9 +317,6 @@ class _EditDetailsState extends State<EditDetails> {
 
       if (pickedTime != null) {
         localSch.cacheTime(widget.scheduleID, pickedTime);
-        setState(() {
-          selectedTime = pickedTime;
-        });
       }
     };
   }

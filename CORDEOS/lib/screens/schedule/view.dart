@@ -156,15 +156,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                         style: textTheme.bodyMedium,
                       ),
                       Text(
-                        DateTimeUtils.formatTime(
-                          DateTime(
-                            0,
-                            0,
-                            0,
-                            schedule.time.hour,
-                            schedule.time.minute,
-                          ),
-                        ),
+                        DateTimeUtils.formatTime(schedule.date),
                         style: textTheme.bodyMedium,
                       ),
                       Text(schedule.location, style: textTheme.bodyMedium),

@@ -4,7 +4,6 @@ import 'package:cordeos/models/domain/playlist/playlist_item.dart';
 import 'package:cordeos/models/domain/schedule.dart';
 import 'package:cordeos/models/dtos/playlist_dto.dart';
 import 'package:cordeos/models/dtos/user_dto.dart';
-import 'package:flutter/material.dart';
 
 class ScheduleDto {
   final String? firebaseId;
@@ -130,8 +129,7 @@ class ScheduleDto {
       ownerFirebaseId: ownerFirebaseId,
       firebaseId: firebaseId,
       name: name,
-      date: DateTime(dateTime.year, dateTime.month, dateTime.day),
-      time: TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
+      date: dateTime,
       location: location,
       roomVenue: roomVenue,
       playlistId: playlistLocalId,
