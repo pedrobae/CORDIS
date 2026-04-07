@@ -488,7 +488,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get sectionTextHint =>
-      'Insira o texto da seção, em formato chordPro. (letra[acorde])';
+      'Insira o conteúdo em formato chordPro.\nex.:\n<Canta[D]remos para sempre>\n<Ao nosso [A/C#]Deus e [E]Rei>';
 
   @override
   String get duplicateSectionTooltip => 'Repetir a seção no Mapa da Música';

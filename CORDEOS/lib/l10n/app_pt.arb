@@ -339,7 +339,7 @@
   "@sectionColorHint": {"description": "Hint text for section color input"},
   "sectionText": "Texto da Seção",
   "@sectionText": {"description": "Hint text for section text input"},
-  "sectionTextHint": "Insira o texto da seção, em formato chordPro. (letra[acorde])",
+  "sectionTextHint": "Insira o conteúdo em formato chordPro.\nex.:\n<Canta[D]remos para sempre>\n<Ao nosso [A/C#]Deus e [E]Rei>",
   "@sectionTextHint": {"description": "Hint text for section text input, in chordPro format"},
   "duplicateSectionTooltip": "Repetir a seção no Mapa da Música",
   "@duplicateSectionTooltip": {"description": "Tooltip for duplicate section action"},
