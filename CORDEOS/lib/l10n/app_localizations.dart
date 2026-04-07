@@ -1007,7 +1007,7 @@ abstract class AppLocalizations {
   /// Hint text for section text input, in chordPro format
   ///
   /// In pt, this message translates to:
-  /// **'Insira o conteúdo em formato chordPro.\nex.:\n<Canta[D]remos para sempre>\n<Ao nosso [A/C#]Deus e [E]Rei>'**
+  /// **'Insira o conteúdo em formato chordPro.\nex.:\n<Canta[D]remos para sempre>\n<Ao nosso [A/C#]Deus e [E]Rei>\n...'**
   String get sectionTextHint;
 
   /// Tooltip for duplicate section action

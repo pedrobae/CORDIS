@@ -331,7 +331,7 @@
   "@sectionColorHint": {"description": "Hint text for section color input"},
   "sectionText": "Section Text",
   "@sectionText": {"description": "Hint text for section text input"},
-  "sectionTextHint": "Enter the content in chordPro format \n ex.:\n<O Lord my G[G]od, when I in awesome [C]wonder>\n<Consider [G]all the [D]worlds Thy hands have [G]made>[D]",
+  "sectionTextHint": "Enter the content in chordPro format \n ex.:\n<O Lord my G[G]od, when I in awesome [C]wonder>\n<Consider [G]all the [D]worlds Thy hands have [G]made>[D]\n...",
   "@sectionTextHint": {"description": "Hint text for section text input, in chordPro format"},
   "duplicateSectionTooltip": "Repeat the section on the Song Map",
   "@duplicateSectionTooltip": {"description": "Tooltip for duplicate section action"},

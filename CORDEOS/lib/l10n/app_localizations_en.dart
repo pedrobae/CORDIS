@@ -485,7 +485,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sectionTextHint =>
-      'Enter the content in chordPro format \n ex.:\n<O Lord my G[G]od, when I in awesome [C]wonder>\n<Consider [G]all the [D]worlds Thy hands have [G]made>[D]';
+      'Enter the content in chordPro format \n ex.:\n<O Lord my G[G]od, when I in awesome [C]wonder>\n<Consider [G]all the [D]worlds Thy hands have [G]made>[D]\n...';
 
   @override
   String get duplicateSectionTooltip => 'Repeat the section on the Song Map';

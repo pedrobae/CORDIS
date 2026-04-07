@@ -217,7 +217,7 @@ class SideMenu extends StatelessWidget {
               children: [
                 SvgPicture.asset(
                   'assets/logos/v2_simple_color_white.svg',
-                  height: MediaQuery.of(context).size.height * 0.15,
+                  height: MediaQuery.of(context).size.height * 0.05,
                   fit: BoxFit.contain,
                 ),
                 Text(
