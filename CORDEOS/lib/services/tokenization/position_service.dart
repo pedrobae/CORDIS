@@ -221,7 +221,10 @@ class PositionService {
           if (cursor.hasLyrics == false) {
             cursor.hasLyrics = true;
           }
-          final xOffset = max(ctx.precedingOffset, cursor.lyricsX);
+          final xOffset = max(
+            ctx.precedingOffset + ctx.minChordSpacing,
+            cursor.lyricsX,
+          );
           positions.setPosition(token, xOffset, cursor.yOffset);
           final msr =
               ctx.measurements[measurementKey(token.text, ctx.lyricStyle)]!;
