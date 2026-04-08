@@ -33,6 +33,7 @@ class SectionCard extends StatelessWidget {
 
     final tokenProv = context.read<TokenProvider>();
     final trans = context.read<TranspositionProvider>();
+    final width = MediaQuery.sizeOf(context).width;
 
     final layoutKey = TokenCacheKey(content: sectionText, isEditMode: false);
     return Selector2<
@@ -101,97 +102,88 @@ class SectionCard extends StatelessWidget {
                 layoutKey.lineSpacing = l.lineSpacing;
                 layoutKey.lineBreakSpacing = l.lineBreakSpacing;
                 layoutKey.minChordSpacing = l.minChordSpacing;
+                layoutKey.maxWidth = width * l.cardWidthMult;
 
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    layoutKey.maxWidth = constraints.maxWidth * l.cardWidthMult;
+                tokenProv.calculatePositions(
+                  key: layoutKey,
+                  lyricStyle: measure.lyricStyle,
+                  chordStyle: measure.chordStyle,
+                );
+                return Selector2<
+                  LayoutSetProvider,
+                  ScrollProvider,
+                  ({bool isCurrent, bool showSectionHeaders})
+                >(
+                  selector: (context, laySet, scroll) => (
+                    showSectionHeaders: laySet.showSectionHeaders,
+                    isCurrent:
+                        (scroll.currentSectionIndex == index &&
+                        (scroll.currentItemIndex == itemIndex)),
+                  ),
+                  builder: (context, s, child) {
+                    final Color dimmedSectionColor =
+                        Color.lerp(sectionColor, colorScheme.surface, 0.82) ??
+                        sectionColor;
 
-                    tokenProv.calculatePositions(
-                      key: layoutKey,
-                      lyricStyle: measure.lyricStyle,
-                      chordStyle: measure.chordStyle,
-                    );
-                    return Selector2<
-                      LayoutSetProvider,
-                      ScrollProvider,
-                      ({bool isCurrent, bool showSectionHeaders})
-                    >(
-                      selector: (context, laySet, scroll) => (
-                        showSectionHeaders: laySet.showSectionHeaders,
-                        isCurrent:
-                            (scroll.currentSectionIndex == index &&
-                            (scroll.currentItemIndex == itemIndex)),
+                    return Container(
+                      width: width * l.cardWidthMult,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
                       ),
-                      builder: (context, s, child) {
-                        final Color dimmedSectionColor =
-                            Color.lerp(
-                              sectionColor,
-                              colorScheme.surface,
-                              0.82,
-                            ) ??
-                            sectionColor;
-
-                        return Container(
-                          width: constraints.maxWidth * l.cardWidthMult,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: s.showSectionHeaders
-                                ? colorScheme.surface
-                                : dimmedSectionColor,
-                            border: Border.all(
-                              color: s.showSectionHeaders
-                                  ? colorScheme.surfaceContainerHigh
-                                  : sectionColor,
-                            ),
-                            borderRadius: BorderRadius.circular(0),
-                            boxShadow: s.isCurrent
-                                ? [
-                                    BoxShadow(
-                                      color: colorScheme.primary,
-                                      blurRadius: 8,
-                                    ),
-                                  ]
-                                : null,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (s.showSectionHeaders)
-                                Row(
-                                  spacing: 8,
-                                  children: [
-                                    SectionBadge(
-                                      sectionCode: sectionCode,
-                                      sectionColor: sectionColor,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        sectionType.isNotEmpty
-                                            ? sectionType[0].toUpperCase() +
-                                                  sectionType.substring(1)
-                                            : sectionType,
-                                        style: textTheme.labelLarge,
-                                        overflow: TextOverflow.fade,
-                                      ),
-                                    ),
-                                  ],
+                      decoration: BoxDecoration(
+                        color: s.showSectionHeaders
+                            ? colorScheme.surface
+                            : dimmedSectionColor,
+                        border: Border.all(
+                          color: s.showSectionHeaders
+                              ? colorScheme.surfaceContainerHigh
+                              : sectionColor,
+                        ),
+                        borderRadius: BorderRadius.circular(0),
+                        boxShadow: s.isCurrent
+                            ? [
+                                BoxShadow(
+                                  color: colorScheme.primary,
+                                  blurRadius: 8,
                                 ),
-                              SizedBox(height: s.showSectionHeaders ? 8 : 0),
-                              child!,
-                            ],
-                          ),
-                        );
-                      },
-                      child: TokenView(
-                        tokensKey: layoutKey,
-                        contentColor: sectionColor,
+                              ]
+                            : null,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (s.showSectionHeaders)
+                            Row(
+                              spacing: 8,
+                              children: [
+                                SectionBadge(
+                                  sectionCode: sectionCode,
+                                  sectionColor: sectionColor,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    sectionType.isNotEmpty
+                                        ? sectionType[0].toUpperCase() +
+                                              sectionType.substring(1)
+                                        : sectionType,
+                                    style: textTheme.labelLarge,
+                                    overflow: TextOverflow.fade,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          SizedBox(height: s.showSectionHeaders ? 8 : 0),
+                          child!,
+                        ],
                       ),
                     );
                   },
+                  child: TokenView(
+                    tokensKey: layoutKey,
+                    contentColor: sectionColor,
+                  ),
                 );
               },
             );

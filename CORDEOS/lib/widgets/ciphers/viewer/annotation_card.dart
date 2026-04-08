@@ -30,41 +30,36 @@ class AnnotationCard extends StatelessWidget {
         if (sectionText.trim().isEmpty) {
           return SizedBox.shrink();
         }
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            return Container(
-              width: constraints.maxWidth * s.cardWidthMult,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: .25),
-                borderRadius: BorderRadius.circular(0),
-                border: BoxBorder.fromLTRB(
-                  left: BorderSide(color: colorScheme.primary, width: 6),
+        return Container(
+          width: MediaQuery.sizeOf(context).width * s.cardWidthMult,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: colorScheme.primary.withValues(alpha: .25),
+            borderRadius: BorderRadius.circular(0),
+            border: Border(
+              left: BorderSide(color: colorScheme.primary, width: 6),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            spacing: 8,
+            children: [
+              // LABEL
+              Text(
+                sectionType.isNotEmpty
+                    ? sectionType[0].toUpperCase() + sectionType.substring(1)
+                    : sectionType,
+                style: textTheme.labelLarge?.copyWith(
+                  fontSize: s.fontSize * 1.1,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                spacing: 8,
-                children: [
-                  // LABEL
-                  Text(
-                    sectionType.isNotEmpty
-                        ? sectionType[0].toUpperCase() +
-                              sectionType.substring(1)
-                        : sectionType,
-                    style: textTheme.labelLarge?.copyWith(
-                      fontSize: s.fontSize * 1.1,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
 
-                  // CONTENT
-                  Text(sectionText, style: s.lyricStyle),
-                ],
-              ),
-            );
-          },
+              // CONTENT
+              Text(sectionText, style: s.lyricStyle),
+            ],
+          ),
         );
       },
     );
