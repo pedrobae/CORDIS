@@ -218,7 +218,7 @@ class _EditDetailsState extends State<EditDetails> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        Text(label, style: textTheme.labelLarge),
+        Text(label, style: textTheme.labelMedium),
         GestureDetector(
           onTap: _showDatePicker(),
           child: Container(
@@ -285,7 +285,7 @@ class _EditDetailsState extends State<EditDetails> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        Text(label, style: textTheme.labelLarge),
+        Text(label, style: textTheme.labelMedium),
         GestureDetector(
           onTap: _showTimePicker(),
           child: Container(

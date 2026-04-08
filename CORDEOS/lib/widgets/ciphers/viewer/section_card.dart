@@ -30,7 +30,6 @@ class SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final screenWidth = MediaQuery.of(context).size.width;
 
     final tokenProv = context.read<TokenProvider>();
     final trans = context.read<TranspositionProvider>();
@@ -80,7 +79,7 @@ class SectionCard extends StatelessWidget {
             return Selector<
               LayoutSetProvider,
               ({
-                double maxWidth,
+                double cardWidthMult,
                 double letterSpacing,
                 double lineSpacing,
                 double lineBreakSpacing,
@@ -89,7 +88,7 @@ class SectionCard extends StatelessWidget {
             >(
               selector: (context, laySet) {
                 return (
-                  maxWidth: screenWidth * laySet.cardWidthMult,
+                  cardWidthMult: laySet.cardWidthMult,
                   letterSpacing: laySet.letterSpacing,
                   lineSpacing: laySet.lineSpacing,
                   lineBreakSpacing: laySet.lineBreakSpacing,
@@ -98,93 +97,101 @@ class SectionCard extends StatelessWidget {
               },
               builder: (context, l, child) {
                 // PHASE 3: Calculate and cache widget positions based on width constraints
-                layoutKey.maxWidth = l.maxWidth - 24; // account for horizontal padding
                 layoutKey.letterSpacing = l.letterSpacing;
                 layoutKey.lineSpacing = l.lineSpacing;
                 layoutKey.lineBreakSpacing = l.lineBreakSpacing;
                 layoutKey.minChordSpacing = l.minChordSpacing;
 
-                tokenProv.calculatePositions(
-                  key: layoutKey,
-                  lyricStyle: measure.lyricStyle,
-                  chordStyle: measure.chordStyle,
-                );
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    layoutKey.maxWidth = constraints.maxWidth * l.cardWidthMult;
 
-                return Selector2<
-                  LayoutSetProvider,
-                  ScrollProvider,
-                  ({bool isCurrent, bool showSectionHeaders})
-                >(
-                  selector: (context, laySet, scroll) => (
-                    showSectionHeaders: laySet.showSectionHeaders,
-                    isCurrent:
-                        (scroll.currentSectionIndex == index &&
-                        (scroll.currentItemIndex == itemIndex)),
-                  ),
-                  builder: (context, s, child) {
-                    final Color dimmedSectionColor =
-                        Color.lerp(sectionColor, colorScheme.surface, 0.82) ??
-                        sectionColor;
+                    tokenProv.calculatePositions(
+                      key: layoutKey,
+                      lyricStyle: measure.lyricStyle,
+                      chordStyle: measure.chordStyle,
+                    );
+                    return Selector2<
+                      LayoutSetProvider,
+                      ScrollProvider,
+                      ({bool isCurrent, bool showSectionHeaders})
+                    >(
+                      selector: (context, laySet, scroll) => (
+                        showSectionHeaders: laySet.showSectionHeaders,
+                        isCurrent:
+                            (scroll.currentSectionIndex == index &&
+                            (scroll.currentItemIndex == itemIndex)),
+                      ),
+                      builder: (context, s, child) {
+                        final Color dimmedSectionColor =
+                            Color.lerp(
+                              sectionColor,
+                              colorScheme.surface,
+                              0.82,
+                            ) ??
+                            sectionColor;
 
-                    return Container(
-                      width: l.maxWidth,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: s.showSectionHeaders
-                            ? colorScheme.surface
-                            : dimmedSectionColor,
-                        border: Border.all(
-                          color: s.showSectionHeaders
-                              ? colorScheme.surfaceContainerHigh
-                              : sectionColor,
-                        ),
-                        borderRadius: BorderRadius.circular(0),
-                        boxShadow: s.isCurrent
-                            ? [
-                                BoxShadow(
-                                  color: colorScheme.primary,
-                                  blurRadius: 8,
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (s.showSectionHeaders)
-                            Row(
-                              spacing: 8,
-                              children: [
-                                SectionBadge(
-                                  sectionCode: sectionCode,
-                                  sectionColor: sectionColor,
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    sectionType.isNotEmpty
-                                        ? sectionType[0].toUpperCase() +
-                                              sectionType.substring(1)
-                                        : sectionType,
-                                    style: textTheme.labelLarge,
-                                    overflow: TextOverflow.fade,
-                                  ),
-                                ),
-                              ],
+                        return Container(
+                          width: constraints.maxWidth * l.cardWidthMult,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: s.showSectionHeaders
+                                ? colorScheme.surface
+                                : dimmedSectionColor,
+                            border: Border.all(
+                              color: s.showSectionHeaders
+                                  ? colorScheme.surfaceContainerHigh
+                                  : sectionColor,
                             ),
-                          SizedBox(height: s.showSectionHeaders ? 8 : 0),
-                          child!,
-                        ],
+                            borderRadius: BorderRadius.circular(0),
+                            boxShadow: s.isCurrent
+                                ? [
+                                    BoxShadow(
+                                      color: colorScheme.primary,
+                                      blurRadius: 8,
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (s.showSectionHeaders)
+                                Row(
+                                  spacing: 8,
+                                  children: [
+                                    SectionBadge(
+                                      sectionCode: sectionCode,
+                                      sectionColor: sectionColor,
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        sectionType.isNotEmpty
+                                            ? sectionType[0].toUpperCase() +
+                                                  sectionType.substring(1)
+                                            : sectionType,
+                                        style: textTheme.labelLarge,
+                                        overflow: TextOverflow.fade,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              SizedBox(height: s.showSectionHeaders ? 8 : 0),
+                              child!,
+                            ],
+                          ),
+                        );
+                      },
+                      child: TokenView(
+                        tokensKey: layoutKey,
+                        contentColor: sectionColor,
                       ),
                     );
                   },
-                  child: TokenView(
-                    tokensKey: layoutKey,
-                    contentColor: sectionColor,
-                  ),
                 );
               },
             );

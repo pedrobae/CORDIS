@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cordeos/providers/settings/layout_settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,27 +16,32 @@ class AnnotationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final width = MediaQuery.of(context).size.width > 600
-      ? max(300.0, MediaQuery.of(context).size.width / 4)
-        : MediaQuery.of(context).size.width;
 
-    return Consumer<LayoutSetProvider>(
-      builder: (context, laySet, child) {
+    return Selector<
+      LayoutSetProvider,
+      ({double fontSize, double cardWidthMult, TextStyle lyricStyle})
+    >(
+      selector: (context, laySet) => (
+        fontSize: laySet.fontSize,
+        cardWidthMult: laySet.cardWidthMult,
+        lyricStyle: laySet.lyricStyle,
+      ),
+      builder: (context, s, child) {
         if (sectionText.trim().isEmpty) {
           return SizedBox.shrink();
         }
-        return SizedBox(
-          width: width,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: .25),
-              borderRadius: BorderRadius.circular(0),
-              border: BoxBorder.fromLTRB(
-                left: BorderSide(color: colorScheme.primary, width: 6),
-              ),
-            ),
-            child: Padding(
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return Container(
+              width: constraints.maxWidth * s.cardWidthMult,
               padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: .25),
+                borderRadius: BorderRadius.circular(0),
+                border: BoxBorder.fromLTRB(
+                  left: BorderSide(color: colorScheme.primary, width: 6),
+                ),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -47,20 +50,21 @@ class AnnotationCard extends StatelessWidget {
                   // LABEL
                   Text(
                     sectionType.isNotEmpty
-                        ? sectionType[0].toUpperCase() + sectionType.substring(1)
+                        ? sectionType[0].toUpperCase() +
+                              sectionType.substring(1)
                         : sectionType,
                     style: textTheme.labelLarge?.copyWith(
-                      fontSize: laySet.fontSize * 1.1,
+                      fontSize: s.fontSize * 1.1,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
 
                   // CONTENT
-                  Text(sectionText, style: laySet.lyricStyle),
+                  Text(sectionText, style: s.lyricStyle),
                 ],
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

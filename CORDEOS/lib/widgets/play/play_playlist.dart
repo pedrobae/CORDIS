@@ -189,6 +189,9 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
             },
           ),
         ),
+        // invisible large scroll button overlays that only absorb tap events
+        _buildTransparentButtons(),
+
         // auto scroll indicator
         Positioned(
           bottom: 8,
@@ -205,9 +208,6 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
             },
           ),
         ),
-
-        // invisible large scroll button overlays that only absorb tap events
-        _buildTransparentButtons(),
       ],
     );
   }
