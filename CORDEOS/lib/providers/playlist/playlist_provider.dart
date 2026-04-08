@@ -11,9 +11,6 @@ class PlaylistProvider extends ChangeNotifier {
 
   final Map<int, Playlist> _playlists = {};
 
-  bool _isLoading = false;
-  bool _isSaving = false;
-  bool _isDeleting = false;
   bool _hasUnsavedChanges = false;
 
   String? _error;
@@ -38,10 +35,6 @@ class PlaylistProvider extends ChangeNotifier {
 
   String _searchTerm = '';
 
-  bool get isLoading => _isLoading;
-  bool get isSaving => _isSaving;
-  bool get isDeleting => _isDeleting;
-
   String? get error => _error;
 
   Playlist? getPlaylist(int id) {
@@ -51,9 +44,6 @@ class PlaylistProvider extends ChangeNotifier {
   // ===== CREATE =====
   // Create a new playlist from local cache
   Future<void> createPlaylist(String playlistName, int userLocalId) async {
-    if (_isSaving) return;
-
-    _isSaving = true;
     _error = null;
     notifyListeners();
 
@@ -70,7 +60,6 @@ class PlaylistProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
     } finally {
-      _isSaving = false;
       _hasUnsavedChanges = false;
       notifyListeners();
     }
@@ -81,7 +70,6 @@ class PlaylistProvider extends ChangeNotifier {
   Future<int> createPlaylistFromDomain(Playlist playlist) async {
     int playlistId;
     try {
-      _isSaving = true;
       _error = null;
       notifyListeners();
 
@@ -93,7 +81,6 @@ class PlaylistProvider extends ChangeNotifier {
       _error = e.toString();
       playlistId = -1;
     } finally {
-      _isSaving = false;
       notifyListeners();
     }
 
@@ -103,9 +90,6 @@ class PlaylistProvider extends ChangeNotifier {
   // ===== READ =====
   // Load Playlists from local SQLite database
   Future<void> loadPlaylists() async {
-    if (_isLoading) return;
-
-    _isLoading = true;
     _error = null;
     notifyListeners();
 
@@ -117,15 +101,12 @@ class PlaylistProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
     } finally {
-      _isLoading = false;
       notifyListeners();
     }
   }
 
   // Load Single Playlist by ID
   Future<void> loadPlaylist(int id) async {
-    if (_isLoading) return;
-
     // If id is -1, it means we want to clear the current playlist
     // (used when discarding changes on a new playlist that hasn't been saved yet)
     if (id == -1) {
@@ -133,7 +114,6 @@ class PlaylistProvider extends ChangeNotifier {
       return;
     }
 
-    _isLoading = true;
     _error = null;
     notifyListeners();
 
@@ -146,7 +126,6 @@ class PlaylistProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
     } finally {
-      _isLoading = false;
       notifyListeners();
     }
   }
@@ -154,9 +133,6 @@ class PlaylistProvider extends ChangeNotifier {
   // ===== UPDATE =====
   /// Update a playlist with data currently on the cache (name/description/items)
   Future<void> saveFromCache(int playlistID) async {
-    if (_isSaving) return;
-
-    _isSaving = true;
     _error = null;
     notifyListeners();
 
@@ -195,11 +171,26 @@ class PlaylistProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
     } finally {
-      _isSaving = false;
       notifyListeners();
     }
   }
 
+  Future<void> savePlaylistMetadata(int playlistID) async {
+    _error = null;
+    notifyListeners();
+
+    try {
+      final playlist = _playlists[playlistID];
+      if (playlist != null) {
+        await _playlistRepository.updatePlaylistMetadata(playlist);
+        await loadPlaylist(playlistID);
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      notifyListeners();
+    }
+  }
   // ===== CACHE =====
   /// Update a Playlist with new data (name/description)
   void cacheName(int id, String name) {
@@ -259,9 +250,6 @@ class PlaylistProvider extends ChangeNotifier {
   void clearCache() {
     _playlists.clear();
     _error = null;
-    _isLoading = false;
-    _isSaving = false;
-    _isDeleting = false;
     _hasUnsavedChanges = false;
     notifyListeners();
   }
@@ -269,9 +257,6 @@ class PlaylistProvider extends ChangeNotifier {
   // ===== DELETE =====
   // Delete a playlist
   Future<void> deletePlaylist(int playlistId) async {
-    if (_isSaving) return;
-
-    _isDeleting = true;
     _error = null;
     notifyListeners();
 
@@ -281,7 +266,6 @@ class PlaylistProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
     } finally {
-      _isDeleting = false;
       notifyListeners();
     }
   }

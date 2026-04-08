@@ -119,6 +119,7 @@ class _EditPlaylistScreenState extends State<EditPlaylistScreen> {
   ) async {
     if (widget.playlistId != null) {
       play.cacheName(widget.playlistId!, playlistNameController.text);
+      await play.savePlaylistMetadata(widget.playlistId!);
     } else {
       final localId = Provider.of<MyAuthProvider>(
         context,

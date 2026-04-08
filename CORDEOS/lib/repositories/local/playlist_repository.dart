@@ -127,6 +127,17 @@ class PlaylistRepository {
     }
   }
 
+  Future<void> updatePlaylistMetadata(Playlist playlist) async {
+    final db = await _databaseHelper.database;
+
+    await db.update(
+      'playlist',
+      {'name': playlist.name},
+      where: 'id = ?',
+      whereArgs: [playlist.id],
+    );
+  }
+
   // ===== DELETE =====
   /// Deletes a playlist and all its related data
   Future<void> deletePlaylist(int playlistId) async {
