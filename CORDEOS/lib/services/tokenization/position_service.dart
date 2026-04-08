@@ -43,9 +43,6 @@ class PositionService {
     );
 
     final lineHeight = lyricHeight + chordLyricSpacing + chordHeight;
-    debugPrint(
-      "chordHeight - $chordHeight | lyricHeight - $lyricHeight | lineHeight - $lineHeight",
-    );
 
     final ctx = _LayoutCtx(
       chordHeight: chordHeight,
@@ -84,7 +81,7 @@ class PositionService {
 
         if (result.lineBroke) {
           // Word overflowed: bump Y and redo layout from the new line origin.
-          cursor.breakLine(ctx.lineBreakSpacing);
+          cursor.breakLine(ctx.lineBreakSpacing, isEditMode);
 
           result = _layoutWord(
             word: word,
@@ -102,11 +99,16 @@ class PositionService {
       }
       cursor.newLine(ctx.lineSpacing);
     }
+
     positionMap.contentHeight =
-        cursor.yOffset -
-        ((cursor.hasLyrics || isEditMode)
-            ? 0
-            : (ctx.lineHeight - ctx.chordHeight - ctx.chordLyricSpacing));
+        (cursor.yOffset -
+                ((cursor.hasLyrics || isEditMode)
+                    ? 0
+                    : (ctx.lineHeight -
+                          ctx.chordHeight -
+                          ctx.chordLyricSpacing)))
+            .clamp(0, double.infinity);
+
     return positionMap;
   }
 
@@ -145,8 +147,12 @@ class PositionService {
           break;
 
         case TokenType.preSeparator:
-          cursor.lyricsX = ctx.precedingOffset + ctx.minChordSpacing;
-          cursor.chordX = ctx.precedingOffset + ctx.minChordSpacing;
+          cursor.lyricsX =
+              ctx.precedingOffset +
+              (isEditMode ? TokenizationConstants.chordTokenWidthPadding : 0);
+          cursor.chordX =
+              ctx.precedingOffset +
+              (isEditMode ? TokenizationConstants.chordTokenWidthPadding : 0);
           cursor.foundPreSeparator = true;
 
           positions.setPosition(
@@ -221,15 +227,11 @@ class PositionService {
           if (cursor.hasLyrics == false) {
             cursor.hasLyrics = true;
           }
-          final xOffset = max(
-            ctx.precedingOffset + ctx.minChordSpacing,
-            cursor.lyricsX,
-          );
-          positions.setPosition(token, xOffset, cursor.yOffset);
+          positions.setPosition(token, cursor.lyricsX, cursor.yOffset);
           final msr =
               ctx.measurements[measurementKey(token.text, ctx.lyricStyle)]!;
 
-          cursor.lyricsX = xOffset + msr.width + ctx.letterSpacing;
+          cursor.lyricsX = cursor.lyricsX + msr.width + ctx.letterSpacing;
           charIndex++;
           if (ctx.checkOverflow && cursor.lyricsX > ctx.maxWidth) {
             return _WordLayoutResult(
@@ -468,10 +470,14 @@ class _LayoutCursor {
   _LayoutCursor({required this.precedingOffset, required this.lineHeight});
 
   /// Starts a fresh visual line at origin.
-  void breakLine(double lineBreakSpacing) {
+  void breakLine(double lineBreakSpacing, bool isEditMode) {
     yOffset += lineHeight + lineBreakSpacing;
-    lyricsX = precedingOffset;
-    chordX = precedingOffset;
+    lyricsX =
+        precedingOffset +
+        (isEditMode ? TokenizationConstants.chordTokenWidthPadding : 0);
+    chordX =
+        precedingOffset +
+        (isEditMode ? TokenizationConstants.chordTokenWidthPadding : 0);
   }
 
   void newLine(double newLineSpacing) {

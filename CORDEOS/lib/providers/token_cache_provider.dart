@@ -333,14 +333,25 @@ class TokenProvider extends ChangeNotifier {
     _positionCache.clear();
   }
 
+  void invalidatePaintCache() {
+    _paintCache.clear();
+  }
+
   /// Invalidates position cache only (when layout settings change).
   void invalidatePositions() {
     _positionCache.clear();
+    invalidatePaintCache(); // Paint depends on positions
   }
 
   /// Invalidates measurement cache only (when text styles change).
   void invalidateMeasurements() {
     _measurementCache.clear();
     invalidatePositions(); // Positions depend on measurements
+  }
+
+  void invalidateTokens() {
+    _tokenCache.clear();
+    _organizedCache.clear();
+    invalidateMeasurements(); // Measurements depend on tokens
   }
 }

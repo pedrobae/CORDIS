@@ -99,8 +99,6 @@ class _TokenContentCardState extends State<TokenContentCard> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return Selector<SectionProvider, ({Section? section, String? contentText})>(
       selector: (context, sect) {
         final section = sect.getSection(widget.versionID, widget.sectionCode);
@@ -111,7 +109,10 @@ class _TokenContentCardState extends State<TokenContentCard> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        _tokensKey = TokenCacheKey(content: s.contentText ?? '', isEditMode: true);
+        _tokensKey = TokenCacheKey(
+          content: s.contentText ?? '',
+          isEditMode: true,
+        );
 
         return Container(
           decoration: BoxDecoration(
@@ -207,11 +208,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                       Selector2<
                         LayoutSetProvider,
                         TranspositionProvider,
-                        ({
-                          bool showLyrics,
-                          bool showChords,
-                          int transposeValue,
-                        })
+                        ({bool showLyrics, bool showChords, int transposeValue})
                       >(
                         selector: (context, laySet, trans) => (
                           showLyrics: laySet.showLyrics,
@@ -257,7 +254,6 @@ class _TokenContentCardState extends State<TokenContentCard> {
                               return Selector<
                                 LayoutSetProvider,
                                 ({
-                                  double maxWidth,
                                   double letterSpacing,
                                   double lineSpacing,
                                   double lineBreakSpacing,
@@ -266,8 +262,6 @@ class _TokenContentCardState extends State<TokenContentCard> {
                               >(
                                 selector: (context, laySet) {
                                   return (
-                                    maxWidth:
-                                        screenWidth * laySet.cardWidthMult,
                                     letterSpacing: laySet.letterSpacing,
                                     lineSpacing: laySet.lineSpacing,
                                     lineBreakSpacing: laySet.lineBreakSpacing,
@@ -276,7 +270,9 @@ class _TokenContentCardState extends State<TokenContentCard> {
                                 },
                                 builder: (context, l, child) {
                                   // PHASE 3: Calculate and cache widget positions based on width constraints
-                                  _tokensKey!.maxWidth = l.maxWidth;
+                                  _tokensKey!.maxWidth = MediaQuery.of(
+                                    context,
+                                  ).size.width;
                                   _tokensKey!.letterSpacing = l.letterSpacing;
                                   _tokensKey!.lineSpacing = l.lineSpacing;
                                   _tokensKey!.lineBreakSpacing =
@@ -290,7 +286,9 @@ class _TokenContentCardState extends State<TokenContentCard> {
                                     chordStyle: measure.chordStyle,
                                   );
 
-                                  final positions = _tokenProv.getPositions(_tokensKey!);
+                                  final positions = _tokenProv.getPositions(
+                                    _tokensKey!,
+                                  );
 
                                   final content = _tokenProv.buildEditWidgets(
                                     key: _tokensKey!,

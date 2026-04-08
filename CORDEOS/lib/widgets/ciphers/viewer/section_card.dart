@@ -98,7 +98,7 @@ class SectionCard extends StatelessWidget {
               },
               builder: (context, l, child) {
                 // PHASE 3: Calculate and cache widget positions based on width constraints
-                layoutKey.maxWidth = l.maxWidth;
+                layoutKey.maxWidth = l.maxWidth - 24; // account for horizontal padding
                 layoutKey.letterSpacing = l.letterSpacing;
                 layoutKey.lineSpacing = l.lineSpacing;
                 layoutKey.lineBreakSpacing = l.lineBreakSpacing;
@@ -126,62 +126,58 @@ class SectionCard extends StatelessWidget {
                         Color.lerp(sectionColor, colorScheme.surface, 0.82) ??
                         sectionColor;
 
-                    return SizedBox(
+                    return Container(
                       width: l.maxWidth,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: s.showSectionHeaders
+                            ? colorScheme.surface
+                            : dimmedSectionColor,
+                        border: Border.all(
                           color: s.showSectionHeaders
-                              ? colorScheme.surface
-                              : dimmedSectionColor,
-                          border: Border.all(
-                            color: s.showSectionHeaders
-                                ? colorScheme.surfaceContainerHigh
-                                : sectionColor,
-                          ),
-                          borderRadius: BorderRadius.circular(0),
-                          boxShadow: s.isCurrent
-                              ? [
-                                  BoxShadow(
-                                    color: colorScheme.primary,
-                                    blurRadius: 8,
-                                  ),
-                                ]
-                              : null,
+                              ? colorScheme.surfaceContainerHigh
+                              : sectionColor,
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (s.showSectionHeaders)
-                                Row(
-                                  spacing: 8,
-                                  children: [
-                                    SectionBadge(
-                                      sectionCode: sectionCode,
-                                      sectionColor: sectionColor,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        sectionType.isNotEmpty
-                                            ? sectionType[0].toUpperCase() +
-                                                  sectionType.substring(1)
-                                            : sectionType,
-                                        style: textTheme.labelLarge,
-                                        overflow: TextOverflow.fade,
-                                      ),
-                                    ),
-                                  ],
+                        borderRadius: BorderRadius.circular(0),
+                        boxShadow: s.isCurrent
+                            ? [
+                                BoxShadow(
+                                  color: colorScheme.primary,
+                                  blurRadius: 8,
                                 ),
-                              SizedBox(height: s.showSectionHeaders ? 8 : 0),
-                              child!,
-                            ],
-                          ),
-                        ),
+                              ]
+                            : null,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (s.showSectionHeaders)
+                            Row(
+                              spacing: 8,
+                              children: [
+                                SectionBadge(
+                                  sectionCode: sectionCode,
+                                  sectionColor: sectionColor,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    sectionType.isNotEmpty
+                                        ? sectionType[0].toUpperCase() +
+                                              sectionType.substring(1)
+                                        : sectionType,
+                                    style: textTheme.labelLarge,
+                                    overflow: TextOverflow.fade,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          SizedBox(height: s.showSectionHeaders ? 8 : 0),
+                          child!,
+                        ],
                       ),
                     );
                   },
