@@ -120,7 +120,7 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
   Widget _buildInnerScaffold(NavigationProvider nav, bool isWideScreen) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: nav.showAppBar ? _buildAppBar(nav, isWideScreen) : null,
       bottomNavigationBar: !isWideScreen && nav.showBottomNavBar
           ? _buildBottomNavigationBar(nav)

@@ -116,6 +116,26 @@ class _EditDetailsState extends State<EditDetails> {
                 nav.pop();
               } else {
                 // feedback to user about missing fields
+                if (schedule == null) return;
+
+                if (schedule.name.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)!.pleaseEnterScheduleName,
+                      ),
+                    ),
+                  );
+                }
+                if (schedule.location.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)!.pleaseEnterLocation,
+                      ),
+                    ),
+                  );
+                }
               }
             },
             icon: Icon(Icons.save, size: 30),
@@ -130,6 +150,9 @@ class _EditDetailsState extends State<EditDetails> {
     return Form(
       autovalidateMode: AutovalidateMode.onUnfocus,
       child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 16,
