@@ -174,8 +174,8 @@ class _PlayPlaylistState extends State<PlayPlaylist> {
                     for (int i = 0; i < itemCount; i++) ...[
                       Padding(
                         padding: scrollDirection == Axis.vertical
-                            ? const EdgeInsets.symmetric(horizontal: 8)
-                            : const EdgeInsets.symmetric(vertical: 8),
+                            ? const EdgeInsets.symmetric(vertical: 8)
+                            : const EdgeInsets.symmetric(horizontal: 8),
                         child: _buildItem(i, scrollDirection),
                       ),
                     ],

@@ -24,14 +24,13 @@ class VersionWrap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector4<
+    return Selector3<
       LayoutSetProvider,
       LocalVersionProvider,
       CloudVersionProvider,
-      SectionProvider,
       ({Axis wrapDirection, List<String> filteredStructure})
     >(
-      selector: (context, laySet, localVer, cloudVer, sect) {
+      selector: (context, laySet, localVer, cloudVer) {
         final songStructure = versionID is String
             ? cloudVer.getVersion(versionID)!.songStructure
             : localVer.getSongStructure(versionID);
@@ -57,13 +56,21 @@ class VersionWrap extends StatelessWidget {
         );
       },
       builder: (context, s, child) {
-        return Wrap(
-          direction: s.wrapDirection,
-          crossAxisAlignment: WrapCrossAlignment.start,
-          alignment: WrapAlignment.start,
-          runSpacing: 8,
-          spacing: 8,
-          children: _buildSectionCards(context, s.filteredStructure),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: Wrap(
+                direction: s.wrapDirection,
+                crossAxisAlignment: WrapCrossAlignment.start,
+                alignment: WrapAlignment.start,
+                runSpacing: 8,
+                spacing: 8,
+                children: _buildSectionCards(context, s.filteredStructure),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -139,7 +146,7 @@ class VersionWrap extends StatelessWidget {
     final sect = context.read<SectionProvider>();
     final cloudVer = context.read<CloudVersionProvider>();
 
-    final sectionWidgets = <Widget>[_buildHeader(context)];
+    final sectionWidgets = <Widget>[];
 
     for (var i = 0; i < filteredStructure.length; i++) {
       final key = scroll.registerSection(itemIndex, i);
