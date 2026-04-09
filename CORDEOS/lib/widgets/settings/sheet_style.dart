@@ -13,21 +13,43 @@ class StyleSettings extends StatefulWidget {
 }
 
 class _StyleSettingsState extends State<StyleSettings> {
-  double? _localCardWidthMult;
+  double? _cardsOnScreen;
   double? _localLineSpacing;
   double? _localLineBreakSpacing;
   double? _localChordLyricSpacing;
   double? _localMinChordSpacing;
   double? _localLetterSpacing;
 
+  /// Width mult is a value from 0.2 to 1 that determines the width of the cards.
+  /// The number of cards on screen is calculated from this value, with 1 being 1 cards on screen and 0.2 being 5 cards on screen.
+  double _calcCardsOnScreen(double widthMult, double screenWidth) {
+    final cardWidth = screenWidth * widthMult;
+    final cardsOnScreen = ((screenWidth - 8) / (cardWidth + 8));
+    debugPrint("$cardsOnScreen");
+    return cardsOnScreen;
+  }
+
+  double _calcWidthMult(double cardsOnScreen, double screenWidth) {
+    final totalSpacing = 8 * (cardsOnScreen + 1);
+    final availableWidth = screenWidth - totalSpacing;
+    final cardWidth = availableWidth / cardsOnScreen;
+    debugPrint("${cardWidth/screenWidth}");
+    return cardWidth / screenWidth;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    final width = MediaQuery.sizeOf(context).width;
+
     return Consumer<LayoutSetProvider>(
       builder: (context, settings, child) {
-        _localCardWidthMult ??= 1/settings.cardWidthMult.clamp(0.2, 1);
+        _cardsOnScreen ??= _calcCardsOnScreen(
+          settings.cardWidthMult.clamp(0.2, 1),
+          width,
+        );
         _localLineSpacing ??= settings.lineSpacing.clamp(-5, 10);
         _localLineBreakSpacing ??= settings.lineBreakSpacing.clamp(-5, 10);
         _localChordLyricSpacing ??= settings.chordLyricSpacing.clamp(-5, 15);
@@ -128,15 +150,15 @@ class _StyleSettingsState extends State<StyleSettings> {
                         ),
                       ),
                       Text(
-                        (_localCardWidthMult!).toStringAsFixed(1),
+                        (_cardsOnScreen!).toStringAsFixed(2),
                         style: textTheme.labelMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       SizedBox(
-                        width: 180,
+                        width: 150,
                         child: Slider(
-                          value: (_localCardWidthMult! - 6) / -5,
+                          value: (1 / _cardsOnScreen!).clamp(0.2, 1.0),
                           padding: EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 16,
@@ -145,10 +167,12 @@ class _StyleSettingsState extends State<StyleSettings> {
                           min: 0.2,
                           max: 1.0,
                           onChanged: (v) {
-                            setState(() => _localCardWidthMult = (v * -5) + 6);
+                            setState(() => _cardsOnScreen = 1 / v);
                           },
                           onChangeEnd: (v) {
-                            settings.setCardWidthMult(1/((v * -5) + 6));
+                            settings.setCardWidthMult(
+                              _calcWidthMult(1 / v, width),
+                            );
                           },
                         ),
                       ),
