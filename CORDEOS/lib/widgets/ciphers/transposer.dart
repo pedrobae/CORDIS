@@ -49,8 +49,6 @@ class Transposer extends StatelessWidget {
                             transposedKey: key,
                           );
                           await localVer.saveVersion(versionID: s.versionID);
-                          trans.setTransposedKey(key);
-                          trans.setOriginalKey(key, s.versionID);
                         },
                       );
                     },

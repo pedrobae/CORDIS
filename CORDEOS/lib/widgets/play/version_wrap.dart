@@ -81,57 +81,67 @@ class VersionWrap extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    final localVer = context.read<LocalVersionProvider>();
-    final cloudVer = context.read<CloudVersionProvider>();
-    final ciph = context.read<CipherProvider>();
+    return Selector3<
+      CipherProvider,
+      LocalVersionProvider,
+      CloudVersionProvider,
+      ({String? title, String? key, int? bpm, Duration? duration})
+    >(
+      selector: (context, ciph, localVer, cloudVer) {
+        String? title;
+        String? key;
+        int? bpm;
+        Duration? duration;
 
-    String title;
-    String key;
-    int bpm;
-    Duration duration;
-
-    if (versionID is String) {
-      final version = cloudVer.getVersion(versionID);
-      if (version == null) return const LinearProgressIndicator();
-      title = version.title;
-      key = version.transposedKey ?? version.originalKey;
-      bpm = version.bpm;
-      duration = Duration(milliseconds: version.duration);
-    } else {
-      final version = localVer.getVersion(versionID);
-      if (version == null) return const LinearProgressIndicator();
-      final cipher = ciph.getCipher(version.cipherID);
-      if (cipher == null) return const LinearProgressIndicator();
-      title = cipher.title;
-      key = version.transposedKey ?? cipher.musicKey;
-      bpm = version.bpm;
-      duration = version.duration;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(title, style: textTheme.titleMedium),
-        Row(
+        if (versionID is String) {
+          final version = cloudVer.getVersion(versionID);
+          if (version == null) {
+            return (title: null, key: null, bpm: null, duration: null);
+          }
+          title = version.title;
+          key = version.transposedKey ?? version.originalKey;
+          bpm = version.bpm;
+          duration = Duration(milliseconds: version.duration);
+        } else {
+          final version = localVer.getVersion(versionID);
+          if (version == null) {
+            return (title: null, key: null, bpm: null, duration: null);
+          }
+          final cipher = ciph.getCipher(version.cipherID);
+          title = cipher?.title;
+          key = version.transposedKey ?? cipher?.musicKey;
+          bpm = version.bpm;
+          duration = version.duration;
+        }
+        return (title: title, key: key, bpm: bpm, duration: duration);
+      },
+      builder: (context, s, child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          spacing: 16.0,
           children: [
-            Text(
-              AppLocalizations.of(context)!.keyWithPlaceholder(key),
-              style: textTheme.bodyMedium,
-            ),
-            Text(
-              AppLocalizations.of(context)!.bpmWithPlaceholder(bpm),
-              style: textTheme.bodyMedium,
-            ),
-            Text(
-              '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(duration)}',
-              style: textTheme.bodyMedium,
+            Text(s.title ?? '', style: textTheme.titleMedium),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 16.0,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.keyWithPlaceholder(s.key ?? ''),
+                  style: textTheme.bodyMedium,
+                ),
+                Text(
+                  AppLocalizations.of(context)!.bpmWithPlaceholder(s.bpm ?? 0),
+                  style: textTheme.bodyMedium,
+                ),
+                Text(
+                  '${AppLocalizations.of(context)!.duration}: ${DateTimeUtils.formatDuration(s.duration ?? Duration.zero)}',
+                  style: textTheme.bodyMedium,
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
