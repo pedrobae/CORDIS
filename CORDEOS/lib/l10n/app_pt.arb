@@ -265,6 +265,11 @@
   "@language": {"description": "Song language field label"},
   "tag": "Tag",
   "@tag": {"description": "Single tag label"},
+  "link": "Link",
+  "@link": {"description": "Link field label"},
+  "linkHint": "Digite um Link",
+  "@linkHint": {"description": "Hint for link field"},
+
 
 
   "version": "Versão",

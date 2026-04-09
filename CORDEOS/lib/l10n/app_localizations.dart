@@ -794,6 +794,18 @@ abstract class AppLocalizations {
   /// **'Tag'**
   String get tag;
 
+  /// Link field label
+  ///
+  /// In pt, this message translates to:
+  /// **'Link'**
+  String get link;
+
+  /// Hint for link field
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite um Link'**
+  String get linkHint;
+
   /// Version label
   ///
   /// In pt, this message translates to:

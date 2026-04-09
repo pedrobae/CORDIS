@@ -378,6 +378,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tag => 'Tag';
 
   @override
+  String get link => 'Link';
+
+  @override
+  String get linkHint => 'Enter a URL';
+
+  @override
   String get version => 'Version';
 
   @override

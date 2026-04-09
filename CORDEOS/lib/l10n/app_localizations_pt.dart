@@ -381,6 +381,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get tag => 'Tag';
 
   @override
+  String get link => 'Link';
+
+  @override
+  String get linkHint => 'Digite um Link';
+
+  @override
   String get version => 'Versão';
 
   @override

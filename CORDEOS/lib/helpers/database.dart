@@ -21,7 +21,7 @@ class DatabaseHelper {
 
       final db = await openDatabase(
         path,
-        version: 18,
+        version: 19,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade, // Handle migrations
       );
@@ -52,6 +52,7 @@ class DatabaseHelper {
         author TEXT,
         music_key TEXT,
         language TEXT DEFAULT 'por',
+        link TEXT,
         firebase_id TEXT,
         is_deleted BOOLEAN DEFAULT 0,
         updated_at INTEGER DEFAULT (strftime('%s','now')),
@@ -398,6 +399,10 @@ class DatabaseHelper {
     if (oldVersion < 18) {
       // REMOVE TIME COLUMN FROM SCHEDULE TABLE
       await db.execute('ALTER TABLE schedule DROP COLUMN time');
+    }
+    if (oldVersion < 19) {
+      // ADD LINK COLUMN TO CIPHER TABLE
+      await db.execute('ALTER TABLE cipher ADD COLUMN link TEXT');
     }
   }
 

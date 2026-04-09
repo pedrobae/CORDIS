@@ -21,6 +21,7 @@ enum InfoField {
   duration,
   language,
   tags,
+  link,
 }
 
 class MetadataTab extends StatefulWidget {
@@ -148,7 +149,13 @@ class _MetadataTabState extends State<MetadataTab> {
             localVer.cacheUpdates(widget.versionID, duration: duration);
           });
           break;
-        default:
+        case InfoField.link:
+          controller.addListener(
+            () => ciph.cacheUpdates(widget.cipherID, link: controller.text),
+          );
+        case InfoField.tags:
+        case InfoField.key:
+          // THESE FIELDS ARE HANDLED SEPARATELY, NOT USING TEXT CONTROLLERS
           break;
       }
     }
@@ -170,6 +177,7 @@ class _MetadataTabState extends State<MetadataTab> {
       InfoField.tags => AppLocalizations.of(
         context,
       )!.pluralPlaceholder(AppLocalizations.of(context)!.tag),
+      InfoField.link => AppLocalizations.of(context)!.link,
     };
   }
 
@@ -183,6 +191,7 @@ class _MetadataTabState extends State<MetadataTab> {
       InfoField.key => AppLocalizations.of(context)!.keyHint,
       InfoField.language => AppLocalizations.of(context)!.languageHint,
       InfoField.tags => AppLocalizations.of(context)!.tagHint,
+      InfoField.link => AppLocalizations.of(context)!.linkHint,
     };
   }
 

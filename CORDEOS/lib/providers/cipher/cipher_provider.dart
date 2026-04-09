@@ -222,11 +222,13 @@ class CipherProvider extends ChangeNotifier {
     String? title,
     String? author,
     String? language,
+    String? link
   }) {
     _ciphers[cipherId] = _ciphers[cipherId]!.copyWith(
       title: title,
       author: author,
       language: language,
+      link: link,
     );
     _hasUnsavedChanges = true;
     notifyListeners();
