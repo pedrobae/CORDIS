@@ -35,7 +35,7 @@ class SectionCard extends StatelessWidget {
     final trans = context.read<TranspositionProvider>();
     final width = MediaQuery.sizeOf(context).width;
 
-    final layoutKey = TokenCacheKey(content: sectionText, isEditMode: false);
+    final layoutKey = TokenCacheKey(content: sectionText, sectionIndex: index, isEditMode: false);
     return Selector2<
       LayoutSetProvider,
       TranspositionProvider,

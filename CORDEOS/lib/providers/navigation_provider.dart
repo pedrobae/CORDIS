@@ -197,11 +197,47 @@ class NavigationProvider extends ChangeNotifier {
     return;
   }
 
-  /// Launch external URL using the default browser
-  void launchURL(String url) {
-    debugPrint('NAVIGATION - Launching URL: $url');
-    // Use url_launcher to open the URL
-    url_launcher.launchUrl(Uri.parse(url));
+  /// Launch external URL using the default browser.
+  /// Returns `true` when the URL was successfully handed off.
+  Future<bool> launchURL(String rawUrl) async {
+    final normalizedInput = rawUrl.trim();
+    if (normalizedInput.isEmpty) {
+      debugPrint('NAVIGATION - Empty URL, launch skipped');
+      return false;
+    }
+
+    final uri = _normalizeExternalUri(normalizedInput);
+    if (uri == null) {
+      debugPrint('NAVIGATION - Invalid URL: $rawUrl');
+      return false;
+    }
+
+    debugPrint('NAVIGATION - Launching URL: $uri');
+    try {
+      final didLaunch = await url_launcher.launchUrl(
+        uri,
+        mode: url_launcher.LaunchMode.externalApplication,
+      );
+
+      if (!didLaunch) {
+        debugPrint('NAVIGATION - URL launcher returned false: $uri');
+      }
+
+      return didLaunch;
+    } catch (e) {
+      debugPrint('NAVIGATION - Failed to launch URL ($uri): $e');
+      return false;
+    }
+  }
+
+  Uri? _normalizeExternalUri(String input) {
+    final parsed = Uri.tryParse(input);
+    if (parsed != null && parsed.hasScheme) {
+      return parsed;
+    }
+
+    // Support links entered without scheme, e.g. "example.com".
+    return Uri.tryParse('https://$input');
   }
 
   // Error handling following your provider pattern

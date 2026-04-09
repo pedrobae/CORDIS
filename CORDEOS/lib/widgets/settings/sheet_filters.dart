@@ -46,14 +46,12 @@ class ContentFilters extends StatelessWidget {
                 value: settings.showChords,
                 onChanged: (_) => settings.toggleChords(),
               ),
-
               _buildFilterToggle(
                 context,
-                label: AppLocalizations.of(context)!.lyrics,
-                value: settings.showLyrics,
-                onChanged: (_) => settings.toggleLyrics(),
+                label: AppLocalizations.of(context)!.repeatSections,
+                value: settings.showRepeatSections,
+                onChanged: (_) => settings.toggleRepeatSections(),
               ),
-
               _buildFilterToggle(
                 context,
                 label: AppLocalizations.of(context)!.notes,
@@ -68,9 +66,9 @@ class ContentFilters extends StatelessWidget {
               ),
               _buildFilterToggle(
                 context,
-                label: AppLocalizations.of(context)!.repeatSections,
-                value: settings.showRepeatSections,
-                onChanged: (_) => settings.toggleRepeatSections(),
+                label: AppLocalizations.of(context)!.lyrics,
+                value: settings.showLyrics,
+                onChanged: (_) => settings.toggleLyrics(),
               ),
               SizedBox(),
             ],

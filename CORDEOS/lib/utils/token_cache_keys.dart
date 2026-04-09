@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 /// Composite key for position cache that includes all layout dependencies.
 /// Two keys are equal only if all parameters match.
 class TokenCacheKey {
-  final String content;
+  String? content;
+  final int sectionIndex;
   double? maxWidth;
   double? lineSpacing;
   double? lineBreakSpacing;
@@ -22,7 +23,7 @@ class TokenCacheKey {
   Color? lyricColor;
 
   TokenCacheKey({
-    required this.content,
+    this.content,
     this.maxWidth,
     this.lineSpacing,
     this.lineBreakSpacing,
@@ -32,6 +33,7 @@ class TokenCacheKey {
     this.showChords,
     this.showLyrics,
     this.transposeValue,
+    required this.sectionIndex,
     this.isEditMode = false,
     this.chordColor,
     this.lyricColor,
@@ -51,7 +53,8 @@ class TokenCacheKey {
         other.showChords == showChords &&
         other.showLyrics == showLyrics &&
         other.isEditMode == isEditMode &&
-        other.transposeValue == transposeValue;
+        other.transposeValue == transposeValue &&
+        other.sectionIndex == sectionIndex;
   }
 
   @override
@@ -66,6 +69,7 @@ class TokenCacheKey {
     showChords,
     showLyrics,
     transposeValue,
+    sectionIndex,
     isEditMode,
   );
 }
@@ -76,7 +80,7 @@ class TokenCacheKey {
 
 /// Token cache key: content + filters + transposition
 String tokenCacheKey(TokenCacheKey k) =>
-    '${k.content}|chords:${k.showChords}|lyrics:${k.showLyrics}|transposeValue:${k.transposeValue}|editMode:${k.isEditMode}';
+    '${k.sectionIndex}|content:${k.content}|chords:${k.showChords}|lyrics:${k.showLyrics}|transposeValue:${k.transposeValue}|editMode:${k.isEditMode}';
 
 String measurementKey(
   String text,

@@ -23,12 +23,14 @@ import 'package:cordeos/widgets/common/filled_text_button.dart';
 
 class TokenContentCard extends StatefulWidget {
   final int versionID;
+  final int index;
   final String sectionCode;
   final bool isEnabled;
 
   const TokenContentCard({
     super.key,
     required this.versionID,
+    required this.index,
     required this.sectionCode,
     this.isEnabled = true,
   });
@@ -99,20 +101,20 @@ class _TokenContentCardState extends State<TokenContentCard> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
+    _tokensKey = TokenCacheKey(sectionIndex: widget.index, isEditMode: true);
+
     return Selector<SectionProvider, ({Section? section, String? contentText})>(
       selector: (context, sect) {
         final section = sect.getSection(widget.versionID, widget.sectionCode);
         return (section: section, contentText: section?.contentText);
       },
       builder: (context, s, child) {
+        _tokenProv.clearIndex(_tokensKey!);
         if (s.section == null) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        _tokensKey = TokenCacheKey(
-          content: s.contentText ?? '',
-          isEditMode: true,
-        );
+        _tokensKey!.content = s.contentText;
 
         return Container(
           decoration: BoxDecoration(
@@ -260,7 +262,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                             builder: (context, l, child) {
                               // PHASE 3: Calculate and cache widget positions based on width constraints
                               final width =
-                                  MediaQuery.of(context).size.width -
+                                  MediaQuery.sizeOf(context).width -
                                   32; // 32 for padding
                               _tokensKey!.letterSpacing = l.letterSpacing;
                               _tokensKey!.lineSpacing = l.lineSpacing;

@@ -112,10 +112,10 @@ class CipherCardActionsSheet extends StatelessWidget {
               tooltip: link,
               trailingIcon: Icons.open_in_new,
               isDiscrete: true,
-              onPressed: () {
+              onPressed: () async {
                 // Open the cipher's link in the default browser
                 final url = ciph.ciphers[cipherId]!.link!;
-                nav.launchURL(url);
+                await nav.launchURL(url);
               },
             ),
           // SELECT VERSION

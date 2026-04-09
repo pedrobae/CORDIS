@@ -35,11 +35,10 @@ class _SectionsTabState extends State<SectionsTab> {
 
     return Selector<LocalVersionProvider, List<String>>(
       selector: (context, localVer) {
-        return localVer.getSongStructure(widget.versionID);
+        final songStructure = localVer.getSongStructure(widget.versionID);
+        return songStructure.toSet().toList();
       },
-      builder: (context, songStructure, child) {
-        final uniqueSections = songStructure.toSet().toList();
-
+      builder: (context, uniqueSections, child) {
         return Stack(
           children: [
             SingleChildScrollView(
@@ -107,6 +106,7 @@ class _SectionsTabState extends State<SectionsTab> {
                         else
                           ...uniqueSections.map((sectionCode) {
                             return TokenContentCard(
+                              index: uniqueSections.indexOf(sectionCode),
                               versionID: widget.versionID,
                               sectionCode: sectionCode,
                               isEnabled: widget.isEnabled,

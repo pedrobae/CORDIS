@@ -66,9 +66,9 @@ class TokenProvider extends ChangeNotifier {
 
     // Cache miss - compute
     final tokens = _tokenizer.tokenize(
-      key.content,
-      showLyrics: key.showLyrics!,
-      showChords: key.showChords!,
+      key.content!,
+      showLyrics: key.showLyrics ?? true,
+      showChords: key.showChords ?? true,
       transposeChord: transposeChord,
     );
 
@@ -333,25 +333,29 @@ class TokenProvider extends ChangeNotifier {
     _positionCache.clear();
   }
 
+  void clearIndex(TokenCacheKey key) {
+    debugPrint("TOKEN PROVIDER - clearing cache of section ${key.sectionIndex}");
+    _tokenCache.removeWhere(
+      (k, v) => k.startsWith(key.sectionIndex.toString()),
+    );
+    _organizedCache.removeWhere(
+      (k, v) => k.startsWith(key.sectionIndex.toString()),
+    );
+    _measurementCache.removeWhere(
+      (k, v) => k.startsWith(key.sectionIndex.toString()),
+    );
+    _positionCache.removeWhere(
+      (k, v) => k.startsWith(key.sectionIndex.toString()),
+    );
+  }
+
   void invalidatePaintCache(TokenCacheKey key) {
-    _paintCache.remove(paintCacheKey(key));
+    _paintCache.removeWhere((k, v) => k.startsWith(tokenCacheKey(key)));
   }
 
   /// Invalidates position cache only (when layout settings change).
   void invalidatePositions(TokenCacheKey key) {
-    _positionCache.remove(positionCacheKey(key));
+    _positionCache.removeWhere((k, v) => k.startsWith(tokenCacheKey(key)));
     invalidatePaintCache(key); // Paint depends on positions
-  }
-
-  /// Invalidates measurement cache only (when text styles change).
-  void invalidateMeasurements(TokenCacheKey key) {
-    _measurementCache.clear();
-    invalidatePositions(key); // Positions depend on measurements
-  }
-
-  void invalidateTokens(TokenCacheKey key) {
-    _tokenCache.remove(tokenCacheKey(key));
-    _organizedCache.remove(tokenCacheKey(key));
-    invalidatePositions(key); // Measurements depend on tokens
   }
 }

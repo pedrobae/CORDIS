@@ -415,6 +415,7 @@ class TokenizationBuilder {
       chordStyle: chordStyle,
       lyricStyle: lyricStyle,
       maxWidth: maxWidth,
+      lineHeight: lineHeight,
       surfaceColor: surfaceColor,
       onSurfaceColor: onSurfaceColor,
       isEnabled: isEnabled,
@@ -454,6 +455,7 @@ class TokenizationBuilder {
       chordStyle: chordStyle,
       lyricStyle: lyricStyle,
       maxWidth: maxWidth,
+      lineHeight: lineHeight,
       surfaceColor: surfaceColor,
       onSurfaceColor: onSurfaceColor,
       isEnabled: isEnabled,
@@ -490,6 +492,7 @@ class TokenizationBuilder {
       chordStyle: chordStyle,
       lyricStyle: lyricStyle,
       maxWidth: maxWidth,
+      lineHeight: lineHeight,
       surfaceColor: surfaceColor,
       onSurfaceColor: onSurfaceColor,
       isEnabled: isEnabled,
@@ -508,6 +511,7 @@ class TokenizationBuilder {
     required TextStyle chordStyle,
     required TextStyle lyricStyle,
     required double maxWidth,
+    required double lineHeight,
     required Color surfaceColor,
     required Color onSurfaceColor,
     required bool isEnabled,
@@ -527,6 +531,7 @@ class TokenizationBuilder {
                   chordStyle: chordStyle,
                   lyricStyle: lyricStyle,
                   maxWidth: maxWidth,
+                  lineHeight: lineHeight,
                   surfaceColor: surfaceColor,
                   onSurfaceColor: onSurfaceColor,
                   dragTargetChild: child,
@@ -556,6 +561,7 @@ class TokenizationBuilder {
     required TextStyle chordStyle,
     required TextStyle lyricStyle,
     required double maxWidth,
+    required double lineHeight,
     required Color surfaceColor,
     required Color onSurfaceColor,
   }) {
@@ -686,7 +692,7 @@ class TokenizationBuilder {
       children: [
         dragTargetChild,
         Positioned(
-          bottom: 2* lyricMsr.height,
+          bottom: lineHeight,
           left: cutoutXOffset,
           child: Container(
             height:

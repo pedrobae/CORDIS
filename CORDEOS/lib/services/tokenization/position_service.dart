@@ -213,14 +213,6 @@ class PositionService {
           cursor.chordX = cursor.lyricsX + msr.width + ctx.minChordSpacing;
 
           charIndex++;
-
-          if (ctx.checkOverflow && cursor.chordX > ctx.maxWidth) {
-            return _WordLayoutResult(
-              wordPositions: positions,
-              tokensToAdd: tokensToAdd,
-              lineBroke: true,
-            );
-          }
           break;
 
         case TokenType.lyric:
@@ -233,13 +225,6 @@ class PositionService {
 
           cursor.lyricsX = cursor.lyricsX + msr.width + ctx.letterSpacing;
           charIndex++;
-          if (ctx.checkOverflow && cursor.lyricsX > ctx.maxWidth) {
-            return _WordLayoutResult(
-              wordPositions: positions,
-              tokensToAdd: tokensToAdd,
-              lineBroke: true,
-            );
-          }
           break;
 
         case TokenType.space:
@@ -249,13 +234,6 @@ class PositionService {
               ctx.measurements[measurementKey(token.text, ctx.lyricStyle)]!;
           cursor.lyricsX += msr.width + ctx.letterSpacing;
           charIndex++;
-          if (ctx.checkOverflow && cursor.lyricsX > ctx.maxWidth) {
-            return _WordLayoutResult(
-              wordPositions: positions,
-              tokensToAdd: tokensToAdd,
-              lineBroke: true,
-            );
-          }
           break;
 
         case TokenType.chordTarget:
@@ -273,6 +251,14 @@ class PositionService {
         case TokenType.underline:
         case TokenType.newline:
           break;
+      }
+      if (ctx.checkOverflow &&
+          (cursor.lyricsX > ctx.maxWidth || cursor.chordX > ctx.maxWidth)) {
+        return _WordLayoutResult(
+          wordPositions: positions,
+          tokensToAdd: tokensToAdd,
+          lineBroke: true,
+        );
       }
     }
 

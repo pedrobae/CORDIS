@@ -181,9 +181,13 @@ class _EditCipherScreenState extends State<EditCipherScreen>
   Widget build(BuildContext context) {
     final nav = Provider.of<NavigationProvider>(context, listen: false);
 
-    return Scaffold(
-      appBar: _buildAppBar(nav),
-      body: Column(spacing: 16, children: [_buildTabBar(), _buildTabContent()]),
+    return Column(
+      children: [
+        _buildAppBar(nav),
+        Expanded(
+          child: Column(spacing: 16, children: [_buildTabBar(), _buildTabContent()]),
+        ),
+      ],
     );
   }
 
