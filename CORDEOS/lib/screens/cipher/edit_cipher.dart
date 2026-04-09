@@ -41,7 +41,7 @@ class _EditCipherScreenState extends State<EditCipherScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 1);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<EditSectionsStateProvider>().resetState();
       _loadData();
@@ -185,7 +185,10 @@ class _EditCipherScreenState extends State<EditCipherScreen>
       children: [
         _buildAppBar(nav),
         Expanded(
-          child: Column(spacing: 16, children: [_buildTabBar(), _buildTabContent()]),
+          child: Column(
+            spacing: 16,
+            children: [_buildTabBar(), _buildTabContent()],
+          ),
         ),
       ],
     );
