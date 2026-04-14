@@ -209,13 +209,12 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   child: Selector<TranspositionProvider, int>(
                     selector: (context, trans) => trans.transposeValue,
                     builder: (context, transposeValue, child) {
-                      final trans = context.read<TranspositionProvider>();
                       // PHASE 1: Ensure tokens are cached & organized for this content + filters
                       _tokensKey!.transposeValue = transposeValue;
 
                       _tokenProv.tokenize(
                         _tokensKey!,
-                        transposeChord: trans.transposeChord,
+                        transposeChord: (chord) => chord,
                       );
                       _tokenProv.organize(_tokensKey!);
                       return Selector2<
@@ -278,6 +277,8 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
                               final positions = _tokenProv.getPositions(
                                 _tokensKey!,
+                                measure.chordStyle,
+                                measure.lyricStyle,
                               );
 
                               final content = _tokenProv.buildEditWidgets(

@@ -116,6 +116,7 @@ class LocalVersionProvider extends ChangeNotifier {
       debugPrint(
         'Created a new version with id $versionId, for cipher ${cipherID ?? versionWithCipherId.cipherID}',
       );
+      _versions.remove(-1); // Clear the cached new version
     } catch (e) {
       _error = e.toString();
       debugPrint('Error creating cipher version: $e');
@@ -177,9 +178,7 @@ class LocalVersionProvider extends ChangeNotifier {
       }
 
       _versions[versionId] = version;
-      debugPrint(
-        'LOCAL VERSION - Loaded version $versionId',
-      );
+      debugPrint('LOCAL VERSION - Loaded version $versionId');
     } catch (e) {
       _error = e.toString();
       debugPrint('Error loading version by id: $e');

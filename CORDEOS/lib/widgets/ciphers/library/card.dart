@@ -240,12 +240,15 @@ class _CipherCardState extends State<CipherCard> {
                     ),
 
                     if (s.cipher?.link != null && s.cipher!.link!.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 4.0),
-                        child: Icon(Icons.link, size: 20),
+                      GestureDetector(
+                        onTap: _openCipherActionsSheet(s.cipher!.id),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 4.0),
+                          child: Icon(Icons.link, size: 20),
+                        ),
                       ),
 
-                    // ACTIONS SHEET
+                    // ACTIONS SHEET   
                     GestureDetector(
                       onTap: _openCipherActionsSheet(s.cipher!.id),
                       child: SizedBox(

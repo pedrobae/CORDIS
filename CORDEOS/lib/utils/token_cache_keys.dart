@@ -99,8 +99,12 @@ String chordTargetKey(
 ) =>
     'CT|$text|${chordStyle.fontFamily}|${chordStyle.fontSize}|${lyricStyle.fontSize}';
 
-/// Position cache key: token key + layout params
-String positionCacheKey(TokenCacheKey k) {
+/// Position cache key: token key + layout params + Style params
+String positionCacheKey(
+  TokenCacheKey k,
+  TextStyle chordStyle,
+  TextStyle lyricStyle,
+) {
   return '${ //
   tokenCacheKey(k)}|w:${ //
   k.maxWidth}|ls:${ //
@@ -108,10 +112,18 @@ String positionCacheKey(TokenCacheKey k) {
   k.lineBreakSpacing}|cls:${ //
   k.chordLyricSpacing}|mcs:${ //
   k.minChordSpacing}|lts:${ //
-  k.letterSpacing}';
+  k.letterSpacing}|lStyle:${ //
+  lyricStyle.fontFamily}|lSize:${ //
+  lyricStyle.fontSize}|cStyle:${ //
+  chordStyle.fontFamily}|cSize:${ //
+  chordStyle.fontSize}';
 }
 
-String paintCacheKey(TokenCacheKey k) =>
-    '${positionCacheKey(k)}|chordColor:${ //
+String paintCacheKey(
+  TokenCacheKey k,
+  TextStyle chordStyle,
+  TextStyle lyricStyle,
+) =>
+    '${positionCacheKey(k, chordStyle, lyricStyle)}|chordColor:${ //
     k.chordColor}|lyricColor:${ //
     k.lyricColor}';
