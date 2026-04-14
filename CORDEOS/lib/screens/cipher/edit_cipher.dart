@@ -7,6 +7,7 @@ import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/cipher/parser_provider.dart';
 import 'package:cordeos/providers/user/my_auth_provider.dart';
 import 'package:cordeos/providers/version/cloud_version_provider.dart';
+import 'package:cordeos/screens/cipher/print_preview_screen.dart';
 import 'package:cordeos/services/key_recognizer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -216,6 +217,18 @@ class _EditCipherScreenState extends State<EditCipherScreen>
             },
             icon: Icon(Icons.publish, size: 30),
           ),
+        IconButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) =>
+                    PrintPreviewScreen(versionID: widget.versionID),
+              ),
+            );
+          },
+          icon: const Icon(Icons.print_outlined, size: 30),
+          tooltip: AppLocalizations.of(context)!.printPreview,
+        ),
         IconButton(
           onPressed: () async {
             await _save(context);

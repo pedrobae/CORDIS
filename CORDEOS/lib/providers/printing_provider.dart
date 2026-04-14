@@ -1,93 +1,113 @@
 import 'package:cordeos/models/dtos/song_pdf_dto.dart';
-import 'package:cordeos/providers/token_cache_provider.dart';
+import 'package:cordeos/widgets/ciphers/print/page_preview_painter.dart';
 import 'package:cordeos/repositories/local/cipher_repository.dart';
 import 'package:cordeos/repositories/local/section_repository.dart';
 import 'package:cordeos/repositories/local/version_repository.dart';
+import 'package:cordeos/services/tokenization/build_service.dart';
 import 'package:cordeos/services/tokenization/helper_classes.dart';
+import 'package:cordeos/services/tokenization/position_service.dart';
+import 'package:cordeos/services/tokenization/tokenization_service.dart';
 import 'package:cordeos/utils/token_cache_keys.dart';
 import 'package:flutter/material.dart';
 
 class PrintingProvider {
-  final ciph = CipherRepository();
-  final localVer = LocalVersionRepository();
-  final sect = SectionRepository();
+  final _ciph = CipherRepository();
+  final _localVer = LocalVersionRepository();
+  final _sect = SectionRepository();
 
-  final _tokenize = TokenProvider();
+  static const _tokenizer = TokenizationService();
+  static const _builder = TokenizationBuilder();
+  static const _positioner = PositionService();
 
   Future<SongPdfDto> buildSongPdfDto({
     required int versionID,
-    required TextStyle lyricStyle,
-    required TextStyle chordStyle,
-    required TextStyle metadataStyle,
+    required SongPdfBuildOptions options,
+    String Function(String)? transposeChord,
   }) async {
-    final version = await localVer.getVersionWithId(versionID);
-
+    final version = await _localVer.getVersionWithId(versionID);
     if (version == null) {
       throw Exception('Version not found for ID: $versionID');
     }
 
-    final cipher = await ciph.getCipherById(version.cipherID);
+    final cipher = await _ciph.getCipherById(version.cipherID);
     if (cipher == null) {
       throw Exception('Cipher not found for ID: ${version.cipherID}');
     }
 
-    final sections = await sect.getSections(versionID);
-    if (sections.length != version.songStructure.toSet().length) {
+    final sections = await _sect.getSections(versionID);
+    final uniqueCodes = version.songStructure.toSet();
+    if (sections.length < uniqueCodes.length) {
       throw Exception(
-        'Mismatch between song structure and sections for version ID: $versionID',
+        "Structure has more sections than found sections for version ID: $versionID",
       );
     }
 
-    // TOKENIZATION
-    final Map<String, TokenPositionMap> content = {};
-    for (int i = 0; i < sections.length; i++) {
-      final contentCode = version.songStructure.toSet().elementAt(i);
-      final section = sections[contentCode];
+    // Measure sample text once — shared across all sections.
+    final lyricStyle = options.lyricStyle;
+    final chordStyle = options.chordStyle;
+    final lyricHeight = _builder.measureText(style: lyricStyle, text: 'Sample Text').height;
+    final chordHeight = _builder.measureText(style: chordStyle, text: 'C').height;
+    final double effectiveLayoutWidth = options.layoutWidth ?? options.pageContentWidth;
 
+    // Shared measurement map — accumulated across sections so identical
+    // glyphs are only measured once. This map is stored in the DTO and acts
+    // as the cache for the downstream PDF renderer.
+    final Map<String, Measurements> tokenMeasurements = {};
+    // Global-coordinate positions keyed by section code.
+    final Map<String, TokenPositionMap> content = {};
+    // Global Y start of each section (for rendering labels and repeat placements).
+    final Map<String, double> sectionOffsets = {};
+
+    // Iterate in songStructure first-seen order so global Y matches render order.
+    final orderedUnique = version.songStructure
+        .fold<List<String>>([], (acc, c) => acc.contains(c) ? acc : (acc..add(c)));
+
+    for (final code in orderedUnique) {
+      final section = sections[code];
       if (section == null) {
         throw Exception(
-          'Section with code $contentCode not found for version ID: $versionID',
+          'Section with code $code not found for version ID: $versionID',
         );
       }
 
-      final TokenCacheKey key = TokenCacheKey(
-        sectionIndex: i,
-        content: section.contentText,
-        maxWidth:
-            100, // TODO: This should be calculated based on the PDF layout, not hardcoded
-        lineSpacing: 0,
-        lineBreakSpacing: 0,
-        chordLyricSpacing: 0,
-        minChordSpacing: 5,
-        letterSpacing: 0,
-        showChords: true,
+      // Phase 1: Tokenize
+      final tokens = _tokenizer.tokenize(
+        section.contentText,
         showLyrics: true,
+        showChords: true,
+        transposeChord: transposeChord ?? (chord) => chord,
+      );
+
+      // Phase 2: Organize
+      final organized = _tokenizer.organize(tokens);
+
+      // Phase 3: Measure (accumulated into shared map)
+      _measureTokens(
+        tokens: tokens,
+        chordStyle: chordStyle,
+        lyricStyle: lyricStyle,
+        chordLyricSpacing: options.chordLyricSpacing,
+        measurements: tokenMeasurements,
+      );
+
+      // Phase 4: Position (local coordinates, using layoutWidth for column support)
+      content[code] = _positioner.calculateTokenPositions(
+        organizedTokens: organized,
+        measurements: tokenMeasurements,
+        maxWidth: effectiveLayoutWidth,
+        lineSpacing: 0,
+        lineBreakSpacing: options.lineBreakSpacing,
+        chordLyricSpacing: options.chordLyricSpacing,
+        minChordSpacing: options.minChordSpacing,
+        letterSpacing: 0,
         isEditMode: false,
-        transposeValue: 0,
-        chordColor: Colors.deepOrange,
-        lyricColor: Colors.black,
-      );
-
-      _tokenize.tokenize(
-        key,
-        transposeChord: (chord) {
-          return chord;
-        },
-      );
-
-      _tokenize.organize(key);
-      _tokenize.measureTokens(
-        chordStyle: chordStyle,
-        lyricStyle: lyricStyle,
-        key: key,
-      );
-      _tokenize.calculatePositions(
-        key: key,
         lyricStyle: lyricStyle,
         chordStyle: chordStyle,
+        lyricHeight: lyricHeight,
+        chordHeight: chordHeight,
       );
     }
-
+    
     return SongPdfDto(
       title: cipher.title,
       author: cipher.author,
@@ -97,10 +117,80 @@ class PrintingProvider {
       bpm: version.bpm,
       songStructure: version.songStructure,
       content: content,
-      tokenMeasurements: _tokenize.getMeasurements(),
-      lyricsStyle: lyricStyle,
-      chordsStyle: chordStyle,
-      metadataStyle: metadataStyle,
+      sectionOffsets: sectionOffsets,
+      tokenMeasurements: tokenMeasurements,
+      pageContentWidth: options.pageContentWidth,
+      layoutWidth: effectiveLayoutWidth,
+      lyricsStyle: options.lyricStyle,
+      chordsStyle: options.chordStyle,
+      metadataStyle: options.metadataStyle,
     );
+  }
+
+  /// Builds a [PagePreviewSnapshot] synchronously from an already-computed
+  /// [SongPdfDto] and display options.
+  ///
+  /// Call this after [buildSongPdfDto] resolves, or again whenever display
+  /// options change (e.g. toggling BPM / song-map / section labels) without
+  /// needing to re-read the database.
+  PagePreviewSnapshot buildPreviewSnapshot({
+    required SongPdfDto dto,
+    required SongPreviewDisplayOptions displayOptions,
+  }) {
+    return PagePreviewSnapshot.build(
+      dto: dto,
+      builder: _builder,
+      chordColor: displayOptions.chordColor,
+      lyricColor: displayOptions.lyricColor,
+      showSongMap: displayOptions.showSongMap,
+      showBpm: displayOptions.showBpm,
+      showDuration: displayOptions.showDuration,
+      songMapLabel: displayOptions.songMapLabel,
+      bpmLabel: displayOptions.bpmLabel,
+      durationLabel: displayOptions.durationLabel,
+      sectionLabelStyle: displayOptions.sectionLabelStyle,
+      sectionLabels: displayOptions.sectionLabels,
+    );
+  }
+
+  /// Measures every token in [tokens] and accumulates results into [measurements].
+  /// Uses [putIfAbsent] so identical glyphs across sections are only computed once.
+  void _measureTokens({
+    required List<ContentToken> tokens,
+    required TextStyle chordStyle,
+    required TextStyle lyricStyle,
+    required double chordLyricSpacing,
+    required Map<String, Measurements> measurements,
+  }) {
+    for (final token in tokens) {
+      switch (token.type) {
+        case TokenType.chord:
+          final key = measurementKey(token.text, chordStyle);
+          measurements.putIfAbsent(
+            key,
+            () => _builder.measureText(text: token.text, style: chordStyle),
+          );
+          break;
+
+        case TokenType.space:
+        case TokenType.lyric:
+          final key = measurementKey(token.text, lyricStyle);
+          measurements.putIfAbsent(
+            key,
+            () => _builder.measureText(text: token.text, style: lyricStyle),
+          );
+          break;
+
+        case TokenType.preSeparator:
+        case TokenType.postSeparator:
+        case TokenType.chordTarget:
+          // Targets are not shown on the PDF
+          break;
+        case TokenType.underline:
+        case TokenType.newline:
+          // Computed dynamically during positioning — nothing to pre-measure.
+          break;
+      }
+    }
   }
 }

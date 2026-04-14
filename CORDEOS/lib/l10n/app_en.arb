@@ -802,5 +802,12 @@
   "report": "Report",
   "@report": {"description": "Label for the report button"},
   "bugReportSuccess": "Bug report submitted successfully!",
-  "@bugReportSuccess": {"description": "Message for succesfull bug report"}
+  "@bugReportSuccess": {"description": "Message for succesfull bug report"},
+
+  "printPreview": "Print Preview",
+  "@printPreview": {"description": "Title for the print preview screen"},
+  "printColumns": "Columns",
+  "@printColumns": {"description": "Label for column count selector in print settings"},
+  "printMetadata": "Metadata",
+  "@printMetadata": {"description": "Label for metadata toggle in print settings"}
 }

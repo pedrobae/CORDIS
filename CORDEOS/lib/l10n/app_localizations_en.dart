@@ -1225,4 +1225,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bugReportSuccess => 'Bug report submitted successfully!';
+
+  @override
+  String get printPreview => 'Print Preview';
+
+  @override
+  String get printColumns => 'Columns';
+
+  @override
+  String get printMetadata => 'Metadata';
 }

@@ -2281,6 +2281,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Bug report submitted successfully!'**
   String get bugReportSuccess;
+
+  /// Title for the print preview screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Prévia de Impressão'**
+  String get printPreview;
+
+  /// Label for column count selector in print settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Colunas'**
+  String get printColumns;
+
+  /// Label for metadata toggle in print settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Cabeçalho'**
+  String get printMetadata;
 }
 
 class _AppLocalizationsDelegate

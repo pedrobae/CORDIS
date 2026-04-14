@@ -807,5 +807,12 @@
   "report": "Relatar",
   "@report": {"description": "Label for the report button"},
   "bugReportSuccess": "Bug report submitted successfully!",
-  "@bugReportSuccess": {"description": "Message for succesfull bug report"}
+  "@bugReportSuccess": {"description": "Message for succesfull bug report"},
+
+  "printPreview": "Prévia de Impressão",
+  "@printPreview": {"description": "Title for the print preview screen"},
+  "printColumns": "Colunas",
+  "@printColumns": {"description": "Label for column count selector in print settings"},
+  "printMetadata": "Cabeçalho",
+  "@printMetadata": {"description": "Label for metadata toggle in print settings"}
 }

@@ -1236,4 +1236,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get bugReportSuccess => 'Bug report submitted successfully!';
+
+  @override
+  String get printPreview => 'Prévia de Impressão';
+
+  @override
+  String get printColumns => 'Colunas';
+
+  @override
+  String get printMetadata => 'Cabeçalho';
 }
