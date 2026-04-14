@@ -21,8 +21,9 @@ class _ChordPaletteState extends State<ChordPalette> {
   String customChord = '';
   final _chordVariationsNotifier = ValueNotifier<List<String>>([]);
 
-  void _showChordVariations(String baseChord, int chordIndex) {
-    final chordVariations = ChordHelper().getVariationsForChord(
+  void _showChordVariations(String key, String baseChord, int chordIndex) {
+    final chordVariations = ChordHelper().getChordVariationsOnKey(
+      key,
       baseChord,
       chordIndex,
     );
@@ -181,7 +182,7 @@ class _ChordPaletteState extends State<ChordPalette> {
                             final chord = chords[i];
                             return GestureDetector(
                               onLongPress: () => {
-                                _showChordVariations(chord, i),
+                                _showChordVariations(originalKey ?? 'C', chord, i),
                               },
                               child: _buildDraggableChordToken(chord),
                             );
