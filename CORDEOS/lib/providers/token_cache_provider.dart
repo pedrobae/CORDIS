@@ -251,7 +251,7 @@ class TokenProvider extends ChangeNotifier {
     required Color contentColor,
     required Color onContentColor,
     required bool isEnabled,
-    required Function(ContentToken, ContentToken) onAddChord,
+    required Function(ContentToken, ContentToken, {bool addBefore}) onAddChord,
     required Function(ContentToken) onRemoveChord,
   }) {
     final chordHeight = _builder

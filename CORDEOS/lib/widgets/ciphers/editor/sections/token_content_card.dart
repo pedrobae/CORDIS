@@ -49,8 +49,10 @@ class _TokenContentCardState extends State<TokenContentCard> {
     _tokenProv = context.read<TokenProvider>();
   }
 
-  Function(ContentToken, ContentToken) _addChord(TokenCacheKey key) {
-    return (draggedChord, targetToken) {
+  Function(ContentToken, ContentToken, {bool addBefore}) _addChord(
+    TokenCacheKey key,
+  ) {
+    return (draggedChord, targetToken, {bool addBefore = true}) {
       final sect = context.read<SectionProvider>();
       final tokenProv = context.read<TokenProvider>();
 
@@ -60,7 +62,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
       final index = tokens.indexWhere((t) => t == targetToken);
       if (index == -1) return;
-      tokens.insert(index, draggedChord);
+      tokens.insert(addBefore ? index : index + 1, draggedChord);
 
       final updatedContent = tokenProv.getContent(key);
 
@@ -173,11 +175,13 @@ class _TokenContentCardState extends State<TokenContentCard> {
                                         return Icon(
                                           Icons.delete,
                                           color: Colors.red,
+                                          size: 32,
                                         );
                                       }
                                       return Icon(
                                         Icons.delete,
                                         color: Colors.grey,
+                                        size: 32,
                                       );
                                     },
                               )
@@ -200,116 +204,117 @@ class _TokenContentCardState extends State<TokenContentCard> {
               ),
 
               /// CONTENT
-              Padding(
-                padding: const EdgeInsets.all(4),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: TokenizationConstants.chordTokenWidthPadding,
-                  ),
-                  child: Selector<TranspositionProvider, int>(
-                    selector: (context, trans) => trans.transposeValue,
-                    builder: (context, transposeValue, child) {
-                      // PHASE 1: Ensure tokens are cached & organized for this content + filters
-                      _tokensKey!.transposeValue = transposeValue;
+              Selector<TranspositionProvider, int>(
+                selector: (context, trans) => trans.transposeValue,
+                builder: (context, transposeValue, child) {
+                  // PHASE 1: Ensure tokens are cached & organized for this content + filters
+                  _tokensKey!.transposeValue = transposeValue;
 
-                      _tokenProv.tokenize(
-                        _tokensKey!,
-                        transposeChord: (chord) => chord,
+                  _tokenProv.tokenize(
+                    _tokensKey!,
+                    transposeChord: (chord) => chord,
+                  );
+                  _tokenProv.organize(_tokensKey!);
+                  return Selector2<
+                    LayoutSetProvider,
+                    TranspositionProvider,
+                    ({
+                      TextStyle lyricStyle,
+                      TextStyle chordStyle,
+                      double chordLyricSpacing,
+                    })
+                  >(
+                    selector: (context, laySet, trans) => (
+                      lyricStyle: laySet.lyricStyle,
+                      chordStyle: laySet.chordStyle,
+                      chordLyricSpacing: laySet.chordLyricSpacing,
+                    ),
+                    builder: (context, measure, child) {
+                      // PHASE 2: Ensure measurements are cached for this content + style
+                      _tokensKey!.chordLyricSpacing = measure.chordLyricSpacing;
+                      _tokenProv.measureTokens(
+                        chordStyle: measure.chordStyle,
+                        lyricStyle: measure.lyricStyle,
+                        key: _tokensKey!,
                       );
-                      _tokenProv.organize(_tokensKey!);
-                      return Selector2<
+
+                      return Selector<
                         LayoutSetProvider,
-                        TranspositionProvider,
                         ({
-                          TextStyle lyricStyle,
-                          TextStyle chordStyle,
-                          double chordLyricSpacing,
+                          double letterSpacing,
+                          double lineSpacing,
+                          double lineBreakSpacing,
+                          double minChordSpacing,
                         })
                       >(
-                        selector: (context, laySet, trans) => (
-                          lyricStyle: laySet.lyricStyle,
-                          chordStyle: laySet.chordStyle,
-                          chordLyricSpacing: laySet.chordLyricSpacing,
-                        ),
-                        builder: (context, measure, child) {
-                          // PHASE 2: Ensure measurements are cached for this content + style
-                          _tokensKey!.chordLyricSpacing =
-                              measure.chordLyricSpacing;
-                          _tokenProv.measureTokens(
-                            chordStyle: measure.chordStyle,
-                            lyricStyle: measure.lyricStyle,
+                        selector: (context, laySet) {
+                          return (
+                            letterSpacing: laySet.letterSpacing,
+                            lineSpacing: laySet.lineSpacing,
+                            lineBreakSpacing: laySet.lineBreakSpacing,
+                            minChordSpacing: laySet.minChordSpacing,
+                          );
+                        },
+                        builder: (context, l, child) {
+                          // PHASE 3: Calculate and cache widget positions based on width constraints
+                          final width =
+                              MediaQuery.sizeOf(context).width -
+                              2.4 - // Container border
+                              8 - // Container padding
+                              32 - // ScrollView padding
+                              TokenizationConstants.chordTokenWidthPadding;
+                          _tokensKey!.letterSpacing = l.letterSpacing;
+                          _tokensKey!.lineSpacing = l.lineSpacing;
+                          _tokensKey!.lineBreakSpacing = l.lineBreakSpacing;
+                          _tokensKey!.minChordSpacing = l.minChordSpacing;
+                          _tokensKey!.maxWidth = width;
+
+                          _tokenProv.calculatePositions(
                             key: _tokensKey!,
+                            lyricStyle: measure.lyricStyle,
+                            chordStyle: measure.chordStyle,
                           );
 
-                          return Selector<
-                            LayoutSetProvider,
-                            ({
-                              double letterSpacing,
-                              double lineSpacing,
-                              double lineBreakSpacing,
-                              double minChordSpacing,
-                            })
-                          >(
-                            selector: (context, laySet) {
-                              return (
-                                letterSpacing: laySet.letterSpacing,
-                                lineSpacing: laySet.lineSpacing,
-                                lineBreakSpacing: laySet.lineBreakSpacing,
-                                minChordSpacing: laySet.minChordSpacing,
-                              );
-                            },
-                            builder: (context, l, child) {
-                              // PHASE 3: Calculate and cache widget positions based on width constraints
-                              final width =
-                                  MediaQuery.sizeOf(context).width -
-                                  32; // 32 for padding
-                              _tokensKey!.letterSpacing = l.letterSpacing;
-                              _tokensKey!.lineSpacing = l.lineSpacing;
-                              _tokensKey!.lineBreakSpacing = l.lineBreakSpacing;
-                              _tokensKey!.minChordSpacing = l.minChordSpacing;
-                              _tokensKey!.maxWidth = width;
+                          final positions = _tokenProv.getPositions(
+                            _tokensKey!,
+                            measure.chordStyle,
+                            measure.lyricStyle,
+                          );
 
-                              _tokenProv.calculatePositions(
-                                key: _tokensKey!,
-                                lyricStyle: measure.lyricStyle,
-                                chordStyle: measure.chordStyle,
-                              );
+                          final content = _tokenProv.buildEditWidgets(
+                            key: _tokensKey!,
+                            lyricStyle: measure.lyricStyle,
+                            chordStyle: measure.chordStyle,
+                            contentColor: s.section!.contentColor,
+                            chordTargetColor: colorScheme.surfaceTint,
+                            surfaceColor: colorScheme.surface,
+                            onSurfaceColor: colorScheme.onSurface,
+                            onContentColor: colorScheme.surface,
+                            isEnabled: widget.isEnabled,
+                            onAddChord: _addChord(_tokensKey!),
+                            onRemoveChord: _removeChord(_tokensKey!),
+                          );
 
-                              final positions = _tokenProv.getPositions(
-                                _tokensKey!,
-                                measure.chordStyle,
-                                measure.lyricStyle,
-                              );
-
-                              final content = _tokenProv.buildEditWidgets(
-                                key: _tokensKey!,
-                                lyricStyle: measure.lyricStyle,
-                                chordStyle: measure.chordStyle,
-                                contentColor: s.section!.contentColor,
-                                chordTargetColor: colorScheme.surfaceTint,
-                                surfaceColor: colorScheme.surface,
-                                onSurfaceColor: colorScheme.onSurface,
-                                onContentColor: colorScheme.surface,
-                                isEnabled: widget.isEnabled,
-                                onAddChord: _addChord(_tokensKey!),
-                                onRemoveChord: _removeChord(_tokensKey!),
-                              );
-
-                              return SizedBox(
-                                width: width,
-                                height: positions?.contentHeight,
-                                child: Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [...content.tokens],
-                                ),
-                              );
-                            },
+                          return Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Container(
+                              padding: const EdgeInsets.only(
+                                left: TokenizationConstants
+                                    .chordTokenWidthPadding,
+                              ),
+                              width: width,
+                              height: positions?.contentHeight,
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [...content.tokens],
+                              ),
+                            ),
                           );
                         },
                       );
                     },
-                  ),
-                ),
+                  );
+                },
               ),
             ],
           ),

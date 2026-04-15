@@ -101,10 +101,7 @@ class TokenizationBuilder {
         case TokenType.underline:
           underlines.add(
             UnderLinePaintInstruction(
-              offset: Offset(
-                offset.dx,
-                offset.dy + positions.lineHeight,
-              ),
+              offset: Offset(offset.dx, offset.dy + positions.lineHeight),
               width: measurements[token.toKey()]!.width,
             ),
           );
@@ -151,7 +148,7 @@ class TokenizationBuilder {
     required Color contentColor,
     required Color onContentColor,
     required bool isEnabled,
-    required Function(ContentToken, ContentToken) onAddChord,
+    required Function(ContentToken, ContentToken, {bool addBefore}) onAddChord,
     required Function(ContentToken) onRemoveChord,
     required Function() toggleDrag,
   }) {
@@ -386,7 +383,7 @@ class TokenizationBuilder {
     required Color surfaceColor,
     required Color onSurfaceColor,
     required bool isEnabled,
-    required Function(ContentToken, ContentToken) onAddChord,
+    required Function(ContentToken, ContentToken, {bool addBefore}) onAddChord,
     required Function(ContentToken) onRemoveChord,
   }) {
     final msr = token.type == TokenType.chordTarget
@@ -438,7 +435,7 @@ class TokenizationBuilder {
     required Color surfaceColor,
     required Color onSurfaceColor,
     required bool isEnabled,
-    required Function(ContentToken, ContentToken) onAddChord,
+    required Function(ContentToken, ContentToken, {bool addBefore}) onAddChord,
     required Function(ContentToken) onRemoveChord,
   }) {
     final dragTargetChild = SizedBox(
@@ -478,7 +475,7 @@ class TokenizationBuilder {
     required Color surfaceColor,
     required Color onSurfaceColor,
     required bool isEnabled,
-    required Function(ContentToken, ContentToken) onAddChord,
+    required Function(ContentToken, ContentToken, {bool addBefore}) onAddChord,
     required Function(ContentToken) onRemoveChord,
   }) {
     final dragTargetChild = SizedBox(
@@ -517,7 +514,7 @@ class TokenizationBuilder {
     required Color surfaceColor,
     required Color onSurfaceColor,
     required bool isEnabled,
-    required Function(ContentToken, ContentToken) onAddChord,
+    required Function(ContentToken, ContentToken, {bool addBefore}) onAddChord,
     required Function(ContentToken) onRemoveChord,
     bool isChordTarget = false,
   }) {
@@ -525,7 +522,13 @@ class TokenizationBuilder {
         ? DragTarget<ContentToken>(
             onAcceptWithDetails: (details) {
               onRemoveChord(details.data);
-              onAddChord(details.data, token);
+              onAddChord(
+                details.data,
+                token,
+                addBefore: (token.type == TokenType.postSeparator)
+                    ? false
+                    : true,
+              );
             },
             builder: (context, candidateData, rejectedData) {
               if (candidateData.isNotEmpty) {

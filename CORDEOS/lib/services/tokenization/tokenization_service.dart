@@ -42,7 +42,8 @@ class TokenizationService {
 
           lineTokens.add(ContentToken(type: TokenType.newline, text: char));
 
-          _prePostHandling(lineTokens);
+          _preHandling(lineTokens);
+          _postHandling(lineTokens);
           _removeAdjacentSeparators(lineTokens);
         }
 
@@ -79,7 +80,8 @@ class TokenizationService {
 
     if (lineTokens.isNotEmpty) {
       _ensureSeparators(lineTokens);
-      _prePostHandling(lineTokens);
+      _preHandling(lineTokens);
+      _postHandling(lineTokens);
       _removeAdjacentSeparators(lineTokens);
       tokens.addAll(lineTokens);
     }
@@ -102,9 +104,10 @@ class TokenizationService {
     }
   }
 
+  /// Mutates the line tokens to ensure that chord targets are positioned before chords,
   /// Insert chord targets before preceding chords
   /// Remove spaces on preceding sides of lyrics
-  void _prePostHandling(List<ContentToken> lineTokens) {
+  void _preHandling(List<ContentToken> lineTokens) {
     final iteratingLine = List<ContentToken>.from(lineTokens);
     int offset = 0; // Track the offset caused by insertions
     for (int i = 0; i < iteratingLine.length; i++) {
@@ -112,6 +115,34 @@ class TokenizationService {
       if (token.type == TokenType.preSeparator) {
         break;
       } else if (token.type == TokenType.chord) {
+        lineTokens.insert(
+          i + offset,
+          ContentToken(type: TokenType.chordTarget, text: token.text),
+        );
+        offset++; // Increment the offset for each insertion
+      }
+      if (token.type == TokenType.space) {
+        lineTokens.removeAt(i + offset);
+        offset--; // Decrement the offset for each removal
+      }
+    }
+  }
+
+  /// Mutates the line tokens to ensure that chord targets are positioned before chords,
+  /// Insert chord targets before preceding chords
+  /// Remove spaces on preceding sides of lyrics
+  void _postHandling(List<ContentToken> lineTokens) {
+    final iteratingLine = List<ContentToken>.from(lineTokens);
+    int offset = 0; // Track the offset caused by removals
+    for (
+      int i = iteratingLine.indexWhere(
+        (token) => token.type == TokenType.postSeparator,
+      );
+      i < iteratingLine.length;
+      i++
+    ) {
+      final token = iteratingLine[i];
+      if (token.type == TokenType.chord) {
         lineTokens.insert(
           i + offset,
           ContentToken(type: TokenType.chordTarget, text: token.text),
