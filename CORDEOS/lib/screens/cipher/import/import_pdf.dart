@@ -312,8 +312,11 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
     LocalVersionProvider localVer,
     CipherProvider ciph,
   ) async {
-    await imp.importText();
-    await par.parseCipher(imp.importedCipher!);
+    final importedCipher = await imp.importText();
+    if (importedCipher == null) {
+      throw Exception('Failed to import text from PDF');
+    }
+    await par.parseCipher(importedCipher);
     nav.push(
       () => EditCipherScreen(
         cipherID: widget.cipherID,

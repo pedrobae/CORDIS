@@ -2,7 +2,6 @@ import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/models/dtos/pdf_dto.dart';
 import 'package:cordeos/models/dtos/version_dto.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 enum ImportType { text, pdf, image }
 
@@ -78,12 +77,6 @@ class ParsingResult {
   final List<RawSection> rawSections = [];
   final Map<String, SectionDto> parsedSections = {};
   final List<String> songStructure = [];
-  List<PdfFontStyle>? dominantChordStyle;
-
-  /// PDF-specific formatting analysis (only populated for PDF imports)
-  final Map<List<PdfFontStyle>, int> fontStyleCount = {};
-  final Map<List<PdfFontStyle>, Map<List<PdfFontStyle>, int>>
-  followingStyleCounts = {};
 
   ParsingResult({required this.strategy, required this.rawText});
 

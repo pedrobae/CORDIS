@@ -249,10 +249,8 @@ class LineData {
   final double? fontSize;
   final Rect? bounds;
   final List<PdfFontStyle>? fontStyle;
-  final double? avgWordLength;
   final int? wordCount;
   final int lineIndex;
-  int? avgSpaceBetweenWords;
   final List<WordData>? wordList;
 
   LineData({
@@ -263,8 +261,6 @@ class LineData {
     this.fontStyle,
     required this.lineIndex,
     this.wordList,
-    this.avgWordLength,
-    this.avgSpaceBetweenWords,
   });
 
   int get pdfWordCount => wordList!.length;

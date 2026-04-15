@@ -2,8 +2,8 @@ import 'package:cordeos/screens/main_screen.dart';
 import 'package:cordeos/screens/user/login_screen.dart';
 import 'package:cordeos/services/firebase/remote_config_service.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
+import 'package:cordeos/widgets/common/icon_load_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie_native/lottie_native.dart';
 import 'package:provider/provider.dart';
 import 'package:cordeos/providers/user/my_auth_provider.dart';
 import 'package:cordeos/providers/cipher/cipher_provider.dart';
@@ -157,13 +157,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 150,
-              height: 150,
-              child: LottieView.fromAsset(
-                filePath: 'assets/animations/iconLoad.json',
-              ),
-            ),
+            IconLoadIndicator(size: 150),
             const SizedBox(height: 32),
             if (_isPreloading) ...[
               const SizedBox(height: 16),

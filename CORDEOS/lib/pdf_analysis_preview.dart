@@ -332,12 +332,6 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
         if (documentData != null && documentData.projectedBounds.isNotEmpty)
           const SizedBox(height: 16),
 
-        // Average spacing between words chart
-        _buildChartCard(
-          'Espaçamento Médio Entre Palavras',
-          _buildAverageWordSpacingChart(displayData, theme),
-          theme,
-        ),
         const SizedBox(height: 16),
 
         // Font Size chart
@@ -509,70 +503,6 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildAverageWordSpacingChart(List<LineData> data, ThemeData theme) {
-    if (data.isEmpty) {
-      return const Center(child: Text('Dados insuficientes'));
-    }
-
-    final spots = data.asMap().entries.map((entry) {
-      final avgSpacing = _averageSpacingForLine(entry.value);
-      return FlSpot(entry.key.toDouble() + 1, avgSpacing);
-    }).toList();
-
-    return LineChart(
-      LineChartData(
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: false,
-            color: theme.colorScheme.secondary,
-            barWidth: 2,
-            dotData: const FlDotData(show: false),
-          ),
-        ],
-        titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: true, reservedSize: 40),
-          ),
-          bottomTitles: AxisTitles(
-            axisNameWidget: const Text('Número da Linha'),
-            sideTitles: SideTitles(showTitles: true, reservedSize: 30),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-        ),
-        borderData: FlBorderData(show: true),
-        gridData: const FlGridData(show: true),
-      ),
-    );
-  }
-
-  double _averageSpacingForLine(LineData line) {
-    if (line.avgSpaceBetweenWords != null) {
-      return line.avgSpaceBetweenWords!.toDouble();
-    }
-
-    final words = line.wordList!;
-    if (words.length < 2) {
-      line.avgSpaceBetweenWords ??= 0;
-      return 0;
-    }
-
-    double totalSpacing = 0;
-    for (int i = 0; i < words.length - 1; i++) {
-      final gap = max(0.0, words[i + 1].bounds.left - words[i].bounds.right);
-      totalSpacing += gap;
-    }
-
-    final avg = totalSpacing / (words.length - 1);
-    line.avgSpaceBetweenWords = avg.round();
-    return avg;
   }
 
   Widget _buildFontSizeChart(List<LineData> data, ThemeData theme) {

@@ -2,14 +2,24 @@ import 'package:cordeos/models/domain/parsing_cipher.dart';
 import 'package:cordeos/models/dtos/pdf_dto.dart';
 import 'package:cordeos/utils/section_constants.dart';
 
-enum SeparatorType { doubleNewLine, bracket, parenthesis, hyphen }
+enum SeparatorType { emptyLine, bracket, parenthesis, hyphen }
 
 class SectionParser {
-  void parseByDoubleNewLine(ParsingResult result) {
-    List<String> rawSections = result.rawText.split('\n\n');
+  void parseByEmptyLine(ParsingResult result) {
+    List<String> rawSections = [];
+    final StringBuffer buffer = StringBuffer();
+    for (var line in result.lines) {
+      if (line.text.trim().isEmpty) {
+        // EMPTY LINE - Section break
+        rawSections.add(buffer.toString());
+        buffer.clear();
+      } else {
+        buffer.writeln(line.text);
+      }
+    }
 
     for (int i = 0; i < rawSections.length; i++) {
-      String sectionContent = rawSections[i].trim();
+      String sectionContent = rawSections[i].trimRight();
       if (sectionContent.isEmpty) {
         continue; // Skip empty sections
       }
@@ -17,7 +27,7 @@ class SectionParser {
       RawSection section = RawSection(
         index: i,
         content: sectionContent,
-        numberOfLines: '\n'.allMatches(sectionContent).length + 1,
+        numberOfLines: sectionContent.split('\n').length,
         duplicateOf: null,
         suggestedLabel: SectionLabelType.unknown.canonicalLabel,
       );
@@ -63,17 +73,19 @@ class SectionParser {
           : rawText.length;
       SectionLabel label = match['label'];
 
+      final content = rawText.substring(sectionStart, sectionEnd).trimRight();
+      if (content.isEmpty) {
+        continue; // Skip empty sections
+      }
+
       result.rawSections.add(
         RawSection(
           index: result.rawSections.length,
           suggestedLabel: label.canonicalLabel,
           code: label.code,
           color: label.color,
-          content: rawText.substring(sectionStart, sectionEnd).trim(),
-          numberOfLines: rawText
-              .substring(sectionStart, sectionEnd)
-              .split('\n')
-              .length,
+          content: content,
+          numberOfLines: content.split('\n').length,
           duplicateOf: null,
         ),
       );
@@ -282,11 +294,9 @@ class SectionParser {
 
       if (labelData['isValid']) {
         // Remove label from LineData
-        linesData[0].text = linesData[0].text
-            .substring(labelData['labelEnd'])
-            .trimLeft();
+        linesData[0].text = linesData[0].text.substring(labelData['labelEnd']);
 
-        if (linesData[0].text.isEmpty) {
+        if (linesData[0].text.trim().isEmpty) {
           // If the line is now empty, remove it from linesData
           linesData.removeAt(0);
         }
@@ -296,9 +306,9 @@ class SectionParser {
     for (var line in linesData) {
       buffer.writeln(line.text);
     }
-    String sectionContent = buffer.toString().trim();
+    String sectionContent = buffer.toString().trimRight();
 
-    if (sectionContent.trim().isEmpty) {
+    if (sectionContent.isEmpty) {
       return; // Skip empty sections
     }
 

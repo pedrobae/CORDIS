@@ -8,6 +8,7 @@ import 'package:cordeos/providers/section/section_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/screens/cipher/edit_cipher.dart';
 import 'package:cordeos/widgets/common/filled_text_button.dart';
+import 'package:cordeos/widgets/common/icon_load_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/providers/cipher/import_provider.dart';
 import 'package:provider/provider.dart';
@@ -25,9 +26,14 @@ class ImportTextScreen extends StatefulWidget {
 class _ImportTextScreenState extends State<ImportTextScreen> {
   final TextEditingController _importTextController = TextEditingController();
 
+  void _onImportTextChanged() {
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
+    _importTextController.addListener(_onImportTextChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ImportProvider>().setImportType(ImportType.text);
       context.read<ImportProvider>().setParsingStrategy(
@@ -38,6 +44,7 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
 
   @override
   void dispose() {
+    _importTextController.removeListener(_onImportTextChanged);
     _importTextController.dispose();
     super.dispose();
   }
@@ -91,7 +98,7 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(child: CircularProgressIndicator());
+    return const Center(child: IconLoadIndicator(size: 150));
   }
 
   Widget _buildContentState(ImportProvider imp, ParserProvider par) {
@@ -200,9 +207,12 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
 
     final text = _importTextController.text;
     if (text.isNotEmpty) {
-      await imp.importText(data: text);
+      final importedCipher = await imp.importText(data: text);
 
-      par.parseCipher(imp.importedCipher!);
+      if (importedCipher == null) {
+        throw Exception('Failed to import text');
+      }
+      par.parseCipher(importedCipher);
 
       if (widget.cipherID != -1 && widget.versionID != -1) {
         // CLEAN THE SCREEN STACK IF COMING FROM EDITING
