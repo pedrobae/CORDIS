@@ -23,6 +23,22 @@ class DocumentData {
     this.hasColumns = const {},
   });
 
+  List<LineData> get lines {
+    List<LineData> allLines = [];
+    for (var page in pageLines.values) {
+      allLines.addAll(page);
+    }
+    return allLines;
+  }
+
+  List<LineData> get linesWithColumns {
+    List<LineData> allLines = [];
+    for (var page in pageLinesWithColumns.values) {
+      allLines.addAll(page);
+    }
+    return allLines;
+  }
+
   factory DocumentData.fromGlyphMap(
     Map<int, List<TextGlyph>> pageGlyphs,
     String docName,

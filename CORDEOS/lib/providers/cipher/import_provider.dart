@@ -95,10 +95,10 @@ class ImportProvider extends ChangeNotifier {
 
           final importedLines =
               _importVariation == ImportVariation.pdfWithColumns
-              ? pdfDocument.pageLinesWithColumns[0]
-              : pdfDocument.pageLines[0];
+              ? pdfDocument.linesWithColumns
+              : pdfDocument.lines;
 
-          if (importedLines == null || importedLines.isEmpty) {
+          if (importedLines.isEmpty) {
             throw Exception('No text lines were extracted from the PDF');
           }
 
