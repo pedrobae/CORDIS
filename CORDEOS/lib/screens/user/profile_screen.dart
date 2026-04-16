@@ -9,6 +9,7 @@ import 'package:cordeos/screens/user/new_password_screen.dart';
 import 'package:cordeos/utils/locale.dart';
 import 'package:cordeos/widgets/common/delete_confirmation.dart';
 import 'package:cordeos/widgets/common/filled_text_button.dart';
+import 'package:cordeos/widgets/common/icon_load_indicator.dart';
 import 'package:cordeos/widgets/common/labeled_country_picker.dart';
 import 'package:cordeos/widgets/common/labeled_language_picker.dart';
 import 'package:cordeos/widgets/common/labeled_text_field.dart';
@@ -297,13 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       selector: (_, info) => (info.isLoading, info.appVersion),
       builder: (context, data, child) {
         final (isLoading, appVersion) = data;
-        if (isLoading) {
-          return const SizedBox(
-            height: 20,
-            width: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          );
-        }
+        if (isLoading) return const IconLoadIndicator(size: 20);
         return Text(
           appVersion,
           textAlign: TextAlign.center,

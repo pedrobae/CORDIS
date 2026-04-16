@@ -30,56 +30,56 @@ class Palette {
 }
 
 class BrandPalette extends Palette {
-  static Color white = Palette._neutral;
-  static Color black = Palette._darkNeutral;
+  static final Color white = Palette._neutral;
+  static final Color black = Palette._darkNeutral;
 
   // ===== PRECOMPUTED COLORS ======
   // GREEN THEME
   // PRIMARIES (Green)
-  static Color green = Palette._green;
-  static Color greenTint = const Color.fromARGB(255, 129, 167, 163);
+  static final Color green = Palette._green;
+  static final Color greenTint = const Color.fromARGB(255, 129, 167, 163);
 
   // =============================================================================
   // ORANGE THEME
   // PRIMARIES (Orange)
-  static Color orange = Palette._orange;
-  static Color orangeTint = Palette._orange.withAlpha(76);
+  static final Color orange = Palette._orange;
+  static final Color orangeTint = Palette._orange.withAlpha(76);
 
   // =============================================================================
   // GOLD THEME
   // PRIMARIES (Gold)
-  static Color gold = Palette._gold;
-  static Color goldTint = Palette._gold.withAlpha(76);
+  static final Color gold = Palette._gold;
+  static final Color goldTint = Palette._gold.withAlpha(76);
 
   // =============================================================================
   //  BURGUNDY THEME
   //  PRIMARIES (burgundy)
-  static Color burgundy = Palette._burgundy;
-  static Color burgundyTint = const Color.fromARGB(255, 190, 150, 170);
+  static final Color burgundy = Palette._burgundy;
+  static final Color burgundyTint = const Color.fromARGB(255, 190, 150, 170);
 }
 
 class NeutralPalette extends Palette {
   // Neutral colors for surfaces using final with calculations
-  static Color surface1Light = Palette.darken(Palette._neutral, 0.25);
-  static Color surface2Light = Palette.darken(Palette._neutral, 0.2);
-  static Color surface3Light = Palette.darken(Palette._neutral, 0.15);
-  static Color surface4Light = Palette.darken(Palette._neutral, 0.1);
-  static Color surface5Light = Palette.darken(Palette._neutral, 0.05);
-  static Color surfaceLight = Palette._neutral;
+  static final Color surface1Light = Palette.darken(Palette._neutral, 0.25);
+  static final Color surface2Light = Palette.darken(Palette._neutral, 0.2);
+  static final Color surface3Light = Palette.darken(Palette._neutral, 0.15);
+  static final Color surface4Light = Palette.darken(Palette._neutral, 0.1);
+  static final Color surface5Light = Palette.darken(Palette._neutral, 0.05);
+  static final Color surfaceLight = Palette._neutral;
 
-  static Color surface1Dark = Palette.lighten(Palette._darkNeutral, 0.25);
-  static Color surface2Dark = Palette.lighten(Palette._darkNeutral, 0.2);
-  static Color surface3Dark = Palette.lighten(Palette._darkNeutral, 0.15);
-  static Color surface4Dark = Palette.lighten(Palette._darkNeutral, 0.1);
-  static Color surface5Dark = Palette.lighten(Palette._darkNeutral, 0.05);
-  static Color surfaceDark = Palette._darkNeutral;
+  static final Color surface1Dark = Palette.lighten(Palette._darkNeutral, 0.25);
+  static final Color surface2Dark = Palette.lighten(Palette._darkNeutral, 0.2);
+  static final Color surface3Dark = Palette.lighten(Palette._darkNeutral, 0.15);
+  static final Color surface4Dark = Palette.lighten(Palette._darkNeutral, 0.1);
+  static final Color surface5Dark = Palette.lighten(Palette._darkNeutral, 0.05);
+  static final Color surfaceDark = Palette._darkNeutral;
 
   // Neutral elements using final with calculations
-  static Color outlineLight = Palette.darken(
+  static final Color outlineLight = Palette.darken(
     Palette._neutral,
     0.5,
   ); // Light outline
-  static Color outlineDark = Palette.lighten(
+  static final Color outlineDark = Palette.lighten(
     Palette._darkNeutral,
     0.5,
   ); // Dark outline
