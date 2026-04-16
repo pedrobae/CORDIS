@@ -244,6 +244,21 @@ class PositionService {
             cursor.yOffset,
           );
 
+          final msr =
+              ctx.measurements[chordTargetKey(
+                token.text,
+                ctx.chordStyle,
+                ctx.lyricStyle,
+              )]!;
+
+          if (ctx.checkOverflow && (cursor.chordX + msr.width > ctx.maxWidth)) {
+            return _WordLayoutResult(
+              wordPositions: positions,
+              tokensToAdd: tokensToAdd,
+              lineBroke: true,
+            );
+          }
+
           charIndex++;
           break;
         // Underlines are injected on-demand above; newlines are handled at
