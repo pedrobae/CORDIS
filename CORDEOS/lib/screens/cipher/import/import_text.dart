@@ -15,7 +15,7 @@ import 'package:provider/provider.dart';
 
 class ImportTextScreen extends StatefulWidget {
   final int cipherID;
-  final int versionID;
+  final int versionID; 
 
   const ImportTextScreen({super.key, this.cipherID = -1, this.versionID = -1});
 

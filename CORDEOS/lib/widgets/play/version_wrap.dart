@@ -28,26 +28,26 @@ class VersionWrap extends StatelessWidget {
       LayoutSetProvider,
       LocalVersionProvider,
       CloudVersionProvider,
-      ({Axis wrapDirection, List<String> filteredStructure})
+      ({Axis wrapDirection, List<int> filteredStructure})
     >(
       selector: (context, laySet, localVer, cloudVer) {
         final songStructure = versionID is String
             ? cloudVer.getVersion(versionID)!.songStructure
             : localVer.getSongStructure(versionID);
 
-        final filteredStructure = <String>[];
-        for (var code in songStructure) {
-          if (laySet.showAnnotations == false && isAnnotation(code)) {
+        final filteredStructure = <int>[];
+        for (var key in songStructure) {
+          if (laySet.showAnnotations == false && isAnnotation(key)) {
             continue;
           }
-          if (laySet.showTransitions == false && isTransition(code)) {
+          if (laySet.showTransitions == false && isTransition(key)) {
             continue;
           }
           if (laySet.showRepeatSections == false &&
-              filteredStructure.contains(code)) {
+              filteredStructure.contains(key)) {
             continue;
           }
-          filteredStructure.add(code);
+          filteredStructure.add(key);
         }
 
         return (
@@ -147,7 +147,7 @@ class VersionWrap extends StatelessWidget {
 
   List<Widget> _buildSectionCards(
     BuildContext context,
-    List<String> filteredStructure,
+    List<int> filteredStructure,
   ) {
     if (versionID == null) return [const SizedBox.shrink()];
 
@@ -160,15 +160,15 @@ class VersionWrap extends StatelessWidget {
     for (var i = 0; i < filteredStructure.length; i++) {
       final key = scroll.registerSection(itemIndex, i);
 
-      final code = filteredStructure[i];
+      final sectionKey = filteredStructure[i];
 
       final section =
-          sect.getSection(versionID, code) ??
+          sect.getSection(versionKey: versionID, sectionKey: sectionKey) ??
           (versionID is String
               ? () {
                   final sectionDto = cloudVer
                       .getVersion(versionID)
-                      ?.sections[code];
+                      ?.sections[sectionKey];
                   if (sectionDto == null) return null;
                   return sectionDto.toDomain();
                 }()
@@ -185,7 +185,7 @@ class VersionWrap extends StatelessWidget {
         section.contentText.split('\n').length,
       );
 
-      if (isAnnotation(code)) {
+      if (isAnnotation(sectionKey)) {
         sectionWidgets.add(
           AnnotationCard(
             key: key,
@@ -203,7 +203,7 @@ class VersionWrap extends StatelessWidget {
             index: i,
             itemIndex: itemIndex,
             sectionType: section.contentType,
-            sectionCode: code,
+            sectionKey: sectionKey,
             sectionText: section.contentText,
             sectionColor: section.contentColor,
           ),

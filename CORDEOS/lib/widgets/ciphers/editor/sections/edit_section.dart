@@ -12,13 +12,13 @@ import 'package:provider/provider.dart';
 
 class EditSectionScreen extends StatefulWidget {
   final int versionID;
-  final String sectionCode;
+  final int sectionKey;
   final bool isNewSection;
   final bool canChangeType;
 
   const EditSectionScreen({
     super.key,
-    required this.sectionCode,
+    required this.sectionKey,
     required this.versionID,
     this.isNewSection = false,
     this.canChangeType = true,
@@ -40,11 +40,10 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     super.initState();
 
     Section section = context.read<SectionProvider>().getSection(
-      widget.versionID,
-      widget.sectionCode,
+      versionKey: widget.versionID,
+      sectionKey: widget.sectionKey,
     )!;
 
-    contentCodeController = TextEditingController(text: section.contentCode);
     contentTypeController = TextEditingController(text: section.contentType);
     contentTextController = TextEditingController(text: section.contentText);
     contentColor = section.contentColor;
@@ -123,39 +122,42 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                       children: [
                         // TYPE SELECTION
                         if (widget.canChangeType)
-                          SizedBox(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              spacing: 8,
-                              children: [
-                                Container(
-                                  height: 28,
-                                  width: 28,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: contentColor,
-                                  ),
+                          GestureDetector(
+                            onTap: () {
+                              _upsertSection();
+                              context.read<NavigationProvider>().pushForeground(
+                                SelectType(
+                                  versionID: widget.versionID,
+                                  sectionKey: widget.sectionKey,
                                 ),
-                                Expanded(
-                                  child: Text(
-                                    contentTypeController.text,
-                                    style: textTheme.bodyLarge,
-                                  ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: BoxBorder.all(
+                                  color: colorScheme.surfaceContainerHigh,
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    _upsertSection();
-                                    context
-                                        .read<NavigationProvider>()
-                                        .pushForeground(
-                                          SelectType(
-                                            versionID: widget.versionID,
-                                            sectionCode: widget.sectionCode,
-                                          ),
-                                        );
-                                  },
-                                  child: Container(
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                spacing: 8,
+                                children: [
+                                  Container(
+                                    height: 28,
+                                    width: 28,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: contentColor,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      contentTypeController.text,
+                                      style: textTheme.bodyLarge,
+                                    ),
+                                  ),
+                                  Container(
                                     padding: EdgeInsets.symmetric(
                                       horizontal: 8,
                                       vertical: 4,
@@ -174,8 +176,8 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         // SECTION CODE
@@ -262,36 +264,13 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
   void _upsertSection() {
     // New section was added when selecting type, so just update it
     // Update the section with new values
-    final newCode = context.read<SectionProvider>().cacheUpdate(
+    context.read<SectionProvider>().cacheUpdate(
       widget.versionID,
-      widget.sectionCode,
-      newContentCode: contentCodeController.text,
+      widget.sectionKey,
       newContentType: contentTypeController.text,
       newContentText: contentTextController.text,
-      newColor: contentColor,
     );
 
-    // If it is a new section Add the section to the song structure
-    if (widget.isNewSection) {
-      context.read<LocalVersionProvider>().addSectionToStruct(
-        widget.versionID,
-        newCode,
-      );
-    }
-
-    // If the content code has changed, update the song structure accordingly
-    if (newCode != widget.sectionCode) {
-      context.read<LocalVersionProvider>().updateSectionCodeInStruct(
-        widget.versionID,
-        oldCode: widget.sectionCode,
-        newCode: newCode,
-      );
-      context.read<SectionProvider>().renameSectionKey(
-        widget.versionID,
-        oldCode: widget.sectionCode,
-        newCode: newCode,
-      );
-    }
   }
 
   void _deleteSection() {
@@ -299,11 +278,11 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
 
     context.read<SectionProvider>().cacheDeletion(
       widget.versionID,
-      widget.sectionCode,
+      widget.sectionKey,
     );
-    context.read<LocalVersionProvider>().removeSectionsByCode(
+    context.read<LocalVersionProvider>().removeSectionsByKey(
       widget.versionID,
-      widget.sectionCode,
+      widget.sectionKey,
     );
   }
 }

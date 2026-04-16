@@ -68,7 +68,7 @@ class _ManageSheetState extends State<ManageSheet> {
     return Selector2<
       LocalVersionProvider,
       CipherProvider,
-      ({List<String>? songStructure, Duration? duration})
+      ({List<int>? songStructure, Duration? duration})
     >(
       selector: (context, localVer, ciph) {
         final version = localVer.getVersion(widget.versionID);
@@ -156,19 +156,19 @@ class _ManageSheetState extends State<ManageSheet> {
                 child: ListView(
                   children: [
                     _buildAnnotationSection(),
-                    for (var sectionCode in s.songStructure!.toSet())
+                    for (var sectionKey in s.songStructure!.toSet())
                       Builder(
                         builder: (context) {
                           final sect = context.read<SectionProvider>();
                           final section = sect.getSection(
-                            widget.versionID,
-                            sectionCode,
+                            versionKey: widget.versionID,
+                            sectionKey: sectionKey,
                           )!;
                           return GestureDetector(
                             onTap: () {
                               localVer.addSectionToStruct(
                                 widget.versionID,
-                                sectionCode,
+                                sectionKey,
                               );
                               if (_scrollToEnd != null) {
                                 WidgetsBinding.instance.addPostFrameCallback((
@@ -296,16 +296,15 @@ class _ManageSheetState extends State<ManageSheet> {
 
     return GestureDetector(
       onTap: () {
-        final newCode = sect.cacheAddSection(
+        final newKey = sect.cacheAddSection(
           widget.versionID,
-          sectionLabel.code,
           sectionLabel.color,
           sectionLabel.localizedLabel(context),
         );
 
         nav.pushForeground(
           EditSectionScreen(
-            sectionCode: newCode,
+            sectionKey: newKey,
             versionID: widget.versionID,
             isNewSection: true,
             canChangeType: false,

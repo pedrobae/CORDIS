@@ -62,7 +62,7 @@ class _StructureListState extends State<StructureList> {
       LayoutSetProvider,
       LocalVersionProvider,
       CloudVersionProvider,
-      ({List<String> filteredStructure, bool tapEnabled})
+      ({List<int> filteredStructure, bool tapEnabled})
     >(
       selector: (context, laySet, localVer, cloudVer) {
         final tapEnabled = laySet.showRepeatSections == true;
@@ -75,15 +75,15 @@ class _StructureListState extends State<StructureList> {
             ? cloudVer.getVersion(widget.versionID)!.songStructure
             : localVer.getSongStructure(widget.versionID);
 
-        final filteredStructure = <String>[];
-        for (var code in songStructure) {
-          if (laySet.showAnnotations == false && isAnnotation(code)) {
+        final filteredStructure = <int>[];
+        for (var key in songStructure) {
+          if (laySet.showAnnotations == false && isAnnotation()) {
             continue;
           }
-          if (laySet.showTransitions == false && isTransition(code)) {
+          if (laySet.showTransitions == false && isTransition()) {
             continue;
           }
-          filteredStructure.add(code);
+          filteredStructure.add(key);
         }
 
         return (filteredStructure: filteredStructure, tapEnabled: tapEnabled);
@@ -113,15 +113,18 @@ class _StructureListState extends State<StructureList> {
                           const SizedBox(),
                           ...s.filteredStructure.asMap().entries.map((entry) {
                             final index = entry.key;
-                            final sectionCode = entry.value;
+                            final sectionKey = entry.value;
 
                             return _StructureSectionButton(
                               index: index,
                               versionID: widget.versionID,
-                              sectionCode: sectionCode,
+                              sectionKey: sectionKey,
                               onTap: () {
                                 if (s.tapEnabled) {
-                                  scroll.probeScrollToItem(state.currentItemIndex, index);
+                                  scroll.probeScrollToItem(
+                                    state.currentItemIndex,
+                                    index,
+                                  );
                                 } else {
                                   scroll.currentSectionIndex = index;
                                 }
@@ -150,13 +153,13 @@ class _StructureListState extends State<StructureList> {
 class _StructureSectionButton extends StatelessWidget {
   final int index;
   final dynamic versionID;
-  final String sectionCode;
+  final int sectionKey;
   final VoidCallback onTap;
 
   const _StructureSectionButton({
     required this.index,
     required this.versionID,
-    required this.sectionCode,
+    required this.sectionKey,
     required this.onTap,
   });
 
@@ -172,7 +175,10 @@ class _StructureSectionButton extends StatelessWidget {
             ({Section? section, bool highlighted})
           >(
             selector: (context, scroll, section) => (
-              section: section.getSection(versionID, sectionCode),
+              section: section.getSection(
+                versionKey: versionID,
+                sectionKey: sectionKey,
+              ),
               highlighted: scroll.currentSectionIndex == index,
             ),
             builder: (context, selection, child) {

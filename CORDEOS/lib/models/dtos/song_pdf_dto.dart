@@ -10,7 +10,7 @@ class SongPdfDto {
   final int bpm;
   final String? link;
 
-  final List<String> songStructure;
+  final List<int> songStructure;
   final Map<String, TokenPositionMap> content;
   final Map<String, Measurements> tokenMeasurements;
 

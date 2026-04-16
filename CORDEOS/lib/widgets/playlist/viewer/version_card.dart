@@ -89,7 +89,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
           return Center(child: CircularProgressIndicator());
         }
 
-        final List<String> songStructure = s.version!.songStructure;
+        final List<int> songStructure = s.version!.songStructure;
 
         return Container(
           decoration: BoxDecoration(
@@ -213,7 +213,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
 
   Widget _buildReorderableSectionChips(
     Version version,
-    List<String> songStructure,
+    List<int> songStructure,
   ) {
     final localVer = context.read<LocalVersionProvider>();
 

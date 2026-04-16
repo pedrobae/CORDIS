@@ -65,7 +65,7 @@ class NewSectionSheet extends StatelessWidget {
               Navigator.of(context).pop();
               nav.pushForeground(
                 SelectType(
-                  sectionCode: null,
+                  sectionKey: null,
                   versionID: versionID,
                   isNewSection: true,
                 ),
@@ -83,8 +83,12 @@ class NewSectionSheet extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pop();
               nav.push(
-                () =>
-                    ImportTextScreen(versionID: versionID, cipherID: cipherID),
+                () => ImportTextScreen(
+                  versionID: versionID,
+                  cipherID: cipherID != -1
+                      ? cipherID
+                      : -2, // Pass -2 to trigger import instead of create flow
+                ),
               );
             },
           ),
@@ -97,7 +101,12 @@ class NewSectionSheet extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pop();
               nav.push(
-                () => ImportPdfScreen(versionID: versionID, cipherID: cipherID),
+                () => ImportPdfScreen(
+                  versionID: versionID,
+                  cipherID: cipherID != -1
+                      ? cipherID
+                      : -2, // Pass -2 to trigger import instead of create flow
+                ),
               );
             },
           ),

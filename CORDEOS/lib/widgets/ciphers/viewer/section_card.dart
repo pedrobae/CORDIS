@@ -11,7 +11,7 @@ import 'package:cordeos/providers/settings/layout_settings_provider.dart';
 class SectionCard extends StatelessWidget {
   final int index;
   final int itemIndex;
-  final String sectionCode;
+  final int sectionKey;
   final String sectionType;
   final String sectionText;
   final Color sectionColor;
@@ -21,7 +21,7 @@ class SectionCard extends StatelessWidget {
     required this.index,
     required this.itemIndex,
     required this.sectionType,
-    required this.sectionCode,
+    required this.sectionKey,
     required this.sectionText,
     required this.sectionColor,
   });

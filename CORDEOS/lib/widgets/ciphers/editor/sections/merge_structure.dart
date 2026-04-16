@@ -93,17 +93,14 @@ class _MergeStructureState extends State<MergeStructure> {
                 Selector2<
                   EditSectionsStateProvider,
                   LocalVersionProvider,
-                  ({
-                    List<String> uniqueStructure,
-                    List<String> mergeSectionCodes,
-                  })
+                  ({List<int> uniqueStructure, List<int> mergeSectionKeys})
                 >(
                   selector: (context, state, localVer) => (
                     uniqueStructure: localVer
                         .getSongStructure(widget.versionID)
                         .toSet()
                         .toList(),
-                    mergeSectionCodes: state.mergeSectionCodes,
+                    mergeSectionKeys: state.mergeSectionKeys,
                   ),
                   builder: (context, s, child) {
                     return s.uniqueStructure.isEmpty
@@ -123,7 +120,7 @@ class _MergeStructureState extends State<MergeStructure> {
                               return _buildItem(
                                 index,
                                 s.uniqueStructure,
-                                s.mergeSectionCodes,
+                                s.mergeSectionKeys,
                               );
                             },
                           );
@@ -143,25 +140,26 @@ class _MergeStructureState extends State<MergeStructure> {
 
       StringBuffer newContent = StringBuffer();
       bool first = true;
-      for (var code in state.mergeSectionCodes) {
-        final section = sect.getSection(widget.versionID, code);
+      for (var key in state.mergeSectionKeys) {
+        final section = sect.getSection(
+          versionKey: widget.versionID,
+          sectionKey: key,
+        );
         if (section != null) {
           newContent.writeln(section.contentText);
         }
         if (!first) {
-          sect.cacheDeletion(widget.versionID, code);
-          localVer.removeSectionsByCode(widget.versionID, code);
+          sect.cacheDeletion(widget.versionID, key);
+          localVer.removeSectionsByKey(widget.versionID, key);
         }
         first = false;
       }
 
-      sect.cacheContent(
-        sectionCode: state.mergeSectionCodes.first,
-        versionID: widget.versionID,
-        content: newContent.toString(),
+      sect.cacheUpdate(
+        widget.versionID,
+        state.mergeSectionKeys.first,
+        newContentText: newContent.toString(),
       );
-
-
 
       state.disableMergeOverlay();
     };
@@ -169,22 +167,26 @@ class _MergeStructureState extends State<MergeStructure> {
 
   Widget _buildItem(
     int index,
-    List<String> uniqueStructure,
-    List<String> mergeSectionCodes,
+    List<int> uniqueStructure,
+    List<int> mergeSectionKeys,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
 
     final sectionCode = uniqueStructure[index];
-    final isTarget = mergeSectionCodes.firstOrNull == sectionCode;
-    final isSelected = mergeSectionCodes.contains(sectionCode);
+    final isTarget = mergeSectionKeys.firstOrNull == sectionCode;
+    final isSelected = mergeSectionKeys.contains(sectionCode);
 
     return Selector<SectionProvider, Color>(
       selector: (context, sect) =>
-          sect.getSection(widget.versionID, sectionCode)?.contentColor ??
+          sect
+              .getSection(versionKey: widget.versionID, sectionKey: sectionCode)
+              ?.contentColor ??
           Colors.grey,
       builder: (context, color, child) => GestureDetector(
         onTap: () {
-          context.read<EditSectionsStateProvider>().toggleMergeSection(sectionCode);
+          context.read<EditSectionsStateProvider>().toggleMergeSection(
+            sectionCode,
+          );
         },
         child: Container(
           margin: EdgeInsets.only(right: 4),
@@ -195,7 +197,9 @@ class _MergeStructureState extends State<MergeStructure> {
             borderRadius: BorderRadius.circular(7),
             border: isSelected
                 ? Border.all(
-                    color: isTarget ? colorScheme.primary : colorScheme.secondary,
+                    color: isTarget
+                        ? colorScheme.primary
+                        : colorScheme.secondary,
                     width: 2,
                   )
                 : null,

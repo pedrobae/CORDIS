@@ -21,8 +21,8 @@ class SectionRepository {
 
     final existing = await db.query(
       'section',
-      where: 'version_id = ? AND content_code = ?',
-      whereArgs: [section.versionID, section.contentCode],
+      where: 'version_id = ? AND key = ?',
+      whereArgs: [section.versionID, section.id],
     );
 
     if (existing.isNotEmpty) {
@@ -30,8 +30,8 @@ class SectionRepository {
       await db.update(
         'section',
         section.toSqlite(),
-        where: 'version_id = ? AND content_code = ?',
-        whereArgs: [section.versionID, section.contentCode],
+        where: 'version_id = ? AND key = ?',
+        whereArgs: [section.versionID, section.id],
       );
       return existing.first['id'] as int;
     } else {
@@ -45,18 +45,18 @@ class SectionRepository {
 
   // ===== READ =====
   /// Gets all sections of a version
-  Future<Map<String, Section>> getSections(int versionId) async {
+  Future<Map<int, Section>> getSections(int versionId) async {
     final db = await _databaseHelper.database;
     final results = await db.query(
       'section',
       where: 'version_id = ?',
       whereArgs: [versionId],
-      orderBy: 'content_code',
+      orderBy: 'key',
     );
 
-    final sections = <String, Section>{};
+    final sections = <int, Section>{};
     for (var row in results) {
-      sections[row['content_code'] as String] = Section.fromSqLite(row);
+      sections[row['key'] as int] = Section.fromSqLite(row);
     }
     return sections;
   }
@@ -68,19 +68,19 @@ class SectionRepository {
     await db.update(
       'section',
       section.toSqlite(),
-      where: 'version_id = ? AND content_code = ?',
-      whereArgs: [section.versionID, section.contentCode],
+      where: 'version_id = ? AND key = ?',
+      whereArgs: [section.versionID, section.id],
     );
   }
 
   // ===== DELETE =====
-  /// Deletes section by its versionID and sectionCode
-  Future<void> deleteSection(int versionID, String sectionCode) async {
+  /// Deletes section by its versionID and sectionKey
+  Future<void> deleteSection(int versionID, int sectionKey) async {
     final db = await _databaseHelper.database;
     await db.delete(
       'section',
-      where: 'version_id = ? AND content_code = ?',
-      whereArgs: [versionID, sectionCode],
+      where: 'version_id = ? AND key = ?',
+      whereArgs: [versionID, sectionKey],
     );
   }
 

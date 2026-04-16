@@ -262,18 +262,18 @@ class ScheduleSyncService {
       );
 
       for (final existingSection in existingSections.values) {
-        final cloudSection = versionDto.sections[existingSection.contentCode];
+        final cloudSection = versionDto.sections[existingSection.key];
 
         if (cloudSection == null) {
           // Section doesnt exist in the cloud version, delete it locally
           await _sectionRepo.deleteSection(
             existingSection.versionID,
-            existingSection.contentCode,
+            existingSection.key,
           );
           await _versionRepo.updateVersion(
             existingVersion.copyWith(
               songStructure: existingVersion.songStructure
-                ..remove(existingSection.contentCode),
+                ..remove(existingSection.key),
             ),
           );
         } else {

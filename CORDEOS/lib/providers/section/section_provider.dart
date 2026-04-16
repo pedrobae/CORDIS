@@ -9,12 +9,13 @@ class SectionProvider extends ChangeNotifier {
 
   SectionProvider();
 
-  Map<dynamic, Map<String, Section>> _sections =
-      {}; // versionId -> (sectionCode -> Section) -1 versionId for new/importing versions
+  Map<dynamic, Map<int, Section>> _sections =
+      {}; // versionKey -> (sectionKey -> Section) -1 versionId for new/importing versions
   Map<dynamic, bool> _isLoadingVersion = {}; // versionId -> isLoading
   bool _isSaving = false;
   bool _hasUnsavedChanges = false;
-  final List<MapEntry<int, String>> _cachedDeletions = [];
+  //
+  final List<List<int>> _cachedDeletions = [];
 
   String? _error;
 
@@ -28,53 +29,48 @@ class SectionProvider extends ChangeNotifier {
   /// that need to rebuild when any version's section data becomes available.
   int get loadedVersionsCount => _sections.length;
 
-  Map<String, Section> getSections(dynamic versionKey) {
+  Map<int, Section> getSections(dynamic versionKey) {
     if (versionKey != null && _sections.containsKey(versionKey)) {
       return _sections[versionKey]!;
     }
     return {};
   }
 
-  Section? getSection(dynamic versionKey, String contentCode) {
+  Section? getSection({required dynamic versionKey, dynamic sectionKey}) {
+    if (versionKey == null || sectionKey == null) return null;
     switch (versionKey.runtimeType) {
       case const (String):
-        return _sections[versionKey]?[contentCode];
+        return _sections[versionKey]?[sectionKey];
       case const (int):
-        return _sections[versionKey]?[contentCode];
+        return _sections[versionKey]?[sectionKey];
       default:
-        return _sections[-1]?[contentCode]; // For new/importing versions
+        return null;
     }
   }
 
   /// ===== CREATE =====
   // Add a new section, returns the new section code (with suffix if there was a conflict)
-  String cacheAddSection(
-    dynamic versionKey,
-    String contentCode,
-    Color color,
-    String sectionType,
-  ) {
-    final code = _assignNumbering(versionKey, '', contentCode);
+  int cacheAddSection(dynamic versionKey, Color color, String sectionType) {
+    final key = _getAvailableKey(versionKey);
     final newSection = Section(
-      versionID: versionKey is String ? -1 : versionKey,
-      contentCode: code,
+      key: key,
+      versionID: versionKey is String
+          ? -1
+          : versionKey, // if versionKey is String, it's a new/importing version, so use -1 as placeholder
       contentColor: color,
       contentType: sectionType,
       contentText: '',
     );
 
     _sections[newSection.versionID] ??= {};
-    _sections[newSection.versionID]![newSection.contentCode] = newSection;
+    _sections[newSection.versionID]![key] = newSection;
     _hasUnsavedChanges = true;
     notifyListeners();
-    return newSection.contentCode;
+    return key;
   }
 
   // Set new sections in cache (used when importing or on cloud load)
-  void setNewSectionsInCache(
-    dynamic versionKey,
-    Map<String, Section> sections,
-  ) {
+  void setNewSectionsInCache(dynamic versionKey, Map<int, Section> sections) {
     _sections[versionKey] = sections;
     _hasUnsavedChanges = true;
     notifyListeners();
@@ -96,21 +92,20 @@ class SectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  String? cacheCopyOfSection({
+  dynamic cacheCopyOfSection({
     required dynamic versionId,
-    required String sectionCode,
+    required dynamic sectionKey,
   }) {
-    final section = _sections[versionId]?[sectionCode];
+    final section = _sections[versionId]?[sectionKey];
     if (section == null) return null;
 
-    final newCode = _assignNumbering(versionId, '', section.contentCode);
-
-    final newSection = section.copyWith(contentCode: newCode);
-    _sections[versionId]![newSection.contentCode] = newSection;
+    final newKey = _getAvailableKey(versionId);
+    final newSection = section.copyWith(id: newKey);
+    _sections[versionId]![newKey] = newSection;
 
     _hasUnsavedChanges = true;
     notifyListeners();
-    return newCode;
+    return newKey;
   }
 
   ///Create sections for a new version from -1 cache
@@ -136,7 +131,9 @@ class SectionProvider extends ChangeNotifier {
 
     try {
       _sections[versionId] = await _repo.getSections(versionId);
-      debugPrint("SECTION - Loaded version $versionId's SECTIONS - ${_sections[versionId]!.length} loaded");
+      debugPrint(
+        "SECTION - Loaded version $versionId's SECTIONS - ${_sections[versionId]!.length} loaded",
+      );
     } catch (e) {
       _error = e.toString();
       if (kDebugMode) {
@@ -150,51 +147,19 @@ class SectionProvider extends ChangeNotifier {
   }
 
   /// ===== UPDATE =====
-  String cacheUpdate(
+  void cacheUpdate(
     dynamic versionID,
-    String contentCode, {
-    String? newContentCode,
+    dynamic sectionKey, {
     String? newContentType,
     String? newContentText,
     Color? newColor,
   }) {
-    String newCode = contentCode;
-    if (newContentCode != null) {
-      newCode = _assignNumbering(versionID, contentCode, newContentCode);
-    }
+    final section = _sections[versionID]?[sectionKey];
+    if (section == null) return;
 
-    final section = _sections[versionID]![contentCode]!;
-    section.contentCode = newCode;
     section.contentType = newContentType ?? section.contentType;
     section.contentColor = newColor ?? section.contentColor;
     section.contentText = newContentText ?? section.contentText;
-
-    _hasUnsavedChanges = true;
-    notifyListeners();
-    return newCode;
-  }
-
-  void cacheContent({
-    required String sectionCode,
-    required int versionID,
-    required String content,
-  }) {
-    _sections[versionID]![sectionCode]!.contentText = content;
-    _hasUnsavedChanges = true;
-    notifyListeners();
-  }
-
-  void renameSectionKey(
-    dynamic versionID, {
-    required String oldCode,
-    required String newCode,
-  }) {
-    final section = _sections[versionID]![oldCode];
-    if (section == null) return;
-
-    // Remove the old entry and add a new one with the updated code
-    _sections[versionID]!.remove(oldCode);
-    _sections[versionID]![newCode] = section;
 
     _hasUnsavedChanges = true;
     notifyListeners();
@@ -202,9 +167,9 @@ class SectionProvider extends ChangeNotifier {
 
   /// ===== DELETE =====
   // Remove all sections by its code
-  void cacheDeletion(dynamic versionKey, String sectionCode) {
-    _sections[versionKey]!.remove(sectionCode);
-    _cachedDeletions.add(MapEntry(versionKey as int, sectionCode));
+  void cacheDeletion(int versionKey, int sectionKey) {
+    _sections[versionKey]!.remove(sectionKey);
+    _cachedDeletions.add([versionKey, sectionKey]);
     _hasUnsavedChanges = true;
     notifyListeners();
   }
@@ -234,7 +199,7 @@ class SectionProvider extends ChangeNotifier {
         await _repo.upsertSection(entry.value.copyWith(versionID: versionID));
       }
       for (final deletion in _cachedDeletions) {
-        await _repo.deleteSection(deletion.key, deletion.value);
+        await _repo.deleteSection(deletion[0], deletion[1]);
       }
     } catch (e) {
       _error = e.toString();
@@ -248,59 +213,6 @@ class SectionProvider extends ChangeNotifier {
     }
   }
 
-  String _assignNumbering(
-    dynamic versionID,
-    String originalCode,
-    String newBaseCode,
-  ) {
-    // CHECK IF ALREADY EXISTS
-    final matchingCodes = <String>[];
-    for (String code in _sections[versionID]?.keys ?? []) {
-      if (code == originalCode) {
-        continue; // Skip the original code when renaming
-      }
-      // Strip numbering suffixes for comparison
-      final strippedCode = code.toString().replaceAll(RegExp(r'\d+$'), '');
-      if (strippedCode == newBaseCode) {
-        matchingCodes.add(code);
-      }
-    }
-    // If there are more than 1 matching codes, it means there is a possible conflict
-    if (matchingCodes.isNotEmpty && originalCode != newBaseCode) {
-      // // CHECK IF THERE IS A CODE WITH NO NUMBERING
-      // if (matchingCodes.contains(newBaseCode)) {
-      //   // And add 1 suffixes to all other matching codes
-      //   // Return the following available number suffix for the new section
-
-      //   // Sort matching codes by their numerical suffix to avoid conflicts when renaming
-      //   matchingCodes.sort((a, b) {
-      //     final aSuffix =
-      //         int.tryParse(a.toString().substring(newBaseCode.length)) ?? 0;
-      //     final bSuffix =
-      //         int.tryParse(b.toString().substring(newBaseCode.length)) ?? 0;
-      //     return -aSuffix.compareTo(-bSuffix);
-      //   });
-
-      //   for (String code in matchingCodes) {
-      //     final existingSuffix =
-      //         int.tryParse(code.toString().substring(newBaseCode.length)) ?? 0;
-
-      //     renameSectionKey(
-      //       versionID,
-      //       oldCode: code,
-      //       newCode: '$newBaseCode${existingSuffix + 1}',
-      //     );
-      //   }
-      // }
-      debugPrint(
-        'Section with code $newBaseCode already exists in version $versionID.',
-      );
-      _hasUnsavedChanges = true;
-      return '$newBaseCode${matchingCodes.length + 1}'; // New section gets the next available suffix
-    }
-    return newBaseCode; // No conflicts, return just the base code
-  }
-
   /// Clear all sections from cache
   void clearCache() {
     _sections = {};
@@ -311,5 +223,14 @@ class SectionProvider extends ChangeNotifier {
 
   void clearUnsavedChanges() {
     _hasUnsavedChanges = false;
+  }
+
+  int _getAvailableKey(dynamic versionKey) {
+    final existingKeys = _sections[versionKey]!.keys;
+    int key = 1;
+    while (existingKeys.contains(key)) {
+      key++;
+    }
+    return key;
   }
 }

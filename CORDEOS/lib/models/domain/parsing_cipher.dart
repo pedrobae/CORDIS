@@ -75,8 +75,8 @@ class ParsingResult {
   final List<LineData> lines = [];
   final Map<String, dynamic> metadata = {};
   final List<RawSection> rawSections = [];
-  final Map<String, SectionDto> parsedSections = {};
-  final List<String> songStructure = [];
+  final Map<int, SectionDto> parsedSections = {};
+  final List<int> songStructure = [];
 
   ParsingResult({required this.strategy, required this.rawText});
 
@@ -100,21 +100,21 @@ class ParsingCipher {
 
 class RawSection {
   String suggestedLabel;
-  String? code;
-  Color? color;
+  Color color;
   String content;
   List<LineData>? linesData;
+  int key;
   int index;
   int numberOfLines;
-  String? duplicateOf; // If duplicate, holds the code of the original section
+  int? duplicateOf; // If duplicate, holds the key of the original section
 
   RawSection({
     required this.suggestedLabel,
-    this.code,
-    this.color,
+    required this.color,
     required this.content,
     required this.index,
     required this.numberOfLines,
+    required this.key,
     this.linesData,
     this.duplicateOf,
   });

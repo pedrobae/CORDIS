@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:cordeos/widgets/common/custom_reorderable_delayed.dart';
 import 'package:provider/provider.dart';
 
-
 class ReorderableStructure extends StatefulWidget {
   final int versionID;
   final bool showDelete;
   final void Function(void Function())? onInit;
-  
+
   const ReorderableStructure({
     super.key,
     required this.versionID,
@@ -49,7 +48,7 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
 
     final localVer = context.read<LocalVersionProvider>();
 
-    return Selector<LocalVersionProvider, List<String>>(
+    return Selector<LocalVersionProvider, List<int>>(
       selector: (context, localVer) {
         return localVer.getSongStructure(widget.versionID);
       },
@@ -76,8 +75,12 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
                   scrollDirection: Axis.horizontal,
                   scrollController: _scrollController,
                   itemCount: songStructure.length,
-                  onReorder: (oldIndex, newIndex) => localVer
-                      .reorderSongStructure(widget.versionID, oldIndex, newIndex),
+                  onReorder: (oldIndex, newIndex) =>
+                      localVer.reorderSongStructure(
+                        widget.versionID,
+                        oldIndex,
+                        newIndex,
+                      ),
                   itemBuilder: (context, index) {
                     return _buildItem(context, index, songStructure);
                   },
@@ -87,11 +90,7 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
     );
   }
 
-  Widget _buildItem(
-    BuildContext context,
-    int index,
-    List<String> songStructure,
-  ) {
+  Widget _buildItem(BuildContext context, int index, List<int> songStructure) {
     final sect = context.read<SectionProvider>();
     final localVer = context.read<LocalVersionProvider>();
 
@@ -99,7 +98,10 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
 
     final sectionCode = songStructure[index];
     final color =
-        sect.getSection(widget.versionID, sectionCode)?.contentColor ?? Colors.grey;
+        sect
+            .getSection(versionKey: widget.versionID, sectionKey: sectionCode)
+            ?.contentColor ??
+        Colors.grey;
 
     final codeCount = songStructure.where((code) => code == sectionCode).length;
 

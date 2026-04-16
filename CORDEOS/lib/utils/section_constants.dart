@@ -43,6 +43,33 @@ extension SectionLabelTypeX on SectionLabelType {
     }
   }
 
+  Color get color {
+    switch (this) {
+      case SectionLabelType.verse:
+        return Color(0xFF2196F3);
+      case SectionLabelType.chorus:
+        return Color(0xFFF44336);
+      case SectionLabelType.bridge:
+        return Colors.green;
+      case SectionLabelType.intro:
+        return Color(0xFF9C27B0);
+      case SectionLabelType.outro:
+        return Colors.brown;
+      case SectionLabelType.solo:
+        return Colors.amber;
+      case SectionLabelType.preChorus:
+        return Colors.orange;
+      case SectionLabelType.tag:
+        return Colors.teal;
+      case SectionLabelType.finale:
+        return Color(0xFF3F51B5);
+      case SectionLabelType.annotations:
+        return Colors.grey;
+      case SectionLabelType.unknown:
+        return Colors.grey;
+    }
+  }
+
   String localizedLabel(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     switch (this) {
@@ -72,6 +99,19 @@ extension SectionLabelTypeX on SectionLabelType {
   }
 }
 
+Map<Color, String> sectionCodes = {
+  Color(0xFF2196F3): 'V',
+  Color(0xFFF44336): 'C',
+  Color(0xFF4CAF50): 'B',
+  Color(0xFF9C27B0): 'I',
+  Color(0xFF795548): 'O',
+  Color(0xFFFFC107): 'S',
+  Color(0xFFFF9800): 'PC',
+  Color(0xFF009688): 'T',
+  Color(0xFF3F51B5): 'F',
+  Color(0xFF9E9E9E): 'A',
+};
+
 /// Common Section labels are iterated through on import / parsing to identify sections
 /// MIGHT BE PRUDENT TO MAKE THIS LOCALIZABLE IN THE FUTURE
 /// AREA OF OPTIMIZATION: use a more efficient data structure for lookups
@@ -84,61 +124,51 @@ const Map<String, SectionLabel> commonSectionLabels = {
       r'(?:\w+\s+)?estrofe(?:\s*\d+)?',
     ],
     labelType: SectionLabelType.verse,
-    code: 'V',
     color: Color(0xFF2196F3),
   ),
   'chorus': SectionLabel(
     labelVariations: ['chorus', 'coro', 'refrao', 'refrão'],
     labelType: SectionLabelType.chorus,
-    code: 'C',
     color: Color(0xFFF44336),
   ),
   'bridge': SectionLabel(
     labelVariations: ['bridge', 'ponte'],
     labelType: SectionLabelType.bridge,
-    code: 'B',
     color: Colors.green,
   ),
   'intro': SectionLabel(
     labelVariations: ['intro'],
     labelType: SectionLabelType.intro,
-    code: 'I',
     color: Color(0xFF9C27B0),
   ),
   'outro': SectionLabel(
     labelVariations: ['outro'],
     labelType: SectionLabelType.outro,
-    code: 'O',
     color: Colors.brown,
   ),
   'solo': SectionLabel(
     labelVariations: ['solo'],
     labelType: SectionLabelType.solo,
-    code: 'S',
     color: Colors.amber,
   ),
   'pre-chorus': SectionLabel(
     labelVariations: ['pre[- ]?chorus', 'pre[- ]?refrao', 'pré[- ]?refrão'],
     labelType: SectionLabelType.preChorus,
-    code: 'PC',
     color: Colors.orange,
   ),
   'tag': SectionLabel(
     labelVariations: ['tag'],
     labelType: SectionLabelType.tag,
-    code: 'T',
     color: Colors.teal,
   ),
   'finale': SectionLabel(
     labelVariations: ['finale', 'final'],
     labelType: SectionLabelType.finale,
-    code: 'F',
     color: Color(0xFF3F51B5),
   ),
   'annotations': SectionLabel(
     labelVariations: ['notes', 'anotacoes', 'anotações'],
     labelType: SectionLabelType.annotations,
-    code: 'N',
     color: Colors.grey,
   ),
 };
@@ -146,13 +176,11 @@ const Map<String, SectionLabel> commonSectionLabels = {
 class SectionLabel {
   final List<String> labelVariations;
   final SectionLabelType labelType;
-  final String code;
   final Color color;
 
   const SectionLabel({
     required this.labelVariations,
     required this.labelType,
-    required this.code,
     required this.color,
   });
 
@@ -165,7 +193,6 @@ class SectionLabel {
     return const SectionLabel(
       labelVariations: [],
       labelType: SectionLabelType.unknown,
-      code: '',
       color: Colors.grey,
     );
   }
@@ -176,10 +203,4 @@ bool isTransition(String sectionCode) {
   final trimmedCode = sectionCode.replaceAll(RegExp(r'\d+$'), '');
   final transitionCodes = ['I', 'B', 'PC', 'S', 'O', 'F'];
   return (transitionCodes.contains(trimmedCode));
-}
-
-/// Checks if the code trimmed of a numeric suffix matches the annotation code
-bool isAnnotation(String sectionCode) {
-  final trimmedCode = sectionCode.replaceAll(RegExp(r'\d+$'), '');
-  return (trimmedCode == 'N');
 }

@@ -30,6 +30,8 @@ class SectionParser {
         numberOfLines: sectionContent.split('\n').length,
         duplicateOf: null,
         suggestedLabel: SectionLabelType.unknown.canonicalLabel,
+        color: SectionLabelType.unknown.color,
+        key: i,
       );
 
       result.rawSections.add(section);
@@ -82,7 +84,7 @@ class SectionParser {
         RawSection(
           index: result.rawSections.length,
           suggestedLabel: label.canonicalLabel,
-          code: label.code,
+          key: result.rawSections.length,
           color: label.color,
           content: content,
           numberOfLines: content.split('\n').length,
@@ -244,34 +246,14 @@ class SectionParser {
   void _checkDuplicates(ParsingResult result) {
     // Check for duplicate content and mark them
     List<RawSection> sections = result.rawSections;
-    Map<String, int> seenContentCodes = {};
+    Map<String, int> seenContentKeys = {};
     for (var section in sections) {
       String content = section.content;
 
-      if (seenContentCodes.containsKey(content)) {
-        section.duplicateOf = seenContentCodes[content]
-            .toString(); // Mark as duplicate, with a reference
+      if (seenContentKeys.containsKey(content)) {
+        section.duplicateOf = seenContentKeys[content];
       } else {
-        seenContentCodes[content] = section.index;
-      }
-    }
-
-    // Check for duplicate labels and rename suggestions, and code adding index suffixes
-    Map<String, int> labelCount = {};
-    for (var section in sections) {
-      String title = section.suggestedLabel.toLowerCase();
-
-      if (section.suggestedLabel == SectionLabelType.unknown.canonicalLabel) {
-        continue;
-      }
-
-      if (labelCount.containsKey(title)) {
-        int count = labelCount[title]! + 1;
-        section.suggestedLabel = '${section.suggestedLabel} $count';
-        section.code = '${section.code}$count';
-        labelCount[title] = count;
-      } else {
-        labelCount[title] = 1;
+        seenContentKeys[content] = section.key;
       }
     }
   }
@@ -314,12 +296,12 @@ class SectionParser {
 
     RawSection section = RawSection(
       index: result.rawSections.length,
+      key: result.rawSections.length,
       content: sectionContent,
       numberOfLines: linesData.length,
       duplicateOf: null,
       suggestedLabel: label.canonicalLabel,
       linesData: linesData,
-      code: label.code,
       color: label.color,
     );
 

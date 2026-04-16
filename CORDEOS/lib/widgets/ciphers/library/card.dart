@@ -87,7 +87,7 @@ class _CipherCardState extends State<CipherCard> {
 
                 nav.pop();
               } else {
-                    final token = context.read<TokenProvider>();
+                final token = context.read<TokenProvider>();
                 nav.push(
                   () => ViewCipherScreen(
                     cipherID: s.cipher!.id,
@@ -182,7 +182,7 @@ class _CipherCardState extends State<CipherCard> {
                                 scrollDirection: Axis.horizontal,
                                 itemCount: s.version!.songStructure.length,
                                 itemBuilder: (_, index) {
-                                  final sectionCode =
+                                  final sectionKey =
                                       s.version!.songStructure[index];
 
                                   // Painter for sections code width
@@ -201,8 +201,8 @@ class _CipherCardState extends State<CipherCard> {
                                   return Selector<SectionProvider, Color>(
                                     selector: (context, sect) {
                                       final section = sect.getSection(
-                                        widget.versionID,
-                                        sectionCode,
+                                        versionKey: widget.versionID,
+                                        sectionKey: sectionKey,
                                       );
                                       return section?.contentColor ??
                                           Colors.grey;

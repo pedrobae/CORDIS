@@ -97,46 +97,34 @@ class _EditCipherScreenState extends State<EditCipherScreen>
       final existingStruct = existingVersion.songStructure;
 
       // FOR ANY CODE THAT OVERLAPS RENAME THE IMPORTED CODE
-      for (String code in importedStruct) {
-        String? newCode;
-
-        final baseCode = code.toString().replaceAll(RegExp(r'\d+$'), '');
-        if (existingStruct.contains(code)) {
-          // Get new Code
-          final matchingCodes = <String>[];
-          for (String code in existingStruct) {
-            // Strip numbering suffixes for comparison
-            final strippedCode = code.toString().replaceAll(
-              RegExp(r'\d+$'),
-              '',
-            );
-            if (strippedCode == baseCode) {
-              matchingCodes.add(code);
-            }
+      for (int key in importedStruct) {
+        if (existingStruct.contains(key)) {
+          int newKey = 0;
+          while (existingStruct.contains(newKey) ||
+              importedStruct.contains(newKey)) {
+            newKey++;
           }
-          newCode = '$baseCode${matchingCodes.length + 1}';
+          final newSect = importedSections[key]!.copyWith(
+            key: newKey,
+            versionID: widget.versionID,
+          );
+          // Cache new section
+          sect.cacheAddSection(
+            widget.versionID,
+            newSect.contentColor,
+            newSect.contentType,
+          );
+          sect.cacheUpdate(
+            widget.versionID,
+            newKey,
+            newContentText: newSect.contentText,
+          );
+          // append to existing struct
+          existingStruct.add(newKey);
         }
-        final newSect = importedSections[code]!.copyWith(
-          contentCode: newCode ?? code,
-          versionID: widget.versionID,
-        );
-        // Cache new section
-        sect.cacheAddSection(
-          widget.versionID,
-          newSect.contentCode,
-          newSect.contentColor,
-          newSect.contentType,
-        );
-        sect.cacheContent(
-          sectionCode: newSect.contentCode,
-          versionID: widget.versionID,
-          content: newSect.contentText,
-        );
-        // append to existing struct
-        existingStruct.add(newSect.contentCode);
+        // Cache new struct
+        localVer.cacheUpdates(widget.versionID, songStructure: existingStruct);
       }
-      // Cache new struct
-      localVer.cacheUpdates(widget.versionID, songStructure: existingStruct);
     }
 
     parse.clearCache();

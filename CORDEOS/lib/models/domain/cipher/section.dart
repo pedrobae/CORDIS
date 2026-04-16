@@ -5,17 +5,17 @@ import 'package:flutter/cupertino.dart';
 
 class Section {
   final int? id;
+  final int key;
   int versionID;
   String contentType;
-  String contentCode;
   String contentText;
   Color contentColor;
 
   Section({
     this.id,
+    required this.key,
     required this.versionID,
     required this.contentType,
-    required this.contentCode,
     required this.contentText,
     required this.contentColor,
   });
@@ -23,9 +23,9 @@ class Section {
   factory Section.fromSqLite(Map<String, dynamic> json) {
     return Section(
       id: json['id'],
+      key: json['key'],
       versionID: json['version_id'],
       contentType: json['content_type'],
-      contentCode: json['content_code'],
       contentText: json['content_text'],
       contentColor: colorFromHex(json['content_color']),
     );
@@ -35,8 +35,8 @@ class Section {
   /// Later the version Id (int) gets assigned.
   Map<String, dynamic> toSqlite() {
     return {
+      'key': key,
       'content_type': contentType,
-      'content_code': contentCode,
       'content_text': contentText,
       'content_color': colorToHex(contentColor),
     };
@@ -44,17 +44,17 @@ class Section {
 
   factory Section.fromFirestore(SectionDto dto, int versionID) {
     return Section(
+      key: dto.key,
       versionID: versionID,
       contentType: dto.contentType,
-      contentCode: dto.contentCode,
       contentText: dto.contentText,
       contentColor: colorFromHex(dto.color),
     );
   }
 
-  SectionDto toFirestore() {
+  SectionDto toDto() {
     return SectionDto(
-      contentCode: contentCode,
+      key: key,
       contentType: contentType,
       contentText: contentText,
       color: colorToHex(contentColor),
@@ -63,17 +63,17 @@ class Section {
 
   Section copyWith({
     int? id,
+    int? key,
     int? versionID,
     String? contentType,
-    String? contentCode,
     String? contentText,
     Color? contentColor,
   }) {
     return Section(
       id: id ?? this.id,
+      key: key ?? this.key,
       versionID: versionID ?? this.versionID,
       contentType: contentType ?? this.contentType,
-      contentCode: contentCode ?? this.contentCode,
       contentText: contentText ?? this.contentText,
       contentColor: contentColor ?? this.contentColor,
     );

@@ -24,14 +24,14 @@ import 'package:cordeos/widgets/common/filled_text_button.dart';
 class TokenContentCard extends StatefulWidget {
   final int versionID;
   final int index;
-  final String sectionCode;
+  final int sectionKey;
   final bool isEnabled;
 
   const TokenContentCard({
     super.key,
     required this.versionID,
     required this.index,
-    required this.sectionCode,
+    required this.sectionKey,
     this.isEnabled = true,
   });
 
@@ -66,10 +66,10 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
       final updatedContent = tokenProv.getContent(key);
 
-      sect.cacheContent(
-        versionID: widget.versionID,
-        sectionCode: widget.sectionCode,
-        content: updatedContent,
+      sect.cacheUpdate(
+        widget.versionID,
+        widget.sectionKey,
+        newContentText: updatedContent,
       );
     };
   }
@@ -90,10 +90,10 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
       final updatedContent = tokenProv.getContent(key);
 
-      sect.cacheContent(
-        versionID: widget.versionID,
-        sectionCode: widget.sectionCode,
-        content: updatedContent,
+      sect.cacheUpdate(
+        widget.versionID,
+        widget.sectionKey,
+        newContentText: updatedContent,
       );
     };
   }
@@ -107,7 +107,10 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
     return Selector<SectionProvider, ({Section? section, String? contentText})>(
       selector: (context, sect) {
-        final section = sect.getSection(widget.versionID, widget.sectionCode);
+        final section = sect.getSection(
+          versionKey: widget.versionID,
+          sectionKey: widget.sectionKey,
+        );
         return (section: section, contentText: section?.contentText);
       },
       builder: (context, s, child) {
@@ -439,7 +442,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                           );
                           context
                               .read<LocalVersionProvider>()
-                              .removeSectionsByCode(
+                              .removeSectionsByKey(
                                 widget.versionID,
                                 widget.sectionCode,
                               );

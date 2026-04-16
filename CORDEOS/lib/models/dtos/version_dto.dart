@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cordeos/models/domain/cipher/section.dart';
 import 'package:cordeos/models/domain/cipher/version.dart';
 import 'package:cordeos/utils/color.dart';
-import 'package:flutter/material.dart';
 
 /// DTO para metadados de version (camada de separação entre a nuvem e o armazenamento local).
 class VersionDto {
@@ -16,9 +15,9 @@ class VersionDto {
   final String versionName;
   final String originalKey;
   final String? transposedKey;
-  final List<String> songStructure;
+  final List<int> songStructure;
   final Timestamp? updatedAt;
-  final Map<String, SectionDto> sections;
+  final Map<int, SectionDto> sections;
   final String? link;
 
   VersionDto({
@@ -52,12 +51,12 @@ class VersionDto {
       link: map['link'] as String?,
       tags: (map['tags'] as List<dynamic>).map((e) => e.toString()).toList(),
       songStructure: (map['songStructure'] as List<dynamic>)
-          .map((e) => e.toString())
+          .map((e) => e as int)
           .toList(),
       updatedAt: map['updatedAt'] as Timestamp?,
-      sections: (map['sections'] as Map<String, dynamic>).map(
-        (sectionsCode, section) => MapEntry(
-          sectionsCode,
+      sections: (map['sections'] as Map<int, dynamic>).map(
+        (sectionKey, section) => MapEntry(
+          sectionKey,
           SectionDto.fromFirestore(Map<String, dynamic>.from(section)),
         ),
       ),
@@ -77,7 +76,9 @@ class VersionDto {
       'tags': tags,
       'songStructure': songStructure,
       'updatedAt': updatedAt ?? Timestamp.now(),
-      'sections': sections.map((key, value) => MapEntry(key, value.toFirestore())),
+      'sections': sections.map(
+        (key, value) => MapEntry(key, value.toFirestore()),
+      ),
       'link': link,
     };
   }
@@ -94,15 +95,13 @@ class VersionDto {
       originalKey: map['originalKey'] as String,
       transposedKey: map['transposedKey'] as String?,
       tags: (map['tags'] as List<dynamic>).map((e) => e.toString()).toList(),
-      songStructure: (map['songStructure'] as List<dynamic>)
-          .map((e) => e.toString())
-          .toList(),
+      songStructure: (map['songStructure'] as List<int>).toList(),
       updatedAt: map['updatedAt'] != null
           ? (Timestamp.fromMillisecondsSinceEpoch(map['updatedAt'] as int))
           : Timestamp.now(),
-      sections: (map['sections'] as Map<String, dynamic>).map(
-        (sectionsCode, section) => MapEntry(
-          sectionsCode,
+      sections: (map['sections'] as Map<int, dynamic>).map(
+        (sectionKey, section) => MapEntry(
+          sectionKey,
           SectionDto.fromFirestore(Map<String, dynamic>.from(section)),
         ),
       ),
@@ -154,9 +153,9 @@ class VersionDto {
     String? versionName,
     String? originalKey,
     String? transposedKey,
-    List<String>? songStructure,
+    List<int>? songStructure,
     Timestamp? updatedAt,
-    Map<String, SectionDto>? sections,
+    Map<int, SectionDto>? sections,
     String? link,
   }) {
     return VersionDto(
@@ -179,30 +178,30 @@ class VersionDto {
 }
 
 class SectionDto {
-  final String contentCode;
+  final int key;
   final String contentType;
   final String contentText;
-  final String? color;
+  final String color;
 
   SectionDto({
-    required this.contentCode,
+    required this.key,
     required this.contentType,
     required this.contentText,
-    this.color,
+    required this.color,
   });
 
   factory SectionDto.fromFirestore(Map<String, dynamic> map) {
     return SectionDto(
-      contentCode: map['contentCode'] as String,
+      key: map['key'] as int,
       contentType: map['contentType'] as String,
       contentText: map['contentText'] as String,
-      color: map['contentColor'] as String?,
+      color: map['contentColor'] as String,
     );
   }
 
   Map<String, dynamic> toFirestore() {
     return {
-      'contentCode': contentCode,
+      'key': key,
       'contentType': contentType,
       'contentText': contentText,
       'contentColor': color,
@@ -214,10 +213,10 @@ class SectionDto {
   Section toDomain({int? versionID}) {
     return Section(
       versionID: versionID ?? -1,
+      key: key,
       contentType: contentType,
-      contentCode: contentCode,
       contentText: contentText,
-      contentColor: color != null ? colorFromHex(color!) : Colors.grey,
+      contentColor: colorFromHex(color),
     );
   }
 }

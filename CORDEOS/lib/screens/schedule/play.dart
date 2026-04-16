@@ -116,7 +116,7 @@ class PlayScheduleState extends State<PlaySchedule> {
           final version = schedule.playlist.versions[item.firebaseContentId]!;
           cloudVer.setVersion(item.firebaseContentId!, version);
 
-          final sections = <String, Section>{};
+          final sections = <int, Section>{};
           for (var entry in version.sections.entries) {
             sections[entry.key] = entry.value.toDomain();
           }

@@ -120,6 +120,7 @@ class ChordHelper {
   }
 
   List<String> getChordVariationsOnKey(String key, String chord, int index) {
+    
     switch (index) {
       case 0:
         return [

@@ -33,7 +33,7 @@ class _SectionsTabState extends State<SectionsTab> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Selector<LocalVersionProvider, List<String>>(
+    return Selector<LocalVersionProvider, List<int>>(
       selector: (context, localVer) {
         final songStructure = localVer.getSongStructure(widget.versionID);
         return songStructure.toSet().toList();
@@ -104,11 +104,11 @@ class _SectionsTabState extends State<SectionsTab> {
                             style: textTheme.bodyMedium,
                           )
                         else
-                          ...uniqueSections.map((sectionCode) {
+                          ...uniqueSections.map((sectionKey) {
                             return TokenContentCard(
-                              index: uniqueSections.indexOf(sectionCode),
+                              index: uniqueSections.indexOf(sectionKey),
                               versionID: widget.versionID,
-                              sectionCode: sectionCode,
+                              sectionKey: sectionKey,
                               isEnabled: widget.isEnabled,
                             );
                           }),

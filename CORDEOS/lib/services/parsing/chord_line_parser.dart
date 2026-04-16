@@ -16,20 +16,13 @@ class ChordLineParser {
   /// Parses sections from the given [ImportVariant] and creates the parsed objects.
   void parseBySimpleText(ParsingResult result) {
     // Iterates through each section of the cipher creating Section objects
-    Map<String, SectionDto> parsedSections = result.parsedSections;
-    List<String> songStructure = result.songStructure;
-    int incrementalDefaultCode = 0;
+    Map<int, SectionDto> parsedSections = result.parsedSections;
+    List<int> songStructure = result.songStructure;
+    int key = 0;
 
     List<RawSection> rawSections = result.rawSections;
 
     for (var rawSection in rawSections) {
-      String? code = rawSection.code;
-      if (code == null) {
-        // Assign a default code if none is found
-        code = incrementalDefaultCode.toString();
-        incrementalDefaultCode++;
-      }
-
       // If the section is marked as duplicate, skip creating a new Section object
       if (rawSection.duplicateOf != null) {
         // Add the code of the original section to the song structure
@@ -39,60 +32,54 @@ class ChordLineParser {
       }
 
       // Keep track of song structure
-      songStructure.add(code);
-      rawSection.code = code;
+      songStructure.add(key);
+      rawSection.key = key;
 
       // Build the Section object
       final parsedSection = SectionDto(
-        color: colorToHex(rawSection.color ?? Colors.grey),
-        contentCode: code,
+        key: key,
+        color: colorToHex(rawSection.color),
         contentType: rawSection.suggestedLabel,
         contentText: _buildContentFromSimpleText(rawSection.content),
       );
 
-      parsedSections[code] = parsedSection;
+      parsedSections[key] = parsedSection;
+      key++;
     }
   }
 
   void parseByPdfFormatting(ParsingResult result) {
     // Iterates through each section of the variant creating Section objects
-    Map<String, SectionDto> parsedSections = result.parsedSections;
+    Map<int, SectionDto> parsedSections = result.parsedSections;
     List<RawSection> rawSections = result.rawSections;
-    List<String> songStructure = result.songStructure;
-    int incrementalDefaultCode = 1;
+    List<int> songStructure = result.songStructure;
+    int key = 0;
 
     for (var rawSection in rawSections) {
-      String? code = rawSection.code;
-      if (code == null || code.isEmpty) {
-        // Assign a default code if none is found
-        code = incrementalDefaultCode.toString();
-        incrementalDefaultCode++;
-      }
-
       // If the section is marked as duplicate, skip creating a new Section object
       if (rawSection.duplicateOf != null) {
         // Add the code of the original section to the song structure
         songStructure.add(rawSection.duplicateOf!);
-        rawSection.code = code;
         // Skip to the next section
         continue;
       }
 
       // Keep track of song structure
-      songStructure.add(code);
-      rawSection.code = code;
+      songStructure.add(key);
+      rawSection.key = key;
 
       // Build the Section object
       final parsedSection = SectionDto(
-        color: colorToHex(rawSection.color ?? Colors.grey),
-        contentCode: code,
+        key: key,
+        color: colorToHex(rawSection.color),
         contentType: rawSection.suggestedLabel,
         contentText: _buildContentFromLinesData(
           rawSection.linesData as List<LineData>,
         ),
       );
 
-      parsedSections[code] = parsedSection;
+      parsedSections[key] = parsedSection;
+      key++;
     }
   }
 

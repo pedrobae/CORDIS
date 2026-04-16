@@ -1,7 +1,6 @@
 import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/section/section_provider.dart';
-import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/utils/section_constants.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/edit_section.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +8,13 @@ import 'package:provider/provider.dart';
 
 class SelectType extends StatelessWidget {
   final int versionID;
-  final String? sectionCode;
+  final int? sectionKey;
   final bool isNewSection;
 
   const SelectType({
     super.key,
     required this.versionID,
-    this.sectionCode,
+    this.sectionKey,
     this.isNewSection = false,
   });
 
@@ -82,23 +81,21 @@ class SelectType extends StatelessWidget {
                     GestureDetector(
                       onTap: () {
                         try {
-                          final newCode = _upsertSection(context, section);
+                          final newKey = _upsertSection(context, section);
                           isNewSection
-                              ? nav
-                                    .pushForeground(
-                                      EditSectionScreen(
-                                        sectionCode: newCode,
-                                        versionID: versionID,
-                                        isNewSection: true,
-                                      ),
-                                    )
-                              : nav
-                                    .pushForeground(
-                                      EditSectionScreen(
-                                        sectionCode: newCode,
-                                        versionID: versionID,
-                                      ),
-                                    );
+                              ? nav.pushForeground(
+                                  EditSectionScreen(
+                                    sectionKey: newKey,
+                                    versionID: versionID,
+                                    isNewSection: true,
+                                  ),
+                                )
+                              : nav.pushForeground(
+                                  EditSectionScreen(
+                                    sectionKey: newKey,
+                                    versionID: versionID,
+                                  ),
+                                );
                         } catch (e) {
                           // Show error snackbar
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -157,40 +154,23 @@ class SelectType extends StatelessWidget {
     );
   }
 
-  String _upsertSection(BuildContext context, SectionLabel section) {
+  int _upsertSection(BuildContext context, SectionLabel section) {
     final sect = context.read<SectionProvider>();
     if (isNewSection) {
-      final newCode = sect.cacheAddSection(
+      final newKey = sect.cacheAddSection(
         versionID,
-        section.code,
         section.color,
         section.canonicalLabel,
       );
-      return newCode;
+      return newKey;
     } else {
-      final newCode = sect.cacheUpdate(
+      sect.cacheUpdate(
         versionID,
-        sectionCode!,
-        newContentCode: section.code,
+        sectionKey!,
         newContentType: section.canonicalLabel,
         newColor: section.color,
       );
-
-      // If the content code has changed, update the song structure accordingly
-      if (sectionCode! != section.code) {
-        context.read<LocalVersionProvider>().updateSectionCodeInStruct(
-          versionID,
-          oldCode: sectionCode!,
-          newCode: newCode,
-        );
-
-        context.read<SectionProvider>().renameSectionKey(
-          versionID,
-          oldCode: sectionCode!,
-          newCode: newCode,
-        );
-      }
-      return newCode;
+      return sectionKey!;
     }
   }
 }
