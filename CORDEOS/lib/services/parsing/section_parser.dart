@@ -29,8 +29,8 @@ class SectionParser {
         content: sectionContent,
         numberOfLines: sectionContent.split('\n').length,
         duplicateOf: null,
-        suggestedLabel: SectionLabelType.unknown.canonicalLabel,
-        color: SectionLabelType.unknown.color,
+        suggestedLabel: SectionType.unknown.canonicalLabel,
+        color: SectionType.unknown.color,
         key: i,
       );
 
@@ -42,8 +42,8 @@ class SectionParser {
     String rawText = result.rawText;
     List<Map<String, dynamic>> validMatches = [];
     // Search common label texts
-    for (var label in commonSectionLabels.values) {
-      for (var labelVariation in label.labelVariations) {
+    for (var sectionType in SectionType.values) {
+      for (var labelVariation in sectionType.knownLabels) {
         RegExp regex = RegExp(labelVariation, caseSensitive: false);
         Iterable<RegExpMatch> matches = regex.allMatches(result.rawText);
 
@@ -53,7 +53,7 @@ class SectionParser {
           // Possible Label found -  Validate
           if (labelData['isValid']) {
             validMatches.add({
-              'label': label,
+              'label': sectionType,
               'labelStart': labelData['labelStart'],
               'labelEnd': labelData['labelEnd'],
             });
@@ -73,7 +73,7 @@ class SectionParser {
       int sectionEnd = nextMatch != null
           ? nextMatch['labelStart']
           : rawText.length;
-      SectionLabel label = match['label'];
+      SectionType label = match['label'];
 
       final content = rawText.substring(sectionStart, sectionEnd).trimRight();
       if (content.isEmpty) {
@@ -268,7 +268,7 @@ class SectionParser {
     // Check first line for label
     bool firstLineHasLabel;
     RegExpMatch? match;
-    SectionLabel label;
+    SectionType label;
     (firstLineHasLabel, match, label) = _containsLabel(linesData[0].text);
 
     if (firstLineHasLabel) {
@@ -308,16 +308,16 @@ class SectionParser {
     result.rawSections.add(section);
   }
 
-  (bool, RegExpMatch?, SectionLabel) _containsLabel(String text) {
-    for (var label in commonSectionLabels.values) {
-      for (var labelVariation in label.labelVariations) {
+  (bool, RegExpMatch?, SectionType) _containsLabel(String text) {
+    for (var type in SectionType.values) {
+      for (var labelVariation in type.knownLabels) {
         RegExp regex = RegExp(labelVariation, caseSensitive: false);
         if (regex.hasMatch(text)) {
-          return (true, regex.firstMatch(text)!, label);
+          return (true, regex.firstMatch(text)!, type);
         }
       }
     }
-    return (false, null, SectionLabel.unknown());
+    return (false, null, SectionType.unknown);
   }
 }
 

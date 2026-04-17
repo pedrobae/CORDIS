@@ -58,13 +58,14 @@ class _StructureListState extends State<StructureList> {
     final scroll = context.read<ScrollProvider>();
     final state = context.read<PlayStateProvider>();
 
-    return Selector3<
+    return Selector4<
       LayoutSetProvider,
       LocalVersionProvider,
       CloudVersionProvider,
+      SectionProvider,
       ({List<int> filteredStructure, bool tapEnabled})
     >(
-      selector: (context, laySet, localVer, cloudVer) {
+      selector: (context, laySet, localVer, cloudVer, sect) {
         final tapEnabled = laySet.showRepeatSections == true;
 
         if (widget.versionID == null) {
@@ -77,10 +78,16 @@ class _StructureListState extends State<StructureList> {
 
         final filteredStructure = <int>[];
         for (var key in songStructure) {
-          if (laySet.showAnnotations == false && isAnnotation()) {
+          final section = sect.getSection(
+            versionKey: widget.versionID,
+            sectionKey: key,
+          );
+          if (laySet.showAnnotations == false &&
+              section?.sectionType == SectionType.annotation) {
             continue;
           }
-          if (laySet.showTransitions == false && isTransition()) {
+          if (laySet.showTransitions == false &&
+              isTransition(section?.sectionType)) {
             continue;
           }
           filteredStructure.add(key);
@@ -169,20 +176,45 @@ class _StructureSectionButton extends StatelessWidget {
 
     return RepaintBoundary(
       child:
-          Selector2<
+          Selector4<
             ScrollProvider,
             SectionProvider,
-            ({Section? section, bool highlighted})
+            LocalVersionProvider,
+            CloudVersionProvider,
+            ({Section? section, bool highlighted, String sectionCode})
           >(
-            selector: (context, scroll, section) => (
-              section: section.getSection(
+            selector: (context, scroll, sect, localVer, cloudVer) {
+              final songStruct = versionID is int
+                  ? localVer.getSongStructure(versionID)
+                  : cloudVer.getSongStructure(versionID);
+
+              final section = sect.getSection(
                 versionKey: versionID,
                 sectionKey: sectionKey,
-              ),
-              highlighted: scroll.currentSectionIndex == index,
-            ),
-            builder: (context, selection, child) {
-              if (selection.section == null) {
+              );
+
+              int typeCount = 1;
+              final sectionType = section?.sectionType;
+
+              for (var i = 0; (i < index); i++) {
+                if (i >= songStruct.length) break;
+                final key = songStruct[i];
+                final sec = sect.getSection(
+                  versionKey: versionID,
+                  sectionKey: key,
+                );
+                if (sec != null && sec.sectionType == sectionType) {
+                  typeCount++;
+                }
+              }
+              return (
+                section: section,
+                highlighted: scroll.currentSectionIndex == index,
+                sectionCode: sectionType?.code(typeCount) ?? 'U$typeCount',
+              );
+            },
+            builder: (context, s, child) {
+              if (s.section == null) {
                 return const SizedBox(
                   height: StructureList.buttonWidth,
                   width: StructureList.buttonWidth,
@@ -196,17 +228,15 @@ class _StructureSectionButton extends StatelessWidget {
                   height: StructureList.buttonWidth,
                   width: StructureList.buttonWidth,
                   decoration: BoxDecoration(
-                    color: selection.section!.contentColor.withValues(
-                      alpha: 0.9,
-                    ),
+                    color: s.section!.contentColor.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(6),
-                    border: selection.highlighted
+                    border: s.highlighted
                         ? Border.all(color: colorScheme.primary, width: 2)
                         : null,
                   ),
                   child: Center(
                     child: Text(
-                      sectionCode,
+                      s.sectionCode,
                       style: TextStyle(
                         color: colorScheme.onPrimary,
                         fontWeight: FontWeight.w600,

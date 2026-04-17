@@ -1,12 +1,13 @@
 import 'package:cordeos/models/dtos/version_dto.dart';
 
 import 'package:cordeos/utils/color.dart';
+import 'package:cordeos/utils/section_constants.dart';
 import 'package:flutter/cupertino.dart';
 
 class Section {
   final int? id;
   final int key;
-  int versionID;
+  final int versionID;
   String contentType;
   String contentText;
   Color contentColor;
@@ -19,6 +20,10 @@ class Section {
     required this.contentText,
     required this.contentColor,
   });
+
+  SectionType get sectionType {
+    return identifySectionType(contentType);
+  }
 
   factory Section.fromSqLite(Map<String, dynamic> json) {
     return Section(

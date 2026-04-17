@@ -67,18 +67,34 @@ class _ManageSheetState extends State<ManageSheet> {
 
     return Selector2<
       LocalVersionProvider,
-      CipherProvider,
-      ({List<int>? songStructure, Duration? duration})
+      SectionProvider,
+      ({
+        List<SectionBadgeData> uniqueBadgeData,
+        Set<int> uniqueStruct,
+        Duration? duration,
+      })
     >(
-      selector: (context, localVer, ciph) {
+      selector: (context, localVer, sect) {
         final version = localVer.getVersion(widget.versionID);
+        final uniqueStruct = (version?.songStructure ?? []).toSet();
+        final sectionTypes = <SectionType>[];
+        for (var sectionKey in uniqueStruct) {
+          final section = sect.getSection(
+            versionKey: widget.versionID,
+            sectionKey: sectionKey,
+          );
+          if (section != null) {
+            sectionTypes.add(section.sectionType);
+          }
+        }
         return (
-          songStructure: version?.songStructure,
+          uniqueBadgeData: getSectionBadges(sectionTypes),
+          uniqueStruct: uniqueStruct,
           duration: version?.duration,
         );
       },
       builder: (context, s, child) {
-        if (s.songStructure == null || s.duration == null) {
+        if (s.uniqueBadgeData.isEmpty || s.duration == null) {
           return Center(child: CircularProgressIndicator());
         }
 
@@ -156,14 +172,12 @@ class _ManageSheetState extends State<ManageSheet> {
                 child: ListView(
                   children: [
                     _buildAnnotationSection(),
-                    for (var sectionKey in s.songStructure!.toSet())
+                    for (int i = 0; i < s.uniqueBadgeData.length; i++)
                       Builder(
                         builder: (context) {
-                          final sect = context.read<SectionProvider>();
-                          final section = sect.getSection(
-                            versionKey: widget.versionID,
-                            sectionKey: sectionKey,
-                          )!;
+                          final badgeData = s.uniqueBadgeData[i];
+                          final sectionKey = s.uniqueStruct.elementAt(i);
+
                           return GestureDetector(
                             onTap: () {
                               localVer.addSectionToStruct(
@@ -197,12 +211,12 @@ class _ManageSheetState extends State<ManageSheet> {
                                     width: 32,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: section.contentColor,
+                                      color: badgeData.color,
                                     ),
                                   ),
                                   Expanded(
                                     child: Text(
-                                      section.contentCode,
+                                      badgeData.type.localizedLabel(context),
                                       style: textTheme.bodyLarge,
                                     ),
                                   ),
@@ -292,14 +306,15 @@ class _ManageSheetState extends State<ManageSheet> {
     final sect = context.read<SectionProvider>();
     final nav = context.read<NavigationProvider>();
 
-    final sectionLabel = commonSectionLabels['annotations']!;
+    final color = SectionType.annotation.color;
+    final sectionLabel = SectionType.annotation.localizedLabel(context);
 
     return GestureDetector(
       onTap: () {
         final newKey = sect.cacheAddSection(
           widget.versionID,
-          sectionLabel.color,
-          sectionLabel.localizedLabel(context),
+          color,
+          sectionLabel,
         );
 
         nav.pushForeground(
@@ -329,12 +344,12 @@ class _ManageSheetState extends State<ManageSheet> {
               width: 32,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: sectionLabel.color,
+                color: color,
               ),
             ),
             Expanded(
               child: Text(
-                sectionLabel.localizedLabel(context),
+                sectionLabel,
                 style: textTheme.bodyLarge,
               ),
             ),

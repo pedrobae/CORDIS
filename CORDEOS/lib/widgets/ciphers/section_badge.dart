@@ -1,14 +1,17 @@
 import 'dart:math';
+import 'package:cordeos/utils/section_constants.dart';
 import 'package:flutter/material.dart';
 
 class SectionBadge extends StatelessWidget {
-  final String sectionCode;
-  final Color sectionColor;
+  final SectionBadgeData sectionBadgeData;
+  final bool isSelected;
+  final bool isTarget;
 
   const SectionBadge({
     super.key,
-    required this.sectionCode,
-    required this.sectionColor,
+    required this.sectionBadgeData,
+    this.isSelected = false,
+    this.isTarget = false,
   });
 
   @override
@@ -19,7 +22,7 @@ class SectionBadge extends StatelessWidget {
     // Measure section code width on the correct style
     final textPainter = TextPainter(
       text: TextSpan(
-        text: sectionCode,
+        text: sectionBadgeData.code,
         style: TextStyle(
           fontWeight: FontWeight.bold,
           color: colorScheme.surface,
@@ -35,16 +38,24 @@ class SectionBadge extends StatelessWidget {
       width: max(28, sectionCodeWidth),
       height: 24,
       decoration: BoxDecoration(
-        color: sectionColor,
+        color: sectionBadgeData.color,
         borderRadius: BorderRadius.circular(8),
+        border: isSelected
+            ? Border.all(
+                color: isTarget ? colorScheme.primary : colorScheme.secondary,
+                width: 2,
+              )
+            : null,
       ),
       alignment: Alignment.center,
       child: Text(
-        sectionCode,
+        sectionBadgeData.code,
         style: textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.w600,
           color: colorScheme.surface,
-          fontSize: textTheme.labelLarge?.fontSize != null ? textTheme.labelLarge!.fontSize! - 4 : null,
+          fontSize: textTheme.labelLarge?.fontSize != null
+              ? textTheme.labelLarge!.fontSize! - 4
+              : null,
         ),
         textAlign: TextAlign.center,
       ),

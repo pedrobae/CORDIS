@@ -77,11 +77,11 @@ class SelectType extends StatelessWidget {
               child: Column(
                 spacing: 8,
                 children: [
-                  for (var section in commonSectionLabels.values)
+                  for (var type in SectionType.values)
                     GestureDetector(
                       onTap: () {
                         try {
-                          final newKey = _upsertSection(context, section);
+                          final newKey = _upsertSection(context, type);
                           isNewSection
                               ? nav.pushForeground(
                                   EditSectionScreen(
@@ -128,12 +128,12 @@ class SelectType extends StatelessWidget {
                               width: 28,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: section.color,
+                                color: type.color,
                               ),
                             ),
                             Expanded(
                               child: Text(
-                                section.localizedLabel(context),
+                                type.localizedLabel(context),
                                 style: textTheme.labelLarge,
                               ),
                             ),
@@ -154,21 +154,21 @@ class SelectType extends StatelessWidget {
     );
   }
 
-  int _upsertSection(BuildContext context, SectionLabel section) {
+  int _upsertSection(BuildContext context, SectionType type) {
     final sect = context.read<SectionProvider>();
     if (isNewSection) {
       final newKey = sect.cacheAddSection(
         versionID,
-        section.color,
-        section.canonicalLabel,
+        type.color,
+        type.canonicalLabel,
       );
       return newKey;
     } else {
       sect.cacheUpdate(
         versionID,
         sectionKey!,
-        newContentType: section.canonicalLabel,
-        newColor: section.color,
+        newContentType: type.canonicalLabel,
+        newColor: type.color,
       );
       return sectionKey!;
     }

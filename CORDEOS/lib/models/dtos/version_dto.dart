@@ -38,6 +38,11 @@ class VersionDto {
   });
 
   factory VersionDto.fromFirestore(Map<String, dynamic> map, String id) {
+    final parsedStructure = _parseStructureAndSections(
+      rawSongStructure: map['songStructure'],
+      rawSections: map['sections'],
+    );
+
     return VersionDto(
       firebaseId: id,
       author: map['author'] as String,
@@ -50,16 +55,9 @@ class VersionDto {
       transposedKey: map['transposedKey'] as String?,
       link: map['link'] as String?,
       tags: (map['tags'] as List<dynamic>).map((e) => e.toString()).toList(),
-      songStructure: (map['songStructure'] as List<dynamic>)
-          .map((e) => e as int)
-          .toList(),
+      songStructure: parsedStructure.songStructure,
       updatedAt: map['updatedAt'] as Timestamp?,
-      sections: (map['sections'] as Map<int, dynamic>).map(
-        (sectionKey, section) => MapEntry(
-          sectionKey,
-          SectionDto.fromFirestore(Map<String, dynamic>.from(section)),
-        ),
-      ),
+      sections: parsedStructure.sections,
     );
   }
 
@@ -77,13 +75,18 @@ class VersionDto {
       'songStructure': songStructure,
       'updatedAt': updatedAt ?? Timestamp.now(),
       'sections': sections.map(
-        (key, value) => MapEntry(key, value.toFirestore()),
+        (key, value) => MapEntry(key.toString(), value.toFirestore()),
       ),
       'link': link,
     };
   }
 
   factory VersionDto.fromCache(Map<String, dynamic> map) {
+    final parsedStructure = _parseStructureAndSections(
+      rawSongStructure: map['songStructure'],
+      rawSections: map['sections'],
+    );
+
     return VersionDto(
       firebaseId: map['firebaseId'] as String?,
       author: map['author'] as String,
@@ -95,18 +98,96 @@ class VersionDto {
       originalKey: map['originalKey'] as String,
       transposedKey: map['transposedKey'] as String?,
       tags: (map['tags'] as List<dynamic>).map((e) => e.toString()).toList(),
-      songStructure: (map['songStructure'] as List<int>).toList(),
+      songStructure: parsedStructure.songStructure,
       updatedAt: map['updatedAt'] != null
           ? (Timestamp.fromMillisecondsSinceEpoch(map['updatedAt'] as int))
           : Timestamp.now(),
-      sections: (map['sections'] as Map<int, dynamic>).map(
-        (sectionKey, section) => MapEntry(
-          sectionKey,
-          SectionDto.fromFirestore(Map<String, dynamic>.from(section)),
-        ),
-      ),
+      sections: parsedStructure.sections,
       link: map['link'] as String?,
     );
+  }
+
+  /// Supports both legacy string-keyed structures and new int-keyed structures.
+  /// The same logical section id is reused between songStructure and sections.
+  static _ParsedStructure _parseStructureAndSections({
+    required dynamic rawSongStructure,
+    required dynamic rawSections,
+  }) {
+    final sectionsMap = rawSections is Map ? rawSections : <dynamic, dynamic>{};
+    final structureList =
+        rawSongStructure is List ? rawSongStructure : <dynamic>[];
+
+    final legacyToInt = <String, int>{};
+    final usedIds = <int>{};
+    var nextGeneratedId = 1;
+
+    int mapId(dynamic rawId) {
+      if (rawId is int) {
+        usedIds.add(rawId);
+        return rawId;
+      }
+
+      final normalized = rawId?.toString() ?? '';
+      if (normalized.isEmpty) {
+        while (usedIds.contains(nextGeneratedId)) {
+          nextGeneratedId++;
+        }
+        final generated = nextGeneratedId;
+        usedIds.add(generated);
+        nextGeneratedId++;
+        return generated;
+      }
+
+      final existing = legacyToInt[normalized];
+      if (existing != null) {
+        return existing;
+      }
+
+      final numeric = int.tryParse(normalized);
+      if (numeric != null && !usedIds.contains(numeric)) {
+        legacyToInt[normalized] = numeric;
+        usedIds.add(numeric);
+        return numeric;
+      }
+
+      while (usedIds.contains(nextGeneratedId)) {
+        nextGeneratedId++;
+      }
+      final generated = nextGeneratedId;
+      legacyToInt[normalized] = generated;
+      usedIds.add(generated);
+      nextGeneratedId++;
+      return generated;
+    }
+
+    final parsedSections = <int, SectionDto>{};
+    for (final entry in sectionsMap.entries) {
+      final sectionId = mapId(entry.key);
+      final sectionData = Map<String, dynamic>.from(entry.value as Map);
+      sectionData['key'] = _tryParseInt(sectionData['key']) ?? sectionId;
+      parsedSections[sectionId] = SectionDto.fromFirestore(sectionData);
+    }
+
+    final parsedSongStructure =
+        structureList.map((item) => mapId(item)).toList(growable: false);
+
+    return _ParsedStructure(
+      songStructure: parsedSongStructure,
+      sections: parsedSections,
+    );
+  }
+
+  static int? _tryParseInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+    if (value is num) {
+      return value.toInt();
+    }
+    if (value is String) {
+      return int.tryParse(value);
+    }
+    return null;
   }
 
   /// To JSON for caching (weekly public versions)
@@ -124,7 +205,9 @@ class VersionDto {
       'tags': tags,
       'songStructure': songStructure,
       'updatedAt': updatedAt?.millisecondsSinceEpoch,
-      'sections': sections.map((key, value) => MapEntry(key, value.toCache())),
+      'sections': sections.map(
+        (key, value) => MapEntry(key.toString(), value.toCache()),
+      ),
       'link': link,
     };
   }
@@ -192,7 +275,7 @@ class SectionDto {
 
   factory SectionDto.fromFirestore(Map<String, dynamic> map) {
     return SectionDto(
-      key: map['key'] as int,
+      key: VersionDto._tryParseInt(map['key']) ?? 0,
       contentType: map['contentType'] as String,
       contentText: map['contentText'] as String,
       color: map['contentColor'] as String,
@@ -219,4 +302,14 @@ class SectionDto {
       contentColor: colorFromHex(color),
     );
   }
+}
+
+class _ParsedStructure {
+  final List<int> songStructure;
+  final Map<int, SectionDto> sections;
+
+  const _ParsedStructure({
+    required this.songStructure,
+    required this.sections,
+  });
 }

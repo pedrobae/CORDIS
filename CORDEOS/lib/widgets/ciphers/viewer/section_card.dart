@@ -1,6 +1,7 @@
 import 'package:cordeos/providers/play/auto_scroll_provider.dart';
 import 'package:cordeos/providers/token_cache_provider.dart';
 import 'package:cordeos/providers/transposition_provider.dart';
+import 'package:cordeos/utils/section_constants.dart';
 import 'package:cordeos/utils/token_cache_keys.dart';
 import 'package:cordeos/widgets/ciphers/section_badge.dart';
 import 'package:cordeos/widgets/ciphers/viewer/token_view.dart';
@@ -14,7 +15,7 @@ class SectionCard extends StatelessWidget {
   final int sectionKey;
   final String sectionType;
   final String sectionText;
-  final Color sectionColor;
+  final SectionBadgeData sectionBadge;
 
   const SectionCard({
     super.key,
@@ -23,7 +24,7 @@ class SectionCard extends StatelessWidget {
     required this.sectionType,
     required this.sectionKey,
     required this.sectionText,
-    required this.sectionColor,
+    required this.sectionBadge,
   });
 
   @override
@@ -35,7 +36,11 @@ class SectionCard extends StatelessWidget {
     final trans = context.read<TranspositionProvider>();
     final width = MediaQuery.sizeOf(context).width;
 
-    final layoutKey = TokenCacheKey(content: sectionText, sectionIndex: index, isEditMode: false);
+    final layoutKey = TokenCacheKey(
+      content: sectionText,
+      sectionIndex: index,
+      isEditMode: false,
+    );
     return Selector2<
       LayoutSetProvider,
       TranspositionProvider,
@@ -123,8 +128,12 @@ class SectionCard extends StatelessWidget {
                   ),
                   builder: (context, s, child) {
                     final Color dimmedSectionColor =
-                        Color.lerp(sectionColor, colorScheme.surface, 0.82) ??
-                        sectionColor;
+                        Color.lerp(
+                          sectionBadge.color,
+                          colorScheme.surface,
+                          0.82,
+                        ) ??
+                        sectionBadge.color;
 
                     return Container(
                       width: width * l.cardWidthMult,
@@ -136,7 +145,7 @@ class SectionCard extends StatelessWidget {
                         border: Border.all(
                           color: s.showSectionHeaders
                               ? colorScheme.surfaceContainerHigh
-                              : sectionColor,
+                              : sectionBadge.color,
                         ),
                         borderRadius: BorderRadius.circular(0),
                         boxShadow: s.isCurrent
@@ -156,10 +165,7 @@ class SectionCard extends StatelessWidget {
                             Row(
                               spacing: 8,
                               children: [
-                                SectionBadge(
-                                  sectionCode: sectionCode,
-                                  sectionColor: sectionColor,
-                                ),
+                                SectionBadge(sectionBadgeData: sectionBadge),
                                 Expanded(
                                   child: Text(
                                     sectionType.isNotEmpty
@@ -180,7 +186,7 @@ class SectionCard extends StatelessWidget {
                   },
                   child: TokenView(
                     tokensKey: layoutKey,
-                    contentColor: sectionColor,
+                    contentColor: sectionBadge.color,
                   ),
                 );
               },

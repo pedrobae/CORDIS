@@ -24,23 +24,33 @@ class VersionWrap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector3<
+    return Selector4<
       LayoutSetProvider,
       LocalVersionProvider,
       CloudVersionProvider,
-      ({Axis wrapDirection, List<int> filteredStructure})
+      SectionProvider,
+      ({
+        Axis wrapDirection,
+        List<int> filteredStructure,
+        List<SectionBadgeData> badgesData,
+      })
     >(
-      selector: (context, laySet, localVer, cloudVer) {
+      selector: (context, laySet, localVer, cloudVer, sect) {
         final songStructure = versionID is String
             ? cloudVer.getVersion(versionID)!.songStructure
             : localVer.getSongStructure(versionID);
 
         final filteredStructure = <int>[];
         for (var key in songStructure) {
-          if (laySet.showAnnotations == false && isAnnotation(key)) {
+          final sectionType = sect
+              .getSection(versionKey: versionID, sectionKey: key)
+              ?.sectionType;
+
+          if (laySet.showAnnotations == false &&
+              sectionType == SectionType.annotation) {
             continue;
           }
-          if (laySet.showTransitions == false && isTransition(key)) {
+          if (laySet.showTransitions == false && isTransition(sectionType)) {
             continue;
           }
           if (laySet.showRepeatSections == false &&
@@ -49,10 +59,21 @@ class VersionWrap extends StatelessWidget {
           }
           filteredStructure.add(key);
         }
+        final sectionTypes = <SectionType>[];
+        for (var key in filteredStructure) {
+          final sectionType = sect
+              .getSection(versionKey: versionID, sectionKey: key)
+              ?.sectionType;
+
+          if (sectionType != null) {
+            sectionTypes.add(sectionType);
+          }
+        }
 
         return (
           wrapDirection: laySet.wrapDirection,
           filteredStructure: filteredStructure,
+          badgesData: getSectionBadges(sectionTypes),
         );
       },
       builder: (context, s, child) {
@@ -69,7 +90,11 @@ class VersionWrap extends StatelessWidget {
                 alignment: WrapAlignment.start,
                 runSpacing: 8,
                 spacing: 8,
-                children: _buildSectionCards(context, s.filteredStructure),
+                children: _buildSectionCards(
+                  context,
+                  s.filteredStructure,
+                  s.badgesData,
+                ),
               ),
             ),
           ],
@@ -148,12 +173,12 @@ class VersionWrap extends StatelessWidget {
   List<Widget> _buildSectionCards(
     BuildContext context,
     List<int> filteredStructure,
+    List<SectionBadgeData> badgesData,
   ) {
     if (versionID == null) return [const SizedBox.shrink()];
 
     final scroll = context.read<ScrollProvider>();
     final sect = context.read<SectionProvider>();
-    final cloudVer = context.read<CloudVersionProvider>();
 
     final sectionWidgets = <Widget>[];
 
@@ -162,19 +187,15 @@ class VersionWrap extends StatelessWidget {
 
       final sectionKey = filteredStructure[i];
 
-      final section =
-          sect.getSection(versionKey: versionID, sectionKey: sectionKey) ??
-          (versionID is String
-              ? () {
-                  final sectionDto = cloudVer
-                      .getVersion(versionID)
-                      ?.sections[sectionKey];
-                  if (sectionDto == null) return null;
-                  return sectionDto.toDomain();
-                }()
-              : null);
+      final section = sect.getSection(
+        versionKey: versionID,
+        sectionKey: sectionKey,
+      );
 
       if (section == null) {
+        debugPrint(
+          "VERSION WRAP - couldnt get section data, probably cloud not being loaded",
+        );
         sectionWidgets.add(const SizedBox.shrink());
         continue;
       }
@@ -185,7 +206,7 @@ class VersionWrap extends StatelessWidget {
         section.contentText.split('\n').length,
       );
 
-      if (isAnnotation(sectionKey)) {
+      if (section.sectionType == SectionType.annotation) {
         sectionWidgets.add(
           AnnotationCard(
             key: key,
@@ -205,7 +226,7 @@ class VersionWrap extends StatelessWidget {
             sectionType: section.contentType,
             sectionKey: sectionKey,
             sectionText: section.contentText,
-            sectionColor: section.contentColor,
+            sectionBadge: badgesData[i],
           ),
         ),
       );

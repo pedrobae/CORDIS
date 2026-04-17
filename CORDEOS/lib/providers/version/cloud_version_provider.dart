@@ -48,6 +48,15 @@ class CloudVersionProvider extends ChangeNotifier {
     }
   }
 
+  List<int> getSongStructure(String versionID) {
+    final version = _versions[versionID];
+    if (version != null) {
+      return version.songStructure;
+    } else {
+      return [];
+    }
+  }
+
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
   String? get currentLoadingOperation => _currentLoadingOperation;
@@ -63,7 +72,9 @@ class CloudVersionProvider extends ChangeNotifier {
     try {
       return await operation.timeout(timeout);
     } on TimeoutException {
-      throw TimeoutException('$operationName timed out after ${timeout.inSeconds}s');
+      throw TimeoutException(
+        '$operationName timed out after ${timeout.inSeconds}s',
+      );
     }
   }
 
@@ -108,7 +119,7 @@ class CloudVersionProvider extends ChangeNotifier {
     _versions[firebaseId] = version;
     notifyListeners();
   }
-  
+
   // ===== READ =====
   /// Loads public versions from Firestore
   Future<void> loadVersions({

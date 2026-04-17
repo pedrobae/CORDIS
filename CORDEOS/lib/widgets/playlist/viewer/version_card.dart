@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:cordeos/models/domain/cipher/cipher.dart';
 import 'package:cordeos/providers/token_cache_provider.dart';
+import 'package:cordeos/utils/section_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
 
@@ -67,29 +67,58 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     final nav = context.read<NavigationProvider>();
 
-    return Selector2<
+    return Selector3<
       LocalVersionProvider,
       CipherProvider,
-      ({Version? version, Cipher? cipher})
+      SectionProvider,
+      ({
+        int? cipherID,
+        String title,
+        String musicKey,
+        String duration,
+        String bpm,
+        List<SectionBadgeData> badgesData,
+      })
     >(
-      selector: (context, localVer, ciph) {
+      selector: (context, localVer, ciph, sect) {
         final version = localVer.getVersion(widget.versionId);
         final cipher = version != null
             ? ciph.getCipher(version.cipherID)
             : null;
-        return (version: version, cipher: cipher);
+
+        final songStructure = version?.songStructure;
+
+        final sectionTypes = <SectionType>[];
+        for (var key in songStructure ?? []) {
+          final type = sect
+              .getSection(versionKey: widget.versionId, sectionKey: key)
+              ?.sectionType;
+          if (type != null) {
+            sectionTypes.add(type);
+          }
+        }
+        return (
+          cipherID: cipher?.id,
+          title: cipher?.title ?? '',
+          musicKey: version?.transposedKey ?? cipher?.musicKey ?? '',
+          duration: (version != null && version.duration != Duration.zero)
+              ? DateTimeUtils.formatDuration(version.duration)
+              : '-',
+          bpm: (version != null && version.bpm != 0)
+              ? version.bpm.toString()
+              : '-',
+          badgesData: getSectionBadges(sectionTypes),
+        );
       },
       builder: (context, s, child) {
-        if (s.version == null || s.cipher == null) {
+        if (s.cipherID == null) {
           return Center(child: CircularProgressIndicator());
         }
-
-        final List<int> songStructure = s.version!.songStructure;
 
         return Container(
           decoration: BoxDecoration(
@@ -120,7 +149,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                       () => ViewCipherScreen(
                         versionType: VersionType.playlist,
                         versionID: widget.versionId,
-                        cipherID: s.version!.cipherID,
+                        cipherID: s.cipherID,
                       ),
                       onPopCallback: () {
                         token.clear();
@@ -143,8 +172,8 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          s.cipher!.title,
-                          style: theme.textTheme.titleMedium,
+                          s.title,
+                          style: textTheme.titleMedium,
                           softWrap: true,
                         ),
                         Wrap(
@@ -155,39 +184,20 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
                               children: [
                                 Text(
                                   '${AppLocalizations.of(context)!.musicKey}: ',
-                                  style: theme.textTheme.bodyMedium,
+                                  style: textTheme.bodyMedium,
                                 ),
-                                Text(
-                                  s.version!.transposedKey ??
-                                      s.cipher!.musicKey,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  '${AppLocalizations.of(context)!.bpm}: ',
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                Text(
-                                  s.version!.bpm.toString(),
-                                  style: theme.textTheme.bodyMedium,
-                                ),
+                                Text(s.musicKey, style: textTheme.bodyMedium),
                               ],
                             ),
                             Text(
-                              DateTimeUtils.formatDuration(s.version!.duration),
-                              style: theme.textTheme.bodyMedium,
+                              '${AppLocalizations.of(context)!.bpm}: ${s.bpm}',
+                              style: textTheme.bodyMedium,
                             ),
+                            Text(s.duration, style: textTheme.bodyMedium),
                           ],
                         ),
                         // REORDERABLE SECTION CHIPS
-                        _buildReorderableSectionChips(
-                          s.version!,
-                          songStructure,
-                        ),
+                        _buildReorderableSectionChips(s.badgesData),
                       ],
                     ),
                   ),
@@ -195,7 +205,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
               ),
               GestureDetector(
                 onTap: () {
-                  _openVersionActions(context, s.version!);
+                  _openVersionActions(context, s.cipherID!);
                 },
                 child: Container(
                   // Container to paint and enable hitbox for the icon
@@ -211,10 +221,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
     );
   }
 
-  Widget _buildReorderableSectionChips(
-    Version version,
-    List<int> songStructure,
-  ) {
+  Widget _buildReorderableSectionChips(List<SectionBadgeData> badgesData) {
     final localVer = context.read<LocalVersionProvider>();
 
     return ConstrainedBox(
@@ -226,66 +233,54 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
         buildDefaultDragHandles: false,
         physics: const ClampingScrollPhysics(),
         scrollDirection: Axis.horizontal,
-        itemCount: songStructure.length,
+        itemCount: badgesData.length,
         onReorder: (oldIndex, newIndex) {
           localVer.reorderSongStructure(widget.versionId, oldIndex, newIndex);
         },
         itemBuilder: (_, index) {
-          final sectionCode = songStructure[index];
-
-          return Selector<SectionProvider, Color>(
-            key: ValueKey(
-              'ver${widget.versionId}_idx_${widget.index}_sect_${sectionCode}_idx_$index',
+          final badgeData = badgesData[index];
+          final codeWidth = (TextPainter(
+            text: TextSpan(
+              text: badgeData.code,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
-            selector: (context, sect) {
-              final sectionCode = songStructure[index];
-              return sect
-                      .getSections(widget.versionId)[sectionCode]
-                      ?.contentColor ??
-                  Colors.grey;
-            },
-            builder: (context, color, child) {
-              final codeWidth = (TextPainter(
-                text: TextSpan(
-                  text: sectionCode,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-                textDirection: TextDirection.ltr,
-              )..layout()).size.width;
+            textDirection: TextDirection.ltr,
+          )..layout()).size.width;
 
-              return CustomReorderableDelayed(
-                delay: Duration(milliseconds: 100),
-                index: index,
-                child: Container(
-                  height: 25,
-                  width: max(25, codeWidth + 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(0),
-                    color: color.withValues(alpha: 0.8),
-                    border: Border.all(color: color, width: 2),
-                  ),
-                  margin: const EdgeInsets.only(right: 4),
-                  child: Center(
-                    child: Text(
-                      strutStyle: StrutStyle(forceStrutHeight: true),
-                      sectionCode,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
+          return CustomReorderableDelayed(
+            key: ValueKey(
+              'ver${widget.versionId}_idx_${widget.index}_sect_${badgesData.hashCode}_idx_$index',
+            ),
+            delay: Duration(milliseconds: 100),
+            index: index,
+            child: Container(
+              height: 25,
+              width: max(25, codeWidth + 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(0),
+                color: badgeData.color.withValues(alpha: 0.8),
+                border: Border.all(color: badgeData.color, width: 2),
+              ),
+              margin: const EdgeInsets.only(right: 4),
+              child: Center(
+                child: Text(
+                  strutStyle: StrutStyle(forceStrutHeight: true),
+                  badgeData.code,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-              );
-            },
+              ),
+            ),
           );
         },
       ),
     );
   }
 
-  void _openVersionActions(BuildContext context, Version version) {
+  void _openVersionActions(BuildContext context, int cipherID) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -293,7 +288,7 @@ class _PlaylistVersionCardState extends State<PlaylistVersionCard> {
         return VersionCardActionsSheet(
           itemID: widget.itemId,
           versionID: widget.versionId,
-          cipherID: version.cipherID,
+          cipherID: cipherID,
           playlistID: widget.playlistId,
         );
       },

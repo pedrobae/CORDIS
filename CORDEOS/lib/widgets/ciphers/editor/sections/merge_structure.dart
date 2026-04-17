@@ -1,3 +1,5 @@
+import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/widgets/ciphers/section_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
 
@@ -91,17 +93,37 @@ class _MergeStructureState extends State<MergeStructure> {
             ),
             child:
                 Selector2<
-                  EditSectionsStateProvider,
                   LocalVersionProvider,
-                  ({List<int> uniqueStructure, List<int> mergeSectionKeys})
+                  SectionProvider,
+                  ({
+                    List<int> uniqueStructure,
+                    List<SectionBadgeData> badgeData,
+                  })
                 >(
-                  selector: (context, state, localVer) => (
-                    uniqueStructure: localVer
+                  selector: (context, localVer, sect) {
+                    final uniqueStruct = localVer
                         .getSongStructure(widget.versionID)
                         .toSet()
-                        .toList(),
-                    mergeSectionKeys: state.mergeSectionKeys,
-                  ),
+                        .toList();
+
+                    final sectionTypes = <SectionType>[];
+                    for (var key in uniqueStruct) {
+                      final section = sect.getSection(
+                        versionKey: widget.versionID,
+                        sectionKey: key,
+                      );
+                      if (section != null) {
+                        sectionTypes.add(section.sectionType);
+                      } else {
+                        sectionTypes.add(SectionType.unknown);
+                      }
+                    }
+
+                    return (
+                      uniqueStructure: uniqueStruct,
+                      badgeData: getSectionBadges(sectionTypes),
+                    );
+                  },
                   builder: (context, s, child) {
                     return s.uniqueStructure.isEmpty
                         ? Center(
@@ -120,7 +142,7 @@ class _MergeStructureState extends State<MergeStructure> {
                               return _buildItem(
                                 index,
                                 s.uniqueStructure,
-                                s.mergeSectionKeys,
+                                s.badgeData,
                               );
                             },
                           );
@@ -168,55 +190,30 @@ class _MergeStructureState extends State<MergeStructure> {
   Widget _buildItem(
     int index,
     List<int> uniqueStructure,
-    List<int> mergeSectionKeys,
+    List<SectionBadgeData> badgesData,
   ) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    final sectionCode = uniqueStructure[index];
-    final isTarget = mergeSectionKeys.firstOrNull == sectionCode;
-    final isSelected = mergeSectionKeys.contains(sectionCode);
-
-    return Selector<SectionProvider, Color>(
-      selector: (context, sect) =>
-          sect
-              .getSection(versionKey: widget.versionID, sectionKey: sectionCode)
-              ?.contentColor ??
-          Colors.grey,
-      builder: (context, color, child) => GestureDetector(
-        onTap: () {
-          context.read<EditSectionsStateProvider>().toggleMergeSection(
-            sectionCode,
-          );
-        },
-        child: Container(
-          margin: EdgeInsets.only(right: 4),
-          height: 44,
-          width: 42,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: .90),
-            borderRadius: BorderRadius.circular(7),
-            border: isSelected
-                ? Border.all(
-                    color: isTarget
-                        ? colorScheme.primary
-                        : colorScheme.secondary,
-                    width: 2,
-                  )
-                : null,
-          ),
-          child: Center(
-            child: Text(
-              sectionCode,
-              style: TextStyle(
-                color: colorScheme.surface,
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
+    final sectionKey = uniqueStructure[index];
+    final badgeData = badgesData[index];
+    return Selector<
+      EditSectionsStateProvider,
+      ({bool isTarget, bool isSelected})
+    >(
+      selector: (context, state) {
+        return (
+          isTarget: state.mergeSectionKeys.firstOrNull == sectionKey,
+          isSelected: state.mergeSectionKeys.contains(sectionKey),
+        );
+      },
+      builder: (context, s, child) {
+        return GestureDetector(
+          onTap: () {
+            context.read<EditSectionsStateProvider>().toggleMergeSection(
+              sectionKey,
+            );
+          },
+          child: SectionBadge(sectionBadgeData: badgeData),
+        );
+      },
     );
   }
 }

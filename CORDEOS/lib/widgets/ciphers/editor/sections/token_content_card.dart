@@ -1,3 +1,4 @@
+import 'package:cordeos/utils/section_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
 
@@ -25,6 +26,7 @@ class TokenContentCard extends StatefulWidget {
   final int versionID;
   final int index;
   final int sectionKey;
+  final SectionBadgeData sectionBadgeData;
   final bool isEnabled;
 
   const TokenContentCard({
@@ -32,6 +34,7 @@ class TokenContentCard extends StatefulWidget {
     required this.versionID,
     required this.index,
     required this.sectionKey,
+    required this.sectionBadgeData,
     this.isEnabled = true,
   });
 
@@ -144,10 +147,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     /// Section Code badge
-                    SectionBadge(
-                      sectionCode: s.section!.contentCode,
-                      sectionColor: s.section!.contentColor,
-                    ),
+                    SectionBadge(sectionBadgeData: widget.sectionBadgeData),
 
                     /// Section Type label
                     Expanded(
@@ -367,7 +367,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   context.read<NavigationProvider>().pushForeground(
                     EditSectionScreen(
                       versionID: widget.versionID,
-                      sectionCode: widget.sectionCode,
+                      sectionKey: widget.sectionKey,
                     ),
                   );
                 },
@@ -381,7 +381,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   Navigator.pop(context); // Close the bottom sheet
                   final state = context.read<EditSectionsStateProvider>();
                   state.enableMergeOverlay();
-                  state.toggleMergeSection(widget.sectionCode);
+                  state.toggleMergeSection(widget.sectionKey);
                 },
               ),
               // create copy
@@ -395,14 +395,14 @@ class _TokenContentCardState extends State<TokenContentCard> {
                 onPressed: () {
                   Navigator.pop(context); // Close the bottom sheet
                   final sect = context.read<SectionProvider>();
-                  final newCode = sect.cacheCopyOfSection(
+                  final newKey = sect.cacheCopyOfSection(
                     versionId: widget.versionID,
-                    sectionCode: widget.sectionCode,
+                    sectionKey: widget.sectionKey,
                   );
-                  if (newCode != null) {
+                  if (newKey != null) {
                     context.read<LocalVersionProvider>().addSectionToStruct(
                       widget.versionID,
-                      newCode,
+                      newKey,
                     );
                   }
                 },
@@ -419,7 +419,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   Navigator.pop(context); // Close the bottom sheet
                   context.read<LocalVersionProvider>().addSectionToStruct(
                     widget.versionID,
-                    widget.sectionCode,
+                    widget.sectionKey,
                   );
                 },
               ),
@@ -438,13 +438,13 @@ class _TokenContentCardState extends State<TokenContentCard> {
                         onConfirm: () {
                           context.read<SectionProvider>().cacheDeletion(
                             widget.versionID,
-                            widget.sectionCode,
+                            widget.sectionKey,
                           );
                           context
                               .read<LocalVersionProvider>()
                               .removeSectionsByKey(
                                 widget.versionID,
-                                widget.sectionCode,
+                                widget.sectionKey,
                               );
                           Navigator.pop(context); // Close quick actions sheet
                         },
