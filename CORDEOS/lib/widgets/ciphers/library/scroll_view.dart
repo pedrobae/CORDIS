@@ -113,6 +113,7 @@ class _CipherScrollViewState extends State<CipherScrollView> {
                   data: items,
                   physics: const AlwaysScrollableScrollPhysics(),
                   indexBarData: SuspensionUtil.getTagIndexList(items),
+                  padding: const EdgeInsets.only(right: 38),
                   indexBarOptions: IndexBarOptions(
                     decoration: BoxDecoration(
                       border: Border.all(color: colorScheme.surfaceContainerLowest),
@@ -120,15 +121,6 @@ class _CipherScrollViewState extends State<CipherScrollView> {
                     needRebuild: false,
                     indexHintAlignment: Alignment.centerRight,
                     indexHintOffset: const Offset(-20, 0),
-                    selectItemDecoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.primary,
-                    ),
-                    selectTextStyle: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
                     textStyle: TextStyle(
                       fontSize: 10,
                       color: colorScheme.onSurfaceVariant,
@@ -137,7 +129,7 @@ class _CipherScrollViewState extends State<CipherScrollView> {
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     final item = items[index];
-                    const itemPadding = EdgeInsets.only(bottom: 8.0, right: 38);
+                    const itemPadding = EdgeInsets.only(bottom: 8.0);
 
                     if (item.id is String) {
                       return Padding(

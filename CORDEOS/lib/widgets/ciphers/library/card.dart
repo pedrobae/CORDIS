@@ -176,19 +176,19 @@ class _CipherCardState extends State<CipherCard> {
                           children: [
                             Text(
                               '${AppLocalizations.of(context)!.musicKey}: ${s.key}',
-                              style: textTheme.titleSmall,
+                              style: textTheme.bodyMedium,
                             ),
                             Text(
                               AppLocalizations.of(
                                 context,
                               )!.bpmWithPlaceholder(s.bpm),
-                              style: textTheme.titleSmall,
+                              style: textTheme.bodyMedium,
                             ),
                             Text(
                               AppLocalizations.of(
                                 context,
                               )!.durationWithPlaceholder(s.duration),
-                              style: textTheme.titleSmall,
+                              style: textTheme.bodyMedium,
                             ),
                           ],
                         ),
