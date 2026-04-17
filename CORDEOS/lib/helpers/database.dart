@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -294,6 +295,11 @@ class DatabaseHelper {
           FOREIGN KEY (version_id) REFERENCES version (id) ON DELETE CASCADE
         )
       ''');
+      // MAP CODE TO KEY, SO WE CAN CHANGE VERSION STRUCTURE WITHOUT LOSING DATA
+      final List<Map<String, dynamic>> oldSections = await db.query(
+        'section_old',
+        columns: ['id', 'version_id', 'content_code'],
+      );
       await db.execute('''
         INSERT INTO section (id, version_id, key, content_type, content_text, content_color)
         SELECT id, version_id, id, content_type, content_text, content_color
@@ -305,6 +311,37 @@ class DatabaseHelper {
         'CREATE INDEX idx_section_version_id ON section(version_id)',
       );
 
+      // USING oldSections to update version structure in app logic,
+      // so we don't lose data and can migrate smoothly
+      final versionStructs = await db.query(
+        'version',
+        columns: ['id', 'song_structure'],
+      );
+
+      for (var version in versionStructs) {
+        final versionID = version['id'] as int;
+        final struct = (version['song_structure'] as String).split(',');
+
+        final newStruct = <int>[];
+        for (var code in struct) {
+          final section = oldSections.firstWhereOrNull(
+            (s) =>
+                s['version_id'] == versionID &&
+                s['content_code'] == code.trim(),
+          );
+
+          if (section != null) {
+            newStruct.add(section['id'] as int);
+          }
+        }
+
+        await db.update(
+          'version',
+          {'song_structure': newStruct.join(',')},
+          where: 'id = ?',
+          whereArgs: [versionID],
+        );
+      }
     }
   }
 

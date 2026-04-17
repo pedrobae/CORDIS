@@ -1,12 +1,12 @@
 
 # build.ps1 - Auto-increment version and build APK
 # Usage:
-#   ./build.ps1 [-IncrementType <build|patch|minor|major>]
+#   ./build.ps1 [-IncrementType <build|patch|minor|major|>]
 
 # Accept parameter for increment type
 param(
-    [ValidateSet('build','patch','minor','major')]
-    [string]$IncrementType = 'build'
+    [ValidateSet('build','patch','minor','major', '')]
+    [string]$IncrementType = ''
 )
 
 # Read current version from pubspec.yaml
