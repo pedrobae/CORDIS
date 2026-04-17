@@ -29,8 +29,6 @@ class EditSectionScreen extends StatefulWidget {
 }
 
 class _EditSectionScreenState extends State<EditSectionScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController contentCodeController;
   late TextEditingController contentTypeController;
   late TextEditingController contentTextController;
   late Color contentColor;
@@ -102,10 +100,8 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                     ),
                     IconButton(
                       onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _upsertSection();
-                          context.read<NavigationProvider>().pop();
-                        }
+                        _upsertSection();
+                        context.read<NavigationProvider>().pop();
                       },
                       icon: Icon(Icons.save, size: 30),
                     ),
@@ -133,9 +129,10 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                               );
                             },
                             child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                               decoration: BoxDecoration(
                                 border: BoxBorder.all(
-                                  color: colorScheme.surfaceContainerHigh,
+                                  color: colorScheme.surfaceContainerLowest,
                                 ),
                               ),
                               child: Row(
@@ -157,59 +154,15 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                                       style: textTheme.bodyLarge,
                                     ),
                                   ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.surfaceContainerHigh,
-                                    ),
-                                    child: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.changePlaceholder(
-                                        AppLocalizations.of(context)!.type,
-                                      ),
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        color: colorScheme.primary,
-                                      ),
-                                    ),
+                                  Icon(
+                                    Icons.chevron_right,
+                                    size: 28,
+                                    color: colorScheme.onSurface,
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        // SECTION CODE
-                        Form(
-                          key: _formKey,
-                          child: LabeledTextField(
-                            label: AppLocalizations.of(context)!.sectionCode,
-                            hint: AppLocalizations.of(context)!.sectionCodeHint,
-                            controller: contentCodeController,
-                            instruction: AppLocalizations.of(
-                              context,
-                            )!.sectionCodeInstruction,
-                            validator: (value) {
-                              // CODE HAS A 3 CHAR MAX CONSTRAINT
-                              if (value == null || value.isEmpty) {
-                                return AppLocalizations.of(
-                                  context,
-                                )!.fieldRequired;
-                              }
-                              if (value.length > 3) {
-                                return AppLocalizations.of(
-                                  context,
-                                )!.tooLongPlaceholder(
-                                  AppLocalizations.of(context)!.code,
-                                  3,
-                                );
-                              } else {
-                                return null;
-                              }
-                            },
-                          ),
-                        ),
 
                         // SECTION TYPE
                         LabeledTextField(
