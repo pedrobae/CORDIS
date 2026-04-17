@@ -141,8 +141,11 @@ class _CipherScrollViewState extends State<CipherScrollView> {
                     }
 
                     if (item.id is! int) {
-                      throw Exception(
-                        'Invalid item ID type: ${item.id.runtimeType}',
+                      return Center(
+                        child: Text(
+                          '${AppLocalizations.of(context)!.error} (ID: ${item.id})',
+                          style: TextStyle(color: colorScheme.error),
+                        ),
                       );
                     }
 
@@ -151,8 +154,10 @@ class _CipherScrollViewState extends State<CipherScrollView> {
                         .getIdOfOldestVersionOfCipher(item.id);
 
                     if (versionID == null) {
-                      throw Exception(
-                        'No versions found for cipher ID: ${item.id}',
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: colorScheme.primary,
+                        ),
                       );
                     }
 
