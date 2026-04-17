@@ -22,7 +22,7 @@ class SectionRepository {
     final existing = await db.query(
       'section',
       where: 'version_id = ? AND key = ?',
-      whereArgs: [section.versionID, section.id],
+      whereArgs: [section.versionID, section.key],
     );
 
     if (existing.isNotEmpty) {
@@ -31,7 +31,7 @@ class SectionRepository {
         'section',
         section.toSqlite(),
         where: 'version_id = ? AND key = ?',
-        whereArgs: [section.versionID, section.id],
+        whereArgs: [section.versionID, section.key],
       );
       return existing.first['id'] as int;
     } else {
@@ -84,7 +84,7 @@ class SectionRepository {
       'section',
       section.toSqlite(),
       where: 'version_id = ? AND key = ?',
-      whereArgs: [section.versionID, section.id],
+      whereArgs: [section.versionID, section.key],
     );
   }
 
