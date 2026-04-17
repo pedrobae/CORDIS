@@ -43,10 +43,11 @@ class SideMenu extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 Image.asset(
-                  'assets/logos/app_icon_transparent.png',
+                  Theme.of(context).brightness == Brightness.dark
+                      ? 'assets/logos/app_icon_transparent_gray.png'
+                      : 'assets/logos/app_icon_transparent.png',
                   height: 40,
                   fit: BoxFit.contain,
-                  color: colorScheme.onSurface,
                 ),
                 Positioned(
                   right: 0,

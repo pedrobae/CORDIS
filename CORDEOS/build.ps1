@@ -42,13 +42,31 @@ if ($versionMatch) {
     }
 
     $newVersion = "$major.$minor.$patch+$buildNumber"
+    $versionName = "$major.$minor.$patch"
     Write-Host "Incrementing version to: $newVersion" -ForegroundColor Green
 
     # Update pubspec.yaml
     $newPubspec = $pubspec -replace "version: \d+\.\d+\.\d+\+\d+", "version: $newVersion"
     Set-Content "pubspec.yaml" $newPubspec
-
     Write-Host "Updated pubspec.yaml" -ForegroundColor Green
+
+    # Update iOS Info.plist
+    $infoPlistPath = "ios/Runner/Info.plist"
+    if (Test-Path $infoPlistPath) {
+        $infoPlist = Get-Content $infoPlistPath -Raw
+        
+        # Update CFBundleShortVersionString (version name: X.Y.Z)
+        $infoPlist = $infoPlist -replace '(<key>CFBundleShortVersionString</key>\s*<string>)[^<]+(</string>)', "`$1$versionName`$2"
+        
+        # Update CFBundleVersion (build number)
+        $infoPlist = $infoPlist -replace '(<key>CFBundleVersion</key>\s*<string>)[^<]+(</string>)', "`$1$buildNumber`$2"
+        
+        Set-Content $infoPlistPath $infoPlist
+        Write-Host "Updated iOS Info.plist (version: $versionName, build: $buildNumber)" -ForegroundColor Green
+    } else {
+        Write-Host "iOS Info.plist not found at $infoPlistPath - skipping iOS update" -ForegroundColor Yellow
+    }
+
     Write-Host "Building APK..." -ForegroundColor Cyan
 
     # Build APK

@@ -208,7 +208,10 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
             )
           : null,
       leadingWidth: nav.showDrawerIcon ? null : 0,
-      title: Image.asset('assets/logos/app_icon_transparent.png', height: 40, color: colorScheme.onSurface,),
+      title:                 Image.asset(
+                  Theme.of(context).brightness == Brightness.dark
+                      ? 'assets/logos/app_icon_transparent_gray.png'
+                      : 'assets/logos/app_icon_transparent.png', height: 40,),
     );
   }
 

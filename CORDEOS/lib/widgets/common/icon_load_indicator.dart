@@ -12,7 +12,9 @@ class IconLoadIndicator extends StatelessWidget {
         width: size,
         height: size,
         child: LottieView.fromAsset(
-          filePath: 'assets/animations/iconLoad.json',
+          filePath: Theme.of(context).brightness == Brightness.dark
+              ? 'assets/animations/iconLoadDark.json'
+              : 'assets/animations/iconLoad.json',
         ),
       ),
     );
