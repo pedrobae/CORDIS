@@ -80,22 +80,30 @@ class SelectType extends StatelessWidget {
                   for (var type in SectionType.values)
                     GestureDetector(
                       onTap: () {
+                        final sect = context.read<SectionProvider>();
+
                         try {
                           final newKey = _upsertSection(context, type);
                           isNewSection
-                              ? nav.pushForeground(
-                                  EditSectionScreen(
+                              ? nav.push(
+                                  () => EditSectionScreen(
                                     sectionKey: newKey,
                                     versionID: versionID,
                                     isNewSection: true,
                                   ),
+                                  showBottomNavBar: true,
+                                  changeDetector: () => sect.hasUnsavedChanges,
+                                  onChangeDiscarded: () =>
+                                      sect.loadSection(versionID, newKey),
+                                  onPopCallback: () {
+                                    // If there are no unsaved changes,
+                                    // Pop to return to the sections tab
+                                    if (!sect.hasUnsavedChanges) {
+                                      nav.pop();
+                                    }
+                                  },
                                 )
-                              : nav.pushForeground(
-                                  EditSectionScreen(
-                                    sectionKey: newKey,
-                                    versionID: versionID,
-                                  ),
-                                );
+                              : nav.pop();
                         } catch (e) {
                           // Show error snackbar
                           ScaffoldMessenger.of(context).showSnackBar(

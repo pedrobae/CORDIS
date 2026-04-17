@@ -138,7 +138,6 @@ class _CipherCardState extends State<CipherCard> {
             },
             onLongPress: () async {
               final localVer = context.read<LocalVersionProvider>();
-              final sect = context.read<SectionProvider>();
               final ciph = context.read<CipherProvider>();
 
               nav.push(
@@ -147,15 +146,13 @@ class _CipherCardState extends State<CipherCard> {
                   versionID: widget.versionID,
                   versionType: VersionType.local,
                 ),
+                keepAlive: true,
                 changeDetector: () {
-                  return localVer.hasUnsavedChanges ||
-                      sect.hasUnsavedChanges ||
-                      ciph.hasUnsavedChanges;
+                  return localVer.hasUnsavedChanges || ciph.hasUnsavedChanges;
                 },
                 onChangeDiscarded: () {
                   localVer.loadVersion(widget.versionID);
                   ciph.loadCipher(s.cipherID!);
-                  sect.loadSectionsOfVersion(widget.versionID);
                 },
                 showBottomNavBar: true,
               );
@@ -208,10 +205,14 @@ class _CipherCardState extends State<CipherCard> {
                                 itemCount: s.songStructure.length,
                                 itemBuilder: (_, index) {
                                   final key = s.songStructure[index];
+                                  final badgeData = s.sectionBadges[key];
+                                  if (badgeData == null) {
+                                    return SizedBox.shrink();
+                                  }
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 2.0),
                                     child: SectionBadge(
-                                      sectionBadgeData: s.sectionBadges[key]!,
+                                      sectionBadgeData: badgeData,
                                     ),
                                   );
                                 },

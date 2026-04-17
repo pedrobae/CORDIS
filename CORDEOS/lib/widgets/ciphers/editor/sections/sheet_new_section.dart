@@ -63,12 +63,13 @@ class NewSectionSheet extends StatelessWidget {
             trailingIcon: Icons.chevron_right,
             onPressed: () {
               Navigator.of(context).pop();
-              nav.pushForeground(
-                SelectType(
+              nav.push(
+                () => SelectType(
                   sectionKey: null,
                   versionID: versionID,
                   isNewSection: true,
                 ),
+                showBottomNavBar: true,
               );
             },
           ),

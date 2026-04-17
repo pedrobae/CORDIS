@@ -66,8 +66,8 @@ class _LabeledCountryPickerState extends State<LabeledCountryPicker> {
   }
 
   void showCountrySheet(BuildContext context) {
-    context.read<NavigationProvider>().pushForeground(
-      CountrySheet(
+    context.read<NavigationProvider>().push(
+      () => CountrySheet(
         countryCode: widget.countryCode,
         onCountryChanged: widget.onCountryChanged,
       ),

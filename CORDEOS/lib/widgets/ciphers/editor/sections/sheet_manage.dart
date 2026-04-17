@@ -308,24 +308,29 @@ class _ManageSheetState extends State<ManageSheet> {
     final sect = context.read<SectionProvider>();
     final nav = context.read<NavigationProvider>();
 
-    final color = SectionType.annotation.color;
-    final sectionLabel = SectionType.annotation.localizedLabel(context);
+    final notesColor = SectionType.annotation.color;
+    final notesLabel = SectionType.annotation.localizedLabel(context);
 
     return GestureDetector(
       onTap: () {
         final newKey = sect.cacheAddSection(
           widget.versionID,
-          color,
-          sectionLabel,
+          notesColor,
+          notesLabel,
         );
 
-        nav.pushForeground(
-          EditSectionScreen(
+        nav.push(
+          () => EditSectionScreen(
             sectionKey: newKey,
             versionID: widget.versionID,
             isNewSection: true,
             canChangeType: false,
           ),
+          onChangeDiscarded: () => sect.loadSection(widget.versionID, newKey),
+          showBottomNavBar: true,
+          changeDetector: () {
+            return sect.hasUnsavedChanges;
+          },
         );
 
         Navigator.of(context).pop();
@@ -346,15 +351,10 @@ class _ManageSheetState extends State<ManageSheet> {
               width: 32,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color,
+                color: notesColor,
               ),
             ),
-            Expanded(
-              child: Text(
-                sectionLabel,
-                style: textTheme.bodyLarge,
-              ),
-            ),
+            Expanded(child: Text(notesLabel, style: textTheme.bodyLarge)),
             Icon(Icons.chevron_right, color: colorScheme.shadow),
           ],
         ),

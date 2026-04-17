@@ -363,12 +363,21 @@ class _TokenContentCardState extends State<TokenContentCard> {
                 trailingIcon: Icons.chevron_right,
                 isDiscrete: true,
                 onPressed: () {
+                  final nav = context.read<NavigationProvider>();
+                  final sect = context.read<SectionProvider>();
+
                   Navigator.pop(context); // Close the bottom sheet
-                  context.read<NavigationProvider>().pushForeground(
-                    EditSectionScreen(
+                  nav.push(
+                    () => EditSectionScreen(
                       versionID: widget.versionID,
                       sectionKey: widget.sectionKey,
                     ),
+                    showBottomNavBar: true,
+                    onChangeDiscarded: () =>
+                        sect.loadSection(widget.versionID, widget.sectionKey),
+                    changeDetector: () {
+                      return sect.hasUnsavedChanges;
+                    },
                   );
                 },
               ),

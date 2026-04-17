@@ -323,6 +323,7 @@ class _ImportPdfScreenState extends State<ImportPdfScreen> {
         versionType: VersionType.import,
         versionID: widget.versionID,
       ),
+      keepAlive: true,
       changeDetector: () =>
           localVer.hasUnsavedChanges || ciph.hasUnsavedChanges,
       onChangeDiscarded: () {

@@ -4,7 +4,6 @@ import 'package:cordeos/models/domain/parsing_cipher.dart';
 import 'package:cordeos/providers/cipher/cipher_provider.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/cipher/parser_provider.dart';
-import 'package:cordeos/providers/section/section_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/screens/cipher/edit_cipher.dart';
 import 'package:cordeos/widgets/common/filled_text_button.dart';
@@ -15,7 +14,7 @@ import 'package:provider/provider.dart';
 
 class ImportTextScreen extends StatefulWidget {
   final int cipherID;
-  final int versionID; 
+  final int versionID;
 
   const ImportTextScreen({super.key, this.cipherID = -1, this.versionID = -1});
 
@@ -202,7 +201,6 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
   ) async {
     final localVer = Provider.of<LocalVersionProvider>(context, listen: false);
     final ciph = Provider.of<CipherProvider>(context, listen: false);
-    final sect = Provider.of<SectionProvider>(context, listen: false);
     final nav = Provider.of<NavigationProvider>(context, listen: false);
 
     final text = _importTextController.text;
@@ -227,10 +225,9 @@ class _ImportTextScreenState extends State<ImportTextScreen> {
           versionID: widget.versionID,
           cipherID: widget.cipherID,
         ),
+        keepAlive: true,
         changeDetector: () {
-          return ciph.hasUnsavedChanges ||
-              localVer.hasUnsavedChanges ||
-              sect.hasUnsavedChanges;
+          return ciph.hasUnsavedChanges || localVer.hasUnsavedChanges;
         },
         onChangeDiscarded: () async {
           await localVer.loadVersion(widget.versionID);

@@ -1,5 +1,4 @@
 import 'package:cordeos/repositories/local/section_repository.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cordeos/models/domain/cipher/section.dart';
@@ -12,14 +11,12 @@ class SectionProvider extends ChangeNotifier {
   Map<dynamic, Map<int, Section>> _sections =
       {}; // versionKey -> (sectionKey -> Section) -1 versionId for new/importing versions
   Map<dynamic, bool> _isLoadingVersion = {}; // versionId -> isLoading
-  bool _isSaving = false;
   bool _hasUnsavedChanges = false;
   //
   final List<List<int>> _cachedDeletions = [];
 
   String? _error;
 
-  bool get isSaving => _isSaving;
   bool get hasUnsavedChanges => _hasUnsavedChanges;
 
   String? get error => _error;
@@ -136,12 +133,30 @@ class SectionProvider extends ChangeNotifier {
       );
     } catch (e) {
       _error = e.toString();
-      if (kDebugMode) {
-        print('⚠️ Failed to load sections: $e');
-      }
+      debugPrint('SECTION PROVIDER - Failed to load sections: $e');
     } finally {
       _isLoadingVersion[versionId] = false;
       _hasUnsavedChanges = false;
+      notifyListeners();
+    }
+  }
+
+  /// Load a single section into cache (used when discarding changes on edit)
+  /// Returns the loaded section, or clears the section from cache if loading fails
+  Future<void> loadSection(dynamic versionId, dynamic sectionKey) async {
+    try {
+      final section = await _repo.getSection(versionId, sectionKey);
+      if (section != null) {
+        _sections[versionId] ??= {};
+        _sections[versionId]![sectionKey] = section;
+        notifyListeners();
+      } else {
+        throw Exception('Section not found in database.');
+      }
+    } catch (e) {
+      _error = e.toString();
+      _sections[versionId]?.remove(sectionKey);
+      debugPrint('SECTION PROVIDER - Failed to load section: $e');
       notifyListeners();
     }
   }
@@ -181,11 +196,6 @@ class SectionProvider extends ChangeNotifier {
   // ===== SAVE =====
   /// Persist the data of the given version key to the database
   Future<void> saveSections({dynamic versionID}) async {
-    if (_isSaving) return;
-
-    _isSaving = true;
-    notifyListeners();
-
     try {
       if (versionID == null) {
         throw Exception('No version key provided.');
@@ -203,11 +213,37 @@ class SectionProvider extends ChangeNotifier {
       }
     } catch (e) {
       _error = e.toString();
-      if (kDebugMode) {
-        print('⚠️ Failed to save sections: $e');
-      }
+      debugPrint('SECTION PROVIDER - error saving sections: $e');
     } finally {
-      _isSaving = false;
+      _hasUnsavedChanges = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> saveSection({
+    required dynamic versionKey,
+    required int sectionKey,
+  }) async {
+    notifyListeners();
+
+    try {
+      if (versionKey == null) {
+        throw Exception('No version key provided.');
+      }
+      if (versionKey is String) {
+        throw Exception('Cannot save section for non-local version.');
+      }
+
+      final section = _sections[versionKey]?[sectionKey];
+      if (section == null) {
+        throw Exception('Section not found in cache.');
+      }
+
+      await _repo.upsertSection(section);
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('SECTION PROVIDER - error saving section: $e');
+    } finally {
       _hasUnsavedChanges = false;
       notifyListeners();
     }
@@ -217,7 +253,6 @@ class SectionProvider extends ChangeNotifier {
   void clearCache() {
     _sections = {};
     _isLoadingVersion = {};
-    _isSaving = false;
     notifyListeners();
   }
 

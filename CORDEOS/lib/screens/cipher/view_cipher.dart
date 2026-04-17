@@ -242,22 +242,19 @@ class _ViewCipherScreenState extends State<ViewCipherScreen>
     return () {
       final localVer = context.read<LocalVersionProvider>();
       final ciph = context.read<CipherProvider>();
-      final sect = context.read<SectionProvider>();
       context.read<NavigationProvider>().push(
         () => EditCipherScreen(
           cipherID: widget.cipherID!,
           versionID: widget.versionID,
           versionType: widget.versionType,
         ),
+        keepAlive: true,
         changeDetector: () {
-          return localVer.hasUnsavedChanges ||
-              ciph.hasUnsavedChanges ||
-              sect.hasUnsavedChanges;
+          return localVer.hasUnsavedChanges || ciph.hasUnsavedChanges;
         },
         onChangeDiscarded: () {
           localVer.loadVersion(widget.versionID);
           ciph.loadCipher(widget.cipherID ?? -1);
-          sect.loadSectionsOfVersion(widget.versionID);
         },
         showBottomNavBar: true,
       );

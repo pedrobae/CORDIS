@@ -61,6 +61,21 @@ class SectionRepository {
     return sections;
   }
 
+  Future<Section?> getSection(int versionId, int sectionKey) async {
+    final db = await _databaseHelper.database;
+    final results = await db.query(
+      'section',
+      where: 'version_id = ? AND key = ?',
+      whereArgs: [versionId, sectionKey],
+    );
+
+    if (results.isNotEmpty) {
+      return Section.fromSqLite(results.first);
+    } else {
+      return null;
+    }
+  }
+
   // ===== UPDATE =====
   /// Replaces entire section
   Future<void> updateSection(Section section) async {

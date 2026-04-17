@@ -46,12 +46,35 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     contentTypeController = TextEditingController(text: section.contentType);
     contentTextController = TextEditingController(text: section.contentText);
     contentColor = section.contentColor;
+
+    addListeners();
+  }
+
+  void addListeners() {
+    contentTypeController.addListener(() {
+      context.read<SectionProvider>().cacheUpdate(
+        widget.versionID,
+        widget.sectionKey,
+        newContentType: contentTypeController.text,
+      );
+    });
+
+    contentTextController.addListener(() {
+      context.read<SectionProvider>().cacheUpdate(
+        widget.versionID,
+        widget.sectionKey,
+        newContentText: contentTextController.text,
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+
+    final nav = context.read<NavigationProvider>();
+
     return Builder(
       builder: (context) {
         final media = MediaQuery.of(context);
@@ -85,12 +108,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                     BackButton(
                       color: colorScheme.onSurface,
                       onPressed: () {
-                        if (widget.isNewSection) {
-                          // If it's a new section,
-                          // Delete the cached section that was created when selecting type
-                          _deleteSection();
-                        }
-                        context.read<NavigationProvider>().attemptPop(context);
+                        nav.attemptPop(context);
                       },
                     ),
                     Text(
@@ -102,7 +120,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                     IconButton(
                       onPressed: () {
                         _upsertSection();
-                        context.read<NavigationProvider>().pop();
+                        nav.pop();
                       },
                       icon: Icon(Icons.save, size: 30),
                     ),
@@ -122,11 +140,12 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                           GestureDetector(
                             onTap: () {
                               _upsertSection();
-                              context.read<NavigationProvider>().pushForeground(
-                                SelectType(
+                              nav.push(
+                                () => SelectType(
                                   versionID: widget.versionID,
                                   sectionKey: widget.sectionKey,
                                 ),
+                                showBottomNavBar: true,
                               );
                             },
                             child: Container(
@@ -215,7 +234,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                                     )!.section,
                                     onConfirm: () {
                                       _deleteSection();
-                                      context.read<NavigationProvider>().pop();
+                                      nav.pop();
                                     },
                                   );
                                 },
@@ -237,11 +256,9 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
   void _upsertSection() {
     // New section was added when selecting type, so just update it
     // Update the section with new values
-    context.read<SectionProvider>().cacheUpdate(
-      widget.versionID,
-      widget.sectionKey,
-      newContentType: contentTypeController.text,
-      newContentText: contentTextController.text,
+    context.read<SectionProvider>().saveSection(
+      versionKey: widget.versionID,
+      sectionKey: widget.sectionKey,
     );
   }
 
