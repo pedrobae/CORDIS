@@ -1,4 +1,5 @@
 import 'package:cordeos/models/dtos/version_dto.dart';
+import 'package:cordeos/providers/token_cache_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/models/domain/cipher/version.dart';
 
@@ -40,12 +41,16 @@ class CloudCipherCard extends StatelessWidget {
         final version = sel.version;
         return GestureDetector(
           onTap: () {
+            final token = context.read<TokenProvider>();
             nav.push(
               () => ViewCipherScreen(
                 cipherID: null,
                 versionID: versionId,
                 versionType: VersionType.cloud,
               ),
+              onPopCallback: () {
+                token.clear();
+              },
               showBottomNavBar: true,
             );
           },
@@ -70,7 +75,12 @@ class CloudCipherCard extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: [
-                    Expanded(
+                    Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface.withAlpha(128),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.only(right: 8),
                       child: Column(
                         spacing: 2.0,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +90,7 @@ class CloudCipherCard extends StatelessWidget {
 
                           // INFO
                           Row(
-                            spacing: 16.0,
+                            spacing: 8.0,
                             children: [
                               Text(
                                 '${AppLocalizations.of(context)!.musicKey}: ${version.transposedKey ?? version.originalKey}',
@@ -113,13 +123,14 @@ class CloudCipherCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                    Spacer(),
 
                     // DOWNLOAD VERSION
                     if (sel.isDownloading == true)
                       const CloudDownloadIndicator()
                     else
-                      IconButton(
-                        onPressed: () => showModalBottomSheet(
+                      GestureDetector(
+                        onTap: () => showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
                           builder: (context) => Padding(
@@ -127,7 +138,23 @@ class CloudCipherCard extends StatelessWidget {
                             child: DownloadVersionSheet(versionId: versionId),
                           ),
                         ),
-                        icon: Icon(Icons.cloud_download),
+                        child: SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: Stack(
+                            children: [
+                              Positioned.fill(
+                                child: Icon(
+                                  Icons.cloud_rounded,
+                                  color: colorScheme.surface,
+                                ),
+                              ),
+                              Positioned.fill(
+                                child: Icon(Icons.cloud_download),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                   ],
                 ),

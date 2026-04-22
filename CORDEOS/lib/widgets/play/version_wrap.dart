@@ -6,7 +6,7 @@ import 'package:cordeos/providers/section/section_provider.dart';
 import 'package:cordeos/providers/version/cloud_version_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/utils/date_utils.dart';
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:cordeos/widgets/ciphers/viewer/annotation_card.dart';
 import 'package:cordeos/widgets/ciphers/viewer/section_card.dart';
 import 'package:flutter/material.dart';
@@ -24,35 +24,58 @@ class VersionWrap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector3<
+    return Selector4<
       LayoutSetProvider,
       LocalVersionProvider,
       CloudVersionProvider,
-      ({Axis wrapDirection, List<String> filteredStructure})
+      SectionProvider,
+      ({
+        Axis wrapDirection,
+        List<int> filteredStructure,
+        Map<int, SectionBadgeData> badgesData,
+      })
     >(
-      selector: (context, laySet, localVer, cloudVer) {
+      selector: (context, laySet, localVer, cloudVer, sect) {
         final songStructure = versionID is String
             ? cloudVer.getVersion(versionID)!.songStructure
             : localVer.getSongStructure(versionID);
 
-        final filteredStructure = <String>[];
-        for (var code in songStructure) {
-          if (laySet.showAnnotations == false && isAnnotation(code)) {
+        final filteredStructure = <int>[];
+        for (var key in songStructure) {
+          final sectionType = sect
+              .getSection(versionKey: versionID, sectionKey: key)
+              ?.sectionType;
+
+          if (laySet.showAnnotations == false &&
+              sectionType == SectionType.annotation) {
             continue;
           }
-          if (laySet.showTransitions == false && isTransition(code)) {
+          if (laySet.showTransitions == false && isTransition(sectionType)) {
             continue;
           }
           if (laySet.showRepeatSections == false &&
-              filteredStructure.contains(code)) {
+              filteredStructure.contains(key)) {
             continue;
           }
-          filteredStructure.add(code);
+          filteredStructure.add(key);
+        }
+        final sectionTypes = <int, SectionType>{};
+        for (var key in filteredStructure) {
+          final sectionType = sect
+              .getSection(versionKey: versionID, sectionKey: key)
+              ?.sectionType;
+
+          if (sectionType != null) {
+            sectionTypes[key] = sectionType;
+          } else {
+            sectionTypes[key] = SectionType.unknown;
+          }
         }
 
         return (
           wrapDirection: laySet.wrapDirection,
           filteredStructure: filteredStructure,
+          badgesData: getSectionBadges(sectionTypes),
         );
       },
       builder: (context, s, child) {
@@ -69,7 +92,11 @@ class VersionWrap extends StatelessWidget {
                 alignment: WrapAlignment.start,
                 runSpacing: 8,
                 spacing: 8,
-                children: _buildSectionCards(context, s.filteredStructure),
+                children: _buildSectionCards(
+                  context,
+                  s.filteredStructure,
+                  s.badgesData,
+                ),
               ),
             ),
           ],
@@ -147,34 +174,30 @@ class VersionWrap extends StatelessWidget {
 
   List<Widget> _buildSectionCards(
     BuildContext context,
-    List<String> filteredStructure,
+    List<int> filteredStructure,
+    Map<int, SectionBadgeData> badgesData,
   ) {
     if (versionID == null) return [const SizedBox.shrink()];
 
     final scroll = context.read<ScrollProvider>();
     final sect = context.read<SectionProvider>();
-    final cloudVer = context.read<CloudVersionProvider>();
 
     final sectionWidgets = <Widget>[];
 
     for (var i = 0; i < filteredStructure.length; i++) {
       final key = scroll.registerSection(itemIndex, i);
 
-      final code = filteredStructure[i];
+      final sectionKey = filteredStructure[i];
 
-      final section =
-          sect.getSection(versionID, code) ??
-          (versionID is String
-              ? () {
-                  final sectionDto = cloudVer
-                      .getVersion(versionID)
-                      ?.sections[code];
-                  if (sectionDto == null) return null;
-                  return sectionDto.toDomain();
-                }()
-              : null);
+      final section = sect.getSection(
+        versionKey: versionID,
+        sectionKey: sectionKey,
+      );
 
       if (section == null) {
+        debugPrint(
+          "VERSION WRAP - couldnt get section data, probably cloud not being loaded",
+        );
         sectionWidgets.add(const SizedBox.shrink());
         continue;
       }
@@ -185,7 +208,7 @@ class VersionWrap extends StatelessWidget {
         section.contentText.split('\n').length,
       );
 
-      if (isAnnotation(code)) {
+      if (section.sectionType == SectionType.annotation) {
         sectionWidgets.add(
           AnnotationCard(
             key: key,
@@ -200,12 +223,12 @@ class VersionWrap extends StatelessWidget {
         RepaintBoundary(
           child: SectionCard(
             key: key,
-            index: i,
+            index: i, 
             itemIndex: itemIndex,
             sectionType: section.contentType,
-            sectionCode: code,
+            sectionKey: sectionKey,
             sectionText: section.contentText,
-            sectionColor: section.contentColor,
+            sectionBadge: badgesData[sectionKey]!,
           ),
         ),
       );

@@ -4,7 +4,7 @@ import "package:cordeos/providers/navigation_provider.dart";
 import "package:cordeos/providers/section/section_provider.dart";
 import "package:cordeos/providers/version/local_version_provider.dart";
 import "package:cordeos/utils/date_utils.dart";
-import "package:cordeos/utils/section_constants.dart";
+import "package:cordeos/utils/section_type.dart";
 import "package:cordeos/widgets/ciphers/editor/metadata.dart/select_key_sheet.dart";
 import "package:cordeos/widgets/ciphers/editor/sections/edit_section.dart";
 import "package:cordeos/widgets/ciphers/editor/sections/reorderable_structure.dart";
@@ -67,18 +67,31 @@ class _ManageSheetState extends State<ManageSheet> {
 
     return Selector2<
       LocalVersionProvider,
-      CipherProvider,
-      ({List<String>? songStructure, Duration? duration})
+      SectionProvider,
+      ({
+        Map<int, SectionBadgeData> badgesData,
+        List<int> sectionIDs,
+        Duration? duration,
+      })
     >(
-      selector: (context, localVer, ciph) {
+      selector: (context, localVer, sect) {
         final version = localVer.getVersion(widget.versionID);
+        final sections = sect.getSections(widget.versionID);
+
+        final sectionIDs = <int>[];
+        final sectionTypes = <int, SectionType>{};
+        for (var section in sections.values) {
+          sectionIDs.add(section.key);
+          sectionTypes[section.key] = section.sectionType;
+        }
         return (
-          songStructure: version?.songStructure,
+          badgesData: getSectionBadges(sectionTypes),
+          sectionIDs: sectionIDs,
           duration: version?.duration,
         );
       },
       builder: (context, s, child) {
-        if (s.songStructure == null || s.duration == null) {
+        if (s.badgesData.isEmpty || s.duration == null) {
           return Center(child: CircularProgressIndicator());
         }
 
@@ -156,19 +169,16 @@ class _ManageSheetState extends State<ManageSheet> {
                 child: ListView(
                   children: [
                     _buildAnnotationSection(),
-                    for (var sectionCode in s.songStructure!.toSet())
+                    for (var key in s.sectionIDs)
                       Builder(
                         builder: (context) {
-                          final sect = context.read<SectionProvider>();
-                          final section = sect.getSection(
-                            widget.versionID,
-                            sectionCode,
-                          )!;
+                          final badgeData = s.badgesData[key]!;
+
                           return GestureDetector(
                             onTap: () {
                               localVer.addSectionToStruct(
                                 widget.versionID,
-                                sectionCode,
+                                key,
                               );
                               if (_scrollToEnd != null) {
                                 WidgetsBinding.instance.addPostFrameCallback((
@@ -197,12 +207,12 @@ class _ManageSheetState extends State<ManageSheet> {
                                     width: 32,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: section.contentColor,
+                                      color: badgeData.color,
                                     ),
                                   ),
                                   Expanded(
                                     child: Text(
-                                      section.contentCode,
+                                      '${badgeData.code} - ${badgeData.type.localizedLabel(context)}',
                                       style: textTheme.bodyLarge,
                                     ),
                                   ),
@@ -292,24 +302,29 @@ class _ManageSheetState extends State<ManageSheet> {
     final sect = context.read<SectionProvider>();
     final nav = context.read<NavigationProvider>();
 
-    final sectionLabel = commonSectionLabels['annotations']!;
+    final notesColor = SectionType.annotation.color;
+    final notesLabel = SectionType.annotation.localizedLabel(context);
 
     return GestureDetector(
       onTap: () {
-        final newCode = sect.cacheAddSection(
+        final newKey = sect.cacheAddSection(
           widget.versionID,
-          sectionLabel.code,
-          sectionLabel.color,
-          sectionLabel.localizedLabel(context),
+          notesColor,
+          notesLabel,
         );
 
-        nav.pushForeground(
-          EditSectionScreen(
-            sectionCode: newCode,
+        nav.push(
+          () => EditSectionScreen(
+            sectionKey: newKey,
             versionID: widget.versionID,
             isNewSection: true,
             canChangeType: false,
           ),
+          onChangeDiscarded: () => sect.loadSection(widget.versionID, newKey),
+          showBottomNavBar: true,
+          changeDetector: () {
+            return sect.hasUnsavedChanges;
+          },
         );
 
         Navigator.of(context).pop();
@@ -330,15 +345,10 @@ class _ManageSheetState extends State<ManageSheet> {
               width: 32,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: sectionLabel.color,
+                color: notesColor,
               ),
             ),
-            Expanded(
-              child: Text(
-                sectionLabel.localizedLabel(context),
-                style: textTheme.bodyLarge,
-              ),
-            ),
+            Expanded(child: Text(notesLabel, style: textTheme.bodyLarge)),
             Icon(Icons.chevron_right, color: colorScheme.shadow),
           ],
         ),

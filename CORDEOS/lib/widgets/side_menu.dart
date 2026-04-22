@@ -43,7 +43,9 @@ class SideMenu extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 Image.asset(
-                  'assets/logos/app_icon_transparent.png',
+                  Theme.of(context).brightness == Brightness.dark
+                      ? 'assets/logos/app_icon_transparent_gray.png'
+                      : 'assets/logos/app_icon_transparent.png',
                   height: 40,
                   fit: BoxFit.contain,
                 ),
@@ -217,13 +219,13 @@ class SideMenu extends StatelessWidget {
               children: [
                 SvgPicture.asset(
                   'assets/logos/nh_colored_white.svg',
-                  height: MediaQuery.of(context).size.height * 0.05,
+                  height: MediaQuery.of(context).size.height * 0.07,
                   fit: BoxFit.contain,
                 ),
                 Text(
                   AppLocalizations.of(context)!.newHeart,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.surface,
+                    color: Colors.white,
                   ),
                   textAlign: TextAlign.center,
                 ),

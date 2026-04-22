@@ -2,6 +2,7 @@ import 'package:cordeos/screens/main_screen.dart';
 import 'package:cordeos/screens/user/login_screen.dart';
 import 'package:cordeos/services/firebase/remote_config_service.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
+import 'package:cordeos/widgets/common/icon_load_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cordeos/providers/user/my_auth_provider.dart';
@@ -19,6 +20,21 @@ class _SplashScreenState extends State<SplashScreen> {
   bool _hasNavigated = false;
   Future<bool>? _versionSupportFuture;
   bool _isPreloading = false;
+  final DateTime _loadStartTime = DateTime.now();
+
+  PageRoute<void> _buildSplashExitRoute(Widget destination) {
+    return PageRouteBuilder<void>(
+      transitionDuration: const Duration(milliseconds: 220),
+      reverseTransitionDuration: const Duration(milliseconds: 180),
+      pageBuilder: (context, animation, secondaryAnimation) => destination,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+          child: child,
+        );
+      },
+    );
+  }
 
   void _navigateToNextScreen(BuildContext context, bool isAuthenticated) {
     if (_hasNavigated) return;
@@ -40,14 +56,26 @@ class _SplashScreenState extends State<SplashScreen> {
         } catch (_) {
           // Preload failures must not block navigation.
         }
+
+        // Ensure splash is visible for at least 5 seconds to avoid jarring transitions
+        final elapsed = DateTime.now().difference(_loadStartTime);
+        if (elapsed < const Duration(seconds: 5)) {
+          await Future.delayed(const Duration(seconds: 5) - elapsed);
+        }
         if (!context.mounted) return;
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainScreen()),
-        );
+        Navigator.of(
+          context,
+        ).pushReplacement(_buildSplashExitRoute(const MainScreen()));
       } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
+        // Ensure splash is visible for at least 2.5 seconds to avoid jarring transitions
+        final elapsed = DateTime.now().difference(_loadStartTime);
+        if (elapsed < const Duration(milliseconds: 2500)) {
+          await Future.delayed(const Duration(milliseconds: 2500) - elapsed);
+        }
+        if (!context.mounted) return;
+        Navigator.of(
+          context,
+        ).pushReplacement(_buildSplashExitRoute(const LoginScreen()));
       }
     });
   }
@@ -61,7 +89,8 @@ class _SplashScreenState extends State<SplashScreen> {
           return _buildSplashScreen(context);
         }
 
-        _versionSupportFuture ??= RemoteConfigService.isCurrentVersionSupported();
+        _versionSupportFuture ??=
+            RemoteConfigService.isCurrentVersionSupported();
 
         return FutureBuilder<bool>(
           future: _versionSupportFuture,
@@ -88,6 +117,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Scaffold _buildVersionBlockedScreen(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -107,7 +137,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Text(
                 localizations.appVersionNotSupported,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: textTheme.bodyLarge,
               ),
             ],
           ),
@@ -118,25 +148,22 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Scaffold _buildSplashScreen(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/logos/app_icon_transparent.png',
-              width: 120,
-              height: 120,
-            ),
+            IconLoadIndicator(size: 150),
             const SizedBox(height: 32),
-            CircularProgressIndicator(color: colorScheme.primary),
             if (_isPreloading) ...[
               const SizedBox(height: 16),
               Text(
                 localizations.loading,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),

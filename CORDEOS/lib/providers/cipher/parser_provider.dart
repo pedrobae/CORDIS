@@ -32,11 +32,10 @@ class ParserProvider extends ChangeNotifier {
       switch (importedCipher.importType) {
         case ImportType.text:
           // Calculate line metrics
-          _parsingService.calculateLines(importedCipher.result);
+          _parsingService.separateLines(importedCipher.result);
           break;
         case ImportType.pdf:
-          // Average character spacing and font style analysis
-          _parsingService.preProcessPdf(importedCipher.result);
+          // PDF-specific pre-processing can be added here
           break;
         case ImportType.image:
           // Image specific parsing can be added here

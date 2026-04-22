@@ -1,15 +1,25 @@
 import 'package:cordeos/models/domain/parsing_cipher.dart';
 import 'package:cordeos/models/dtos/pdf_dto.dart';
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 
-enum SeparatorType { doubleNewLine, bracket, parenthesis, hyphen }
+enum SeparatorType { emptyLine, bracket, parenthesis, hyphen }
 
 class SectionParser {
-  void parseByDoubleNewLine(ParsingResult result) {
-    List<String> rawSections = result.rawText.split('\n\n');
+  void parseByEmptyLine(ParsingResult result) {
+    List<String> rawSections = [];
+    final StringBuffer buffer = StringBuffer();
+    for (var line in result.lines) {
+      if (line.text.trim().isEmpty) {
+        // EMPTY LINE - Section break
+        rawSections.add(buffer.toString());
+        buffer.clear();
+      } else {
+        buffer.writeln(line.text);
+      }
+    }
 
     for (int i = 0; i < rawSections.length; i++) {
-      String sectionContent = rawSections[i].trim();
+      String sectionContent = rawSections[i].trimRight();
       if (sectionContent.isEmpty) {
         continue; // Skip empty sections
       }
@@ -17,9 +27,11 @@ class SectionParser {
       RawSection section = RawSection(
         index: i,
         content: sectionContent,
-        numberOfLines: '\n'.allMatches(sectionContent).length + 1,
+        numberOfLines: sectionContent.split('\n').length,
         duplicateOf: null,
-        suggestedLabel: SectionLabelType.unknown.canonicalLabel,
+        suggestedLabel: SectionType.unknown.canonicalLabel,
+        color: SectionType.unknown.color,
+        key: i,
       );
 
       result.rawSections.add(section);
@@ -30,8 +42,8 @@ class SectionParser {
     String rawText = result.rawText;
     List<Map<String, dynamic>> validMatches = [];
     // Search common label texts
-    for (var label in commonSectionLabels.values) {
-      for (var labelVariation in label.labelVariations) {
+    for (var sectionType in SectionType.values) {
+      for (var labelVariation in sectionType.knownLabels) {
         RegExp regex = RegExp(labelVariation, caseSensitive: false);
         Iterable<RegExpMatch> matches = regex.allMatches(result.rawText);
 
@@ -41,7 +53,7 @@ class SectionParser {
           // Possible Label found -  Validate
           if (labelData['isValid']) {
             validMatches.add({
-              'label': label,
+              'label': sectionType,
               'labelStart': labelData['labelStart'],
               'labelEnd': labelData['labelEnd'],
             });
@@ -61,19 +73,21 @@ class SectionParser {
       int sectionEnd = nextMatch != null
           ? nextMatch['labelStart']
           : rawText.length;
-      SectionLabel label = match['label'];
+      SectionType label = match['label'];
+
+      final content = rawText.substring(sectionStart, sectionEnd).trimRight();
+      if (content.isEmpty) {
+        continue; // Skip empty sections
+      }
 
       result.rawSections.add(
         RawSection(
           index: result.rawSections.length,
           suggestedLabel: label.canonicalLabel,
-          code: label.code,
+          key: result.rawSections.length,
           color: label.color,
-          content: rawText.substring(sectionStart, sectionEnd).trim(),
-          numberOfLines: rawText
-              .substring(sectionStart, sectionEnd)
-              .split('\n')
-              .length,
+          content: content,
+          numberOfLines: content.split('\n').length,
           duplicateOf: null,
         ),
       );
@@ -232,34 +246,14 @@ class SectionParser {
   void _checkDuplicates(ParsingResult result) {
     // Check for duplicate content and mark them
     List<RawSection> sections = result.rawSections;
-    Map<String, int> seenContentCodes = {};
+    Map<String, int> seenContentKeys = {};
     for (var section in sections) {
       String content = section.content;
 
-      if (seenContentCodes.containsKey(content)) {
-        section.duplicateOf = seenContentCodes[content]
-            .toString(); // Mark as duplicate, with a reference
+      if (seenContentKeys.containsKey(content)) {
+        section.duplicateOf = seenContentKeys[content];
       } else {
-        seenContentCodes[content] = section.index;
-      }
-    }
-
-    // Check for duplicate labels and rename suggestions, and code adding index suffixes
-    Map<String, int> labelCount = {};
-    for (var section in sections) {
-      String title = section.suggestedLabel.toLowerCase();
-
-      if (section.suggestedLabel == SectionLabelType.unknown.canonicalLabel) {
-        continue;
-      }
-
-      if (labelCount.containsKey(title)) {
-        int count = labelCount[title]! + 1;
-        section.suggestedLabel = '${section.suggestedLabel} $count';
-        section.code = '${section.code}$count';
-        labelCount[title] = count;
-      } else {
-        labelCount[title] = 1;
+        seenContentKeys[content] = section.key;
       }
     }
   }
@@ -274,7 +268,7 @@ class SectionParser {
     // Check first line for label
     bool firstLineHasLabel;
     RegExpMatch? match;
-    SectionLabel label;
+    SectionType label;
     (firstLineHasLabel, match, label) = _containsLabel(linesData[0].text);
 
     if (firstLineHasLabel) {
@@ -282,11 +276,9 @@ class SectionParser {
 
       if (labelData['isValid']) {
         // Remove label from LineData
-        linesData[0].text = linesData[0].text
-            .substring(labelData['labelEnd'])
-            .trimLeft();
+        linesData[0].text = linesData[0].text.substring(labelData['labelEnd']);
 
-        if (linesData[0].text.isEmpty) {
+        if (linesData[0].text.trim().isEmpty) {
           // If the line is now empty, remove it from linesData
           linesData.removeAt(0);
         }
@@ -296,36 +288,36 @@ class SectionParser {
     for (var line in linesData) {
       buffer.writeln(line.text);
     }
-    String sectionContent = buffer.toString().trim();
+    String sectionContent = buffer.toString().trimRight();
 
-    if (sectionContent.trim().isEmpty) {
+    if (sectionContent.isEmpty) {
       return; // Skip empty sections
     }
 
     RawSection section = RawSection(
       index: result.rawSections.length,
+      key: result.rawSections.length,
       content: sectionContent,
       numberOfLines: linesData.length,
       duplicateOf: null,
       suggestedLabel: label.canonicalLabel,
       linesData: linesData,
-      code: label.code,
       color: label.color,
     );
 
     result.rawSections.add(section);
   }
 
-  (bool, RegExpMatch?, SectionLabel) _containsLabel(String text) {
-    for (var label in commonSectionLabels.values) {
-      for (var labelVariation in label.labelVariations) {
+  (bool, RegExpMatch?, SectionType) _containsLabel(String text) {
+    for (var type in SectionType.values) {
+      for (var labelVariation in type.knownLabels) {
         RegExp regex = RegExp(labelVariation, caseSensitive: false);
         if (regex.hasMatch(text)) {
-          return (true, regex.firstMatch(text)!, label);
+          return (true, regex.firstMatch(text)!, type);
         }
       }
     }
-    return (false, null, SectionLabel.unknown());
+    return (false, null, SectionType.unknown);
   }
 }
 

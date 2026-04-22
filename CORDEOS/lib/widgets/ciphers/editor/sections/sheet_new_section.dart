@@ -63,12 +63,13 @@ class NewSectionSheet extends StatelessWidget {
             trailingIcon: Icons.chevron_right,
             onPressed: () {
               Navigator.of(context).pop();
-              nav.pushForeground(
-                SelectType(
-                  sectionCode: null,
+              nav.push(
+                () => SelectType(
+                  sectionKey: null,
                   versionID: versionID,
                   isNewSection: true,
                 ),
+                showBottomNavBar: true,
               );
             },
           ),
@@ -83,8 +84,12 @@ class NewSectionSheet extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pop();
               nav.push(
-                () =>
-                    ImportTextScreen(versionID: versionID, cipherID: cipherID),
+                () => ImportTextScreen(
+                  versionID: versionID,
+                  cipherID: cipherID != -1
+                      ? cipherID
+                      : -2, // Pass -2 to trigger import instead of create flow
+                ),
               );
             },
           ),
@@ -97,7 +102,12 @@ class NewSectionSheet extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pop();
               nav.push(
-                () => ImportPdfScreen(versionID: versionID, cipherID: cipherID),
+                () => ImportPdfScreen(
+                  versionID: versionID,
+                  cipherID: cipherID != -1
+                      ? cipherID
+                      : -2, // Pass -2 to trigger import instead of create flow
+                ),
               );
             },
           ),

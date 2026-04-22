@@ -1,3 +1,4 @@
+import 'package:cordeos/utils/section_type.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
 
@@ -23,15 +24,15 @@ import 'package:cordeos/widgets/common/filled_text_button.dart';
 
 class TokenContentCard extends StatefulWidget {
   final int versionID;
-  final int index;
-  final String sectionCode;
+  final int sectionKey;
+  final SectionBadgeData sectionBadgeData;
   final bool isEnabled;
 
   const TokenContentCard({
     super.key,
     required this.versionID,
-    required this.index,
-    required this.sectionCode,
+    required this.sectionKey,
+    required this.sectionBadgeData,
     this.isEnabled = true,
   });
 
@@ -49,8 +50,10 @@ class _TokenContentCardState extends State<TokenContentCard> {
     _tokenProv = context.read<TokenProvider>();
   }
 
-  Function(ContentToken, ContentToken) _addChord(TokenCacheKey key) {
-    return (draggedChord, targetToken) {
+  Function(ContentToken, ContentToken, {bool addBefore}) _addChord(
+    TokenCacheKey key,
+  ) {
+    return (draggedChord, targetToken, {bool addBefore = true}) {
       final sect = context.read<SectionProvider>();
       final tokenProv = context.read<TokenProvider>();
 
@@ -60,14 +63,14 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
       final index = tokens.indexWhere((t) => t == targetToken);
       if (index == -1) return;
-      tokens.insert(index, draggedChord);
+      tokens.insert(addBefore ? index : index + 1, draggedChord);
 
       final updatedContent = tokenProv.getContent(key);
 
-      sect.cacheContent(
-        versionID: widget.versionID,
-        sectionCode: widget.sectionCode,
-        content: updatedContent,
+      sect.cacheUpdate(
+        widget.versionID,
+        widget.sectionKey,
+        newContentText: updatedContent,
       );
     };
   }
@@ -88,10 +91,10 @@ class _TokenContentCardState extends State<TokenContentCard> {
 
       final updatedContent = tokenProv.getContent(key);
 
-      sect.cacheContent(
-        versionID: widget.versionID,
-        sectionCode: widget.sectionCode,
-        content: updatedContent,
+      sect.cacheUpdate(
+        widget.versionID,
+        widget.sectionKey,
+        newContentText: updatedContent,
       );
     };
   }
@@ -101,15 +104,18 @@ class _TokenContentCardState extends State<TokenContentCard> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    _tokensKey = TokenCacheKey(sectionIndex: widget.index, isEditMode: true);
+    _tokensKey = TokenCacheKey(sectionKey: widget.sectionKey, isEditMode: true);
 
     return Selector<SectionProvider, ({Section? section, String? contentText})>(
       selector: (context, sect) {
-        final section = sect.getSection(widget.versionID, widget.sectionCode);
+        final section = sect.getSection(
+          versionKey: widget.versionID,
+          sectionKey: widget.sectionKey,
+        );
         return (section: section, contentText: section?.contentText);
       },
       builder: (context, s, child) {
-        _tokenProv.clearIndex(_tokensKey!);
+        _tokenProv.clearSectionKey(_tokensKey!);
         if (s.section == null) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -139,10 +145,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     /// Section Code badge
-                    SectionBadge(
-                      sectionCode: s.section!.contentCode,
-                      sectionColor: s.section!.contentColor,
-                    ),
+                    SectionBadge(sectionBadgeData: widget.sectionBadgeData),
 
                     /// Section Type label
                     Expanded(
@@ -173,11 +176,13 @@ class _TokenContentCardState extends State<TokenContentCard> {
                                         return Icon(
                                           Icons.delete,
                                           color: Colors.red,
+                                          size: 32,
                                         );
                                       }
                                       return Icon(
                                         Icons.delete,
                                         color: Colors.grey,
+                                        size: 32,
                                       );
                                     },
                               )
@@ -200,115 +205,117 @@ class _TokenContentCardState extends State<TokenContentCard> {
               ),
 
               /// CONTENT
-              Padding(
-                padding: const EdgeInsets.all(4),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: TokenizationConstants.chordTokenWidthPadding,
-                  ),
-                  child: Selector<TranspositionProvider, int>(
-                    selector: (context, trans) => trans.transposeValue,
-                    builder: (context, transposeValue, child) {
-                      final trans = context.read<TranspositionProvider>();
-                      // PHASE 1: Ensure tokens are cached & organized for this content + filters
-                      _tokensKey!.transposeValue = transposeValue;
+              Selector<TranspositionProvider, int>(
+                selector: (context, trans) => trans.transposeValue,
+                builder: (context, transposeValue, child) {
+                  // PHASE 1: Ensure tokens are cached & organized for this content + filters
+                  _tokensKey!.transposeValue = transposeValue;
 
-                      _tokenProv.tokenize(
-                        _tokensKey!,
-                        transposeChord: trans.transposeChord,
+                  _tokenProv.tokenize(
+                    _tokensKey!,
+                    transposeChord: (chord) => chord,
+                  );
+                  _tokenProv.organize(_tokensKey!);
+                  return Selector2<
+                    LayoutSetProvider,
+                    TranspositionProvider,
+                    ({
+                      TextStyle lyricStyle,
+                      TextStyle chordStyle,
+                      double chordLyricSpacing,
+                    })
+                  >(
+                    selector: (context, laySet, trans) => (
+                      lyricStyle: laySet.lyricStyle,
+                      chordStyle: laySet.chordStyle,
+                      chordLyricSpacing: laySet.chordLyricSpacing,
+                    ),
+                    builder: (context, measure, child) {
+                      // PHASE 2: Ensure measurements are cached for this content + style
+                      _tokensKey!.chordLyricSpacing = measure.chordLyricSpacing;
+                      _tokenProv.measureTokens(
+                        chordStyle: measure.chordStyle,
+                        lyricStyle: measure.lyricStyle,
+                        key: _tokensKey!,
                       );
-                      _tokenProv.organize(_tokensKey!);
-                      return Selector2<
+
+                      return Selector<
                         LayoutSetProvider,
-                        TranspositionProvider,
                         ({
-                          TextStyle lyricStyle,
-                          TextStyle chordStyle,
-                          double chordLyricSpacing,
+                          double letterSpacing,
+                          double lineSpacing,
+                          double lineBreakSpacing,
+                          double minChordSpacing,
                         })
                       >(
-                        selector: (context, laySet, trans) => (
-                          lyricStyle: laySet.lyricStyle,
-                          chordStyle: laySet.chordStyle,
-                          chordLyricSpacing: laySet.chordLyricSpacing,
-                        ),
-                        builder: (context, measure, child) {
-                          // PHASE 2: Ensure measurements are cached for this content + style
-                          _tokensKey!.chordLyricSpacing =
-                              measure.chordLyricSpacing;
-                          _tokenProv.measureTokens(
-                            chordStyle: measure.chordStyle,
-                            lyricStyle: measure.lyricStyle,
+                        selector: (context, laySet) {
+                          return (
+                            letterSpacing: laySet.letterSpacing,
+                            lineSpacing: laySet.lineSpacing,
+                            lineBreakSpacing: laySet.lineBreakSpacing,
+                            minChordSpacing: laySet.minChordSpacing,
+                          );
+                        },
+                        builder: (context, l, child) {
+                          // PHASE 3: Calculate and cache widget positions based on width constraints
+                          final width =
+                              MediaQuery.sizeOf(context).width -
+                              2.4 - // Container border
+                              8 - // Container padding
+                              32 - // ScrollView padding
+                              TokenizationConstants.chordTokenWidthPadding;
+                          _tokensKey!.letterSpacing = l.letterSpacing;
+                          _tokensKey!.lineSpacing = l.lineSpacing;
+                          _tokensKey!.lineBreakSpacing = l.lineBreakSpacing;
+                          _tokensKey!.minChordSpacing = l.minChordSpacing;
+                          _tokensKey!.maxWidth = width;
+
+                          _tokenProv.calculatePositions(
                             key: _tokensKey!,
+                            lyricStyle: measure.lyricStyle,
+                            chordStyle: measure.chordStyle,
                           );
 
-                          return Selector<
-                            LayoutSetProvider,
-                            ({
-                              double letterSpacing,
-                              double lineSpacing,
-                              double lineBreakSpacing,
-                              double minChordSpacing,
-                            })
-                          >(
-                            selector: (context, laySet) {
-                              return (
-                                letterSpacing: laySet.letterSpacing,
-                                lineSpacing: laySet.lineSpacing,
-                                lineBreakSpacing: laySet.lineBreakSpacing,
-                                minChordSpacing: laySet.minChordSpacing,
-                              );
-                            },
-                            builder: (context, l, child) {
-                              // PHASE 3: Calculate and cache widget positions based on width constraints
-                              final width =
-                                  MediaQuery.sizeOf(context).width -
-                                  32; // 32 for padding
-                              _tokensKey!.letterSpacing = l.letterSpacing;
-                              _tokensKey!.lineSpacing = l.lineSpacing;
-                              _tokensKey!.lineBreakSpacing = l.lineBreakSpacing;
-                              _tokensKey!.minChordSpacing = l.minChordSpacing;
-                              _tokensKey!.maxWidth = width;
+                          final positions = _tokenProv.getPositions(
+                            _tokensKey!,
+                            measure.chordStyle,
+                            measure.lyricStyle,
+                          );
 
-                              _tokenProv.calculatePositions(
-                                key: _tokensKey!,
-                                lyricStyle: measure.lyricStyle,
-                                chordStyle: measure.chordStyle,
-                              );
+                          final content = _tokenProv.buildEditWidgets(
+                            key: _tokensKey!,
+                            lyricStyle: measure.lyricStyle,
+                            chordStyle: measure.chordStyle,
+                            contentColor: s.section!.contentColor,
+                            chordTargetColor: colorScheme.surfaceTint,
+                            surfaceColor: colorScheme.surface,
+                            onSurfaceColor: colorScheme.onSurface,
+                            onContentColor: colorScheme.surface,
+                            isEnabled: widget.isEnabled,
+                            onAddChord: _addChord(_tokensKey!),
+                            onRemoveChord: _removeChord(_tokensKey!),
+                          );
 
-                              final positions = _tokenProv.getPositions(
-                                _tokensKey!,
-                              );
-
-                              final content = _tokenProv.buildEditWidgets(
-                                key: _tokensKey!,
-                                lyricStyle: measure.lyricStyle,
-                                chordStyle: measure.chordStyle,
-                                contentColor: s.section!.contentColor,
-                                chordTargetColor: colorScheme.surfaceTint,
-                                surfaceColor: colorScheme.surface,
-                                onSurfaceColor: colorScheme.onSurface,
-                                onContentColor: colorScheme.surface,
-                                isEnabled: widget.isEnabled,
-                                onAddChord: _addChord(_tokensKey!),
-                                onRemoveChord: _removeChord(_tokensKey!),
-                              );
-
-                              return SizedBox(
-                                width: width,
-                                height: positions?.contentHeight,
-                                child: Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [...content.tokens],
-                                ),
-                              );
-                            },
+                          return Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Container(
+                              padding: const EdgeInsets.only(
+                                left: TokenizationConstants
+                                    .chordTokenWidthPadding,
+                              ),
+                              width: width,
+                              height: positions?.contentHeight,
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [...content.tokens],
+                              ),
+                            ),
                           );
                         },
                       );
                     },
-                  ),
-                ),
+                  );
+                },
               ),
             ],
           ),
@@ -354,12 +361,21 @@ class _TokenContentCardState extends State<TokenContentCard> {
                 trailingIcon: Icons.chevron_right,
                 isDiscrete: true,
                 onPressed: () {
+                  final nav = context.read<NavigationProvider>();
+                  final sect = context.read<SectionProvider>();
+
                   Navigator.pop(context); // Close the bottom sheet
-                  context.read<NavigationProvider>().pushForeground(
-                    EditSectionScreen(
+                  nav.push(
+                    () => EditSectionScreen(
                       versionID: widget.versionID,
-                      sectionCode: widget.sectionCode,
+                      sectionKey: widget.sectionKey,
                     ),
+                    showBottomNavBar: true,
+                    onChangeDiscarded: () =>
+                        sect.loadSection(widget.versionID, widget.sectionKey),
+                    changeDetector: () {
+                      return sect.hasUnsavedChanges;
+                    },
                   );
                 },
               ),
@@ -372,7 +388,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   Navigator.pop(context); // Close the bottom sheet
                   final state = context.read<EditSectionsStateProvider>();
                   state.enableMergeOverlay();
-                  state.toggleMergeSection(widget.sectionCode);
+                  state.toggleMergeSection(widget.sectionKey);
                 },
               ),
               // create copy
@@ -386,14 +402,14 @@ class _TokenContentCardState extends State<TokenContentCard> {
                 onPressed: () {
                   Navigator.pop(context); // Close the bottom sheet
                   final sect = context.read<SectionProvider>();
-                  final newCode = sect.cacheCopyOfSection(
+                  final newKey = sect.cacheCopyOfSection(
                     versionId: widget.versionID,
-                    sectionCode: widget.sectionCode,
+                    sectionKey: widget.sectionKey,
                   );
-                  if (newCode != null) {
+                  if (newKey != null) {
                     context.read<LocalVersionProvider>().addSectionToStruct(
                       widget.versionID,
-                      newCode,
+                      newKey,
                     );
                   }
                 },
@@ -410,7 +426,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
                   Navigator.pop(context); // Close the bottom sheet
                   context.read<LocalVersionProvider>().addSectionToStruct(
                     widget.versionID,
-                    widget.sectionCode,
+                    widget.sectionKey,
                   );
                 },
               ),
@@ -429,13 +445,13 @@ class _TokenContentCardState extends State<TokenContentCard> {
                         onConfirm: () {
                           context.read<SectionProvider>().cacheDeletion(
                             widget.versionID,
-                            widget.sectionCode,
+                            widget.sectionKey,
                           );
                           context
                               .read<LocalVersionProvider>()
-                              .removeSectionsByCode(
+                              .removeSectionsByKey(
                                 widget.versionID,
-                                widget.sectionCode,
+                                widget.sectionKey,
                               );
                           Navigator.pop(context); // Close quick actions sheet
                         },

@@ -23,7 +23,7 @@ class TokenView extends StatelessWidget {
     final laySet = context.read<LayoutSetProvider>();
 
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     tokensKey.lyricColor = colorScheme.onSurface;
     tokensKey.chordColor = colorScheme.primary;
 
@@ -34,7 +34,11 @@ class TokenView extends StatelessWidget {
       laySet.chordStyle,
     );
 
-    final model = tokenProv.getPaintModel(tokensKey);
+    final model = tokenProv.getPaintModel(
+      tokensKey,
+      laySet.lyricStyle,
+      laySet.chordStyle,
+    );
 
     if (model == null) {
       return const SizedBox.shrink();

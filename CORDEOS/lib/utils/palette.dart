@@ -7,7 +7,7 @@ class Palette {
   static const Color _orange = Color(0xFFE66423); // Orange
   static const Color _gold = Color(0xFFE6B428); // Gold
   static const Color _burgundy = Color(0xFF5A002D); // Burgundy
-  static const Color _neutral = Colors.white; // Neutral
+  static const Color _neutral = Color(0xFFE1E1E6); // Neutral
   static const Color _darkNeutral = Color(0xFF121214); // Dark Neutral
 
   /// Lighten a color by [amount] (0.0 to 1.0)
@@ -37,25 +37,25 @@ class BrandPalette extends Palette {
   // GREEN THEME
   // PRIMARIES (Green)
   static final Color green = Palette._green;
-  static final Color greenTint = const Color.fromARGB(255, 200, 226, 223);
+  static final Color greenTint = const Color.fromARGB(255, 129, 167, 163);
 
   // =============================================================================
   // ORANGE THEME
   // PRIMARIES (Orange)
   static final Color orange = Palette._orange;
-  static final Color orangeTint = Color.fromARGB(255, 58, 24, 13);
+  static final Color orangeTint = Palette._orange.withAlpha(76);
 
   // =============================================================================
   // GOLD THEME
   // PRIMARIES (Gold)
   static final Color gold = Palette._gold;
-  static final Color goldTint = const Color.fromARGB(255, 54, 42, 10);
+  static final Color goldTint = Palette._gold.withAlpha(76);
 
   // =============================================================================
   //  BURGUNDY THEME
-  //  PRIMARIES (burgundy)d
+  //  PRIMARIES (burgundy)
   static final Color burgundy = Palette._burgundy;
-  static final Color burgundyTint = const Color.fromARGB(255, 233, 211, 222);
+  static final Color burgundyTint = const Color.fromARGB(255, 190, 150, 170);
 }
 
 class NeutralPalette extends Palette {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -21,7 +22,7 @@ class DatabaseHelper {
 
       final db = await openDatabase(
         path,
-        version: 19,
+        version: 20,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade, // Handle migrations
       );
@@ -94,8 +95,8 @@ class DatabaseHelper {
       CREATE TABLE section (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         version_id INTEGER NOT NULL,
+        key INTEGER NOT NULL,
         content_type TEXT NOT NULL,
-        content_code VARCHAR NOT NULL,
         content_text TEXT NOT NULL,
         content_color TEXT,
         FOREIGN KEY (version_id) REFERENCES version (id) ON DELETE CASCADE
@@ -264,132 +265,6 @@ class DatabaseHelper {
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     // Handle migrations between database versions
-    if (oldVersion < 2) {
-      await db.execute('ALTER TABLE cipher ADD COLUMN duration TEXT');
-    }
-    if (oldVersion < 3) {
-      await db.execute('ALTER TABLE cipher RENAME COLUMN tempo TO bpm');
-    }
-    if (oldVersion < 4) {
-      await db.execute(
-        ''' CREATE TABLE schedule (
-          id INTEGER PRIMARY KEY AUTOINCREMENT, 
-          playlist_id INTEGER NOT NULL, 
-          date TEXT NOT NULL, 
-          time TEXT NOT NULL, 
-          location TEXT, 
-          firebase_id TEXT UNIQUE, 
-          FOREIGN KEY (playlist_id) REFERENCES playlist (id) ON DELETE CASCADE)''',
-      );
-    }
-    if (oldVersion < 5) {
-      // REMOVE time control from playlist table
-      await db.execute('ALTER TABLE playlist DROP COLUMN is_public');
-      await db.execute('ALTER TABLE playlist DROP COLUMN share_code');
-      await db.execute('ALTER TABLE playlist DROP COLUMN created_at');
-      await db.execute('ALTER TABLE playlist DROP COLUMN updated_at');
-    }
-    if (oldVersion < 6) {
-      // CREATE ROLE AND ROLE_MEMBER TABLES
-      await db.execute(
-        ''' CREATE TABLE role (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          schedule_id INTEGER NOT NULL,
-          name TEXT NOT NULL,
-          FOREIGN KEY (schedule_id) REFERENCES schedule (id) ON DELETE CASCADE) ''',
-      );
-      await db.execute(''' CREATE TABLE role_member (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          role_id INTEGER NOT NULL,
-          member_id INTEGER NOT NULL,
-          FOREIGN KEY (role_id) REFERENCES role (id) ON DELETE CASCADE,
-          FOREIGN KEY (member_id) REFERENCES user (id) ON DELETE CASCADE) ''');
-    }
-    if (oldVersion < 7) {
-      // CHANGE BPM TYPE FROM TEXT TO INTEGER IN CIPHER TABLE
-      await db.execute(
-        'ALTER TABLE cipher ADD COLUMN bpm_temp INTEGER DEFAULT 0',
-      );
-
-      // Copy and convert existing data
-      final List<Map<String, Object?>> rows = await db.rawQuery(
-        'SELECT id, bpm FROM cipher',
-      );
-      for (final row in rows) {
-        final int id = row['id'] as int;
-        final String? bpmString = row['bpm'] as String?;
-        final int bpmValue = int.tryParse(bpmString ?? '') ?? 0;
-
-        await db.rawUpdate('UPDATE cipher SET bpm_temp = ? WHERE id = ?', [
-          bpmValue,
-          id,
-        ]);
-      }
-
-      // Remove old bpm column
-      await db.execute('ALTER TABLE cipher DROP COLUMN bpm');
-
-      // Rename temp column to bpm
-      await db.execute('ALTER TABLE cipher RENAME COLUMN bpm_temp TO bpm');
-    }
-    if (oldVersion < 8) {
-      // REMOVE DESCRIPTION COLUMN FROM PLAYLIST TABLE
-      await db.execute("ALTER TABLE playlist DROP COLUMN description");
-    }
-    if (oldVersion < 9) {
-      // CHANGE BPM FROM CIPHER TABLE TO VERSION TABLE
-      await db.execute('ALTER TABLE version ADD COLUMN bpm INTEGER DEFAULT 0');
-      // DROP EXISTING DATA IN CIPHER TABLE AND DROP COLUMN
-      await db.execute('ALTER TABLE cipher DROP COLUMN bpm');
-    }
-    if (oldVersion < 10) {
-      // ADD DURATION COLUMN TO PLAYLIST_TEXT TABLE
-      await db.execute(
-        'ALTER TABLE playlist_text ADD COLUMN duration INTEGER DEFAULT 0',
-      );
-    }
-    if (oldVersion < 11) {
-      // ADD NAME COLUMN TO SCHEDULE TABLE
-      await db.execute(
-        'ALTER TABLE schedule ADD COLUMN name TEXT NOT NULL DEFAULT ""',
-      );
-
-      // ADD ANNOTATIONS COLUMN TO SCHEDULE TABLE
-      await db.execute('ALTER TABLE schedule ADD COLUMN annotations TEXT');
-
-      // ADD OWNER_FIREBASE_ID COLUMN TO SCHEDULE TABLE
-      await db.execute(
-        'ALTER TABLE schedule ADD COLUMN owner_firebase_id TEXT NOT NULL DEFAULT ""',
-      );
-    }
-    if (oldVersion < 12) {
-      // ADD ROOM_VENUE COLUMN TO SCHEDULE TABLE
-      await db.execute('ALTER TABLE schedule ADD COLUMN room_venue TEXT');
-    }
-    if (oldVersion < 13) {
-      // RENAME PLAYLIST_TEXT TABLE TO FLOW_ITEM
-      await db.execute('ALTER TABLE playlist_text RENAME TO flow_item');
-    }
-    if (oldVersion < 14) {
-      // ADD SHARE_CODE AND IS_PUBLIC COLUMNS TO SCHEDULE TABLE
-      await db.execute('ALTER TABLE schedule ADD COLUMN share_code TEXT');
-      await db.execute(
-        'ALTER TABLE schedule ADD COLUMN is_public BOOLEAN DEFAULT 0',
-      );
-    }
-    if (oldVersion < 15) {
-      // RENAMED mail TO email IN USER TABLE
-      await db.execute('ALTER TABLE user RENAME COLUMN mail TO email');
-    }
-    if (oldVersion < 16) {
-      // REMOVED TIMESTAMP TYPE AND ADDED INTEGER (milliseconds since epoch) FOR created_at and updated_at in user table
-
-      // for simplicity, we'll drop and recreate the whole database, since we don't have critical data yet.
-      await db.close();
-      String path = join(await getDatabasesPath(), 'cipher_app.db');
-      await databaseFactory.deleteDatabase(path);
-      await _initDatabase();
-    }
     if (oldVersion < 17) {
       // ADD COUNTRY, LANGUAGE AND TIMEZONE TO USER TABLE
       await db.execute('ALTER TABLE user ADD COLUMN country TEXT');
@@ -403,6 +278,74 @@ class DatabaseHelper {
     if (oldVersion < 19) {
       // ADD LINK COLUMN TO CIPHER TABLE
       await db.execute('ALTER TABLE cipher ADD COLUMN link TEXT');
+    }
+    if (oldVersion < 20) {
+      // REMOVE content_code ON SECTION TABLE (was NON NULL)
+      // ADD key COLUMN TO SECTION TABLE (int, non null)
+      // Since SQLite doesn't support altering column constraints directly, we need to recreate the table
+
+      await db.transaction((txn) async {
+        await txn.execute('ALTER TABLE section RENAME TO section_old');
+        await txn.execute('''
+        CREATE TABLE section (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          version_id INTEGER NOT NULL,
+          key INTEGER NOT NULL,
+          content_type TEXT NOT NULL,
+          content_text TEXT NOT NULL,
+          content_color TEXT,
+          FOREIGN KEY (version_id) REFERENCES version (id) ON DELETE CASCADE
+        )
+      ''');
+
+        // MAP CODE TO KEY, SO WE CAN CHANGE VERSION STRUCTURE WITHOUT LOSING DATA
+        final List<Map<String, dynamic>> oldSections = await txn.query(
+          'section_old',
+          columns: ['id', 'version_id', 'content_code'],
+        );
+        await txn.execute('''
+        INSERT INTO section (id, version_id, key, content_type, content_text, content_color)
+        SELECT id, version_id, id, content_type, content_text, content_color
+        FROM section_old
+      ''');
+        await txn.execute('DROP TABLE section_old');
+
+        await txn.execute(
+          'CREATE INDEX idx_section_version_id ON section(version_id)',
+        );
+
+        // USING oldSections to update version structure in app logic,
+        // so we don't lose data and can migrate smoothly
+        final versionStructs = await txn.query(
+          'version',
+          columns: ['id', 'song_structure'],
+        );
+
+        for (var version in versionStructs) {
+          final versionID = version['id'] as int;
+          final struct = (version['song_structure'] as String).split(',');
+
+          final newStruct = <int>[];
+          for (var code in struct) {
+            final section = oldSections.firstWhereOrNull(
+              (s) =>
+                  s['version_id'] == versionID &&
+                  s['content_code'] == code.trim(),
+            );
+
+            if (section != null) {
+              newStruct.add(section['id'] as int);
+            }
+          }
+
+          await txn.update(
+            'version',
+            {'song_structure': newStruct.join(',')},
+            where: 'id = ?',
+            whereArgs: [versionID],
+          );
+        }
+      });
     }
   }
 

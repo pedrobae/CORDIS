@@ -8,7 +8,6 @@ class ImportProvider extends ChangeNotifier {
   final ImageImportService _imageService = ImageImportService();
 
   /// Single ParsingCipher object that may contain multiple import variants
-  ParsingCipher? _importedCipher;
   bool _isImporting = false;
   String? _selectedFile;
   String? _selectedFileName;
@@ -18,7 +17,6 @@ class ImportProvider extends ChangeNotifier {
   ParsingStrategy? _parsingStrategy;
   ImportVariation? _importVariation;
 
-  ParsingCipher? get importedCipher => _importedCipher;
   String? get selectedFile => _selectedFile;
   String? get selectedFileName => _selectedFileName;
   String? get fileSize => _parseFileSize(_fileSize);
@@ -54,18 +52,19 @@ class ImportProvider extends ChangeNotifier {
   /// Imports text based on the selected import type.
   /// For PDFs: creates multiple import variants (with/without columns) in a single ParsingCipher
   /// For text/images: creates a single import variant
-  Future<void> importText({String? data}) async {
-    if (_isImporting) return;
+  Future<ParsingCipher?> importText({String? data}) async {
+    if (_isImporting) return null;
 
     _isImporting = true;
     _error = null;
     notifyListeners();
 
+    ParsingCipher? importedCipher;
     try {
       switch (_importType) {
         case ImportType.text:
           // Text import: single import variant (textDirect)
-          _importedCipher = ParsingCipher(
+          importedCipher = ParsingCipher(
             result: ParsingResult(
               strategy: _parsingStrategy!,
               rawText: data ?? '',
@@ -79,10 +78,10 @@ class ImportProvider extends ChangeNotifier {
           final pdfDocument = await _pdfService.extractTextWithFormatting(
             selectedFile!,
             selectedFileName!,
-            1,
+            _importVariation == ImportVariation.pdfWithColumns,
           );
 
-          _importedCipher = ParsingCipher(
+          importedCipher = ParsingCipher(
             importType: ImportType.pdf,
             result: ParsingResult(
               strategy: ParsingStrategy.pdfFormatting,
@@ -90,28 +89,31 @@ class ImportProvider extends ChangeNotifier {
             ),
           );
 
-          _importedCipher!.result.metadata['title'] = pdfDocument.documentName
+          importedCipher.result.metadata['title'] = pdfDocument.documentName
               .split('.') // remove file extension
               .first;
 
-          final importedLines =
-              _importVariation == ImportVariation.pdfWithColumns
-              ? pdfDocument.pageLinesWithColumns[0]
-              : pdfDocument.pageLines[0];
+          final importedLines = pdfDocument.lines;
 
-          if (importedLines == null || importedLines.isEmpty) {
+          if (importedLines.isEmpty) {
             throw Exception('No text lines were extracted from the PDF');
           }
 
-          _importedCipher!.result.lines.addAll(importedLines);
+          importedCipher.result.lines.addAll(importedLines);
           break;
 
         case ImportType.image:
-          await _imageService.extractText(selectedFile!);
+          final text = await _imageService.extractText(selectedFile!);
+          importedCipher = ParsingCipher(
+            result: ParsingResult(
+              strategy: ParsingStrategy.pdfFormatting,
+              rawText: text,
+            ),
+            importType: ImportType.image,
+          );
           break;
-
-        default:
-          throw Exception('Import type not set');
+        case null:
+          throw Exception('Import type must be selected before importing');
       }
     } catch (e) {
       _error = e.toString();
@@ -119,6 +121,7 @@ class ImportProvider extends ChangeNotifier {
       _isImporting = false;
       notifyListeners();
     }
+    return importedCipher;
   }
 
   /// Sets the selected file name.
@@ -148,7 +151,6 @@ class ImportProvider extends ChangeNotifier {
   }
 
   void clearCache() {
-    _importedCipher = null;
     _isImporting = false;
     _selectedFile = null;
     _selectedFileName = null;

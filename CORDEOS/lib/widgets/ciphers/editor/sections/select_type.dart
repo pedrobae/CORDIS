@@ -1,21 +1,20 @@
 import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/section/section_provider.dart';
-import 'package:cordeos/providers/version/local_version_provider.dart';
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/edit_section.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SelectType extends StatelessWidget {
   final int versionID;
-  final String? sectionCode;
+  final int? sectionKey;
   final bool isNewSection;
 
   const SelectType({
     super.key,
     required this.versionID,
-    this.sectionCode,
+    this.sectionKey,
     this.isNewSection = false,
   });
 
@@ -78,27 +77,33 @@ class SelectType extends StatelessWidget {
               child: Column(
                 spacing: 8,
                 children: [
-                  for (var section in commonSectionLabels.values)
+                  for (var type in SectionType.values)
                     GestureDetector(
                       onTap: () {
+                        final sect = context.read<SectionProvider>();
+
                         try {
-                          final newCode = _upsertSection(context, section);
+                          final newKey = _upsertSection(context, type);
                           isNewSection
-                              ? nav
-                                    .pushForeground(
-                                      EditSectionScreen(
-                                        sectionCode: newCode,
-                                        versionID: versionID,
-                                        isNewSection: true,
-                                      ),
-                                    )
-                              : nav
-                                    .pushForeground(
-                                      EditSectionScreen(
-                                        sectionCode: newCode,
-                                        versionID: versionID,
-                                      ),
-                                    );
+                              ? nav.push(
+                                  () => EditSectionScreen(
+                                    sectionKey: newKey,
+                                    versionID: versionID,
+                                    isNewSection: true,
+                                  ),
+                                  showBottomNavBar: true,
+                                  changeDetector: () => sect.hasUnsavedChanges,
+                                  onChangeDiscarded: () =>
+                                      sect.loadSection(versionID, newKey),
+                                  onPopCallback: () {
+                                    // If there are no unsaved changes,
+                                    // Pop to return to the sections tab
+                                    if (!sect.hasUnsavedChanges) {
+                                      nav.pop();
+                                    }
+                                  },
+                                )
+                              : nav.pop();
                         } catch (e) {
                           // Show error snackbar
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -131,12 +136,12 @@ class SelectType extends StatelessWidget {
                               width: 28,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: section.color,
+                                color: type.color,
                               ),
                             ),
                             Expanded(
                               child: Text(
-                                section.localizedLabel(context),
+                                type.localizedLabel(context),
                                 style: textTheme.labelLarge,
                               ),
                             ),
@@ -157,40 +162,23 @@ class SelectType extends StatelessWidget {
     );
   }
 
-  String _upsertSection(BuildContext context, SectionLabel section) {
+  int _upsertSection(BuildContext context, SectionType type) {
     final sect = context.read<SectionProvider>();
     if (isNewSection) {
-      final newCode = sect.cacheAddSection(
+      final newKey = sect.cacheAddSection(
         versionID,
-        section.code,
-        section.color,
-        section.canonicalLabel,
+        type.color,
+        type.localizedLabel(context),
       );
-      return newCode;
+      return newKey;
     } else {
-      final newCode = sect.cacheUpdate(
+      sect.cacheUpdate(
         versionID,
-        sectionCode!,
-        newContentCode: section.code,
-        newContentType: section.canonicalLabel,
-        newColor: section.color,
+        sectionKey!,
+        newContentType: type.localizedLabel(context),
+        newColor: type.color,
       );
-
-      // If the content code has changed, update the song structure accordingly
-      if (sectionCode! != section.code) {
-        context.read<LocalVersionProvider>().updateSectionCodeInStruct(
-          versionID,
-          oldCode: sectionCode!,
-          newCode: newCode,
-        );
-
-        context.read<SectionProvider>().renameSectionKey(
-          versionID,
-          oldCode: sectionCode!,
-          newCode: newCode,
-        );
-      }
-      return newCode;
+      return sectionKey!;
     }
   }
 }

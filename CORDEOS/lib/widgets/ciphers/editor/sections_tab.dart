@@ -1,13 +1,18 @@
+import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
+
 import 'package:cordeos/models/domain/cipher/version.dart';
+
+import 'package:provider/provider.dart';
 import 'package:cordeos/providers/cipher/edit_sections_state_provider.dart';
+import 'package:cordeos/providers/section/section_provider.dart';
+
+import 'package:cordeos/utils/section_type.dart';
+
 import 'package:cordeos/widgets/ciphers/editor/sections/chord_palette.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/merge_structure.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/sheet_new_section.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/sheet_manage.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/reorderable_structure.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/token_content_card.dart';
 
@@ -33,12 +38,21 @@ class _SectionsTabState extends State<SectionsTab> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Selector<LocalVersionProvider, List<String>>(
-      selector: (context, localVer) {
-        final songStructure = localVer.getSongStructure(widget.versionID);
-        return songStructure.toSet().toList();
+    return Selector<
+      SectionProvider,
+      ({List<int> sectionIDs, Map<int, SectionBadgeData> badgesData})
+    >(
+      selector: (context, sect) {
+        final sections = sect.getSections(widget.versionID);
+        final ids = <int>[];
+        final types = <int, SectionType>{};
+        for (var section in sections.values) {
+          ids.add(section.key);
+          types[section.key] = section.sectionType;
+        }
+        return (sectionIDs: ids, badgesData: getSectionBadges(types));
       },
-      builder: (context, uniqueSections, child) {
+      builder: (context, s, child) {
         return Stack(
           children: [
             SingleChildScrollView(
@@ -62,7 +76,7 @@ class _SectionsTabState extends State<SectionsTab> {
                               style: textTheme.titleMedium,
                             ),
 
-                            if (uniqueSections.isNotEmpty)
+                            if (s.sectionIDs.isNotEmpty)
                               // MANAGE SECTION BUTTON
                               GestureDetector(
                                 onTap: _openRepeatSectionSheet(),
@@ -97,18 +111,18 @@ class _SectionsTabState extends State<SectionsTab> {
                         ),
 
                         // SECTIONS
-                        if (uniqueSections.isEmpty)
+                        if (s.sectionIDs.isEmpty)
                           Text(
                             AppLocalizations.of(context)!.noLyrics,
                             textAlign: TextAlign.center,
                             style: textTheme.bodyMedium,
                           )
                         else
-                          ...uniqueSections.map((sectionCode) {
+                          ...s.sectionIDs.map((sectionKey) {
                             return TokenContentCard(
-                              index: uniqueSections.indexOf(sectionCode),
                               versionID: widget.versionID,
-                              sectionCode: sectionCode,
+                              sectionBadgeData: s.badgesData[sectionKey]!,
+                              sectionKey: sectionKey,
                               isEnabled: widget.isEnabled,
                             );
                           }),

@@ -12,11 +12,13 @@ enum NavigationRoute { home, library, playlists, schedule }
 /// Screen metadata for storing in the navigation stack
 class _ScreenMetadata {
   final Widget Function() screenBuilder;
+  Widget? screen; // Store the actual widget for keepAlive purposes
   final bool showAppBar;
   final bool showDrawerIcon;
   final bool showBottomNavBar;
   final bool showFAB;
   final bool handlesSystemBack;
+  final bool keepAlive;
   final VoidCallback onPopCallback;
   final bool Function() changeDetector;
   final void Function() onChangeDiscarded;
@@ -28,21 +30,22 @@ class _ScreenMetadata {
     required this.showBottomNavBar,
     required this.showFAB,
     required this.handlesSystemBack,
+    required this.keepAlive,
     required this.onPopCallback,
     required this.changeDetector,
     required this.onChangeDiscarded,
   });
+
+  Widget getScreenWidget() {
+    return screen ??= screenBuilder();
+  }
 }
 
 class NavigationProvider extends ChangeNotifier {
-
   NavigationRoute _currentRoute = NavigationRoute.home;
 
   // Store screen metadata instead of Widget instances to avoid build scope issues
   final List<_ScreenMetadata> _screenStack = [];
-
-  Widget?
-  _screenOnForeground; // Screen that can be placed on top of the current stack without affecting it
 
   bool _isLoading = false;
   String? _error;
@@ -51,21 +54,25 @@ class NavigationProvider extends ChangeNotifier {
   NavigationRoute get currentRoute => _currentRoute;
 
   Widget buildCurrentScreen(BuildContext context) {
-    // Build the current screen from metadata to ensure proper build context
-    final currentScreenWidget = _screenStack.isNotEmpty
-        ? _screenStack.last.screenBuilder()
-        : _getScreenForRoute(_currentRoute);
+    List<Widget> mountedScreens = [];
+    for (int i = 0; i < _screenStack.length; i++) {
+      final screen = _screenStack[i];
+      final isTop = i == _screenStack.length - 1;
+      if (screen.keepAlive || isTop) {
+        mountedScreens.add(
+          Offstage(offstage: !isTop, child: screen.getScreenWidget()),
+        );
+      }
+    }
 
-    return Stack(
-      children: [
-        currentScreenWidget,
-        if (_screenOnForeground != null)
-          Positioned.fill(child: _screenOnForeground!),
-      ],
-    );
+    if (mountedScreens.isEmpty) {
+      // If no screens are in the stack, show the current route's screen
+      mountedScreens.add(_getScreenForRoute(_currentRoute));
+    }
+
+    return Stack(children: mountedScreens);
   }
 
-  Widget? get screenOnForeground => _screenOnForeground;
   bool get showAppBar =>
       _screenStack.isNotEmpty ? _screenStack.last.showAppBar : true;
   bool get showDrawerIcon =>
@@ -84,12 +91,6 @@ class NavigationProvider extends ChangeNotifier {
     BuildContext context, {
     NavigationRoute? route,
   }) async {
-    if (_screenOnForeground != null) {
-      _screenOnForeground = null;
-      notifyListeners();
-      return;
-    }
-
     final hasChanges =
         _screenStack.isNotEmpty && _screenStack.last.changeDetector();
 
@@ -132,8 +133,6 @@ class NavigationProvider extends ChangeNotifier {
   void _navigateToRoute(NavigationRoute route) {
     debugPrint('NAVIGATION - Navigating to route: ${route.name}');
     _currentRoute = route;
-    _screenOnForeground =
-        null; // Clear any foreground screen when navigating to a new route
 
     while (_screenStack.isNotEmpty) {
       pop();
@@ -150,6 +149,7 @@ class NavigationProvider extends ChangeNotifier {
     bool showBottomNavBar = false,
     bool showFAB = false,
     bool handlesSystemBack = false,
+    bool keepAlive = false,
     VoidCallback? onPopCallback,
     bool Function()? changeDetector,
     void Function()? onChangeDiscarded,
@@ -163,6 +163,7 @@ class NavigationProvider extends ChangeNotifier {
         showBottomNavBar: showBottomNavBar,
         showFAB: showFAB,
         handlesSystemBack: handlesSystemBack,
+        keepAlive: keepAlive,
         onPopCallback: onPopCallback ?? () {},
         changeDetector: changeDetector ?? () => false,
         onChangeDiscarded: onChangeDiscarded ?? () {},
@@ -171,18 +172,7 @@ class NavigationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void pushForeground(Widget screen) {
-    debugPrint('NAVIGATION - Pushing foreground screen: ${screen.runtimeType}');
-    _screenOnForeground = screen;
-    notifyListeners();
-  }
-
   void pop() {
-    if (_screenOnForeground != null) {
-      _screenOnForeground = null;
-      notifyListeners();
-      return;
-    }
     if (_screenStack.isNotEmpty) {
       try {
         _screenStack.last.onPopCallback();

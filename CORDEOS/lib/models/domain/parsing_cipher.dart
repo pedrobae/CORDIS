@@ -2,7 +2,6 @@ import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/models/dtos/pdf_dto.dart';
 import 'package:cordeos/models/dtos/version_dto.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 enum ImportType { text, pdf, image }
 
@@ -76,14 +75,8 @@ class ParsingResult {
   final List<LineData> lines = [];
   final Map<String, dynamic> metadata = {};
   final List<RawSection> rawSections = [];
-  final Map<String, SectionDto> parsedSections = {};
-  final List<String> songStructure = [];
-  List<PdfFontStyle>? dominantChordStyle;
-
-  /// PDF-specific formatting analysis (only populated for PDF imports)
-  final Map<List<PdfFontStyle>, int> fontStyleCount = {};
-  final Map<List<PdfFontStyle>, Map<List<PdfFontStyle>, int>>
-  followingStyleCounts = {};
+  final Map<int, SectionDto> parsedSections = {};
+  final List<int> songStructure = [];
 
   ParsingResult({required this.strategy, required this.rawText});
 
@@ -107,21 +100,21 @@ class ParsingCipher {
 
 class RawSection {
   String suggestedLabel;
-  String? code;
-  Color? color;
+  Color color;
   String content;
   List<LineData>? linesData;
+  int key;
   int index;
   int numberOfLines;
-  String? duplicateOf; // If duplicate, holds the code of the original section
+  int? duplicateOf; // If duplicate, holds the key of the original section
 
   RawSection({
     required this.suggestedLabel,
-    this.code,
-    this.color,
+    required this.color,
     required this.content,
     required this.index,
     required this.numberOfLines,
+    required this.key,
     this.linesData,
     this.duplicateOf,
   });

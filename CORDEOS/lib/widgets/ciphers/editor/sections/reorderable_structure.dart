@@ -1,16 +1,16 @@
 import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/providers/section/section_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/widgets/common/custom_reorderable_delayed.dart';
 import 'package:provider/provider.dart';
-
 
 class ReorderableStructure extends StatefulWidget {
   final int versionID;
   final bool showDelete;
   final void Function(void Function())? onInit;
-  
+
   const ReorderableStructure({
     super.key,
     required this.versionID,
@@ -49,11 +49,32 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
 
     final localVer = context.read<LocalVersionProvider>();
 
-    return Selector<LocalVersionProvider, List<String>>(
-      selector: (context, localVer) {
-        return localVer.getSongStructure(widget.versionID);
+    return Selector2<
+      LocalVersionProvider,
+      SectionProvider,
+      ({List<int> songStructure, Map<int, SectionBadgeData> badgesData})
+    >(
+      selector: (context, localVer, sect) {
+        final songStruct = localVer.getSongStructure(widget.versionID);
+
+        final sectionTypes = <int, SectionType>{};
+        for (var key in songStruct) {
+          final type = sect
+              .getSection(versionKey: widget.versionID, sectionKey: key)
+              ?.sectionType;
+          if (type != null) {
+            sectionTypes[key] = type;
+          } else {
+            sectionTypes[key] = SectionType.unknown;
+          }
+        }
+
+        return (
+          songStructure: songStruct,
+          badgesData: getSectionBadges(sectionTypes),
+        );
       },
-      builder: (context, songStructure, child) {
+      builder: (context, s, child) {
         return Container(
           padding: EdgeInsets.all(8),
           height: 64,
@@ -61,7 +82,7 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
             border: Border.all(color: colorScheme.surfaceContainerLowest),
             borderRadius: BorderRadius.circular(0),
           ),
-          child: songStructure.isEmpty
+          child: s.songStructure.isEmpty
               ? Center(
                   child: Text(
                     AppLocalizations.of(context)!.emptyStructure,
@@ -75,11 +96,20 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
                   buildDefaultDragHandles: false,
                   scrollDirection: Axis.horizontal,
                   scrollController: _scrollController,
-                  itemCount: songStructure.length,
-                  onReorder: (oldIndex, newIndex) => localVer
-                      .reorderSongStructure(widget.versionID, oldIndex, newIndex),
+                  itemCount: s.songStructure.length,
+                  onReorder: (oldIndex, newIndex) =>
+                      localVer.reorderSongStructure(
+                        widget.versionID,
+                        oldIndex,
+                        newIndex,
+                      ),
                   itemBuilder: (context, index) {
-                    return _buildItem(context, index, songStructure);
+                    return _buildItem(
+                      context,
+                      index,
+                      s.songStructure,
+                      s.badgesData,
+                    );
                   },
                 ),
         );
@@ -90,22 +120,22 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
   Widget _buildItem(
     BuildContext context,
     int index,
-    List<String> songStructure,
+    List<int> songStructure,
+    Map<int, SectionBadgeData> badgesData,
   ) {
     final sect = context.read<SectionProvider>();
     final localVer = context.read<LocalVersionProvider>();
 
     final colorScheme = Theme.of(context).colorScheme;
 
-    final sectionCode = songStructure[index];
-    final color =
-        sect.getSection(widget.versionID, sectionCode)?.contentColor ?? Colors.grey;
+    final sectionKey = songStructure[index];
+    final badgeData = badgesData[sectionKey]!;
 
-    final codeCount = songStructure.where((code) => code == sectionCode).length;
+    final codeCount = songStructure.where((code) => code == sectionKey).length;
 
     return CustomReorderableDelayed(
       delay: Duration(milliseconds: 100),
-      key: ValueKey('$sectionCode-$index'),
+      key: ValueKey('$sectionKey-$index'),
       index: index,
       child: Stack(
         children: [
@@ -114,12 +144,12 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
             height: 44,
             width: 42,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: .90),
+              color: badgeData.color.withValues(alpha: .90),
               borderRadius: BorderRadius.circular(7),
             ),
             child: Center(
               child: Text(
-                sectionCode,
+                badgeData.code,
                 style: TextStyle(
                   color: colorScheme.surface,
                   fontWeight: FontWeight.w500,
@@ -135,9 +165,10 @@ class _ReorderableStructureState extends State<ReorderableStructure> {
               right: 1, // Right margin is 4
               child: GestureDetector(
                 onTap: () {
+                  debugPrint("REORDERABLE CHIP - tapped delete button");
                   localVer.removeSection(widget.versionID, index);
                   if (codeCount == 1) {
-                    sect.cacheDeletion(widget.versionID, sectionCode);
+                    sect.cacheDeletion(widget.versionID, sectionKey);
                   }
                 },
                 child: Container(

@@ -21,8 +21,28 @@ class _ChordPaletteState extends State<ChordPalette> {
   String customChord = '';
   final _chordVariationsNotifier = ValueNotifier<List<String>>([]);
 
-  void _showChordVariations(String baseChord, int chordIndex) {
-    final chordVariations = ChordHelper().getVariationsForChord(
+  void _showChordVariations(String key, String baseChord, int chordIndex) {
+    if (baseChord == '|') {
+      if (_chordVariationsNotifier.value.contains('||:')) {
+        _chordVariationsNotifier.value = [];
+      } else {
+        _chordVariationsNotifier.value = [
+          '||:',
+          ':||',
+          '(',
+          ')',
+          '!',
+          '*',
+          '...',
+          '%',
+        ];
+      }
+
+      return;
+    }
+
+    final chordVariations = ChordHelper().getChordVariationsOnKey(
+      key,
       baseChord,
       chordIndex,
     );
@@ -58,7 +78,7 @@ class _ChordPaletteState extends State<ChordPalette> {
       selector: (context, ciph, localVer) {
         final version = localVer.getVersion(widget.versionID);
         final cipher = ciph.getCipher(version?.cipherID ?? -1);
-        
+
         if (cipher == null || version == null) return null;
 
         final musicKey = cipher.musicKey;
@@ -69,9 +89,9 @@ class _ChordPaletteState extends State<ChordPalette> {
         final textTheme = Theme.of(context).textTheme;
         final colorScheme = Theme.of(context).colorScheme;
 
-        final chords = ChordHelper().getDiatonicChords(
-          originalKey ?? 'C',
-        );
+        final chords = ChordHelper().getDiatonicChords(originalKey ?? 'C');
+
+        chords.add('|'); // Compass separator token
 
         return Container(
           width: MediaQuery.of(context).size.width,
@@ -136,6 +156,7 @@ class _ChordPaletteState extends State<ChordPalette> {
                 ],
               ),
               Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ValueListenableBuilder<List<String>>(
                     valueListenable: _chordVariationsNotifier,
@@ -180,8 +201,12 @@ class _ChordPaletteState extends State<ChordPalette> {
                           builder: (builder) {
                             final chord = chords[i];
                             return GestureDetector(
-                              onLongPress: () => {
-                                _showChordVariations(chord, i),
+                              onTap: () => {
+                                _showChordVariations(
+                                  originalKey ?? 'C',
+                                  chord,
+                                  i,
+                                ),
                               },
                               child: _buildDraggableChordToken(chord),
                             );
@@ -196,12 +221,14 @@ class _ChordPaletteState extends State<ChordPalette> {
                     style: textTheme.bodyMedium?.copyWith(
                       fontStyle: FontStyle.italic,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                   Text(
                     AppLocalizations.of(context)!.chordExpansionInstruction,
                     style: textTheme.bodyMedium?.copyWith(
                       fontStyle: FontStyle.italic,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),

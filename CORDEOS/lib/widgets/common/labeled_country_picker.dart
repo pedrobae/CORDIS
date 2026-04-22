@@ -66,8 +66,8 @@ class _LabeledCountryPickerState extends State<LabeledCountryPicker> {
   }
 
   void showCountrySheet(BuildContext context) {
-    context.read<NavigationProvider>().pushForeground(
-      CountrySheet(
+    context.read<NavigationProvider>().push(
+      () => CountrySheet(
         countryCode: widget.countryCode,
         onCountryChanged: widget.onCountryChanged,
       ),
@@ -143,7 +143,7 @@ class _CountrySheetState extends State<CountrySheet> {
           ),
 
           // COUNTRY OPTIONS
-          Flexible(
+          Expanded(
             child: Container(
               decoration: BoxDecoration(
                 border: Border.symmetric(
@@ -161,7 +161,7 @@ class _CountrySheetState extends State<CountrySheet> {
                 itemBuilder: (context, index) {
                   final country = filteredCountries[index];
                   bool isSelected = country.countryCode == widget.countryCode;
-
+            
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: FilledTextButton(

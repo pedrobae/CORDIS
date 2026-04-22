@@ -10,7 +10,7 @@ class Version {
   final int cipherID;
   final String versionName;
   final String? transposedKey;
-  final List<String> songStructure;
+  final List<int> songStructure;
   final int bpm;
   final Duration duration;
   final DateTime createdAt;
@@ -28,17 +28,13 @@ class Version {
   });
 
   factory Version.fromSqLite(Map<String, dynamic> row) {
-    Map<String, Section> versionContentMap = {};
-    for (Map<String, dynamic> content in row['content']) {
-      Section versionContent = Section.fromSqLite(content);
-      versionContentMap[versionContent.contentCode] = versionContent;
-    }
-
     return Version(
       id: row['id'] as int?,
       firebaseID: row['firebase_id'] as String?,
       cipherID: row['cipher_id'] as int,
-      songStructure: row['song_structure'] as List<String>,
+      songStructure: ((row['song_structure'] as String?) != null)
+          ? (row['song_structure'] as String).split(',').map(int.parse).toList()
+          : [],
       transposedKey: row['transposed_key'] as String?,
       versionName: row['version_name'] as String,
       bpm: row['bpm'] as int,
@@ -50,36 +46,6 @@ class Version {
           : DateTime.now(),
     );
   }
-
-  // Factory for database row (without content - populated separately)
-  factory Version.fromSqLiteNoSections(Map<String, dynamic> row) {
-    List<String> songStructure = [];
-    final structureString = row['song_structure'] as String?;
-    if (structureString != null && structureString.isNotEmpty) {
-      songStructure = structureString
-          .split(',')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
-    }
-
-    return Version(
-      id: row['id'] as int?,
-      firebaseID: row['firebase_id'] as String?,
-      cipherID: row['cipher_id'] as int,
-      songStructure: songStructure,
-      bpm: row['bpm'] as int,
-      duration: row['duration'] != null
-          ? Duration(seconds: row['duration'])
-          : Duration.zero,
-      transposedKey: row['transposed_key'] as String?,
-      versionName: row['version_name'] as String,
-      createdAt: row['created_at'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(row['created_at'])
-          : DateTime.now(),
-    );
-  }
-
   // To JSON for database (without content - sections handled separately)
   Map<String, dynamic> toSqLite() {
     final row = {
@@ -97,14 +63,14 @@ class Version {
     return row;
   }
 
-  VersionDto toDto(Cipher cipher, Map<String, Section> sections) {
+  VersionDto toDto(Cipher cipher, Map<int, Section> sections) {
     return VersionDto(
       firebaseId: firebaseID,
       versionName: versionName,
       transposedKey: transposedKey,
       songStructure: songStructure,
       sections: sections.map(
-        (sectionCode, section) => MapEntry(sectionCode, section.toFirestore()),
+        (sectionKey, section) => MapEntry(sectionKey, section.toDto()),
       ),
       title: cipher.title,
       author: cipher.author,
@@ -116,24 +82,16 @@ class Version {
     );
   }
 
-  List<String> get uniqueSections => songStructure.toSet().toList();
-  bool get isEmpty => songStructure.isEmpty;
-  int get sectionCount => songStructure.length;
-
-  bool containsSection(String sectionCode) =>
-      songStructure.contains(sectionCode);
-
   Version copyWith({
     int? id,
     String? firebaseID,
     int? cipherID,
-    List<String>? songStructure,
+    List<int>? songStructure,
     Duration? duration,
     int? bpm,
     String? transposedKey,
     String? versionName,
     DateTime? createdAt,
-    Map<String, Section>? content,
   }) {
     return Version(
       id: id ?? this.id,

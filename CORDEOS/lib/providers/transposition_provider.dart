@@ -110,17 +110,17 @@ class TranspositionProvider extends ChangeNotifier {
 
     // Transpose root and bass
     String transposedRoot = ChordHelper().transpose(
+      originalKey,
       root,
       transposeValue,
-      sharpKey: !useFlat,
     );
     String result = prefix + transposedRoot + chordSuffix;
 
     if (bass != null) {
       String transposedBass = ChordHelper().transpose(
+        originalKey,
         bass,
         transposeValue,
-        sharpKey: !useFlat,
       );
       result += '/$transposedBass';
     }

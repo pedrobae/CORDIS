@@ -42,13 +42,19 @@ class TokenProvider extends ChangeNotifier {
 
   /// Phase 3: content|style|layout → positions
   final Map<String, TokenPositionMap> _positionCache = {};
-  TokenPositionMap? getPositions(TokenCacheKey key) =>
-      _positionCache[positionCacheKey(key)];
+  TokenPositionMap? getPositions(
+    TokenCacheKey key,
+    TextStyle chordStyle,
+    TextStyle lyricStyle,
+  ) => _positionCache[positionCacheKey(key, chordStyle, lyricStyle)];
 
   /// Phase 4a: content|style|layout|color → paintModel (view mode only)
   final Map<String, SectionPaintModel> _paintCache = {};
-  SectionPaintModel? getPaintModel(TokenCacheKey key) =>
-      _paintCache[paintCacheKey(key)];
+  SectionPaintModel? getPaintModel(
+    TokenCacheKey key,
+    TextStyle chordStyle,
+    TextStyle lyricStyle,
+  ) => _paintCache[paintCacheKey(key, chordStyle, lyricStyle)];
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PHASE 1: TOKENIZE
@@ -197,7 +203,7 @@ class TokenProvider extends ChangeNotifier {
     required TextStyle lyricStyle,
     required TextStyle chordStyle,
   }) {
-    final cacheKey = positionCacheKey(key);
+    final cacheKey = positionCacheKey(key, chordStyle, lyricStyle);
     if (_positionCache.containsKey(cacheKey)) {
       return;
     }
@@ -245,7 +251,7 @@ class TokenProvider extends ChangeNotifier {
     required Color contentColor,
     required Color onContentColor,
     required bool isEnabled,
-    required Function(ContentToken, ContentToken) onAddChord,
+    required Function(ContentToken, ContentToken, {bool addBefore}) onAddChord,
     required Function(ContentToken) onRemoveChord,
   }) {
     final chordHeight = _builder
@@ -259,7 +265,7 @@ class TokenProvider extends ChangeNotifier {
       tokens: getTokens(key)!,
       organizedTokens: getOrganized(key)!,
       measurements: _measurementCache,
-      tokenPositions: getPositions(key)!,
+      tokenPositions: getPositions(key, chordStyle, lyricStyle)!,
       chordStyle: chordStyle,
       lyricStyle: lyricStyle,
       maxWidth: key.maxWidth!,
@@ -278,7 +284,7 @@ class TokenProvider extends ChangeNotifier {
 
     final positionedContent = _positioner.applyPositionsToWidgets(
       contentWidgets,
-      getPositions(key)!,
+      getPositions(key, chordStyle, lyricStyle)!,
       key.isEditMode,
     );
     return positionedContent;
@@ -290,14 +296,24 @@ class TokenProvider extends ChangeNotifier {
     TextStyle lyricStyle,
     TextStyle chordStyle,
   ) {
-    final cacheKey = paintCacheKey(key);
+    // DEBUG - print caches size
+    debugPrint(
+      "TOKEN PROVIDER - cache sizes"
+      "\n\ttokens:${_tokenCache.length} | "
+      "\n\torganized:${_organizedCache.length} | "
+      "\n\tmeasurements:${_measurementCache.length} | "
+      "\n\tpositions:${_positionCache.length} | "
+      "\n\tpaint:${_paintCache.length}",
+    );
+
+    final cacheKey = paintCacheKey(key, chordStyle, lyricStyle);
     if (_paintCache.containsKey(cacheKey)) {
       return;
     }
 
     final model = _builder.buildPaintModel(
       measurements: _measurementCache,
-      positions: getPositions(key)!,
+      positions: getPositions(key, chordStyle, lyricStyle)!,
       chordStyle: chordStyle,
       lyricStyle: lyricStyle,
       chordColor: key.chordColor!,
@@ -327,25 +343,32 @@ class TokenProvider extends ChangeNotifier {
   // LIFECYCLE
   // ═══════════════════════════════════════════════════════════════════════════
   void clear() {
+    debugPrint("TOKEN PROVIDER - clearing caches");
     _tokenCache.clear();
     _organizedCache.clear();
     _measurementCache.clear();
     _positionCache.clear();
+    _paintCache.clear();
   }
 
-  void clearIndex(TokenCacheKey key) {
-    debugPrint("TOKEN PROVIDER - clearing cache of section ${key.sectionIndex}");
+  void clearSectionKey(TokenCacheKey key) {
+    debugPrint(
+      "TOKEN PROVIDER - clearing cache of section ${key.sectionKey}",
+    );
     _tokenCache.removeWhere(
-      (k, v) => k.startsWith(key.sectionIndex.toString()),
+      (k, v) => k.startsWith(key.sectionKey.toString()),
     );
     _organizedCache.removeWhere(
-      (k, v) => k.startsWith(key.sectionIndex.toString()),
+      (k, v) => k.startsWith(key.sectionKey.toString()),
     );
     _measurementCache.removeWhere(
-      (k, v) => k.startsWith(key.sectionIndex.toString()),
+      (k, v) => k.startsWith(key.sectionKey.toString()),
     );
     _positionCache.removeWhere(
-      (k, v) => k.startsWith(key.sectionIndex.toString()),
+      (k, v) => k.startsWith(key.sectionKey.toString()),
+    );
+    _paintCache.removeWhere(
+      (k, v) => k.startsWith(key.sectionKey.toString()),
     );
   }
 

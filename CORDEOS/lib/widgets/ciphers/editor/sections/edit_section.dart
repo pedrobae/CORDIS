@@ -3,6 +3,7 @@ import 'package:cordeos/models/domain/cipher/section.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/section/section_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/select_type.dart';
 import 'package:cordeos/widgets/common/delete_confirmation.dart';
 import 'package:cordeos/widgets/common/filled_text_button.dart';
@@ -12,13 +13,13 @@ import 'package:provider/provider.dart';
 
 class EditSectionScreen extends StatefulWidget {
   final int versionID;
-  final String sectionCode;
+  final int sectionKey;
   final bool isNewSection;
   final bool canChangeType;
 
   const EditSectionScreen({
     super.key,
-    required this.sectionCode,
+    required this.sectionKey,
     required this.versionID,
     this.isNewSection = false,
     this.canChangeType = true,
@@ -29,8 +30,6 @@ class EditSectionScreen extends StatefulWidget {
 }
 
 class _EditSectionScreenState extends State<EditSectionScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController contentCodeController;
   late TextEditingController contentTypeController;
   late TextEditingController contentTextController;
   late Color contentColor;
@@ -40,22 +39,44 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     super.initState();
 
     Section section = context.read<SectionProvider>().getSection(
-      widget.versionID,
-      widget.sectionCode,
+      versionKey: widget.versionID,
+      sectionKey: widget.sectionKey,
     )!;
 
-    contentCodeController = TextEditingController(text: section.contentCode);
     contentTypeController = TextEditingController(text: section.contentType);
     contentTextController = TextEditingController(text: section.contentText);
     contentColor = section.contentColor;
+
+    addListeners();
+  }
+
+  void addListeners() {
+    contentTypeController.addListener(() {
+      context.read<SectionProvider>().cacheUpdate(
+        widget.versionID,
+        widget.sectionKey,
+        newContentType: contentTypeController.text,
+      );
+    });
+
+    contentTextController.addListener(() {
+      context.read<SectionProvider>().cacheUpdate(
+        widget.versionID,
+        widget.sectionKey,
+        newContentText: contentTextController.text,
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    return LayoutBuilder(
-      builder: (context, constraints) {
+
+    final nav = context.read<NavigationProvider>();
+
+    return Builder(
+      builder: (context) {
         final media = MediaQuery.of(context);
         double keyboardInset = media.viewInsets.bottom;
         final screenHeight = media.size.height;
@@ -87,12 +108,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                     BackButton(
                       color: colorScheme.onSurface,
                       onPressed: () {
-                        if (widget.isNewSection) {
-                          // If it's a new section,
-                          // Delete the cached section that was created when selecting type
-                          _deleteSection();
-                        }
-                        context.read<NavigationProvider>().attemptPop(context);
+                        nav.attemptPop(context);
                       },
                     ),
                     Text(
@@ -103,10 +119,8 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                     ),
                     IconButton(
                       onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _upsertSection();
-                          context.read<NavigationProvider>().pop();
-                        }
+                        _upsertSection();
+                        nav.pop();
                       },
                       icon: Icon(Icons.save, size: 30),
                     ),
@@ -123,97 +137,76 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                       children: [
                         // TYPE SELECTION
                         if (widget.canChangeType)
-                          SizedBox(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              spacing: 8,
-                              children: [
-                                Container(
-                                  height: 28,
-                                  width: 28,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: contentColor,
-                                  ),
+                          GestureDetector(
+                            onTap: () {
+                              _upsertSection();
+                              nav.push(
+                                () => SelectType(
+                                  versionID: widget.versionID,
+                                  sectionKey: widget.sectionKey,
                                 ),
-                                Expanded(
-                                  child: Text(
-                                    contentTypeController.text,
-                                    style: textTheme.bodyLarge,
-                                  ),
+                                showBottomNavBar: true,
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
+                              decoration: BoxDecoration(
+                                border: BoxBorder.all(
+                                  color: colorScheme.surfaceContainerLowest,
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    _upsertSection();
-                                    context
-                                        .read<NavigationProvider>()
-                                        .pushForeground(
-                                          SelectType(
-                                            versionID: widget.versionID,
-                                            sectionCode: widget.sectionCode,
-                                          ),
-                                        );
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                spacing: 8,
+                                children: [
+                                  Container(
+                                    height: 28,
+                                    width: 28,
                                     decoration: BoxDecoration(
-                                      color: colorScheme.surfaceContainerHigh,
-                                    ),
-                                    child: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.changePlaceholder(
-                                        AppLocalizations.of(context)!.type,
-                                      ),
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        color: colorScheme.primary,
-                                      ),
+                                      shape: BoxShape.circle,
+                                      color: contentColor,
                                     ),
                                   ),
-                                ),
-                              ],
+                                  Selector<SectionProvider, String>(
+                                    selector: (context, sect) {
+                                      final section = sect.getSection(
+                                        versionKey: widget.versionID,
+                                        sectionKey: widget.sectionKey,
+                                      );
+                                      return section?.sectionType
+                                              .localizedLabel(context) ??
+                                          '';
+                                    },
+                                    builder:
+                                        (context, sectionTypeLabel, child) {
+                                          return Expanded(
+                                            child: Text(
+                                              sectionTypeLabel,
+                                              style: textTheme.bodyLarge,
+                                            ),
+                                          );
+                                        },
+                                  ),
+                                  Icon(
+                                    Icons.chevron_right,
+                                    size: 28,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        // SECTION CODE
-                        Form(
-                          key: _formKey,
-                          child: LabeledTextField(
-                            label: AppLocalizations.of(context)!.sectionCode,
-                            hint: AppLocalizations.of(context)!.sectionCodeHint,
-                            controller: contentCodeController,
-                            instruction: AppLocalizations.of(
-                              context,
-                            )!.sectionCodeInstruction,
-                            validator: (value) {
-                              // CODE HAS A 3 CHAR MAX CONSTRAINT
-                              if (value == null || value.isEmpty) {
-                                return AppLocalizations.of(
-                                  context,
-                                )!.fieldRequired;
-                              }
-                              if (value.length > 3) {
-                                return AppLocalizations.of(
-                                  context,
-                                )!.tooLongPlaceholder(
-                                  AppLocalizations.of(context)!.code,
-                                  3,
-                                );
-                              } else {
-                                return null;
-                              }
-                            },
-                          ),
-                        ),
 
                         // SECTION TYPE
                         LabeledTextField(
                           label: AppLocalizations.of(context)!.sectionType,
                           hint: AppLocalizations.of(context)!.sectionTypeHint,
                           controller: contentTypeController,
+                          textCapitalization: TextCapitalization.words,
                         ),
 
                         // SECTION TEXT
@@ -223,6 +216,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                           controller: contentTextController,
                           lineCount: 8,
                           keyboardType: TextInputType.multiline,
+                          textCapitalization: TextCapitalization.sentences,
                         ),
 
                         // DELETE BUTTON
@@ -240,7 +234,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                                     )!.section,
                                     onConfirm: () {
                                       _deleteSection();
-                                      context.read<NavigationProvider>().pop();
+                                      nav.pop();
                                     },
                                   );
                                 },
@@ -262,36 +256,10 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
   void _upsertSection() {
     // New section was added when selecting type, so just update it
     // Update the section with new values
-    final newCode = context.read<SectionProvider>().cacheUpdate(
-      widget.versionID,
-      widget.sectionCode,
-      newContentCode: contentCodeController.text,
-      newContentType: contentTypeController.text,
-      newContentText: contentTextController.text,
-      newColor: contentColor,
+    context.read<SectionProvider>().saveSection(
+      versionKey: widget.versionID,
+      sectionKey: widget.sectionKey,
     );
-
-    // If it is a new section Add the section to the song structure
-    if (widget.isNewSection) {
-      context.read<LocalVersionProvider>().addSectionToStruct(
-        widget.versionID,
-        newCode,
-      );
-    }
-
-    // If the content code has changed, update the song structure accordingly
-    if (newCode != widget.sectionCode) {
-      context.read<LocalVersionProvider>().updateSectionCodeInStruct(
-        widget.versionID,
-        oldCode: widget.sectionCode,
-        newCode: newCode,
-      );
-      context.read<SectionProvider>().renameSectionKey(
-        widget.versionID,
-        oldCode: widget.sectionCode,
-        newCode: newCode,
-      );
-    }
   }
 
   void _deleteSection() {
@@ -299,11 +267,11 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
 
     context.read<SectionProvider>().cacheDeletion(
       widget.versionID,
-      widget.sectionCode,
+      widget.sectionKey,
     );
-    context.read<LocalVersionProvider>().removeSectionsByCode(
+    context.read<LocalVersionProvider>().removeSectionsByKey(
       widget.versionID,
-      widget.sectionCode,
+      widget.sectionKey,
     );
   }
 }

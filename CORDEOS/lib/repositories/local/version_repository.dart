@@ -1,12 +1,9 @@
 import 'package:cordeos/models/domain/cipher/version.dart';
 
 import 'package:cordeos/helpers/database.dart';
-import 'package:cordeos/repositories/local/section_repository.dart';
 
 class LocalVersionRepository {
   final _databaseHelper = DatabaseHelper();
-
-  final _sectionRepo = SectionRepository();
 
   // ============= VERSION OPERATIONS =============
   // ===== CREATE =====
@@ -34,7 +31,7 @@ class LocalVersionRepository {
 
     List<Version> versions = [];
     for (var row in results) {
-      versions.add(await _buildVersion(row));
+      versions.add(Version.fromSqLite(row));
     }
 
     return versions;
@@ -52,7 +49,7 @@ class LocalVersionRepository {
 
     if (result.isEmpty) return null;
 
-    Version version = await _buildVersion(result[0]);
+    Version version = Version.fromSqLite(result[0]);
 
     return version;
   }
@@ -69,7 +66,7 @@ class LocalVersionRepository {
 
     if (result.isEmpty) return null;
 
-    return _buildVersion(result[0]);
+    return Version.fromSqLite(result[0]);
   }
 
   Future<Version> getOldestVersionOfCipher(int cipherId) async {
@@ -86,7 +83,7 @@ class LocalVersionRepository {
       throw Exception('No versions found for cipher with ID $cipherId');
     }
 
-    return _buildVersion(result[0]);
+    return Version.fromSqLite(result[0]);
   }
 
   // ===== UPDATE =====
@@ -136,10 +133,5 @@ class LocalVersionRepository {
       return null;
     });
     return cipherID;
-  }
-
-  Future<Version> _buildVersion(Map<String, dynamic> row) async {
-    final section = await _sectionRepo.getSections(row['id']);
-    return Version.fromSqLiteNoSections(row).copyWith(content: section);
   }
 }

@@ -64,8 +64,8 @@ class _LabeledTimezonePickerState extends State<LabeledTimezonePicker> {
   }
 
   void showTimezoneSheet(BuildContext context) {
-    context.read<NavigationProvider>().pushForeground(
-      TimezoneSheet(
+    context.read<NavigationProvider>().push(
+      () => TimezoneSheet(
         timezone: widget.timezone,
         onTimezoneChanged: widget.onTimezoneChanged,
       ),
@@ -139,7 +139,7 @@ class _TimezoneSheetState extends State<TimezoneSheet> {
           ),
 
           // TIMEZONE OPTIONS
-          Flexible(
+          Expanded(
             child: Container(
               decoration: BoxDecoration(
                 border: Border.symmetric(

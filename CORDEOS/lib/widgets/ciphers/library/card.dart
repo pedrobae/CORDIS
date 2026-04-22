@@ -1,6 +1,6 @@
-import 'dart:math';
-
-import 'package:cordeos/models/domain/cipher/cipher.dart';
+import 'package:cordeos/providers/token_cache_provider.dart';
+import 'package:cordeos/utils/section_type.dart';
+import 'package:cordeos/widgets/ciphers/section_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
 
@@ -59,203 +59,188 @@ class _CipherCardState extends State<CipherCard> {
       return SizedBox.shrink();
     }
 
-    return Selector2<
+    return Selector3<
       CipherProvider,
       LocalVersionProvider,
-      ({Cipher? cipher, Version? version})
+      SectionProvider,
+      ({
+        int? cipherID,
+        String title,
+        String key,
+        String duration,
+        String bpm,
+        String? link,
+        Map<int, SectionBadgeData> sectionBadges,
+        List<int> songStructure,
+      })
     >(
-      selector: (context, ciph, localVer) {
+      selector: (context, ciph, localVer, sect) {
         final version = localVer.getVersion(widget.versionID);
         final cipher = version != null
             ? ciph.getCipher(version.cipherID)
             : null;
-        return (cipher: cipher, version: version);
+
+        final sectionTypes = <int, SectionType>{};
+        for (var sectionKey in version?.songStructure.toSet().toList() ?? []) {
+          final section = sect.getSection(
+            versionKey: widget.versionID,
+            sectionKey: sectionKey,
+          );
+
+          if (section?.sectionType != null) {
+            sectionTypes[sectionKey] = section!.sectionType;
+          }
+        }
+
+        return (
+          cipherID: cipher?.id,
+          title: cipher?.title ?? '',
+          key: version?.transposedKey ?? cipher?.musicKey ?? '',
+          duration: version != null && version.duration != Duration.zero
+              ? DateTimeUtils.formatDuration(version.duration)
+              : '-',
+          bpm: version != null && version.bpm != 0
+              ? version.bpm.toString()
+              : '-',
+          link: cipher?.link,
+          sectionBadges: getSectionBadges(sectionTypes),
+          songStructure: version?.songStructure ?? [],
+        );
       },
       builder: (context, s, child) {
-        if (s.version == null || s.cipher == null) {
-          return Center(child: CircularProgressIndicator());
+        if (s.cipherID == null) {
+          return SizedBox.shrink();
         }
 
         // Card content
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8.0), // Spacing between cards
-          child: GestureDetector(
-            onTap: () async {
-              if (sel.isSelectionMode) {
-                await _createAndAddVersionToPlaylist(s.version!);
-
-                nav.pop();
-              } else {
-                nav.push(
-                  () => ViewCipherScreen(
-                    cipherID: s.cipher!.id,
-                    versionID: widget.versionID,
-                    versionType: VersionType.local,
-                  ),
-                  showBottomNavBar: true,
-                );
-              }
-            },
-            onLongPress: () async {
-              final localVer = context.read<LocalVersionProvider>();
-              final sect = context.read<SectionProvider>();
-              final ciph = context.read<CipherProvider>();
-
+        return GestureDetector(
+          onTap: () async {
+            if (sel.isSelectionMode) {
+              await _createAndAddVersionToPlaylist();
+        
+              nav.pop();
+            } else {
+              final token = context.read<TokenProvider>();
               nav.push(
-                () => EditCipherScreen(
-                  cipherID: s.cipher!.id,
+                () => ViewCipherScreen(
+                  cipherID: s.cipherID!,
                   versionID: widget.versionID,
                   versionType: VersionType.local,
                 ),
-                changeDetector: () {
-                  return localVer.hasUnsavedChanges ||
-                      sect.hasUnsavedChanges ||
-                      ciph.hasUnsavedChanges;
-                },
-                onChangeDiscarded: () {
-                  localVer.loadVersion(widget.versionID);
-                  ciph.loadCipher(s.cipher!.id);
-                  sect.loadSectionsOfVersion(widget.versionID);
+                onPopCallback: () {
+                  token.clear();
                 },
                 showBottomNavBar: true,
               );
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: colorScheme.surfaceContainerLowest),
+            }
+          },
+          onLongPress: () async {
+            final localVer = context.read<LocalVersionProvider>();
+            final ciph = context.read<CipherProvider>();
+        
+            nav.push(
+              () => EditCipherScreen(
+                cipherID: s.cipherID!,
+                versionID: widget.versionID,
+                versionType: VersionType.local,
               ),
-              padding: const EdgeInsets.all(8.0),
-              child: IntrinsicHeight(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        spacing: 2.0,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // TITLE
-                          Text(s.cipher!.title, style: textTheme.titleMedium),
-
-                          // INFO
-                          Row(
-                            spacing: 16.0,
-                            children: [
-                              Text(
-                                '${AppLocalizations.of(context)!.musicKey}: ${s.version!.transposedKey ?? s.cipher!.musicKey}',
-                                style: textTheme.bodyMedium,
-                              ),
-                              s.version!.bpm != 0
-                                  ? Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.bpmWithPlaceholder(
-                                        s.version!.bpm.toString(),
-                                      ),
-                                      style: textTheme.bodyMedium,
-                                    )
-                                  : Text('-'),
-                              s.version!.duration != Duration.zero
-                                  ? Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.durationWithPlaceholder(
-                                        DateTimeUtils.formatDuration(
-                                          s.version!.duration,
-                                        ),
-                                      ),
-                                      style: textTheme.bodyMedium,
-                                    )
-                                  : Text('-'),
-                            ],
-                          ),
-
-                          // STRUCTURE LIST
-                          if (!isDense)
-                            SizedBox(
-                              height: 25,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: s.version!.songStructure.length,
-                                itemBuilder: (_, index) {
-                                  final sectionCode =
-                                      s.version!.songStructure[index];
-
-                                  // Painter for sections code width
-                                  final textPainter = TextPainter(
-                                    text: TextSpan(
-                                      text: sectionCode,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    maxLines: 1,
-                                    textDirection: TextDirection.ltr,
-                                  )..layout();
-
-                                  return Selector<SectionProvider, Color>(
-                                    selector: (context, sect) {
-                                      final section = sect.getSection(
-                                        widget.versionID,
-                                        sectionCode,
-                                      );
-                                      return section?.contentColor ??
-                                          Colors.grey;
-                                    },
-                                    builder: (context, color, child) {
-                                      return Container(
-                                        height: 25,
-                                        width: max(
-                                          25,
-                                          textPainter.size.width + 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                          color: color,
-                                        ),
-                                        margin: const EdgeInsets.only(right: 3),
-                                        child: Center(
-                                          child: Text(
-                                            strutStyle: StrutStyle(
-                                              forceStrutHeight: true,
-                                            ),
-                                            sectionCode,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
+              keepAlive: true,
+              changeDetector: () {
+                return localVer.hasUnsavedChanges || ciph.hasUnsavedChanges;
+              },
+              onChangeDiscarded: () {
+                localVer.loadVersion(widget.versionID);
+                ciph.loadCipher(s.cipherID!);
+              },
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: colorScheme.surfaceContainerLowest),
+            ),
+            padding: const EdgeInsets.all(8.0),
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      spacing: 2.0,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // TITLE
+                        Text(s.title, style: textTheme.titleMedium),
+        
+                        // INFO
+                        Row(
+                          spacing: 16.0,
+                          children: [
+                            Text(
+                              '${AppLocalizations.of(context)!.musicKey}: ${s.key}',
+                              style: textTheme.bodyMedium,
                             ),
-                        ],
-                      ),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.bpmWithPlaceholder(s.bpm),
+                              style: textTheme.bodyMedium,
+                            ),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.durationWithPlaceholder(s.duration),
+                              style: textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+        
+                        // STRUCTURE LIST
+                        if (!isDense)
+                          SizedBox(
+                            height: 25,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: s.songStructure.length,
+                              itemBuilder: (_, index) {
+                                final key = s.songStructure[index];
+                                final badgeData = s.sectionBadges[key];
+                                if (badgeData == null) {
+                                  return SizedBox.shrink();
+                                }
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 2.0),
+                                  child: SectionBadge(
+                                    sectionBadgeData: badgeData,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                      ],
                     ),
-
-                    if (s.cipher?.link != null && s.cipher!.link!.isNotEmpty)
-                      Padding(
+                  ),
+        
+                  if (s.link != null && s.link!.isNotEmpty)
+                    GestureDetector(
+                      onTap: () async {
+                        final url = s.link!;
+                        await nav.launchURL(url);
+                      },
+                      child: Padding(
                         padding: const EdgeInsets.only(right: 4.0),
                         child: Icon(Icons.link, size: 20),
                       ),
-
-                    // ACTIONS SHEET
-                    GestureDetector(
-                      onTap: _openCipherActionsSheet(s.cipher!.id),
-                      child: SizedBox(
-                        height: double.infinity,
-                        width: 40,
-                        child: Icon(Icons.more_vert),
-                      ),
                     ),
-                  ],
-                ),
+        
+                  // ACTIONS SHEET
+                  GestureDetector(
+                    onTap: _openCipherActionsSheet(s.cipherID!),
+                    child: SizedBox(
+                      height: double.infinity,
+                      width: 40,
+                      child: Icon(Icons.more_vert),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -264,7 +249,7 @@ class _CipherCardState extends State<CipherCard> {
     );
   }
 
-  Future<void> _createAndAddVersionToPlaylist(Version version) async {
+  Future<void> _createAndAddVersionToPlaylist() async {
     final play = context.read<PlaylistProvider>();
     final localVer = context.read<LocalVersionProvider>();
     final sect = context.read<SectionProvider>();
@@ -273,6 +258,8 @@ class _CipherCardState extends State<CipherCard> {
     final playlistName = AppLocalizations.of(
       context,
     )!.playlistVersionName(play.getPlaylist(sel.targetId!)!.name);
+
+    final version = localVer.getVersion(widget.versionID)!;
 
     final newVersion = version.copyWith(
       versionName: playlistName,

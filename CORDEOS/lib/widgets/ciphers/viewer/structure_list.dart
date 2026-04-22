@@ -1,4 +1,3 @@
-import 'package:cordeos/models/domain/cipher/section.dart';
 import 'package:cordeos/providers/play/play_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
@@ -10,7 +9,7 @@ import 'package:cordeos/providers/version/cloud_version_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/providers/section/section_provider.dart';
 
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 
 class StructureList extends StatefulWidget {
   final dynamic versionID;
@@ -58,35 +57,66 @@ class _StructureListState extends State<StructureList> {
     final scroll = context.read<ScrollProvider>();
     final state = context.read<PlayStateProvider>();
 
-    return Selector3<
+    return Selector4<
       LayoutSetProvider,
       LocalVersionProvider,
       CloudVersionProvider,
-      ({List<String> filteredStructure, bool tapEnabled})
+      SectionProvider,
+      ({
+        List<int> filteredStructure,
+        Map<int, SectionBadgeData> badgesData,
+        bool tapEnabled,
+      })
     >(
-      selector: (context, laySet, localVer, cloudVer) {
+      selector: (context, laySet, localVer, cloudVer, sect) {
         final tapEnabled = laySet.showRepeatSections == true;
 
         if (widget.versionID == null) {
-          return (filteredStructure: [], tapEnabled: tapEnabled);
+          return (
+            filteredStructure: [],
+            badgesData: {},
+            tapEnabled: tapEnabled,
+          );
         }
 
         final songStructure = widget.versionID is String
             ? cloudVer.getVersion(widget.versionID)!.songStructure
             : localVer.getSongStructure(widget.versionID);
 
-        final filteredStructure = <String>[];
-        for (var code in songStructure) {
-          if (laySet.showAnnotations == false && isAnnotation(code)) {
+        final filteredStructure = <int>[];
+        for (var key in songStructure) {
+          final section = sect.getSection(
+            versionKey: widget.versionID,
+            sectionKey: key,
+          );
+          if (laySet.showAnnotations == false &&
+              section?.sectionType == SectionType.annotation) {
             continue;
           }
-          if (laySet.showTransitions == false && isTransition(code)) {
+          if (laySet.showTransitions == false &&
+              isTransition(section?.sectionType)) {
             continue;
           }
-          filteredStructure.add(code);
+          filteredStructure.add(key);
         }
 
-        return (filteredStructure: filteredStructure, tapEnabled: tapEnabled);
+        final sectionTypes = <int, SectionType>{};
+        for (var key in filteredStructure) {
+          final type = sect
+              .getSection(versionKey: widget.versionID, sectionKey: key)
+              ?.sectionType;
+          if (type != null) {
+            sectionTypes[key] = type;
+          } else {
+            sectionTypes[key] = SectionType.unknown;
+          }
+        }
+
+        return (
+          filteredStructure: filteredStructure,
+          badgesData: getSectionBadges(sectionTypes),
+          tapEnabled: tapEnabled,
+        );
       },
       builder: (context, s, child) {
         return Padding(
@@ -113,15 +143,17 @@ class _StructureListState extends State<StructureList> {
                           const SizedBox(),
                           ...s.filteredStructure.asMap().entries.map((entry) {
                             final index = entry.key;
-                            final sectionCode = entry.value;
+                            final sectionKey = entry.value;
 
                             return _StructureSectionButton(
                               index: index,
-                              versionID: widget.versionID,
-                              sectionCode: sectionCode,
+                              badgeData: s.badgesData[sectionKey]!,
                               onTap: () {
                                 if (s.tapEnabled) {
-                                  scroll.probeScrollToItem(state.currentItemIndex, index);
+                                  scroll.probeScrollToItem(
+                                    state.currentItemIndex,
+                                    index,
+                                  );
                                 } else {
                                   scroll.currentSectionIndex = index;
                                 }
@@ -149,14 +181,12 @@ class _StructureListState extends State<StructureList> {
 
 class _StructureSectionButton extends StatelessWidget {
   final int index;
-  final dynamic versionID;
-  final String sectionCode;
+  final SectionBadgeData badgeData;
   final VoidCallback onTap;
 
   const _StructureSectionButton({
     required this.index,
-    required this.versionID,
-    required this.sectionCode,
+    required this.badgeData,
     required this.onTap,
   });
 
@@ -165,54 +195,36 @@ class _StructureSectionButton extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return RepaintBoundary(
-      child:
-          Selector2<
-            ScrollProvider,
-            SectionProvider,
-            ({Section? section, bool highlighted})
-          >(
-            selector: (context, scroll, section) => (
-              section: section.getSection(versionID, sectionCode),
-              highlighted: scroll.currentSectionIndex == index,
-            ),
-            builder: (context, selection, child) {
-              if (selection.section == null) {
-                return const SizedBox(
-                  height: StructureList.buttonWidth,
-                  width: StructureList.buttonWidth,
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              return GestureDetector(
-                onTap: onTap,
-                child: Container(
-                  height: StructureList.buttonWidth,
-                  width: StructureList.buttonWidth,
-                  decoration: BoxDecoration(
-                    color: selection.section!.contentColor.withValues(
-                      alpha: 0.9,
-                    ),
-                    borderRadius: BorderRadius.circular(6),
-                    border: selection.highlighted
-                        ? Border.all(color: colorScheme.primary, width: 2)
-                        : null,
+      child: Selector<ScrollProvider, bool>(
+        selector: (context, scroll) => scroll.currentSectionIndex == index,
+        builder: (context, highlighted, child) {
+          return GestureDetector(
+            onTap: onTap,
+            child: Container(
+              height: StructureList.buttonWidth,
+              width: StructureList.buttonWidth,
+              decoration: BoxDecoration(
+                color: badgeData.color,
+                borderRadius: BorderRadius.circular(6),
+                border: highlighted
+                    ? Border.all(color: colorScheme.primary, width: 2)
+                    : null,
+              ),
+              child: Center(
+                child: Text(
+                  badgeData.code,
+                  style: TextStyle(
+                    color: colorScheme.onPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
-                  child: Center(
-                    child: Text(
-                      sectionCode,
-                      style: TextStyle(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                  textAlign: TextAlign.center,
                 ),
-              );
-            },
-          ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

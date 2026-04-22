@@ -6,7 +6,6 @@ import 'package:cordeos/models/domain/cipher/version.dart';
 import 'package:provider/provider.dart';
 import 'package:cordeos/providers/cipher/cipher_provider.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
-import 'package:cordeos/providers/section/section_provider.dart';
 import 'package:cordeos/providers/version/cloud_version_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
 
@@ -35,7 +34,6 @@ class CipherCardActionsSheet extends StatelessWidget {
     final ciph = context.read<CipherProvider>();
     final localVer = context.read<LocalVersionProvider>();
     final cloudVer = context.read<CloudVersionProvider>();
-    final sect = context.read<SectionProvider>();
 
     final link = ciph.ciphers[cipherId]?.link;
 
@@ -94,15 +92,13 @@ class CipherCardActionsSheet extends StatelessWidget {
                   cipherID: cipherId,
                   isEnabled: versionType == VersionType.local,
                 ),
+                keepAlive: true,
                 changeDetector: () =>
-                    (localVer.hasUnsavedChanges ||
-                    ciph.hasUnsavedChanges ||
-                    sect.hasUnsavedChanges),
+                    localVer.hasUnsavedChanges || ciph.hasUnsavedChanges,
                 onChangeDiscarded: () {
                   localVer.loadVersion(versionID);
                   ciph.loadCipher(cipherId);
                 },
-                showBottomNavBar: true,
               );
             },
           ),

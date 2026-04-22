@@ -10,10 +10,7 @@ class SongPdfDto {
   final int bpm;
   final String? link;
 
-  final List<String> songStructure;
-
-  /// Token positions in global PDF coordinates (y=0 is top of page content area).
-  /// Keyed by section code. Each unique section code appears once.
+  final List<int> songStructure;
   final Map<String, TokenPositionMap> content;
 
   /// Global Y coordinate of each section's top edge, keyed by section code.

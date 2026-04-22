@@ -9,7 +9,7 @@ class EditSectionsStateProvider extends ChangeNotifier {
   bool get paletteIsOpen => _paletteIsOpen;
   bool get mergeOverlayIsOpen => _mergeOverlayIsOpen;
 
-  final List<String> _mergeSectionCodes = [];
+  final List<int> _mergeSectionKeys = [];
 
   // ===== PALETTE METHODS =====
   void togglePalette() {
@@ -18,7 +18,7 @@ class EditSectionsStateProvider extends ChangeNotifier {
   }
 
   // ===== MERGE OVERLAY METHODS =====
-  List<String> get mergeSectionCodes => _mergeSectionCodes;
+  List<int> get mergeSectionKeys => _mergeSectionKeys;
 
   void enableMergeOverlay() {
     _mergeOverlayIsOpen = true;
@@ -27,15 +27,15 @@ class EditSectionsStateProvider extends ChangeNotifier {
 
   void disableMergeOverlay() {
     _mergeOverlayIsOpen = false;
-    _mergeSectionCodes.clear();
+    _mergeSectionKeys.clear();
     notifyListeners();
   }
 
-  void toggleMergeSection(String sectionCode) {
-    if (_mergeSectionCodes.contains(sectionCode)) {
-      _mergeSectionCodes.remove(sectionCode);
+  void toggleMergeSection(int sectionKey) {
+    if (_mergeSectionKeys.contains(sectionKey)) {
+      _mergeSectionKeys.remove(sectionKey);
     } else {
-      _mergeSectionCodes.add(sectionCode);
+      _mergeSectionKeys.add(sectionKey);
     }
     notifyListeners();
   }
@@ -44,7 +44,7 @@ class EditSectionsStateProvider extends ChangeNotifier {
   void resetState() {
     _paletteIsOpen = false;
     _mergeOverlayIsOpen = false;
-    _mergeSectionCodes.clear();
+    _mergeSectionKeys.clear();
     notifyListeners();
   }
 }

@@ -2,6 +2,7 @@ import 'package:cordeos/helpers/database.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/schedule/cloud_schedule_provider.dart';
 import 'package:cordeos/providers/schedule/local_schedule_provider.dart';
+import 'package:cordeos/providers/settings/app_info_provider.dart';
 import 'package:cordeos/providers/settings/secret_settings_provider.dart';
 import 'package:cordeos/providers/version/cloud_version_provider.dart';
 import 'package:cordeos/screens/settings/report_bug_screen.dart';
@@ -22,6 +23,7 @@ import 'package:cordeos/providers/version/local_version_provider.dart';
 
 import 'package:cordeos/widgets/common/delete_confirmation.dart';
 import 'package:cordeos/widgets/common/filled_text_button.dart';
+import 'package:cordeos/widgets/common/icon_load_indicator.dart';
 import 'package:cordeos/widgets/common/labeled_language_picker.dart';
 import 'package:cordeos/widgets/settings/settings_section_header.dart';
 import 'package:cordeos/widgets/settings/settings_switch_tile.dart';
@@ -106,11 +108,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildResetDatabaseButton(),
               _buildReloadInterfaceButton(),
               _buildDatabaseInfoButton(),
+              Center(child: _buildAppVersionText()),
               const SizedBox(height: 32),
             ],
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAppVersionText() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Selector<AppInfoProvider, (bool, String)>(
+      selector: (_, info) => (info.isLoading, info.appVersionWithBuild),
+      builder: (context, data, child) {
+        final (isLoading, appVersion) = data;
+        if (isLoading) return const IconLoadIndicator(size: 20);
+        return Text(
+          appVersion,
+          textAlign: TextAlign.center,
+          style: textTheme.bodyMedium?.copyWith(
+            color: colorScheme.surfaceContainerLow,
+          ),
+        );
+      },
     );
   }
 

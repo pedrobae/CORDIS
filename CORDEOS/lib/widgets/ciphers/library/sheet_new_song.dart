@@ -71,11 +71,11 @@ class NewSongSheet extends StatelessWidget {
                 changeDetector: () {
                   return ciph.hasUnsavedChanges || localVer.hasUnsavedChanges;
                 },
+                keepAlive: true,
                 onChangeDiscarded: () {
                   ciph.clearCipherFromCache();
                   localVer.clearVersionFromCache();
                 },
-                showBottomNavBar: true,
               );
             },
           ),

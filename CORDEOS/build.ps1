@@ -1,12 +1,12 @@
 
 # build.ps1 - Auto-increment version and build APK
 # Usage:
-#   ./build.ps1 [-IncrementType <build|patch|minor|major>]
+#   ./build.ps1 [-IncrementType <build|patch|minor|major|>]
 
 # Accept parameter for increment type
 param(
-    [ValidateSet('build','patch','minor','major')]
-    [string]$IncrementType = 'build'
+    [ValidateSet('build','patch','minor','major', '')]
+    [string]$IncrementType = ''
 )
 
 # Read current version from pubspec.yaml
@@ -36,19 +36,40 @@ if ($versionMatch) {
             $patch++
             $buildNumber++
         }
-        default {
+        'build' {
             $buildNumber++
+        }
+        default {
+            
         }
     }
 
     $newVersion = "$major.$minor.$patch+$buildNumber"
+    $versionName = "$major.$minor.$patch"
     Write-Host "Incrementing version to: $newVersion" -ForegroundColor Green
 
     # Update pubspec.yaml
     $newPubspec = $pubspec -replace "version: \d+\.\d+\.\d+\+\d+", "version: $newVersion"
     Set-Content "pubspec.yaml" $newPubspec
-
     Write-Host "Updated pubspec.yaml" -ForegroundColor Green
+
+    # Update iOS Info.plist
+    $infoPlistPath = "ios/Runner/Info.plist"
+    if (Test-Path $infoPlistPath) {
+        $infoPlist = Get-Content $infoPlistPath -Raw
+        
+        # Update CFBundleShortVersionString (version name: X.Y.Z)
+        $infoPlist = $infoPlist -replace '<key>CFBundleShortVersionString</key>\s*<string>[^<]+</string>', "<key>CFBundleShortVersionString</key>`n`t<string>$versionName</string>"
+        
+        # Update CFBundleVersion (build number)
+        $infoPlist = $infoPlist -replace '<key>CFBundleVersion</key>\s*<string>[^<]+</string>', "<key>CFBundleVersion</key>`n`t<string>$buildNumber</string>"
+        
+        Set-Content $infoPlistPath $infoPlist
+        Write-Host "Updated iOS Info.plist (version: $versionName, build: $buildNumber)" -ForegroundColor Green
+    } else {
+        Write-Host "iOS Info.plist not found at $infoPlistPath - skipping iOS update" -ForegroundColor Yellow
+    }
+
     Write-Host "Building APK..." -ForegroundColor Cyan
 
     # Build APK

@@ -75,13 +75,19 @@ class CloudScheduleCard extends StatelessWidget {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 8,
                   children: [
                     Row(
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Expanded(
+                        Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface.withAlpha(128),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: EdgeInsets.only(right: 8),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // SCHEDULE NAME
                               Wrap(
@@ -99,7 +105,7 @@ class CloudScheduleCard extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                          
+
                               // WHEN & WHERE
                               Wrap(
                                 spacing: 16.0,
@@ -122,13 +128,13 @@ class CloudScheduleCard extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                          
+
                               // PLAYLIST INFO
                               Text(
                                 '${AppLocalizations.of(context)!.playlist}: ${s.schedule!.playlist.name}',
                                 style: theme.textTheme.bodyMedium,
                               ),
-                          
+
                               // YOUR ROLE INFO
                               Text(
                                 '${AppLocalizations.of(context)!.role}: $userRole',
@@ -137,14 +143,15 @@ class CloudScheduleCard extends StatelessWidget {
                             ],
                           ),
                         ),
+                        Spacer(),
                         if (s.isSyncing) const CloudDownloadIndicator(),
                         IconButton(
-                          onPressed: () => _openScheduleActionsSheet(context),
+                          onPressed: () => _openScheduleActionsSheet(context, s.schedule?.ownerFirebaseId),
                           icon: Icon(Icons.more_vert),
                         ),
                       ],
                     ),
-                    
+
                     // BOTTOM BUTTONS
                     FilledTextButton(
                       isDark: true,
@@ -178,8 +185,9 @@ class CloudScheduleCard extends StatelessWidget {
     );
   }
 
-  void _openScheduleActionsSheet(BuildContext context) {
+  void _openScheduleActionsSheet(BuildContext context, String? ownerID) {
     final cloudSch = context.read<CloudScheduleProvider>();
+    final auth = context.read<MyAuthProvider>();
 
     showModalBottomSheet(
       context: context,
@@ -220,31 +228,32 @@ class CloudScheduleCard extends StatelessWidget {
                 trailingIcon: Icons.chevron_right,
                 isDiscrete: true,
               ),
-              // delete
-              FilledTextButton(
-                text: AppLocalizations.of(context)!.delete,
-                tooltip: AppLocalizations.of(context)!.deleteScheduleTooltip,
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                      return DeleteConfirmationSheet(
-                        itemType: AppLocalizations.of(context)!.schedule,
-                        onConfirm: () {
-                          Navigator.of(context).pop();
-                          cloudSch.deleteSchedule(
-                            context.read<MyAuthProvider>().id!,
-                            scheduleId,
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-                trailingIcon: Icons.chevron_right,
-                isDangerous: true,
-                isDiscrete: true,
-              ),
+              // unpublish
+              if (auth.id! == ownerID)
+                FilledTextButton(
+                  text: AppLocalizations.of(context)!.delete,
+                  tooltip: AppLocalizations.of(context)!.deleteScheduleTooltip,
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return DeleteConfirmationSheet(
+                          itemType: AppLocalizations.of(context)!.schedule,
+                          onConfirm: () {
+                            Navigator.of(context).pop();
+                            cloudSch.deleteSchedule(
+                              context.read<MyAuthProvider>().id!,
+                              scheduleId,
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                  trailingIcon: Icons.chevron_right,
+                  isDangerous: true,
+                  isDiscrete: true,
+                ),
 
               SizedBox(height: 16),
             ],
