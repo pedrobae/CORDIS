@@ -249,9 +249,9 @@ class PositionService {
                 token.text,
                 ctx.chordStyle,
                 ctx.lyricStyle,
-              )]!;
+              )];
 
-          if (ctx.checkOverflow && (cursor.chordX + msr.width > ctx.maxWidth)) {
+          if (ctx.checkOverflow && (cursor.chordX + (msr?.width ?? 0) > ctx.maxWidth)) {
             return _WordLayoutResult(
               wordPositions: positions,
               tokensToAdd: tokensToAdd,

@@ -70,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen> {
         // Ensure splash is visible for at least 2.5 seconds to avoid jarring transitions
         final elapsed = DateTime.now().difference(_loadStartTime);
         if (elapsed < const Duration(milliseconds: 2500)) {
-          await Future.delayed(const Duration(milliseconds: 2500) - elapsed);
+          await Future.delayed(Duration(milliseconds: 2500) - elapsed);
         }
         if (!context.mounted) return;
         Navigator.of(

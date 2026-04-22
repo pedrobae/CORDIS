@@ -312,6 +312,7 @@ class TokenProvider extends ChangeNotifier {
     }
 
     final model = _builder.buildPaintModel(
+      sectionKey: key.sectionKey,
       measurements: _measurementCache,
       positions: getPositions(key, chordStyle, lyricStyle)!,
       chordStyle: chordStyle,

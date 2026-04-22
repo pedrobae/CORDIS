@@ -277,12 +277,14 @@ class TokenPositionMap {
 }
 
 class SectionPaintModel {
+  final int key;
   final List<TextPaintInstruction> textInstructions;
   final List<UnderLinePaintInstruction> underlines;
   final Size size;
   final Color underlineColor;
 
   SectionPaintModel({
+    required this.key,
     required this.textInstructions,
     required this.underlines,
     required this.size,
