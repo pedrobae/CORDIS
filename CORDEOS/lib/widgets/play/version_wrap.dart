@@ -223,7 +223,7 @@ class VersionWrap extends StatelessWidget {
         RepaintBoundary(
           child: SectionCard(
             key: key,
-            index: i,
+            index: i, 
             itemIndex: itemIndex,
             sectionType: section.contentType,
             sectionKey: sectionKey,

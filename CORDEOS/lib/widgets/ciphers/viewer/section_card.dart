@@ -38,7 +38,7 @@ class SectionCard extends StatelessWidget {
 
     final layoutKey = TokenCacheKey(
       content: sectionText,
-      sectionIndex: index,
+      sectionKey: sectionKey,
       isEditMode: false,
     );
     return Selector2<

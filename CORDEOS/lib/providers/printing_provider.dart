@@ -51,7 +51,7 @@ class PrintingProvider {
       }
 
       final TokenCacheKey key = TokenCacheKey(
-        sectionIndex: i,
+        sectionKey: section.key,
         content: section.contentText,
         maxWidth:
             100, // TODO: This should be calculated based on the PDF layout, not hardcoded

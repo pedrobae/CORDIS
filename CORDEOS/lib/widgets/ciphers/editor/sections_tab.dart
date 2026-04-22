@@ -1,15 +1,18 @@
+import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
+
 import 'package:cordeos/models/domain/cipher/version.dart';
+
+import 'package:provider/provider.dart';
 import 'package:cordeos/providers/cipher/edit_sections_state_provider.dart';
 import 'package:cordeos/providers/section/section_provider.dart';
+
 import 'package:cordeos/utils/section_type.dart';
+
 import 'package:cordeos/widgets/ciphers/editor/sections/chord_palette.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/merge_structure.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/sheet_new_section.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/sheet_manage.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/reorderable_structure.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/token_content_card.dart';
 
@@ -35,27 +38,19 @@ class _SectionsTabState extends State<SectionsTab> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Selector2<
-      LocalVersionProvider,
+    return Selector<
       SectionProvider,
-      ({List<int> uniqueSections, Map<int, SectionBadgeData> badgesData})
+      ({List<int> sectionIDs, Map<int, SectionBadgeData> badgesData})
     >(
-      selector: (context, localVer, sect) {
-        final songStructure = localVer.getSongStructure(widget.versionID);
-        final sectionTypes = <int, SectionType>{};
-        for (var sectionKey in songStructure) {
-          final section = sect.getSection(
-            versionKey: widget.versionID,
-            sectionKey: sectionKey,
-          );
-          if (section != null) {
-            sectionTypes[sectionKey] = section.sectionType;
-          }
+      selector: (context, sect) {
+        final sections = sect.getSections(widget.versionID);
+        final ids = <int>[];
+        final types = <int, SectionType>{};
+        for (var section in sections.values) {
+          ids.add(section.key);
+          types[section.key] = section.sectionType;
         }
-        return (
-          uniqueSections: songStructure.toSet().toList(),
-          badgesData: getSectionBadges(sectionTypes),
-        );
+        return (sectionIDs: ids, badgesData: getSectionBadges(types));
       },
       builder: (context, s, child) {
         return Stack(
@@ -81,7 +76,7 @@ class _SectionsTabState extends State<SectionsTab> {
                               style: textTheme.titleMedium,
                             ),
 
-                            if (s.uniqueSections.isNotEmpty)
+                            if (s.sectionIDs.isNotEmpty)
                               // MANAGE SECTION BUTTON
                               GestureDetector(
                                 onTap: _openRepeatSectionSheet(),
@@ -116,17 +111,15 @@ class _SectionsTabState extends State<SectionsTab> {
                         ),
 
                         // SECTIONS
-                        if (s.uniqueSections.isEmpty)
+                        if (s.sectionIDs.isEmpty)
                           Text(
                             AppLocalizations.of(context)!.noLyrics,
                             textAlign: TextAlign.center,
                             style: textTheme.bodyMedium,
                           )
                         else
-                          ...s.uniqueSections.map((sectionKey) {
-                            final index = s.uniqueSections.indexOf(sectionKey);
+                          ...s.sectionIDs.map((sectionKey) {
                             return TokenContentCard(
-                              index: index,
                               versionID: widget.versionID,
                               sectionBadgeData: s.badgesData[sectionKey]!,
                               sectionKey: sectionKey,

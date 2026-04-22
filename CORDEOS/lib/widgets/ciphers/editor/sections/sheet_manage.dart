@@ -70,28 +70,23 @@ class _ManageSheetState extends State<ManageSheet> {
       SectionProvider,
       ({
         Map<int, SectionBadgeData> badgesData,
-        Set<int> uniqueStruct,
+        List<int> sectionIDs,
         Duration? duration,
       })
     >(
       selector: (context, localVer, sect) {
         final version = localVer.getVersion(widget.versionID);
-        final uniqueStruct = (version?.songStructure ?? []).toSet();
+        final sections = sect.getSections(widget.versionID);
+
+        final sectionIDs = <int>[];
         final sectionTypes = <int, SectionType>{};
-        for (var sectionKey in uniqueStruct) {
-          final section = sect.getSection(
-            versionKey: widget.versionID,
-            sectionKey: sectionKey,
-          );
-          if (section != null) {
-            sectionTypes[sectionKey] = section.sectionType;
-          } else {
-            sectionTypes[sectionKey] = SectionType.unknown;
-          }
+        for (var section in sections.values) {
+          sectionIDs.add(section.key);
+          sectionTypes[section.key] = section.sectionType;
         }
         return (
           badgesData: getSectionBadges(sectionTypes),
-          uniqueStruct: uniqueStruct,
+          sectionIDs: sectionIDs,
           duration: version?.duration,
         );
       },
@@ -174,10 +169,9 @@ class _ManageSheetState extends State<ManageSheet> {
                 child: ListView(
                   children: [
                     _buildAnnotationSection(),
-                    for (int i = 0; i < s.uniqueStruct.length; i++)
+                    for (var key in s.sectionIDs)
                       Builder(
                         builder: (context) {
-                          final key = s.uniqueStruct.elementAt(i);
                           final badgeData = s.badgesData[key]!;
 
                           return GestureDetector(
@@ -218,7 +212,7 @@ class _ManageSheetState extends State<ManageSheet> {
                                   ),
                                   Expanded(
                                     child: Text(
-                                      badgeData.type.localizedLabel(context),
+                                      '${badgeData.code} - ${badgeData.type.localizedLabel(context)}',
                                       style: textTheme.bodyLarge,
                                     ),
                                   ),

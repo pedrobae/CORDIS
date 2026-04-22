@@ -351,24 +351,24 @@ class TokenProvider extends ChangeNotifier {
     _paintCache.clear();
   }
 
-  void clearIndex(TokenCacheKey key) {
+  void clearSectionKey(TokenCacheKey key) {
     debugPrint(
-      "TOKEN PROVIDER - clearing cache of section ${key.sectionIndex}",
+      "TOKEN PROVIDER - clearing cache of section ${key.sectionKey}",
     );
     _tokenCache.removeWhere(
-      (k, v) => k.startsWith(key.sectionIndex.toString()),
+      (k, v) => k.startsWith(key.sectionKey.toString()),
     );
     _organizedCache.removeWhere(
-      (k, v) => k.startsWith(key.sectionIndex.toString()),
+      (k, v) => k.startsWith(key.sectionKey.toString()),
     );
     _measurementCache.removeWhere(
-      (k, v) => k.startsWith(key.sectionIndex.toString()),
+      (k, v) => k.startsWith(key.sectionKey.toString()),
     );
     _positionCache.removeWhere(
-      (k, v) => k.startsWith(key.sectionIndex.toString()),
+      (k, v) => k.startsWith(key.sectionKey.toString()),
     );
     _paintCache.removeWhere(
-      (k, v) => k.startsWith(key.sectionIndex.toString()),
+      (k, v) => k.startsWith(key.sectionKey.toString()),
     );
   }
 

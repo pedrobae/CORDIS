@@ -92,40 +92,30 @@ class _MergeStructureState extends State<MergeStructure> {
               borderRadius: BorderRadius.circular(0),
             ),
             child:
-                Selector2<
-                  LocalVersionProvider,
+                Selector<
                   SectionProvider,
                   ({
-                    List<int> uniqueStructure,
+                    List<int> sectionIDs,
                     Map<int, SectionBadgeData> badgesData,
                   })
                 >(
-                  selector: (context, localVer, sect) {
-                    final uniqueStruct = localVer
-                        .getSongStructure(widget.versionID)
-                        .toSet()
-                        .toList();
+                  selector: (context, sect) {
+                    final sections = sect.getSections(widget.versionID);
 
+                    final sectionIDs = <int>[];
                     final sectionTypes = <int, SectionType>{};
-                    for (var key in uniqueStruct) {
-                      final section = sect.getSection(
-                        versionKey: widget.versionID,
-                        sectionKey: key,
-                      );
-                      if (section != null) {
-                        sectionTypes[key] = section.sectionType;
-                      } else {
-                        sectionTypes[key] = SectionType.unknown;
-                      }
+                    for (var section in sections.values) {
+                      sectionIDs.add(section.key);
+                      sectionTypes[section.key] = section.sectionType;
+                      sectionTypes[section.key] = SectionType.unknown;
                     }
-
                     return (
-                      uniqueStructure: uniqueStruct,
+                      sectionIDs: sectionIDs,
                       badgesData: getSectionBadges(sectionTypes),
                     );
                   },
                   builder: (context, s, child) {
-                    return s.uniqueStructure.isEmpty
+                    return s.sectionIDs.isEmpty
                         ? Center(
                             child: Text(
                               AppLocalizations.of(context)!.emptyStructure,
@@ -137,13 +127,10 @@ class _MergeStructureState extends State<MergeStructure> {
                           )
                         : ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: s.uniqueStructure.length,
+                            itemCount: s.sectionIDs.length,
                             itemBuilder: (context, index) {
-                              return _buildItem(
-                                index,
-                                s.uniqueStructure,
-                                s.badgesData,
-                              );
+                              final sectionKey = s.sectionIDs[index];
+                              return _buildItem(sectionKey, s.badgesData);
                             },
                           );
                   },
@@ -187,12 +174,7 @@ class _MergeStructureState extends State<MergeStructure> {
     };
   }
 
-  Widget _buildItem(
-    int index,
-    List<int> uniqueStructure,
-    Map<int, SectionBadgeData> badgesData,
-  ) {
-    final sectionKey = uniqueStructure[index];
+  Widget _buildItem(int sectionKey, Map<int, SectionBadgeData> badgesData) {
     final badgeData = badgesData[sectionKey]!;
     return Selector<
       EditSectionsStateProvider,

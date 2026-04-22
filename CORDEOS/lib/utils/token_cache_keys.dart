@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 /// Two keys are equal only if all parameters match.
 class TokenCacheKey {
   String? content;
-  final int sectionIndex;
+  final int sectionKey;
   double? maxWidth;
   double? lineSpacing;
   double? lineBreakSpacing;
@@ -33,7 +33,7 @@ class TokenCacheKey {
     this.showChords,
     this.showLyrics,
     this.transposeValue,
-    required this.sectionIndex,
+    required this.sectionKey,
     this.isEditMode = false,
     this.chordColor,
     this.lyricColor,
@@ -54,7 +54,7 @@ class TokenCacheKey {
         other.showLyrics == showLyrics &&
         other.isEditMode == isEditMode &&
         other.transposeValue == transposeValue &&
-        other.sectionIndex == sectionIndex;
+        other.sectionKey == sectionKey;
   }
 
   @override
@@ -69,7 +69,7 @@ class TokenCacheKey {
     showChords,
     showLyrics,
     transposeValue,
-    sectionIndex,
+    sectionKey,
     isEditMode,
   );
 }
@@ -80,7 +80,7 @@ class TokenCacheKey {
 
 /// Token cache key: content + filters + transposition
 String tokenCacheKey(TokenCacheKey k) =>
-    '${k.sectionIndex}|content:${k.content}|chords:${k.showChords}|lyrics:${k.showLyrics}|transposeValue:${k.transposeValue}|editMode:${k.isEditMode}';
+    '${k.sectionKey}|content:${k.content}|chords:${k.showChords}|lyrics:${k.showLyrics}|transposeValue:${k.transposeValue}|editMode:${k.isEditMode}';
 
 String measurementKey(
   String text,

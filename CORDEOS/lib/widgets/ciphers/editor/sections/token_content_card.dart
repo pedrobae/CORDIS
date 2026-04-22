@@ -24,7 +24,6 @@ import 'package:cordeos/widgets/common/filled_text_button.dart';
 
 class TokenContentCard extends StatefulWidget {
   final int versionID;
-  final int index;
   final int sectionKey;
   final SectionBadgeData sectionBadgeData;
   final bool isEnabled;
@@ -32,7 +31,6 @@ class TokenContentCard extends StatefulWidget {
   const TokenContentCard({
     super.key,
     required this.versionID,
-    required this.index,
     required this.sectionKey,
     required this.sectionBadgeData,
     this.isEnabled = true,
@@ -106,7 +104,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    _tokensKey = TokenCacheKey(sectionIndex: widget.index, isEditMode: true);
+    _tokensKey = TokenCacheKey(sectionKey: widget.sectionKey, isEditMode: true);
 
     return Selector<SectionProvider, ({Section? section, String? contentText})>(
       selector: (context, sect) {
@@ -117,7 +115,7 @@ class _TokenContentCardState extends State<TokenContentCard> {
         return (section: section, contentText: section?.contentText);
       },
       builder: (context, s, child) {
-        _tokenProv.clearIndex(_tokensKey!);
+        _tokenProv.clearSectionKey(_tokensKey!);
         if (s.section == null) {
           return const Center(child: CircularProgressIndicator());
         }
