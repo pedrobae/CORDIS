@@ -2,7 +2,7 @@ import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/models/domain/cipher/version.dart';
 import 'package:cordeos/providers/cipher/edit_sections_state_provider.dart';
 import 'package:cordeos/providers/section/section_provider.dart';
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/chord_palette.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/merge_structure.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/sheet_new_section.dart';

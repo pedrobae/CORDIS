@@ -1,4 +1,3 @@
-import 'package:cordeos/models/domain/cipher/section.dart';
 import 'package:cordeos/providers/play/play_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
@@ -10,7 +9,7 @@ import 'package:cordeos/providers/version/cloud_version_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/providers/section/section_provider.dart';
 
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 
 class StructureList extends StatefulWidget {
   final dynamic versionID;
@@ -148,9 +147,7 @@ class _StructureListState extends State<StructureList> {
 
                             return _StructureSectionButton(
                               index: index,
-                              versionID: widget.versionID,
-                              sectionKey: sectionKey,
-                              sectionCode: s.badgesData[sectionKey]!.code,
+                              badgeData: s.badgesData[sectionKey]!,
                               onTap: () {
                                 if (s.tapEnabled) {
                                   scroll.probeScrollToItem(
@@ -184,16 +181,12 @@ class _StructureListState extends State<StructureList> {
 
 class _StructureSectionButton extends StatelessWidget {
   final int index;
-  final dynamic versionID;
-  final int sectionKey;
-  final String sectionCode;
+  final SectionBadgeData badgeData;
   final VoidCallback onTap;
 
   const _StructureSectionButton({
     required this.index,
-    required this.versionID,
-    required this.sectionKey,
-    required this.sectionCode,
+    required this.badgeData,
     required this.onTap,
   });
 
@@ -202,60 +195,36 @@ class _StructureSectionButton extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return RepaintBoundary(
-      child:
-          Selector4<
-            ScrollProvider,
-            SectionProvider,
-            LocalVersionProvider,
-            CloudVersionProvider,
-            ({Section? section, bool highlighted})
-          >(
-            selector: (context, scroll, sect, localVer, cloudVer) {
-              final section = sect.getSection(
-                versionKey: versionID,
-                sectionKey: sectionKey,
-              );
-              return (
-                section: section,
-                highlighted: scroll.currentSectionIndex == index,
-              );
-            },
-            builder: (context, s, child) {
-              if (s.section == null) {
-                return const SizedBox(
-                  height: StructureList.buttonWidth,
-                  width: StructureList.buttonWidth,
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              return GestureDetector(
-                onTap: onTap,
-                child: Container(
-                  height: StructureList.buttonWidth,
-                  width: StructureList.buttonWidth,
-                  decoration: BoxDecoration(
-                    color: s.section!.contentColor.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(6),
-                    border: s.highlighted
-                        ? Border.all(color: colorScheme.primary, width: 2)
-                        : null,
+      child: Selector<ScrollProvider, bool>(
+        selector: (context, scroll) => scroll.currentSectionIndex == index,
+        builder: (context, highlighted, child) {
+          return GestureDetector(
+            onTap: onTap,
+            child: Container(
+              height: StructureList.buttonWidth,
+              width: StructureList.buttonWidth,
+              decoration: BoxDecoration(
+                color: badgeData.color,
+                borderRadius: BorderRadius.circular(6),
+                border: highlighted
+                    ? Border.all(color: colorScheme.primary, width: 2)
+                    : null,
+              ),
+              child: Center(
+                child: Text(
+                  badgeData.code,
+                  style: TextStyle(
+                    color: colorScheme.onPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
-                  child: Center(
-                    child: Text(
-                      sectionCode,
-                      style: TextStyle(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                  textAlign: TextAlign.center,
                 ),
-              );
-            },
-          ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

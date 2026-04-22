@@ -1,7 +1,7 @@
 import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/section/section_provider.dart';
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/edit_section.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

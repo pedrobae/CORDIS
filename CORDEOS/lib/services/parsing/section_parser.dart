@@ -1,6 +1,6 @@
 import 'package:cordeos/models/domain/parsing_cipher.dart';
 import 'package:cordeos/models/dtos/pdf_dto.dart';
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 
 enum SeparatorType { emptyLine, bracket, parenthesis, hyphen }
 

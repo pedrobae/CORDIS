@@ -1,7 +1,7 @@
 import 'package:cordeos/models/dtos/version_dto.dart';
 
 import 'package:cordeos/utils/color.dart';
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:flutter/cupertino.dart';
 
 class Section {

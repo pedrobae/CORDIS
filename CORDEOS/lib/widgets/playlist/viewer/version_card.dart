@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:cordeos/providers/token_cache_provider.dart';
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
 

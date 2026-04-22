@@ -1,7 +1,7 @@
 import 'package:cordeos/providers/play/auto_scroll_provider.dart';
 import 'package:cordeos/providers/token_cache_provider.dart';
 import 'package:cordeos/providers/transposition_provider.dart';
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:cordeos/utils/token_cache_keys.dart';
 import 'package:cordeos/widgets/ciphers/section_badge.dart';
 import 'package:cordeos/widgets/ciphers/viewer/token_view.dart';

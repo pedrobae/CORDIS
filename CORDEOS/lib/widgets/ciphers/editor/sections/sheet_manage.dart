@@ -4,7 +4,7 @@ import "package:cordeos/providers/navigation_provider.dart";
 import "package:cordeos/providers/section/section_provider.dart";
 import "package:cordeos/providers/version/local_version_provider.dart";
 import "package:cordeos/utils/date_utils.dart";
-import "package:cordeos/utils/section_constants.dart";
+import "package:cordeos/utils/section_type.dart";
 import "package:cordeos/widgets/ciphers/editor/metadata.dart/select_key_sheet.dart";
 import "package:cordeos/widgets/ciphers/editor/sections/edit_section.dart";
 import "package:cordeos/widgets/ciphers/editor/sections/reorderable_structure.dart";

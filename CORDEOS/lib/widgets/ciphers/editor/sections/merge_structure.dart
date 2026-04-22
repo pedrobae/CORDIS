@@ -1,4 +1,4 @@
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:cordeos/widgets/ciphers/section_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';

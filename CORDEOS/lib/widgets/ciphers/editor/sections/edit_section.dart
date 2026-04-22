@@ -3,7 +3,7 @@ import 'package:cordeos/models/domain/cipher/section.dart';
 import 'package:cordeos/providers/navigation_provider.dart';
 import 'package:cordeos/providers/section/section_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:cordeos/widgets/ciphers/editor/sections/select_type.dart';
 import 'package:cordeos/widgets/common/delete_confirmation.dart';
 import 'package:cordeos/widgets/common/filled_text_button.dart';

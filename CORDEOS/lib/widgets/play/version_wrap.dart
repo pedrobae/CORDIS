@@ -6,7 +6,7 @@ import 'package:cordeos/providers/section/section_provider.dart';
 import 'package:cordeos/providers/version/cloud_version_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/utils/date_utils.dart';
-import 'package:cordeos/utils/section_constants.dart';
+import 'package:cordeos/utils/section_type.dart';
 import 'package:cordeos/widgets/ciphers/viewer/annotation_card.dart';
 import 'package:cordeos/widgets/ciphers/viewer/section_card.dart';
 import 'package:flutter/material.dart';

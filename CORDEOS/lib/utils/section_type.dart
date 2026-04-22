@@ -28,27 +28,27 @@ extension SectionTypeMethods on SectionType {
   Color get color {
     switch (this) {
       case SectionType.verse:
-        return Color(0xFF2196F3);
+        return const Color(0xFF2196F3);
       case SectionType.chorus:
-        return Color(0xFFF44336);
+        return const Color(0xFFF44336);
       case SectionType.bridge:
-        return Colors.green;
+        return const Color(0xFF4CAF50);
       case SectionType.intro:
-        return Color(0xFF9C27B0);
+        return const Color(0xFF9C27B0);
       case SectionType.outro:
-        return Colors.brown;
+        return const Color(0xFF795548);
       case SectionType.solo:
-        return Colors.amber;
+        return const Color(0xFFFFC927);
       case SectionType.preChorus:
-        return Colors.orange;
+        return const Color(0xFFFF9800);
       case SectionType.tag:
-        return Colors.teal;
+        return const Color(0xFF009688);
       case SectionType.finale:
-        return Color(0xFF3F51B5);
+        return const Color(0xFF3F51B5);
       case SectionType.annotation:
-        return Colors.grey;
+        return const Color(0xFF9E9E9E);
       case SectionType.unknown:
-        return Colors.blueGrey;
+        return const Color(0xFF607D8B);
     }
   }
 
