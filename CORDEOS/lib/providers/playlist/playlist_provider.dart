@@ -170,6 +170,7 @@ class PlaylistProvider extends ChangeNotifier {
       await loadPlaylist(playlistID);
     } catch (e) {
       _error = e.toString();
+      debugPrint(_error);
     } finally {
       notifyListeners();
     }
@@ -191,6 +192,7 @@ class PlaylistProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   // ===== CACHE =====
   /// Update a Playlist with new data (name/description)
   void cacheName(int id, String name) {
