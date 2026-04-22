@@ -22,7 +22,7 @@ class Section {
   });
 
   SectionType get sectionType {
-    return identifySectionType(contentType);
+    return identifySectionType(contentColor);
   }
 
   factory Section.fromSqLite(Map<String, dynamic> json) {

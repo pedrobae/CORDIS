@@ -122,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Selector<AppInfoProvider, (bool, String)>(
-      selector: (_, info) => (info.isLoading, info.appVersion),
+      selector: (_, info) => (info.isLoading, info.appVersionWithBuild),
       builder: (context, data, child) {
         final (isLoading, appVersion) = data;
         if (isLoading) return const IconLoadIndicator(size: 20);

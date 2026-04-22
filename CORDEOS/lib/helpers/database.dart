@@ -283,8 +283,10 @@ class DatabaseHelper {
       // REMOVE content_code ON SECTION TABLE (was NON NULL)
       // ADD key COLUMN TO SECTION TABLE (int, non null)
       // Since SQLite doesn't support altering column constraints directly, we need to recreate the table
-      await db.execute('ALTER TABLE section RENAME TO section_old');
-      await db.execute('''
+
+      await db.transaction((txn) async {
+        await txn.execute('ALTER TABLE section RENAME TO section_old');
+        await txn.execute('''
         CREATE TABLE section (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           version_id INTEGER NOT NULL,
@@ -295,53 +297,55 @@ class DatabaseHelper {
           FOREIGN KEY (version_id) REFERENCES version (id) ON DELETE CASCADE
         )
       ''');
-      // MAP CODE TO KEY, SO WE CAN CHANGE VERSION STRUCTURE WITHOUT LOSING DATA
-      final List<Map<String, dynamic>> oldSections = await db.query(
-        'section_old',
-        columns: ['id', 'version_id', 'content_code'],
-      );
-      await db.execute('''
+
+        // MAP CODE TO KEY, SO WE CAN CHANGE VERSION STRUCTURE WITHOUT LOSING DATA
+        final List<Map<String, dynamic>> oldSections = await txn.query(
+          'section_old',
+          columns: ['id', 'version_id', 'content_code'],
+        );
+        await txn.execute('''
         INSERT INTO section (id, version_id, key, content_type, content_text, content_color)
         SELECT id, version_id, id, content_type, content_text, content_color
         FROM section_old
       ''');
-      await db.execute('DROP TABLE section_old');
+        await txn.execute('DROP TABLE section_old');
 
-      await db.execute(
-        'CREATE INDEX idx_section_version_id ON section(version_id)',
-      );
-
-      // USING oldSections to update version structure in app logic,
-      // so we don't lose data and can migrate smoothly
-      final versionStructs = await db.query(
-        'version',
-        columns: ['id', 'song_structure'],
-      );
-
-      for (var version in versionStructs) {
-        final versionID = version['id'] as int;
-        final struct = (version['song_structure'] as String).split(',');
-
-        final newStruct = <int>[];
-        for (var code in struct) {
-          final section = oldSections.firstWhereOrNull(
-            (s) =>
-                s['version_id'] == versionID &&
-                s['content_code'] == code.trim(),
-          );
-
-          if (section != null) {
-            newStruct.add(section['id'] as int);
-          }
-        }
-
-        await db.update(
-          'version',
-          {'song_structure': newStruct.join(',')},
-          where: 'id = ?',
-          whereArgs: [versionID],
+        await txn.execute(
+          'CREATE INDEX idx_section_version_id ON section(version_id)',
         );
-      }
+
+        // USING oldSections to update version structure in app logic,
+        // so we don't lose data and can migrate smoothly
+        final versionStructs = await txn.query(
+          'version',
+          columns: ['id', 'song_structure'],
+        );
+
+        for (var version in versionStructs) {
+          final versionID = version['id'] as int;
+          final struct = (version['song_structure'] as String).split(',');
+
+          final newStruct = <int>[];
+          for (var code in struct) {
+            final section = oldSections.firstWhereOrNull(
+              (s) =>
+                  s['version_id'] == versionID &&
+                  s['content_code'] == code.trim(),
+            );
+
+            if (section != null) {
+              newStruct.add(section['id'] as int);
+            }
+          }
+
+          await txn.update(
+            'version',
+            {'song_structure': newStruct.join(',')},
+            where: 'id = ?',
+            whereArgs: [versionID],
+          );
+        }
+      });
     }
   }
 

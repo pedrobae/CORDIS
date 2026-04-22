@@ -15,17 +15,10 @@ enum SectionType {
   unknown,
 }
 
-SectionType identifySectionType(String label) {
-  final normalizedLabel = label.toLowerCase().trim();
+SectionType identifySectionType(Color color) {
   for (var type in SectionType.values) {
-    for (var knownLabel in type.knownLabels) {
-      final regex = RegExp(
-        '^${knownLabel.replaceAll(r'\s+', r'\\s+')}\\b',
-        caseSensitive: false,
-      );
-      if (regex.hasMatch(normalizedLabel)) {
-        return type;
-      }
+    if (type.color == color) {
+      return type;
     }
   }
   return SectionType.unknown;
@@ -55,7 +48,7 @@ extension SectionTypeMethods on SectionType {
       case SectionType.annotation:
         return Colors.grey;
       case SectionType.unknown:
-        return Colors.grey;
+        return Colors.blueGrey;
     }
   }
 
