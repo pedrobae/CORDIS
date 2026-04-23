@@ -138,36 +138,12 @@ class PlaylistProvider extends ChangeNotifier {
 
     try {
       final playlist = _playlists[playlistID];
-      if (playlist != null) {
-        await _playlistRepository.upsertPlaylistMetadata(playlist);
-      }
-      int position = 0;
-      for (var item in playlist!.items) {
-        switch (item.type) {
-          case PlaylistItemType.version:
-            if (item.id == null) {
-              await _playlistRepository.addVersionToPlaylist(
-                playlistID,
-                item.contentId!,
-              );
-            } else {
-              await _playlistRepository.updatePlaylistVersionPosition(
-                item.id!,
-                position,
-              );
-            }
-            break;
-          case PlaylistItemType.flowItem:
-            await _playlistRepository.updateFlowItemPosition(
-              item.contentId!,
-              position,
-            );
-            break;
-        }
-        position++;
-      }
+      if (playlist == null) throw Exception('Could not find playlist in cache');
 
+      await _playlistRepository.upsertPlaylistMetadata(playlist);
+      await _playlistRepository.saveItemOrder(playlist.items);
       await loadPlaylist(playlistID);
+
     } catch (e) {
       _error = e.toString();
       debugPrint(_error);
