@@ -67,8 +67,8 @@ class _CipherCardState extends State<CipherCard> {
         int? cipherID,
         String title,
         String key,
-        String duration,
-        String bpm,
+        String? duration,
+        String? bpm,
         String? link,
         Map<int, SectionBadgeData> sectionBadges,
         List<int> songStructure,
@@ -98,10 +98,10 @@ class _CipherCardState extends State<CipherCard> {
           key: version?.transposedKey ?? cipher?.musicKey ?? '',
           duration: version != null && version.duration != Duration.zero
               ? DateTimeUtils.formatDuration(version.duration)
-              : '-',
+              : null,
           bpm: version != null && version.bpm != 0
               ? version.bpm.toString()
-              : '-',
+              : null,
           link: cipher?.link,
           sectionBadges: getSectionBadges(sectionTypes),
           songStructure: version?.songStructure ?? [],
@@ -117,7 +117,7 @@ class _CipherCardState extends State<CipherCard> {
           onTap: () async {
             if (sel.isSelectionMode) {
               await _createAndAddVersionToPlaylist();
-        
+
               nav.pop();
             } else {
               final token = context.read<TokenProvider>();
@@ -137,7 +137,7 @@ class _CipherCardState extends State<CipherCard> {
           onLongPress: () async {
             final localVer = context.read<LocalVersionProvider>();
             final ciph = context.read<CipherProvider>();
-        
+
             nav.push(
               () => EditCipherScreen(
                 cipherID: s.cipherID!,
@@ -169,7 +169,7 @@ class _CipherCardState extends State<CipherCard> {
                       children: [
                         // TITLE
                         Text(s.title, style: textTheme.titleMedium),
-        
+
                         // INFO
                         Row(
                           spacing: 16.0,
@@ -178,21 +178,23 @@ class _CipherCardState extends State<CipherCard> {
                               '${AppLocalizations.of(context)!.musicKey}: ${s.key}',
                               style: textTheme.bodyMedium,
                             ),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.bpmWithPlaceholder(s.bpm),
-                              style: textTheme.bodyMedium,
-                            ),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.durationWithPlaceholder(s.duration),
-                              style: textTheme.bodyMedium,
-                            ),
+                            if (s.bpm != null)
+                              Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.bpmWithPlaceholder(s.bpm!),
+                                style: textTheme.bodyMedium,
+                              ),
+                            if (s.bpm != null)
+                              Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.durationWithPlaceholder(s.duration!),
+                                style: textTheme.bodyMedium,
+                              ),
                           ],
                         ),
-        
+
                         // STRUCTURE LIST
                         if (!isDense)
                           SizedBox(
@@ -218,7 +220,7 @@ class _CipherCardState extends State<CipherCard> {
                       ],
                     ),
                   ),
-        
+
                   if (s.link != null && s.link!.isNotEmpty)
                     GestureDetector(
                       onTap: () async {
@@ -230,7 +232,7 @@ class _CipherCardState extends State<CipherCard> {
                         child: Icon(Icons.link, size: 20),
                       ),
                     ),
-        
+
                   // ACTIONS SHEET
                   GestureDetector(
                     onTap: _openCipherActionsSheet(s.cipherID!),
