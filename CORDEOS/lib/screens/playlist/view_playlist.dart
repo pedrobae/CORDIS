@@ -109,7 +109,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
             padding: const EdgeInsets.all(16),
             child: playlist.items.isEmpty
                 ? _buildEmptyState()
-                : _buildItemsList(playlist),
+                : _buildItemsList(),
           ),
         );
       },
@@ -138,42 +138,56 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
     );
   }
 
-  Widget _buildItemsList(Playlist playlist) {
-    return ReorderableListView.builder(
-      shrinkWrap: true,
-      proxyDecorator: (child, index, animation) =>
-          Material(type: MaterialType.transparency, child: child),
-      buildDefaultDragHandles: false,
-      physics: const ClampingScrollPhysics(),
-      scrollDirection: Axis.vertical,
-      onReorder: (oldIndex, newIndex) =>
-          _onReorder(playlist, oldIndex, newIndex),
-      itemCount: playlist.items.length,
-      itemBuilder: (BuildContext context, int index) {
-        final item = playlist.items[index];
-        return _buildPlaylistItem(item, index);
+  Widget _buildItemsList() {
+    return Selector<PlaylistProvider, int>(
+      selector: (context, play) {
+        final playlist = play.getPlaylist(widget.playlistId);
+        return playlist?.items.length ?? 0;
+      },
+      builder: (context, itemCount, child) {
+        return ReorderableListView.builder(
+          shrinkWrap: true,
+          proxyDecorator: (child, index, animation) =>
+              Material(type: MaterialType.transparency, child: child),
+          buildDefaultDragHandles: false,
+          physics: const ClampingScrollPhysics(),
+          scrollDirection: Axis.vertical,
+          onReorder: (oldIndex, newIndex) => _onReorder(oldIndex, newIndex),
+          itemCount: itemCount,
+          itemBuilder: (BuildContext context, int index) {
+            return _buildPlaylistItem(index);
+          },
+        );
       },
     );
   }
 
-  Widget _buildPlaylistItem(PlaylistItem item, int index) {
-    switch (item.type) {
-      case PlaylistItemType.version:
-        return PlaylistVersionCard(
-          key: ValueKey('ver_${item.id}_idx_$index'),
-          index: index,
-          versionId: item.contentId!,
-          playlistId: widget.playlistId,
-          itemId: item.id ?? -1,
-        );
-      case PlaylistItemType.flowItem:
-        return FlowItemCard(
-          key: ValueKey('flow_${item.id}_idx_$index'),
-          index: index,
-          flowItemID: item.contentId ?? item.id!,
-          playlistID: widget.playlistId,
-        );
-    }
+  Widget _buildPlaylistItem(int index) {
+    return Selector<PlaylistProvider, PlaylistItem?>(
+      selector: (context, play) {
+        return play.getPlaylist(widget.playlistId)?.items[index];
+      },
+      builder: (context, item, child) {
+        if (item == null) return SizedBox();
+        switch (item.type) {
+          case PlaylistItemType.version:
+            return PlaylistVersionCard(
+              key: ValueKey('ver_${item.id}_idx_$index'),
+              index: index,
+              versionId: item.contentId!,
+              playlistId: widget.playlistId,
+              itemId: item.id ?? -1,
+            );
+          case PlaylistItemType.flowItem:
+            return FlowItemCard(
+              key: ValueKey('flow_${item.id}_idx_$index'),
+              index: index,
+              flowItemID: item.contentId ?? item.id!,
+              playlistID: widget.playlistId,
+            );
+        }
+      },
+    );
   }
 
   Future<void> _handleSave(Playlist playlist, NavigationProvider nav) async {
@@ -220,14 +234,14 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
     );
   }
 
-  void _onReorder(Playlist playlist, int oldIndex, int newIndex) {
+  void _onReorder(int oldIndex, int newIndex) {
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
 
     try {
       context.read<PlaylistProvider>().cacheReposition(
-        playlist.id,
+        widget.playlistId,
         oldIndex,
         newIndex,
       );
@@ -239,7 +253,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
           action: SnackBarAction(
             label: 'Tentar Novamente',
             textColor: Colors.white,
-            onPressed: () => _onReorder(playlist, oldIndex, newIndex),
+            onPressed: () => _onReorder(oldIndex, newIndex),
           ),
         ),
       );
