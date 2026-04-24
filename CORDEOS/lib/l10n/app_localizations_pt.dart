@@ -702,6 +702,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get createLocalCopy => 'Criar uma Cópia Local';
 
   @override
+  String get export => 'Exportar';
+
+  @override
   String get share => 'Compartilhar';
 
   @override

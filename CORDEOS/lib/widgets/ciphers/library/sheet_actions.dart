@@ -1,3 +1,4 @@
+import 'package:cordeos/screens/cipher/print_preview_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cordeos/l10n/app_localizations.dart';
 
@@ -29,6 +30,7 @@ class CipherCardActionsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     final nav = context.read<NavigationProvider>();
     final ciph = context.read<CipherProvider>();
@@ -45,7 +47,7 @@ class CipherCardActionsSheet extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         color: colorScheme.surface,
         child: Text(
-          AppLocalizations.of(context)!.error,
+          l10n.error,
           style: textTheme.bodyMedium,
           textAlign: TextAlign.center,
         ),
@@ -65,7 +67,7 @@ class CipherCardActionsSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                AppLocalizations.of(context)!.quickAction,
+                l10n.quickAction,
                 style: textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
@@ -78,9 +80,7 @@ class CipherCardActionsSheet extends StatelessWidget {
           // ACTIONS
           // EDIT CIPHER
           FilledTextButton(
-            text: AppLocalizations.of(
-              context,
-            )!.editPlaceholder(AppLocalizations.of(context)!.cipher),
+            text: AppLocalizations.of(context)!.editPlaceholder(l10n.cipher),
             trailingIcon: Icons.chevron_right,
             isDiscrete: true,
             onPressed: () {
@@ -102,9 +102,21 @@ class CipherCardActionsSheet extends StatelessWidget {
               );
             },
           ),
+          FilledTextButton(
+            text: l10n.export,
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => PrintPreviewScreen(versionID: versionID),
+                ),
+              );
+            },
+            trailingIcon: Icons.chevron_right,
+            isDiscrete: true,
+          ),
           if (link != null && link.isNotEmpty)
             FilledTextButton(
-              text: AppLocalizations.of(context)!.openLink,
+              text: l10n.openLink,
               tooltip: link,
               trailingIcon: Icons.open_in_new,
               isDiscrete: true,
@@ -120,7 +132,7 @@ class CipherCardActionsSheet extends StatelessWidget {
             FilledTextButton(
               text: AppLocalizations.of(
                 context,
-              )!.selectPlaceholder(AppLocalizations.of(context)!.version),
+              )!.selectPlaceholder(l10n.version),
               trailingIcon: Icons.chevron_right,
               isDiscrete: true,
               onPressed: () {
@@ -141,8 +153,8 @@ class CipherCardActionsSheet extends StatelessWidget {
             ),
           // DELETE CIPHER
           FilledTextButton(
-            text: AppLocalizations.of(context)!.delete,
-            tooltip: AppLocalizations.of(context)!.deleteCipherDescription,
+            text: l10n.delete,
+            tooltip: l10n.deleteCipherDescription,
             trailingIcon: Icons.chevron_right,
             isDiscrete: true,
             isDangerous: true,
@@ -156,7 +168,7 @@ class CipherCardActionsSheet extends StatelessWidget {
                     onClosing: () {},
                     builder: (context) {
                       return DeleteConfirmationSheet(
-                        itemType: AppLocalizations.of(context)!.cipher,
+                        itemType: l10n.cipher,
                         onConfirm: () async {
                           Navigator.of(context).pop();
                           final version = localVer.getVersion(versionID)!;

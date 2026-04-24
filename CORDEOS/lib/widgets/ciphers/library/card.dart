@@ -236,6 +236,7 @@ class _CipherCardState extends State<CipherCard> {
                   // ACTIONS SHEET
                   GestureDetector(
                     onTap: _openCipherActionsSheet(s.cipherID!),
+                    behavior: HitTestBehavior.opaque,
                     child: SizedBox(
                       height: double.infinity,
                       width: 40,

@@ -1346,6 +1346,12 @@ abstract class AppLocalizations {
   /// **'Criar uma Cópia Local'**
   String get createLocalCopy;
 
+  /// Export button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar'**
+  String get export;
+
   /// Share button label
   ///
   /// In pt, this message translates to:

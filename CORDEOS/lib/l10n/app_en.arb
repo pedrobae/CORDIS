@@ -913,6 +913,10 @@
   "@createLocalCopy": {
     "description": "Tooltip for creating a local copy of a cloud object"
   },
+  "export": "Export",
+  "@export": {
+    "description": "Export button label"
+  },
   "share": "Share",
   "@share": {
     "description": "Share button label"

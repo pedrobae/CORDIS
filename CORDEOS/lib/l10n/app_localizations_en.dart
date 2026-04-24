@@ -699,6 +699,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createLocalCopy => 'Create a Local Copy';
 
   @override
+  String get export => 'Export';
+
+  @override
   String get share => 'Share';
 
   @override
