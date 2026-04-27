@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cordeos/l10n/app_localizations.dart';
@@ -14,6 +15,8 @@ import 'package:cordeos/widgets/ciphers/print/sheet_print_filters.dart';
 import 'package:cordeos/widgets/ciphers/print/sheet_print_layout.dart';
 import 'package:cordeos/widgets/ciphers/print/sheet_print_style.dart';
 import 'package:flutter/material.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class PrintPreviewScreen extends StatefulWidget {
@@ -26,6 +29,10 @@ class PrintPreviewScreen extends StatefulWidget {
 }
 
 class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
+  List<PageLayout> pages = [];
+  PagePreviewSnapshot? snapshot;
+  double pageWidth = 0;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -58,8 +65,30 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
         Text(l10n.printPreview, style: textTheme.titleMedium),
         const Spacer(),
         IconButton(
-          onPressed: () {
-            // TODO - print
+          onPressed: () async {
+            if (snapshot != null) {
+              try {
+                final pdfBytes = await context
+                    .read<PrintingProvider>()
+                    .generatePDF(pages, snapshot!, pageWidth);
+
+                // Save PDF to documents directory
+                final dir = await getApplicationDocumentsDirectory();
+                final fileName =
+                    'cipher_${DateTime.now().millisecondsSinceEpoch}.pdf';
+                final file = File('${dir.path}/$fileName');
+                await file.writeAsBytes(pdfBytes);
+
+                // Open PDF with default viewer
+                await OpenFile.open(file.path);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error generating PDF: $e')),
+                  );
+                }
+              }
+            }
           },
           icon: const Icon(Icons.print),
         ),
@@ -122,7 +151,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
     final availableWidth =
         MediaQuery.sizeOf(context).width - 48; // Account for padding
     final pageAspectRatio = 1 / sqrt(2);
-    final pageWidth = min(availableWidth, 600.0);
+    pageWidth = min(availableWidth, 600.0);
     final pageHeight = pageWidth / pageAspectRatio;
 
     return Container(
@@ -249,7 +278,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                       metadataColor: print.headerColor,
                     ),
                     builder: (context, buildSettings, child) {
-                      final previewSnapshot = print.buildPreviewSnapshot(
+                      snapshot = print.buildPreviewSnapshot(
                         layoutSettings.sectionMaxWidth,
                       );
 
@@ -263,8 +292,8 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                         columnCount: print.columnCount,
                       );
 
-                      final pages = print.layoutPages(
-                        previewSnapshot,
+                      pages = print.layoutPages(
+                        snapshot!,
                         pageHeight,
                         layoutSettings.sectionMaxWidth,
                       );
@@ -284,7 +313,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                                 height: pageHeight,
                                 child: CustomPaint(
                                   painter: PagePreviewPainter(
-                                    snapshot: previewSnapshot,
+                                    snapshot: snapshot!,
                                     pages: pages,
                                     pageIndex: pageIndex,
                                     ctx: pageCtx,

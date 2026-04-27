@@ -318,9 +318,14 @@ class BadgePaintModel {
 
 class TextPaintInstruction {
   final Offset offset;
+  final TextStyle style;
   final TextPainter painter;
 
-  TextPaintInstruction({required this.offset, required this.painter});
+  TextPaintInstruction({
+    required this.offset,
+    required this.style,
+    required this.painter,
+  });
 }
 
 class UnderLinePaintInstruction {

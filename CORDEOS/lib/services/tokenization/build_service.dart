@@ -70,6 +70,7 @@ class TokenizationBuilder {
 
           texts.add(
             TextPaintInstruction(
+              style: chordStyle.copyWith(color: chordColor),
               painter: painter,
               offset: Offset(offset.dx, offset.dy),
             ),
@@ -95,6 +96,7 @@ class TokenizationBuilder {
                 offset.dx,
                 offset.dy + positions.lineHeight - msr.height,
               ),
+              style: lyricStyle.copyWith(color: lyricColor),
             ),
           );
           break;

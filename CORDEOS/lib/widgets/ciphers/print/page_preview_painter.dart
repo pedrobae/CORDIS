@@ -99,7 +99,11 @@ class PagePreviewSnapshot {
         textDirection: TextDirection.ltr,
       )..layout(maxWidth: (ctx.contentWidth));
       instructions.add(
-        TextPaintInstruction(painter: painter, offset: Offset(0, y)),
+        TextPaintInstruction(
+          painter: painter,
+          offset: Offset(0, y),
+          style: style,
+        ),
       );
       y += painter.height;
     }
@@ -141,7 +145,7 @@ class PagePreviewSnapshot {
       (detailParts.join('  •  '), ctx.headerStyle),
       if (ctx.showSongMap)
         (
-          '${header.songMapLabel}: ${header.codeSongMap.join('|')}',
+          '${header.songMapLabel}: ${header.codeSongMap.join(' | ')}',
           ctx.headerStyle.copyWith(
             fontSize: (ctx.headerStyle.fontSize ?? 11) - 1,
           ),

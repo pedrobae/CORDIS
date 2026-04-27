@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/models/domain/cipher/cipher.dart';
 import 'package:cordeos/models/domain/cipher/section.dart';
 import 'package:cordeos/models/domain/cipher/version.dart';
 import 'package:cordeos/services/print_cache.dart';
 import 'package:cordeos/utils/section_type.dart';
+import 'package:cordeos/utils/fonts.dart';
 import 'package:cordeos/widgets/ciphers/print/page_preview_painter.dart';
 import 'package:cordeos/services/tokenization/build_service.dart';
 import 'package:cordeos/services/tokenization/helper_classes.dart';
@@ -11,6 +14,7 @@ import 'package:cordeos/services/tokenization/position_service.dart';
 import 'package:cordeos/services/tokenization/tokenization_service.dart';
 import 'package:cordeos/utils/token_cache_keys.dart';
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class _LayoutCursor {
   double x = 0;
@@ -393,9 +397,7 @@ class PrintingProvider extends ChangeNotifier {
       if (sectionBlockHeight > contentHeight) {
         // TODO-Break sections bigger than space
         // for now skip
-        debugPrint(
-          "PRINTING PROVIDER - failed to layout big section",
-        );
+        debugPrint("PRINTING PROVIDER - failed to layout big section");
       }
 
       if (cursor.y + sectionBlockHeight > contentHeight) {
@@ -619,5 +621,294 @@ class PrintingProvider extends ChangeNotifier {
     columnCount = (columnCount == 1) ? 2 : 1;
     await PrintCacheService.setColumnCount(columnCount);
     notifyListeners();
+  }
+
+  Future<Uint8List> generatePDF(
+    List<PageLayout> pages,
+    PagePreviewSnapshot snapshot,
+    double pageWidth,
+  ) async {
+    final document = PdfDocument();
+    final margins = {
+      'top': verticalMargin,
+      'left': horizontalMargin,
+      'right': horizontalMargin,
+      'bottom': verticalMargin,
+    };
+
+    // Pre-load all fonts needed for this PDF
+    final fontCache = <String, PdfFont>{};
+    await _preloadFonts(snapshot, fontCache);
+
+    for (int pageIdx = 0; pageIdx < pages.length; pageIdx++) {
+      final pageLayout = pages[pageIdx];
+      final page = document.pages.add();
+      final contentSize = page.getClientSize();
+
+      final ratio = contentSize.width / pageWidth;
+
+      // Start drawing at top-left with margins
+      double currentY = margins['top']!;
+
+      // DRAW HEADER (only on first page)
+      if (pageIdx == 0 && snapshot.headerBlockHeight > 0) {
+        for (final instruction in snapshot.headerInstructions) {
+          final scaledX = margins['left']! + (instruction.offset.dx * ratio);
+          final scaledY = currentY + (instruction.offset.dy * ratio);
+
+          _drawTextInstruction(
+            page.graphics,
+            instruction,
+            scaledX,
+            scaledY,
+            ratio,
+            fontCache,
+          );
+        }
+        currentY += snapshot.headerBlockHeight * ratio + headerGap * ratio;
+      }
+
+      // DRAW SECTIONS
+      for (final placement in pageLayout.placements) {
+        final model = snapshot.sectionModels[placement.sectionKey]!;
+
+        // Calculate section position with margins
+        final sectionX = margins['left']! + (placement.xOffset * ratio);
+        final sectionY =
+            margins['top']! +
+            (pageIdx == 0
+                ? snapshot.headerBlockHeight * ratio + headerGap * ratio
+                : 0) +
+            (placement.yOffset * ratio);
+
+        // Draw section label and badge if needed
+        final badge = snapshot.badgeModels[placement.sectionKey];
+        final label = snapshot.sectionLabelPainters[placement.sectionKey];
+
+        if (badge != null && label != null && showSectionLabels) {
+          _drawSectionBadge(
+            page.graphics,
+            badge,
+            label,
+            sectionX,
+            sectionY,
+            ratio,
+            fontCache,
+          );
+        }
+
+        // Draw section content (text instructions and underlines)
+        _drawSectionContent(
+          page.graphics,
+          model,
+          sectionX,
+          sectionY + (snapshot.sectionLabelHeight * ratio) + (4 * ratio),
+          ratio,
+          fontCache,
+        );
+      }
+    }
+
+    return await document.saveAsBytes();
+  }
+
+  /// Pre-load all fonts used in the snapshot to cache them
+  Future<void> _preloadFonts(
+    PagePreviewSnapshot snapshot,
+    Map<String, PdfFont> fontCache,
+  ) async {
+    final fontNamesToLoad = <String, (bool, bool)>{};
+
+    // Collect fonts from header
+    for (final instruction in snapshot.headerInstructions) {
+      final fontName = instruction.style.fontFamily ?? 'OpenSans';
+      final isBold = instruction.style.fontWeight == FontWeight.bold;
+      final isItalic = instruction.style.fontStyle == FontStyle.italic;
+      fontNamesToLoad['$fontName-$isBold-$isItalic'] = (isBold, isItalic);
+    }
+
+    // Collect fonts from sections
+    for (final model in snapshot.sectionModels.values) {
+      for (final instruction in model.textInstructions) {
+        final fontName = instruction.style.fontFamily ?? 'OpenSans';
+        final isBold = instruction.style.fontWeight == FontWeight.bold;
+        final isItalic = instruction.style.fontStyle == FontStyle.italic;
+        fontNamesToLoad['$fontName-$isBold-$isItalic'] = (isBold, isItalic);
+      }
+    }
+
+    // Load all fonts
+    for (final entry in fontNamesToLoad.entries) {
+      final (fontName, (isBold, isItalic)) = (entry.key.split('-')[0], entry.value);
+      final fontSize = 12.0; // Default, will be scaled during drawing
+      try {
+        final font = await getPdfFont(
+          fontName,
+          isBold: isBold,
+          isItalic: isItalic,
+          fontSize: fontSize,
+        );
+        fontCache[entry.key] = font;
+      } catch (e) {
+        debugPrint('Failed to preload font $fontName: $e');
+      }
+    }
+  }
+
+  /// Draw a single text instruction with proper styling
+  void _drawTextInstruction(
+    PdfGraphics graphics,
+    TextPaintInstruction instruction,
+    double x,
+    double y,
+    double ratio,
+    Map<String, PdfFont> fontCache,
+  ) {
+    final style = instruction.style;
+    final fontSize = (style.fontSize ?? 12) * ratio;
+    final fontName = style.fontFamily ?? 'OpenSans';
+    final isBold = style.fontWeight == FontWeight.bold;
+    final isItalic = style.fontStyle == FontStyle.italic;
+
+    // Get font from cache
+    final cacheKey = '$fontName-$isBold-$isItalic';
+    final pdfFont = fontCache[cacheKey] ?? 
+        PdfStandardFont(PdfFontFamily.helvetica, fontSize);
+
+    // Set text color if specified
+    if (style.color != null) {
+      graphics.drawString(
+        instruction.painter.plainText,
+        pdfFont,
+        brush: PdfSolidBrush(_colorToPdfColor(style.color!)),
+        bounds: Rect.fromLTWH(x, y, double.maxFinite, fontSize * 2),
+      );
+    } else {
+      graphics.drawString(
+        instruction.painter.plainText,
+        pdfFont,
+        bounds: Rect.fromLTWH(x, y, double.maxFinite, fontSize * 2),
+      );
+    }
+  }
+
+  /// Draw section badge with label
+  void _drawSectionBadge(
+    PdfGraphics graphics,
+    BadgePaintModel badge,
+    TextPainter label,
+    double x,
+    double y,
+    double ratio,
+    Map<String, PdfFont> fontCache,
+  ) {
+    // Draw badge background
+    final badgeWidth = (badge.textInstruction.width + 8) * ratio;
+    final badgeHeight = (badge.textInstruction.height + 4) * ratio;
+
+    final badgeRect = Rect.fromLTWH(x, y, badgeWidth, badgeHeight);
+    graphics.drawRectangle(
+      bounds: badgeRect,
+      brush: PdfSolidBrush(_colorToPdfColor(badge.color)),
+    );
+
+    // Draw badge text
+    final badgeFontSize = 10 * ratio;
+    final badgeFont = fontCache.values.isNotEmpty
+        ? fontCache.values.first
+        : PdfStandardFont(PdfFontFamily.helvetica, badgeFontSize);
+    
+    graphics.drawString(
+      badge.textInstruction.plainText,
+      badgeFont,
+      brush: PdfSolidBrush(PdfColor(255, 255, 255)), // White text on badge
+      bounds: Rect.fromLTWH(
+        x + (4 * ratio),
+        y + (2 * ratio),
+        badgeWidth,
+        badgeHeight,
+      ),
+    );
+
+    // Draw label text
+    final labelFontSize = 10 * ratio;
+    final labelFont = fontCache.values.isNotEmpty
+        ? fontCache.values.first
+        : PdfStandardFont(PdfFontFamily.helvetica, labelFontSize);
+    
+    graphics.drawString(
+      label.plainText,
+      labelFont,
+      bounds: Rect.fromLTWH(
+        x + badgeWidth + (12 * ratio),
+        y + (2 * ratio),
+        double.maxFinite,
+        labelFontSize * 2,
+      ),
+    );
+  }
+
+  /// Draw section content (chords, lyrics, underlines)
+  void _drawSectionContent(
+    PdfGraphics graphics,
+    SectionPaintModel model,
+    double baseX,
+    double baseY,
+    double ratio,
+    Map<String, PdfFont> fontCache,
+  ) {
+    // Draw text instructions (chords and lyrics)
+    for (final instruction in model.textInstructions) {
+      final style = instruction.style;
+      final fontSize = (style.fontSize ?? 12) * ratio;
+      final fontName = style.fontFamily ?? 'OpenSans';
+      final isBold = style.fontWeight == FontWeight.bold;
+      final isItalic = style.fontStyle == FontStyle.italic;
+
+      // Get font from cache
+      final cacheKey = '$fontName-$isBold-$isItalic';
+      final pdfFont = fontCache[cacheKey] ?? 
+          PdfStandardFont(PdfFontFamily.helvetica, fontSize);
+
+      final textX = baseX + (instruction.offset.dx * ratio);
+      final textY = baseY + (instruction.offset.dy * ratio);
+
+      if (style.color != null) {
+        graphics.drawString(
+          instruction.painter.plainText,
+          pdfFont,
+          brush: PdfSolidBrush(_colorToPdfColor(style.color!)),
+          bounds: Rect.fromLTWH(textX, textY, double.maxFinite, fontSize * 2),
+        );
+      } else {
+        graphics.drawString(
+          instruction.painter.plainText,
+          pdfFont,
+          bounds: Rect.fromLTWH(textX, textY, double.maxFinite, fontSize * 2),
+        );
+      }
+    }
+
+    // Draw underlines
+    for (final underline in model.underlines) {
+      final underlineX1 = baseX + (underline.offset.dx * ratio);
+      final underlineY = baseY + (underline.offset.dy * ratio);
+      final underlineX2 = underlineX1 + (underline.width * ratio);
+
+      graphics.drawLine(
+        PdfPen(_colorToPdfColor(model.underlineColor), width: 1 * ratio),
+        Offset(underlineX1, underlineY),
+        Offset(underlineX2, underlineY),
+      );
+    }
+  }
+
+  /// Convert Flutter Color to PDF Color
+  PdfColor _colorToPdfColor(Color color) {
+    return PdfColor(
+      (color.r * 255).round(),
+      (color.g * 255).round(),
+      (color.b * 255).round(),
+    );
   }
 }
