@@ -60,6 +60,7 @@ class PrintingContext {
   final double lineBreakSpacing;
   final double minChordSpacing;
   final double maxWidth;
+  final double contentWidth;
 
   PrintingContext({
     required this.showHeader,
@@ -79,6 +80,7 @@ class PrintingContext {
     required this.lineBreakSpacing,
     required this.minChordSpacing,
     required this.maxWidth,
+    required this.contentWidth,
   });
 }
 
@@ -136,6 +138,7 @@ class PrintingProvider extends ChangeNotifier {
   /// ===== DATA CACHES =====
   final Map<String, Measurements> _tokenMeasurements = {};
   final Map<int, SectionPrintCache> _sectionCache = {};
+  final List<int> _songMap = [];
   final HeaderData _headerData = HeaderData();
 
   /// ===== STATE SETTINGS =====
@@ -251,6 +254,9 @@ class PrintingProvider extends ChangeNotifier {
     _headerData.songMapLabel = l10n.songStructure;
     _headerData.durationLabel = l10n.duration;
 
+    _songMap.clear();
+    _songMap.addAll(version.songStructure);
+
     final types = <int, SectionType>{};
     for (var section in sections.values) {
       types[section.key] = section.sectionType;
@@ -327,6 +333,7 @@ class PrintingProvider extends ChangeNotifier {
 
   PagePreviewSnapshot buildPreviewSnapshot(double maxWidth) {
     return PagePreviewSnapshot.build(
+      songMap: _songMap,
       sections: _sectionCache,
       builder: _builder,
       tokenMeasurements: _tokenMeasurements,
@@ -349,6 +356,8 @@ class PrintingProvider extends ChangeNotifier {
         lineBreakSpacing: lineBreakSpacing,
         minChordSpacing: minChordSpacing,
         maxWidth: maxWidth,
+        contentWidth:
+            (maxWidth * columnCount) + ((columnCount - 1) * columnGap),
       ),
     );
   }
@@ -361,23 +370,32 @@ class PrintingProvider extends ChangeNotifier {
   ) {
     final pages = <PageLayout>[];
     final cursor = _LayoutCursor(
-      headerHeight: snapshot.headerBlockHeight + headerGap,
+      headerHeight: showHeader ? snapshot.headerBlockHeight + headerGap : 0,
       columnWidth: sectionWidth + columnGap,
     );
 
     final contentHeight = pageHeight - 2 * verticalMargin;
 
     final placements = <SectionPlacement>[];
-    for (final model in snapshot.sectionModels.values) {
+
+    final seenKeys = <int>{};
+    for (final key in snapshot.songMap) {
+      if (seenKeys.contains(key) && !showRepeatSections) {
+        continue;
+      }
+      seenKeys.add(key);
+
+      final model = snapshot.sectionModels[key]!;
       final sectionBlockHeight =
-          model.size.height + snapshot.sectionLabelHeight;
+          model.size.height +
+          (showSectionLabels ? snapshot.sectionLabelHeight : 0);
+
       if (sectionBlockHeight > contentHeight) {
         // TODO-Break sections bigger than space
         // for now skip
         debugPrint(
-          "PRINTING PROVIDER - failed to layout section bigger than space available",
+          "PRINTING PROVIDER - failed to layout big section",
         );
-        continue;
       }
 
       if (cursor.y + sectionBlockHeight > contentHeight) {

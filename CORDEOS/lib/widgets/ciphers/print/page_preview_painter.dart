@@ -11,17 +11,21 @@ import 'package:flutter/material.dart';
 /// Constructing this object is the only place where TextPainters are built,
 /// keeping [PagePreviewPainter.paint] allocation-free.
 class PagePreviewSnapshot {
-  final Map<int, SectionPaintModel> sectionModels;
-  final Map<int, TextPainter> sectionLabelPainters;
+  final List<int> songMap;
   final List<TextPaintInstruction> headerInstructions;
   final double headerBlockHeight;
+  final Map<int, TextPainter> sectionLabelPainters;
+  final Map<int, BadgePaintModel> badgeModels;
+  final Map<int, SectionPaintModel> sectionModels;
   final double sectionLabelHeight;
 
   const PagePreviewSnapshot({
-    required this.sectionModels,
-    required this.sectionLabelPainters,
+    required this.songMap,
     required this.headerInstructions,
     required this.headerBlockHeight,
+    required this.sectionLabelPainters,
+    required this.badgeModels,
+    required this.sectionModels,
     required this.sectionLabelHeight,
   });
 
@@ -29,6 +33,7 @@ class PagePreviewSnapshot {
   /// Call this outside of [paint] — typically in [State.setState] or after
   /// [PrintingProvider.buildSongPdfDto] resolves.
   static PagePreviewSnapshot build({
+    required List<int> songMap,
     required Map<int, SectionPrintCache> sections,
     required Map<String, Measurements> tokenMeasurements,
     required HeaderData header,
@@ -37,18 +42,14 @@ class PagePreviewSnapshot {
   }) {
     // Build per-section paint models
     final models = <int, SectionPaintModel>{};
-    final sectionLabelPainters = <int, TextPainter>{};
-    final seenTypes = <SectionType>{};
+    final labelPainters = <int, TextPainter>{};
+    final badgePainters = <int, BadgePaintModel>{};
     for (final key in sections.keys) {
       final section = sections[key]!;
 
       if (section.type == SectionType.annotation && !ctx.showAnnotations) {
         continue;
       }
-      if (seenTypes.contains(section.type) && !ctx.showRepeatSections) {
-        continue;
-      }
-      seenTypes.add(section.type);
 
       final lyricStyle = (section.type == SectionType.annotation)
           ? ctx.lyricStyle.copyWith(fontStyle: FontStyle.italic)
@@ -62,16 +63,33 @@ class PagePreviewSnapshot {
         lyricStyle: lyricStyle,
       );
 
-      final labelPainter = TextPainter(
-        text: TextSpan(text: section.label, style: ctx.labelStyle),
-        textDirection: TextDirection.ltr,
-        maxLines: 1,
-      )..layout(maxWidth: ctx.maxWidth);
-      sectionLabelPainters[key] = labelPainter;
+      if (ctx.showSectionLabels) {
+        final labelPainter = TextPainter(
+          text: TextSpan(text: section.label, style: ctx.labelStyle),
+          textDirection: TextDirection.ltr,
+          maxLines: 1,
+        )..layout(maxWidth: ctx.contentWidth);
+
+        labelPainters[key] = labelPainter;
+
+        final badgePainter = TextPainter(
+          text: TextSpan(text: section.code, style: ctx.labelStyle),
+          textDirection: TextDirection.ltr,
+          maxLines: 1,
+        )..layout(maxWidth: ctx.contentWidth);
+
+        badgePainters[key] = BadgePaintModel(
+          color: section.color,
+          key: key,
+          textInstruction: badgePainter,
+        );
+      }
     }
 
     // Build header instructions
-    final metaLines = _buildHeaderLines(ctx: ctx, header: header);
+    final metaLines = ctx.showHeader
+        ? _buildHeaderLines(ctx: ctx, header: header)
+        : [];
     final instructions = <TextPaintInstruction>[];
     double y = 0;
     for (final (text, style) in metaLines) {
@@ -79,8 +97,7 @@ class PagePreviewSnapshot {
       final painter = TextPainter(
         text: TextSpan(text: text, style: style),
         textDirection: TextDirection.ltr,
-        maxLines: 1,
-      )..layout(maxWidth: ctx.maxWidth);
+      )..layout(maxWidth: (ctx.contentWidth));
       instructions.add(
         TextPaintInstruction(painter: painter, offset: Offset(0, y)),
       );
@@ -88,13 +105,15 @@ class PagePreviewSnapshot {
     }
 
     return PagePreviewSnapshot(
+      badgeModels: badgePainters,
+      songMap: songMap,
       sectionModels: models,
-      sectionLabelPainters: sectionLabelPainters,
+      sectionLabelPainters: labelPainters,
       headerInstructions: instructions,
       headerBlockHeight: y,
-      sectionLabelHeight: sectionLabelPainters.isEmpty
+      sectionLabelHeight: labelPainters.isEmpty
           ? 0
-          : (sectionLabelPainters.values.first.height + 4),
+          : (labelPainters.values.first.height + 4),
     );
   }
 
@@ -234,7 +253,12 @@ class PagePreviewPainter extends CustomPainter {
 
     for (final placement in pages[pageIndex].placements) {
       final model = snapshot.sectionModels[placement.sectionKey]!;
-      _paintSectionSlice(canvas, model, placement);
+      _paintSectionSlice(
+        canvas,
+        model,
+        placement,
+        snapshot.sectionLabelHeight > 0,
+      );
     }
 
     canvas.restore();
@@ -254,6 +278,7 @@ class PagePreviewPainter extends CustomPainter {
     Canvas canvas,
     SectionPaintModel model,
     SectionPlacement placement,
+    bool showLabel,
   ) {
     canvas.save();
     canvas.clipRect(
@@ -265,8 +290,25 @@ class PagePreviewPainter extends CustomPainter {
       ),
     );
 
-    final painter = snapshot.sectionLabelPainters[placement.sectionKey];
-    painter?.paint(canvas, Offset(placement.xOffset, placement.yOffset));
+    final label = snapshot.sectionLabelPainters[placement.sectionKey];
+    final badge = snapshot.badgeModels[placement.sectionKey];
+    if (showLabel && badge != null && label != null) {
+      canvas.drawRRect(
+        badge.rRect.shift(Offset(placement.xOffset, placement.yOffset)),
+        Paint()..color = badge.color,
+      );
+      badge.textInstruction.paint(
+        canvas,
+        Offset(placement.xOffset + 4, placement.yOffset + 2),
+      );
+      label.paint(
+        canvas,
+        Offset(
+          placement.xOffset + badge.textInstruction.width + 12,
+          placement.yOffset + 2,
+        ),
+      );
+    }
 
     for (final instruction in model.textInstructions) {
       instruction.painter.paint(
@@ -275,7 +317,8 @@ class PagePreviewPainter extends CustomPainter {
           placement.xOffset + instruction.offset.dx,
           placement.yOffset +
               instruction.offset.dy +
-              snapshot.sectionLabelHeight,
+              snapshot.sectionLabelHeight +
+              4,
         ),
       );
     }

@@ -289,27 +289,43 @@ class SectionPaintModel {
     required this.underlines,
     required this.size,
     required this.underlineColor,
-
   });
+}
+
+class BadgePaintModel {
+  final int key;
+  final TextPainter textInstruction;
+  final Color color;
+
+  BadgePaintModel({
+    required this.key,
+    required this.color,
+    required this.textInstruction,
+  });
+
+  RRect get rRect {
+    return RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+        0,
+        0,
+        textInstruction.width + 8,
+        textInstruction.height + 4,
+      ),
+      const Radius.circular(4),
+    );
+  }
 }
 
 class TextPaintInstruction {
   final Offset offset;
   final TextPainter painter;
 
-  TextPaintInstruction({
-    required this.offset,
-    required this.painter,
-  });
+  TextPaintInstruction({required this.offset, required this.painter});
 }
 
 class UnderLinePaintInstruction {
   final Offset offset;
   final double width;
 
-  UnderLinePaintInstruction({
-    required this.offset,
-    required this.width,
-  });
+  UnderLinePaintInstruction({required this.offset, required this.width});
 }
-

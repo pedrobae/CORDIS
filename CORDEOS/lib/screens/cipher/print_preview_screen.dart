@@ -194,8 +194,9 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                 selector: (context, print) {
                   final sectionMaxWidth =
                       (pageWidth -
-                      (print.horizontalMargin * 2) -
-                      ((print.columnCount - 1) * print.columnGap)) / print.columnCount;
+                          (print.horizontalMargin * 2) -
+                          ((print.columnCount - 1) * print.columnGap)) /
+                      print.columnCount;
 
                   return (
                     sectionMaxWidth: sectionMaxWidth,
