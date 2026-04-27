@@ -99,7 +99,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => EditSectionsStateProvider()),
         ChangeNotifierProvider(create: (_) => TokenProvider()),
         // FUNCTIONALITY PROVIDERS
-        ChangeNotifierProvider(create: (_) => PrintingProvider()),
+        ChangeNotifierProvider(
+          create: (_) => PrintingProvider()..loadSettings(),
+        ),
         ChangeNotifierProvider(create: (_) => SelectionProvider()),
         ChangeNotifierProvider(create: (_) => TranspositionProvider()),
         ChangeNotifierProvider(create: (_) => EmailProvider()),

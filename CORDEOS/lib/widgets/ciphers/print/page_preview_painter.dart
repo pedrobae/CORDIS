@@ -13,15 +13,15 @@ import 'package:flutter/material.dart';
 class PagePreviewSnapshot {
   final Map<int, SectionPaintModel> sectionModels;
   final Map<int, TextPainter> sectionLabelPainters;
-  final List<TextPaintInstruction> metadataInstructions;
-  final double metadataBlockHeight;
+  final List<TextPaintInstruction> headerInstructions;
+  final double headerBlockHeight;
   final double sectionLabelHeight;
 
   const PagePreviewSnapshot({
     required this.sectionModels,
     required this.sectionLabelPainters,
-    required this.metadataInstructions,
-    required this.metadataBlockHeight,
+    required this.headerInstructions,
+    required this.headerBlockHeight,
     required this.sectionLabelHeight,
   });
 
@@ -70,8 +70,8 @@ class PagePreviewSnapshot {
       sectionLabelPainters[key] = labelPainter;
     }
 
-    // Build metadata header instructions
-    final metaLines = _buildMetadataLines(ctx: ctx, header: header);
+    // Build header instructions
+    final metaLines = _buildHeaderLines(ctx: ctx, header: header);
     final instructions = <TextPaintInstruction>[];
     double y = 0;
     for (final (text, style) in metaLines) {
@@ -90,15 +90,15 @@ class PagePreviewSnapshot {
     return PagePreviewSnapshot(
       sectionModels: models,
       sectionLabelPainters: sectionLabelPainters,
-      metadataInstructions: instructions,
-      metadataBlockHeight: y,
+      headerInstructions: instructions,
+      headerBlockHeight: y,
       sectionLabelHeight: sectionLabelPainters.isEmpty
           ? 0
           : (sectionLabelPainters.values.first.height + 4),
     );
   }
 
-  static List<(String, TextStyle)> _buildMetadataLines({
+  static List<(String, TextStyle)> _buildHeaderLines({
     required PrintingContext ctx,
     required HeaderData header,
   }) {
@@ -114,17 +114,17 @@ class PagePreviewSnapshot {
     return [
       (
         header.title,
-        ctx.metadataStyle.copyWith(
+        ctx.headerStyle.copyWith(
           fontWeight: FontWeight.bold,
-          fontSize: (ctx.metadataStyle.fontSize ?? 12) + 2,
+          fontSize: (ctx.headerStyle.fontSize ?? 12) + 2,
         ),
       ),
-      (detailParts.join('  •  '), ctx.metadataStyle),
+      (detailParts.join('  •  '), ctx.headerStyle),
       if (ctx.showSongMap)
         (
           '${header.songMapLabel}: ${header.codeSongMap.join('|')}',
-          ctx.metadataStyle.copyWith(
-            fontSize: (ctx.metadataStyle.fontSize ?? 11) - 1,
+          ctx.headerStyle.copyWith(
+            fontSize: (ctx.headerStyle.fontSize ?? 11) - 1,
           ),
         ),
     ];
@@ -230,7 +230,7 @@ class PagePreviewPainter extends CustomPainter {
     canvas.save();
     canvas.translate(ctx.horizontalMargin, ctx.verticalMargin);
 
-    if (pageIndex == 0) _paintHeader(canvas, snapshot.metadataInstructions);
+    if (pageIndex == 0) _paintHeader(canvas, snapshot.headerInstructions);
 
     for (final placement in pages[pageIndex].placements) {
       final model = snapshot.sectionModels[placement.sectionKey]!;
@@ -242,10 +242,10 @@ class PagePreviewPainter extends CustomPainter {
 
   void _paintHeader(
     Canvas canvas,
-    List<TextPaintInstruction> metadataInstructions,
+    List<TextPaintInstruction> headerInstructions,
   ) {
-    // Paint all metadata text instructions at their computed positions
-    for (final instruction in metadataInstructions) {
+    // Paint all header instructions at their computed positions
+    for (final instruction in headerInstructions) {
       instruction.painter.paint(canvas, instruction.offset);
     }
   }

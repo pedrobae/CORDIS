@@ -620,6 +620,12 @@ abstract class AppLocalizations {
   /// **'Filtros de Conteúdo'**
   String get contentFilters;
 
+  /// Label for header Filter setting
+  ///
+  /// In pt, this message translates to:
+  /// **'Cabeçalho'**
+  String get header;
+
   /// Label for repeat sections filter setting
   ///
   /// In pt, this message translates to:
@@ -661,6 +667,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Espaçamento entre Letras'**
   String get letterSpacing;
+
+  /// Label for horizontal margin slider
+  ///
+  /// In pt, this message translates to:
+  /// **'Margem Horizontal'**
+  String get horizontalMargin;
+
+  /// Label for vertical margin slider
+  ///
+  /// In pt, this message translates to:
+  /// **'Margem Vertical'**
+  String get verticalMargin;
+
+  /// Label for Section Spacing slider
+  ///
+  /// In pt, this message translates to:
+  /// **'Espaço entre Seções'**
+  String get sectionSpacing;
+
+  /// Label for Header Gap slider
+  ///
+  /// In pt, this message translates to:
+  /// **'Espaço após Cabeçalho'**
+  String get headerGap;
+
+  /// Label for Column Gap slider
+  ///
+  /// In pt, this message translates to:
+  /// **'Espaço entre Colunas'**
+  String get columnGap;
 
   /// Label for small card width
   ///

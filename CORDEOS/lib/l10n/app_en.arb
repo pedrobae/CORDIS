@@ -371,6 +371,10 @@
   "@contentFilters": {
     "description": "Title for content filters settings section"
   },
+  "header": "Header",
+  "@header": {
+    "description": "Label for header Filter setting"
+  },
   "repeatSections": "Repeat Sections",
   "@repeatSections": {
     "description": "Label for repeat sections filter setting"
@@ -398,6 +402,26 @@
   "letterSpacing": "Letter Spacing",
   "@letterSpacing": {
     "description": "Label for letter spacing setting"
+  },
+  "horizontalMargin": "Horizontal Margin",
+  "@horizontalMargin": {
+    "description": "Label for horizontal margin slider"
+  },
+  "verticalMargin": "Vertical Margin",
+  "@verticalMargin": {
+    "description": "Label for vertical margin slider"
+  },
+  "sectionSpacing": "Section Spacing",
+  "@sectionSpacing": {
+    "description": "Label for Section Spacing slider"
+  },
+  "headerGap": "Header Gap",
+  "@headerGap": {
+    "description": "Label for Header Gap slider"
+  },
+  "columnGap": "Column Gap",
+  "@columnGap": {
+    "description": "Label for Column Gap slider"
   },
   "small": "Small",
   "@small": {

@@ -293,6 +293,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get contentFilters => 'Filtros de Conteúdo';
 
   @override
+  String get header => 'Cabeçalho';
+
+  @override
   String get repeatSections => 'Seções Repetidas';
 
   @override
@@ -312,6 +315,21 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get letterSpacing => 'Espaçamento entre Letras';
+
+  @override
+  String get horizontalMargin => 'Margem Horizontal';
+
+  @override
+  String get verticalMargin => 'Margem Vertical';
+
+  @override
+  String get sectionSpacing => 'Espaço entre Seções';
+
+  @override
+  String get headerGap => 'Espaço após Cabeçalho';
+
+  @override
+  String get columnGap => 'Espaço entre Colunas';
 
   @override
   String get small => 'Pequeno';

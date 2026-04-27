@@ -10,6 +10,9 @@ import 'package:cordeos/providers/section/section_provider.dart';
 import 'package:cordeos/providers/transposition_provider.dart';
 import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/widgets/ciphers/print/page_preview_painter.dart';
+import 'package:cordeos/widgets/ciphers/print/sheet_print_filters.dart';
+import 'package:cordeos/widgets/ciphers/print/sheet_print_layout.dart';
+import 'package:cordeos/widgets/ciphers/print/sheet_print_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -70,19 +73,34 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
       children: [
         IconButton(
           onPressed: () {
-            //TODO - Open printFilters
+             showModalBottomSheet(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => PrintFilters(),
+      );
           },
           icon: const Icon(Icons.filter_list),
         ),
         IconButton(
           onPressed: () {
-            //TODO - Open layout settings
+             showModalBottomSheet(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => PrintLayout(),
+      );
           },
           icon: const Icon(Icons.format_paint_rounded),
         ),
         IconButton(
           onPressed: () {
-            //TODO - Open textStyle settings
+            showModalBottomSheet(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => PrintStyle(),
+      );
           },
           icon: const Icon(Icons.text_fields),
         ),
@@ -195,11 +213,10 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                       Color lyricColor,
                       Color chordColor,
                       Color metadataColor,
-                      Color labelColor,
                     })
                   >(
                     selector: (context, print) => (
-                      showMetadata: print.showMetadata,
+                      showMetadata: print.showHeader,
                       showRepeatSections: print.showRepeatSections,
                       showAnnotations: print.showAnnotations,
                       showSongMap: print.showSongMap,
@@ -208,8 +225,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                       showDuration: print.showDuration,
                       lyricColor: print.lyricColor,
                       chordColor: print.chordColor,
-                      metadataColor: print.metadataColor,
-                      labelColor: print.labelColor,
+                      metadataColor: print.headerColor,
                     ),
                     builder: (context, buildSettings, child) {
                       final previewSnapshot = print.buildPreviewSnapshot(

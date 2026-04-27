@@ -2,6 +2,7 @@ import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/models/domain/cipher/cipher.dart';
 import 'package:cordeos/models/domain/cipher/section.dart';
 import 'package:cordeos/models/domain/cipher/version.dart';
+import 'package:cordeos/services/print_cache.dart';
 import 'package:cordeos/utils/section_type.dart';
 import 'package:cordeos/widgets/ciphers/print/page_preview_painter.dart';
 import 'package:cordeos/services/tokenization/build_service.dart';
@@ -15,11 +16,11 @@ class _LayoutCursor {
   double x = 0;
   int pageIndex = 0;
   int columnIndex = 0;
-  double metadataHeight;
+  double headerHeight;
   double columnWidth;
-  late double y = metadataHeight;
+  late double y = headerHeight;
 
-  _LayoutCursor({required this.metadataHeight, required this.columnWidth});
+  _LayoutCursor({required this.headerHeight, required this.columnWidth});
 
   // Returns whether a new page is needed
   bool breakColumn(int columnCount) {
@@ -33,7 +34,7 @@ class _LayoutCursor {
     }
     x = columnIndex * columnWidth;
     if (pageIndex == 0) {
-      y = metadataHeight;
+      y = headerHeight;
     } else {
       y = 0;
     }
@@ -42,7 +43,7 @@ class _LayoutCursor {
 }
 
 class PrintingContext {
-  final bool showMetadata;
+  final bool showHeader;
   final bool showRepeatSections;
   final bool showAnnotations;
   final bool showSongMap;
@@ -51,7 +52,7 @@ class PrintingContext {
   final bool showDuration;
   final TextStyle lyricStyle;
   final TextStyle chordStyle;
-  final TextStyle metadataStyle;
+  final TextStyle headerStyle;
   final TextStyle labelStyle;
   final double chordLyricSpacing;
   final double lineSpacing;
@@ -61,7 +62,7 @@ class PrintingContext {
   final double maxWidth;
 
   PrintingContext({
-    required this.showMetadata,
+    required this.showHeader,
     required this.showRepeatSections,
     required this.showAnnotations,
     required this.showSongMap,
@@ -70,7 +71,7 @@ class PrintingContext {
     required this.showDuration,
     required this.lyricStyle,
     required this.chordStyle,
-    required this.metadataStyle,
+    required this.headerStyle,
     required this.labelStyle,
     required this.chordLyricSpacing,
     required this.lineSpacing,
@@ -139,7 +140,7 @@ class PrintingProvider extends ChangeNotifier {
 
   /// ===== STATE SETTINGS =====
   // Filter Settings
-  bool showMetadata = true;
+  bool showHeader = true;
   bool showRepeatSections = true;
   bool showAnnotations = true;
   bool showSongMap = true;
@@ -149,7 +150,7 @@ class PrintingProvider extends ChangeNotifier {
 
   // Style settings
   String lyricFontFamily = 'OpenSans';
-  double lyricFontSize = 11;
+  double lyricFontSize = 12;
   Color lyricColor = Colors.black;
   TextStyle get lyricStyle => TextStyle(
     fontFamily: lyricFontFamily,
@@ -167,29 +168,24 @@ class PrintingProvider extends ChangeNotifier {
     color: chordColor,
   );
 
-  String metadataFontFamily = 'OpenSans';
-  double metadataFontSize = 11;
-  Color metadataColor = Colors.black;
-  TextStyle get metadataStyle => TextStyle(
-    fontFamily: metadataFontFamily,
-    fontSize: metadataFontSize,
-    color: metadataColor,
+  String headerFontFamily = 'OpenSans';
+  double headerFontSize = 12;
+  Color headerColor = Colors.black;
+  TextStyle get headerSyle => TextStyle(
+    fontFamily: headerFontFamily,
+    fontSize: headerFontSize,
+    color: headerColor,
   );
 
-  String labelFontFamily = 'OpenSans';
-  double labelFontSize = 10;
-  Color labelColor = Colors.black;
   TextStyle get labelStyle => TextStyle(
-    fontFamily: labelFontFamily,
-    fontSize: labelFontSize,
+    fontFamily: lyricFontFamily,
+    fontStyle: FontStyle.italic,
+    fontSize: lyricFontSize,
     fontWeight: FontWeight.bold,
-    color: labelColor,
+    color: lyricColor,
   );
 
   // Layout settings
-  int columnCount = 1;
-  double columnGap = 16;
-  double topMargin = 24;
   double lineBreakSpacing = 0;
   double chordLyricSpacing = 0;
   double minChordSpacing = 5;
@@ -200,7 +196,41 @@ class PrintingProvider extends ChangeNotifier {
   double horizontalMargin = 24;
   double verticalMargin = 24;
   double sectionSpacing = 16;
-  double metadataGap = 12;
+  double headerGap = 12;
+  double columnGap = 16;
+  int columnCount = 1;
+
+  /// Initialize with stored settings
+  Future<void> loadSettings() async {
+    // Style Settings
+    lyricFontSize = PrintCacheService.getLyricSize();
+    lyricFontFamily = PrintCacheService.getLyricFontFamily();
+    chordFontSize = PrintCacheService.getChordSize();
+    chordFontFamily = PrintCacheService.getChordFontFamily();
+    headerFontSize = PrintCacheService.getHeaderSize();
+    headerFontFamily = PrintCacheService.getHeaderFontFamily();
+    // Layout settings
+    lineSpacing = PrintCacheService.getLineSpacing();
+    lineBreakSpacing = PrintCacheService.getLineBreakSpacing();
+    chordLyricSpacing = PrintCacheService.getChordLyricSpacing();
+    minChordSpacing = PrintCacheService.getMinChordSpacing();
+    letterSpacing = PrintCacheService.getLetterSpacing();
+    showHeader = PrintCacheService.getShowHeader();
+    showRepeatSections = PrintCacheService.getShowRepeatSections();
+    showAnnotations = PrintCacheService.getShowAnnotations();
+    showSongMap = PrintCacheService.getShowSongMap();
+    showBpm = PrintCacheService.getShowBpm();
+    showDuration = PrintCacheService.getShowDuration();
+    showSectionLabels = PrintCacheService.getShowLabel();
+    // Page layout settings
+    horizontalMargin = PrintCacheService.getHorizontalMargin();
+    verticalMargin = PrintCacheService.getVerticalMargin();
+    sectionSpacing = PrintCacheService.getSectionSpacing();
+    headerGap = PrintCacheService.getHeaderGap();
+    columnGap = PrintCacheService.getColumnGap();
+    columnCount = PrintCacheService.getColumnCount();
+    notifyListeners();
+  }
 
   void tokenize({
     required Cipher cipher,
@@ -302,7 +332,7 @@ class PrintingProvider extends ChangeNotifier {
       tokenMeasurements: _tokenMeasurements,
       header: _headerData,
       ctx: PrintingContext(
-        showMetadata: showMetadata,
+        showHeader: showHeader,
         showRepeatSections: showRepeatSections,
         showAnnotations: showAnnotations,
         showSongMap: showSongMap,
@@ -311,7 +341,7 @@ class PrintingProvider extends ChangeNotifier {
         showDuration: showDuration,
         lyricStyle: lyricStyle,
         chordStyle: chordStyle,
-        metadataStyle: metadataStyle,
+        headerStyle: headerSyle,
         labelStyle: labelStyle,
         chordLyricSpacing: chordLyricSpacing,
         lineSpacing: lineSpacing,
@@ -331,7 +361,7 @@ class PrintingProvider extends ChangeNotifier {
   ) {
     final pages = <PageLayout>[];
     final cursor = _LayoutCursor(
-      metadataHeight: snapshot.metadataBlockHeight + metadataGap,
+      headerHeight: snapshot.headerBlockHeight + headerGap,
       columnWidth: sectionWidth + columnGap,
     );
 
@@ -419,5 +449,157 @@ class PrintingProvider extends ChangeNotifier {
           break;
       }
     }
+  }
+
+  // =========== SETTERS FOR STYLE SETTINGS =============
+
+  Future<void> setLyricFontSize(double size) async {
+    lyricFontSize = size;
+    await PrintCacheService.setLyricSize(size);
+    notifyListeners();
+  }
+
+  Future<void> setLyricFontFamily(String family) async {
+    lyricFontFamily = family;
+    await PrintCacheService.setLyricFontFamily(family);
+    notifyListeners();
+  }
+
+  Future<void> setChordFontSize(double size) async {
+    chordFontSize = size;
+    await PrintCacheService.setChordSize(size);
+    notifyListeners();
+  }
+
+  Future<void> setChordFontFamily(String family) async {
+    chordFontFamily = family;
+    await PrintCacheService.setChordFontFamily(family);
+    notifyListeners();
+  }
+
+  Future<void> setHeaderFontSize(double size) async {
+    headerFontSize = size;
+    await PrintCacheService.setHeaderSize(size);
+    notifyListeners();
+  }
+
+  Future<void> setHeaderFontFamily(String family) async {
+    headerFontFamily = family;
+    await PrintCacheService.setHeaderFontFamily(family);
+    notifyListeners();
+  }
+
+  // =========== SETTERS FOR LAYOUT SETTINGS =============
+
+  Future<void> setLineSpacing(double spacing) async {
+    lineSpacing = spacing;
+    await PrintCacheService.setLineSpacing(spacing);
+    notifyListeners();
+  }
+
+  Future<void> setLineBreakSpacing(double spacing) async {
+    lineBreakSpacing = spacing;
+    await PrintCacheService.setLineBreakSpacing(spacing);
+    notifyListeners();
+  }
+
+  Future<void> setChordLyricSpacing(double spacing) async {
+    chordLyricSpacing = spacing;
+    await PrintCacheService.setChordLyricSpacing(spacing);
+    notifyListeners();
+  }
+
+  Future<void> setMinChordSpacing(double spacing) async {
+    minChordSpacing = spacing;
+    await PrintCacheService.setMinChordSpacing(spacing);
+    notifyListeners();
+  }
+
+  Future<void> setLetterSpacing(double spacing) async {
+    letterSpacing = spacing;
+    await PrintCacheService.setLetterSpacing(spacing);
+    notifyListeners();
+  }
+
+  // =========== SETTERS FOR FILTER SETTINGS =============
+
+  Future<void> toggleHeader() async {
+    showHeader = !showHeader;
+    await PrintCacheService.setShowHeader(showHeader);
+    notifyListeners();
+  }
+
+  Future<void> toggleRepeatSections() async {
+    showRepeatSections = !showRepeatSections;
+    await PrintCacheService.setShowRepeatSections(showRepeatSections);
+    notifyListeners();
+  }
+
+  Future<void> toggleAnnotations() async {
+    showAnnotations = !showAnnotations;
+    await PrintCacheService.setShowAnnotations(showAnnotations);
+    notifyListeners();
+  }
+
+  Future<void> toggleSongMap() async {
+    showSongMap = !showSongMap;
+    await PrintCacheService.setShowSongMap(showSongMap);
+    notifyListeners();
+  }
+
+  Future<void> toggleSectionLabels() async {
+    showSectionLabels = !showSectionLabels;
+    await PrintCacheService.setShowLabel(showSectionLabels);
+    notifyListeners();
+  }
+
+  Future<void> toggleBpm() async {
+    showBpm = !showBpm;
+    await PrintCacheService.setShowBpm(showBpm);
+    notifyListeners();
+  }
+
+  Future<void> toggleDuration() async {
+    showDuration = !showDuration;
+    await PrintCacheService.setShowDuration(showDuration);
+    notifyListeners();
+  }
+
+  // =========== SETTERS FOR PAGE LAYOUT SETTINGS =============
+
+  Future<void> setHorizontalMargin(double margin) async {
+    horizontalMargin = margin;
+    await PrintCacheService.setHorizontalMargin(margin);
+    notifyListeners();
+  }
+
+  Future<void> setVerticalMargin(double margin) async {
+    verticalMargin = margin;
+    await PrintCacheService.setVerticalMargin(margin);
+    notifyListeners();
+  }
+
+  Future<void> setSectionSpacing(double spacing) async {
+    sectionSpacing = spacing;
+    await PrintCacheService.setSectionSpacing(spacing);
+    notifyListeners();
+  }
+
+  Future<void> setHeaderGap(double gap) async {
+    headerGap = gap;
+    await PrintCacheService.setHeaderGap(gap);
+    notifyListeners();
+  }
+
+  Future<void> setColumnGap(double gap) async {
+    columnGap = gap;
+    await PrintCacheService.setColumnGap(gap);
+    notifyListeners();
+  }
+
+  Future<void> toggleColumnCount() async {
+    columnCount = (columnCount == 1) ? 2 : 1;
+    await PrintCacheService.setColumnCount(columnCount);
+    notifyListeners();
   }
 }

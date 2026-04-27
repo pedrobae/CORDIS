@@ -1,5 +1,6 @@
 import 'package:cordeos/l10n/app_localizations.dart';
 import 'package:cordeos/providers/settings/layout_settings_provider.dart';
+import 'package:cordeos/utils/fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -185,46 +186,17 @@ class _StyleSettingsState extends State<StyleSettings> {
                           value: settings.fontFamily,
                           isExpanded: true,
                           items: [
-                            DropdownMenuItem(
-                              value: 'OpenSans',
-                              child: Text(
-                                'OpenSans',
-                                style: textTheme.labelLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'OpenSans',
+                            for (final fontFamily in FontFamilies.values) ...[
+                              DropdownMenuItem(
+                                value: fontFamily.key,
+                                child: Text(
+                                  fontFamily.key,
+                                  style: textTheme.titleMedium?.copyWith(
+                                    fontFamily: fontFamily.key,
+                                  ),
                                 ),
                               ),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Asimovian',
-                              child: Text(
-                                'Asimovian',
-                                style: textTheme.labelLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Asimovian',
-                                ),
-                              ),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Atkinson',
-                              child: Text(
-                                'Atkinson',
-                                style: textTheme.labelLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Atkinson',
-                                ),
-                              ),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Caveat',
-                              child: Text(
-                                'Caveat',
-                                style: textTheme.labelLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Caveat',
-                                ),
-                              ),
-                            ),
+                            ],
                           ],
                           onChanged: (v) {
                             if (v != null) settings.setFontFamily(v);
