@@ -175,7 +175,11 @@ class PlaylistRepository {
       }
       pos = 0;
       for (final item in items) {
-        if (item.id != null && item.id! != -1) {
+        if ((item.type == PlaylistItemType.version && item.id != null ||
+                item.id != -1) ||
+            (item.type == PlaylistItemType.flowItem &&
+                item.contentId != null &&
+                item.contentId != -1)) {
           _updateItemPosition(txn, item, pos);
         } else {
           _createItem(txn, playlistID, item, pos);
@@ -245,7 +249,7 @@ class PlaylistRepository {
           'flow_item',
           {'position': position},
           where: 'id = ?',
-          whereArgs: [item.id!],
+          whereArgs: [item.contentId!],
         );
         break;
     }

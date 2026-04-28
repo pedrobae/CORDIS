@@ -142,7 +142,6 @@ class PlaylistProvider extends ChangeNotifier {
 
       await _playlistRepository.saveItemOrder(playlist.items, playlistID);
       await loadPlaylist(playlistID);
-
     } catch (e) {
       _error = e.toString();
       debugPrint(_error);
@@ -231,6 +230,19 @@ class PlaylistProvider extends ChangeNotifier {
     final playlist = _playlists[playlistID];
     if (playlist != null) {
       playlist.items.removeWhere((item) => item.id == itemID);
+      _hasUnsavedChanges = true;
+      notifyListeners();
+    }
+  }
+
+  void cacheRemoveFlowItem(int itemID, int playlistID) {
+    final playlist = _playlists[playlistID];
+    if (playlist != null) {
+      playlist.items.removeWhere(
+        (item) =>
+            (item.contentId == itemID &&
+            item.type == PlaylistItemType.flowItem),
+      );
       _hasUnsavedChanges = true;
       notifyListeners();
     }

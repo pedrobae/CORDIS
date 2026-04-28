@@ -178,7 +178,7 @@ class ScheduleCard extends StatelessWidget {
                             padding: EdgeInsets.only(
                               bottom: MediaQuery.of(context).viewInsets.bottom,
                             ),
-                            child: ShareScheduleSheet(scheduleId: scheduleId),
+                            child: ShareScheduleSheet(scheduleID: scheduleId),
                           );
                         },
                       );

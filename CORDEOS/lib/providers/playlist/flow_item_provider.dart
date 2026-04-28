@@ -1,3 +1,4 @@
+import 'package:cordeos/helpers/codes.dart';
 import 'package:cordeos/models/domain/playlist/flow_item.dart';
 import 'package:cordeos/repositories/local/flow_item_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -116,7 +117,7 @@ class FlowItemProvider extends ChangeNotifier {
 
   void initializeNewFlow(int playlistID, int position) {
     final newFlowItem = FlowItem(
-      firebaseId: '',
+      firebaseId: generateFirebaseId(),
       playlistId: playlistID,
       title: '',
       contentText: '',
@@ -147,7 +148,8 @@ class FlowItemProvider extends ChangeNotifier {
       }
 
       final duplicate = FlowItem(
-        firebaseId: '', // Dont copy Firebase ID for new item
+        firebaseId:
+            generateFirebaseId(), // Generate a new Firebase ID for the duplicate
         playlistId: original.playlistId,
         title: '${original.title} $titleSuffix',
         contentText: original.contentText,
@@ -265,6 +267,7 @@ class FlowItemProvider extends ChangeNotifier {
       _cachedDeletions.clear();
     } catch (e) {
       _error = e.toString();
+      debugPrint("FLOW PROVIDER - error deleting flow - $e");
     } finally {
       _isDeleting = false;
       notifyListeners();
@@ -292,7 +295,7 @@ class FlowItemProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void clearUnsavedChanges() async {
+  void deleteCachedCreations() async {
     _hasUnsavedChanges = false;
     for (var id in _cachedCreations) {
       debugPrint(
@@ -300,6 +303,13 @@ class FlowItemProvider extends ChangeNotifier {
       );
       await _flowItemRepo.deleteFlowItem(id);
     }
+    notifyListeners();
+  }
+
+  void clearUnsavedChanges() {
+    _hasUnsavedChanges = false;
+    _cachedCreations.clear();
+    _cachedDeletions.clear();
     notifyListeners();
   }
 }

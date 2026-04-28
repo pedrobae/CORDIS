@@ -33,10 +33,7 @@ class PlaylistCard extends StatelessWidget {
 
     return Selector2<PlaylistProvider, SelectionProvider, (Playlist?, bool)>(
       selector: (context, play, sel) {
-        return (
-          play.getPlaylist(playlistID),
-          sel.isSelected(playlistID),
-        );
+        return (play.getPlaylist(playlistID), sel.isSelected(playlistID));
       },
       builder: (context, data, child) {
         final playlist = data.$1;
@@ -73,7 +70,7 @@ class PlaylistCard extends StatelessWidget {
                         await sect.deleteSectionsOfVersion(id);
                       }
                       play.clearUnsavedChanges();
-                      flow.clearUnsavedChanges();
+                      flow.deleteCachedCreations();
                       localVer.clearUnsavedChanges();
                       sect.clearUnsavedChanges();
                       sel.clearNewlyAddedVersionIds();
@@ -98,7 +95,7 @@ class PlaylistCard extends StatelessWidget {
                                 color: colorScheme.shadow,
                               )
                       : const SizedBox.shrink(),
-              
+
                   // INFO
                   Expanded(
                     child: Column(
@@ -134,16 +131,14 @@ class PlaylistCard extends StatelessWidget {
                   sel.isSelectionMode
                       ? const SizedBox.shrink()
                       : GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => _openPlaylistActionsSheet(context),
-                        child: SizedBox(
-                          height: double.infinity,
-                          width: 40,
-                          child: Icon(
-                              Icons.more_vert,
-                            ),
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => _openPlaylistActionsSheet(context),
+                          child: SizedBox(
+                            height: double.infinity,
+                            width: 40,
+                            child: Icon(Icons.more_vert),
+                          ),
                         ),
-                      ),
                 ],
               ),
             ),

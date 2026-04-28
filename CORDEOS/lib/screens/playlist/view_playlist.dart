@@ -213,6 +213,7 @@ class _ViewPlaylistScreenState extends State<ViewPlaylistScreen> {
     sel.clearNewlyAddedVersionIds();
 
     play.clearUnsavedChanges();
+    flow.clearUnsavedChanges();
 
     nav.pop();
   }

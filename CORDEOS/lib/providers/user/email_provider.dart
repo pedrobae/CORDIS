@@ -32,14 +32,16 @@ class EmailProvider extends ChangeNotifier {
   bool get isSending => _isSending;
 
   /// Sends invitation emails for the given schedule to users with the selected roles.
-  /// 
+  ///
   /// The [emailStrings] parameter should contain all localized email strings.
   /// Flutter handles localization, server only validates and sends.
   /// This prevents context invalidation errors in async operations.
   ///
   /// Returns true if emails were sent successfully, false otherwise.
   Future<bool> sendInvites(
-    Schedule schedule,
+    String shareCode,
+    String scheduleName,
+    Map<int, Role> roles,
     List<String> selectedRoles,
     EmailStrings emailStrings,
   ) async {
@@ -48,15 +50,13 @@ class EmailProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      final functions = FirebaseFunctions.instanceFor(
-        region: _functionsRegion,
-      );
+      final functions = FirebaseFunctions.instanceFor(region: _functionsRegion);
       final sendInviteEmail = functions.httpsCallable('sendInviteEmail');
 
       int successCount = 0;
       int failureCount = 0;
 
-      for (var role in schedule.roles.values) {
+      for (var role in roles.values) {
         if (selectedRoles.contains(role.name)) {
           for (var user in role.users) {
             try {
@@ -65,15 +65,20 @@ class EmailProvider extends ChangeNotifier {
               );
 
               // Build HTML with proper HTML escaping for user data
-              final greeting = _escapeHtml(emailStrings.invitationGreeting(user.username));
-              final message = _escapeHtml(
-                emailStrings.invitationMessage(schedule.name, role.name),
+              final greeting = _escapeHtml(
+                emailStrings.invitationGreeting(user.username),
               );
-              final instructions = _escapeHtml(emailStrings.instructions(schedule.shareCode));
+              final message = _escapeHtml(
+                emailStrings.invitationMessage(scheduleName, role.name),
+              );
+              final instructions = _escapeHtml(
+                emailStrings.instructions(shareCode),
+              );
               final support = _escapeHtml(emailStrings.contactSupport);
               final regards = _escapeHtml(emailStrings.bestRegards);
 
-              final htmlString = '''
+              final htmlString =
+                  '''
                 <p>$greeting</p>
                 <p>$message</p>
                 <p>$instructions</p>
@@ -82,12 +87,15 @@ class EmailProvider extends ChangeNotifier {
               ''';
 
               // Build subject line with localized text
-              final subject = emailStrings.invitationSubject(schedule.name, role.name);
+              final subject = emailStrings.invitationSubject(
+                scheduleName,
+                role.name,
+              );
 
               await sendInviteEmail.call({
                 'email': user.email,
                 'roleName': role.name,
-                'scheduleTitle': schedule.name,
+                'scheduleTitle': scheduleName,
                 'subject': subject,
                 'emailHtml': htmlString,
               });
@@ -103,9 +111,7 @@ class EmailProvider extends ChangeNotifier {
               debugPrint('[EmailProvider] Error type: ${e.runtimeType}');
               debugPrint('[EmailProvider] Error message: $e');
               if (e is FirebaseFunctionsException) {
-                debugPrint(
-                  '[EmailProvider] Firebase error code: ${e.code}',
-                );
+                debugPrint('[EmailProvider] Firebase error code: ${e.code}');
                 debugPrint(
                   '[EmailProvider] Firebase error details: ${e.details}',
                 );

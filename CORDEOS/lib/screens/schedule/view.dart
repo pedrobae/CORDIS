@@ -269,7 +269,7 @@ class _ViewScheduleScreenState extends State<ViewScheduleScreen> {
                         }
                         sel.clearNewlyAddedVersionIds();
                         play.clearUnsavedChanges();
-                        flow.clearUnsavedChanges();
+                        flow.deleteCachedCreations();
                       },
                       showBottomNavBar: true,
                     );

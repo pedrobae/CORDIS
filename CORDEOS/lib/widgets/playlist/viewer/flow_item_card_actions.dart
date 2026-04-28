@@ -72,6 +72,8 @@ class FlowItemCardActionsSheet extends StatelessWidget {
             isDangerous: true,
             onPressed: () {
               flow.cacheDeletion(flowItemId);
+              play.cacheRemoveFlowItem(flowItemId, playlistId);
+              Navigator.of(context).pop();
             },
           ),
           SizedBox(),

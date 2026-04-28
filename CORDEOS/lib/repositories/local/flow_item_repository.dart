@@ -153,16 +153,22 @@ class FlowItemRepository {
         await txn.delete('flow_item', where: 'id = ?', whereArgs: [id]);
 
         // Adjust positions of items that come after the deleted item
-        await txn.rawUpdate(
-          'UPDATE flow_item SET position = position - 1 WHERE playlist_id = ? AND position > ?',
-          [playlistId, deletedPosition],
+        // Get all flow items in the same playlist with a position greater than the deleted item
+        final itemsToUpdate = await txn.query(
+          'flow_item',
+          columns: ['id', 'position'],
+          where: 'playlist_id = ? AND position > ?',
+          whereArgs: [playlistId, deletedPosition],
         );
 
-        // Also adjust positions in playlist_version table for the same playlist
-        await txn.rawUpdate(
-          'UPDATE playlist_version SET position = position - 1 WHERE playlist_id = ? AND position > ?',
-          [playlistId, deletedPosition],
-        );
+        for (final item in itemsToUpdate) {
+          final currentPosition = item['position'] as int;
+          final newPos = currentPosition - 1;
+          await txn.rawUpdate(
+            'UPDATE flow_item SET position = ? WHERE id = ?',
+            [newPos, item['id']],
+          );
+        }
       }
     });
   }
