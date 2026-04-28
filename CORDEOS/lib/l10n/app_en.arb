@@ -1178,6 +1178,10 @@
   "@processPDF": {
     "description": "Process PDF button label"
   },
+  "generatingPdf": "Generating PDF...",
+  "@generatingPdf": {
+    "description": "Message displayed while generating PDF"
+  },
   "howToImport": "How to Import",
   "@howToImport": {
     "description": "How to import instructions title"

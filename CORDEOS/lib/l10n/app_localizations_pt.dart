@@ -912,6 +912,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get processPDF => 'Processar PDF';
 
   @override
+  String get generatingPdf => 'Gerando PDF...';
+
+  @override
   String get howToImport => 'Como Importar';
 
   @override

@@ -906,6 +906,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get processPDF => 'Process PDF';
 
   @override
+  String get generatingPdf => 'Generating PDF...';
+
+  @override
   String get howToImport => 'How to Import';
 
   @override

@@ -1730,6 +1730,12 @@ abstract class AppLocalizations {
   /// **'Processar PDF'**
   String get processPDF;
 
+  /// Message displayed while generating PDF
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerando PDF...'**
+  String get generatingPdf;
+
   /// How to import instructions title
   ///
   /// In pt, this message translates to:

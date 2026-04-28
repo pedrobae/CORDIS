@@ -335,13 +335,13 @@ class PrintingProvider extends ChangeNotifier {
     }
   }
 
-  PagePreviewSnapshot buildPreviewSnapshot(double maxWidth) {
-    return PagePreviewSnapshot.build(
+  PrintPreviewSnapshot buildPreviewSnapshot(double maxWidth) {
+    return PrintPreviewSnapshot.build(
       songMap: _songMap,
       sections: _sectionCache,
       builder: _builder,
       tokenMeasurements: _tokenMeasurements,
-      header: _headerData,
+      headerData: _headerData,
       ctx: PrintingContext(
         showHeader: showHeader,
         showRepeatSections: showRepeatSections,
@@ -368,7 +368,7 @@ class PrintingProvider extends ChangeNotifier {
 
   /// Calculate the offsets of each section and in which page it sits, as well as the number of pages
   List<PageLayout> layoutPages(
-    PagePreviewSnapshot snapshot,
+    PrintPreviewSnapshot snapshot,
     double pageHeight,
     double sectionWidth,
   ) {
@@ -625,7 +625,7 @@ class PrintingProvider extends ChangeNotifier {
 
   Future<Uint8List> generatePDF(
     List<PageLayout> pages,
-    PagePreviewSnapshot snapshot,
+    PrintPreviewSnapshot snapshot,
     double pageWidth,
   ) async {
     final document = PdfDocument();
@@ -714,7 +714,7 @@ class PrintingProvider extends ChangeNotifier {
 
   /// Pre-load all fonts used in the snapshot to cache them
   Future<void> _preloadFonts(
-    PagePreviewSnapshot snapshot,
+    PrintPreviewSnapshot snapshot,
     Map<String, PdfFont> fontCache,
   ) async {
     final fontNamesToLoad = <String, (bool, bool)>{};
@@ -739,7 +739,10 @@ class PrintingProvider extends ChangeNotifier {
 
     // Load all fonts
     for (final entry in fontNamesToLoad.entries) {
-      final (fontName, (isBold, isItalic)) = (entry.key.split('-')[0], entry.value);
+      final (fontName, (isBold, isItalic)) = (
+        entry.key.split('-')[0],
+        entry.value,
+      );
       final fontSize = 12.0; // Default, will be scaled during drawing
       try {
         final font = await getPdfFont(
@@ -772,7 +775,8 @@ class PrintingProvider extends ChangeNotifier {
 
     // Get font from cache
     final cacheKey = '$fontName-$isBold-$isItalic';
-    final pdfFont = fontCache[cacheKey] ?? 
+    final pdfFont =
+        fontCache[cacheKey] ??
         PdfStandardFont(PdfFontFamily.helvetica, fontSize);
 
     // Set text color if specified
@@ -802,13 +806,38 @@ class PrintingProvider extends ChangeNotifier {
     double ratio,
     Map<String, PdfFont> fontCache,
   ) {
-    // Draw badge background
+    // Draw badge background (Rounded RECT)
     final badgeWidth = (badge.textInstruction.width + 8) * ratio;
     final badgeHeight = (badge.textInstruction.height + 4) * ratio;
+    final radius = Radius.circular(4 * ratio);
 
-    final badgeRect = Rect.fromLTWH(x, y, badgeWidth, badgeHeight);
-    graphics.drawRectangle(
-      bounds: badgeRect,
+    final pdfPath = PdfPath();
+
+    pdfPath.addArc(Rect.fromLTWH(x, y, badgeWidth, badgeHeight), 0, 90);
+    pdfPath.addArc(
+      Rect.fromLTWH(x + badgeWidth - radius.x, y, radius.x, radius.y),
+      90,
+      90,
+    );
+    pdfPath.addArc(
+      Rect.fromLTWH(
+        x + badgeWidth - radius.x,
+        y + badgeHeight - radius.y,
+        radius.x,
+        radius.y,
+      ),
+      180,
+      90,
+    );
+    pdfPath.addArc(
+      Rect.fromLTWH(x, y + badgeHeight - radius.y, radius.x, radius.y),
+      270,
+      90,
+    );
+    pdfPath.closeFigure();
+
+    graphics.drawPath(
+      pdfPath,
       brush: PdfSolidBrush(_colorToPdfColor(badge.color)),
     );
 
@@ -817,7 +846,7 @@ class PrintingProvider extends ChangeNotifier {
     final badgeFont = fontCache.values.isNotEmpty
         ? fontCache.values.first
         : PdfStandardFont(PdfFontFamily.helvetica, badgeFontSize);
-    
+
     graphics.drawString(
       badge.textInstruction.plainText,
       badgeFont,
@@ -835,7 +864,7 @@ class PrintingProvider extends ChangeNotifier {
     final labelFont = fontCache.values.isNotEmpty
         ? fontCache.values.first
         : PdfStandardFont(PdfFontFamily.helvetica, labelFontSize);
-    
+
     graphics.drawString(
       label.plainText,
       labelFont,
@@ -867,7 +896,8 @@ class PrintingProvider extends ChangeNotifier {
 
       // Get font from cache
       final cacheKey = '$fontName-$isBold-$isItalic';
-      final pdfFont = fontCache[cacheKey] ?? 
+      final pdfFont =
+          fontCache[cacheKey] ??
           PdfStandardFont(PdfFontFamily.helvetica, fontSize);
 
       final textX = baseX + (instruction.offset.dx * ratio);

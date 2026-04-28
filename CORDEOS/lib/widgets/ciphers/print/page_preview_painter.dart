@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 ///
 /// Constructing this object is the only place where TextPainters are built,
 /// keeping [PagePreviewPainter.paint] allocation-free.
-class PagePreviewSnapshot {
+class PrintPreviewSnapshot {
   final List<int> songMap;
   final List<TextPaintInstruction> headerInstructions;
   final double headerBlockHeight;
@@ -18,8 +18,9 @@ class PagePreviewSnapshot {
   final Map<int, BadgePaintModel> badgeModels;
   final Map<int, SectionPaintModel> sectionModels;
   final double sectionLabelHeight;
+  final String filename;
 
-  const PagePreviewSnapshot({
+  const PrintPreviewSnapshot({
     required this.songMap,
     required this.headerInstructions,
     required this.headerBlockHeight,
@@ -27,16 +28,17 @@ class PagePreviewSnapshot {
     required this.badgeModels,
     required this.sectionModels,
     required this.sectionLabelHeight,
+required this.filename
   });
 
   /// Builds the snapshot from a [SongPdfDto] and style overrides.
   /// Call this outside of [paint] — typically in [State.setState] or after
   /// [PrintingProvider.buildSongPdfDto] resolves.
-  static PagePreviewSnapshot build({
+  static PrintPreviewSnapshot build({
     required List<int> songMap,
     required Map<int, SectionPrintCache> sections,
     required Map<String, Measurements> tokenMeasurements,
-    required HeaderData header,
+    required HeaderData headerData,
     required TokenizationBuilder builder,
     required PrintingContext ctx,
   }) {
@@ -88,7 +90,7 @@ class PagePreviewSnapshot {
 
     // Build header instructions
     final metaLines = ctx.showHeader
-        ? _buildHeaderLines(ctx: ctx, header: header)
+        ? _buildHeaderLines(ctx: ctx, headerData: headerData)
         : [];
     final instructions = <TextPaintInstruction>[];
     double y = 0;
@@ -108,7 +110,8 @@ class PagePreviewSnapshot {
       y += painter.height;
     }
 
-    return PagePreviewSnapshot(
+    return PrintPreviewSnapshot(
+      filename: headerData.title,
       badgeModels: badgePainters,
       songMap: songMap,
       sectionModels: models,
@@ -123,20 +126,20 @@ class PagePreviewSnapshot {
 
   static List<(String, TextStyle)> _buildHeaderLines({
     required PrintingContext ctx,
-    required HeaderData header,
+    required HeaderData headerData,
   }) {
-    final detailParts = <String>[header.author, header.musicKey];
-    if (ctx.showBpm && (header.bpm ?? 0) > 0) {
-      detailParts.add('${header.bpmLabel}: ${header.bpm}');
+    final detailParts = <String>[headerData.author, headerData.musicKey];
+    if (ctx.showBpm && (headerData.bpm ?? 0) > 0) {
+      detailParts.add('${headerData.bpmLabel}: ${headerData.bpm}');
     }
-    final formattedDuration = DateTimeUtils.formatDuration(header.duration);
+    final formattedDuration = DateTimeUtils.formatDuration(headerData.duration);
     if (ctx.showDuration && formattedDuration.isNotEmpty) {
-      detailParts.add('${header.durationLabel}: $formattedDuration');
+      detailParts.add('${headerData.durationLabel}: $formattedDuration');
     }
 
     return [
       (
-        header.title,
+        headerData.title,
         ctx.headerStyle.copyWith(
           fontWeight: FontWeight.bold,
           fontSize: (ctx.headerStyle.fontSize ?? 12) + 2,
@@ -145,7 +148,7 @@ class PagePreviewSnapshot {
       (detailParts.join('  •  '), ctx.headerStyle),
       if (ctx.showSongMap)
         (
-          '${header.songMapLabel}: ${header.codeSongMap.join(' | ')}',
+          '${headerData.songMapLabel}: ${headerData.codeSongMap.join(' | ')}',
           ctx.headerStyle.copyWith(
             fontSize: (ctx.headerStyle.fontSize ?? 11) - 1,
           ),
@@ -204,7 +207,7 @@ class PageLayout {
 /// [PagePreviewSnapshot] data. Pixel-perfect scaling is handled by
 /// the caller via [LayoutBuilder] — this painter works in logical page units.
 class PagePreviewPainter extends CustomPainter {
-  final PagePreviewSnapshot snapshot;
+  final PrintPreviewSnapshot snapshot;
   final List<PageLayout> pages;
   final int pageIndex;
 

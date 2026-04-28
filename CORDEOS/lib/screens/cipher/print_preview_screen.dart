@@ -14,6 +14,7 @@ import 'package:cordeos/widgets/ciphers/print/page_preview_painter.dart';
 import 'package:cordeos/widgets/ciphers/print/sheet_print_filters.dart';
 import 'package:cordeos/widgets/ciphers/print/sheet_print_layout.dart';
 import 'package:cordeos/widgets/ciphers/print/sheet_print_style.dart';
+import 'package:cordeos/widgets/common/icon_load_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -30,8 +31,10 @@ class PrintPreviewScreen extends StatefulWidget {
 
 class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
   List<PageLayout> pages = [];
-  PagePreviewSnapshot? snapshot;
+  PrintPreviewSnapshot? snapshot;
   double pageWidth = 0;
+
+  bool _isGenerating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +48,11 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
         children: [
           _buildAppBar(),
           _buildControlBar(),
-          Expanded(child: _buildPreviewArea()),
+          if (_isGenerating) ...[
+            _buildGeneratingState(),
+          ] else ...[
+            Expanded(child: _buildPreviewArea()),
+          ],
         ],
       ),
     );
@@ -68,14 +75,16 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
           onPressed: () async {
             if (snapshot != null) {
               try {
+                setState(() {
+                  _isGenerating = true;
+                });
                 final pdfBytes = await context
                     .read<PrintingProvider>()
                     .generatePDF(pages, snapshot!, pageWidth);
 
                 // Save PDF to documents directory
                 final dir = await getApplicationDocumentsDirectory();
-                final fileName =
-                    'cipher_${DateTime.now().millisecondsSinceEpoch}.pdf';
+                final fileName = '${snapshot!.filename}.pdf';
                 final file = File('${dir.path}/$fileName');
                 await file.writeAsBytes(pdfBytes);
 
@@ -87,12 +96,30 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                     SnackBar(content: Text('Error generating PDF: $e')),
                   );
                 }
+              } finally {
+                if (mounted) {
+                  setState(() {
+                    _isGenerating = false;
+                  });
+                }
               }
             }
           },
           icon: const Icon(Icons.print),
         ),
       ],
+    );
+  }
+
+  Widget _buildGeneratingState() {
+    final l10n = AppLocalizations.of(context)!;
+    return Expanded(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [IconLoadIndicator(size: 30), Text(l10n.generatingPdf)],
+        ),
+      ),
     );
   }
 
