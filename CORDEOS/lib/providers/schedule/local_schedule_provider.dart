@@ -434,7 +434,7 @@ class LocalScheduleProvider extends ChangeNotifier {
       final schedule = _schedules[scheduleID];
 
       for (Role role in schedule?.roles.values ?? []) {
-        await _repo.upsertRole(scheduleID, role);
+        await _repo.updateRole(scheduleID, role);
       }
     } catch (e) {
       _error = e.toString();

@@ -143,38 +143,22 @@ class LocalScheduleRepository {
     );
   }
 
-  Future<void> upsertRole(int scheduleId, Role role) async {
+  //
+  Future<void> updateRole(int scheduleId, Role role) async {
     final db = await _databaseHelper.database;
-    final existing = await db.query(
+
+    if (role.id == -1) throw ArgumentError('Role ID cannot be -1 for update.');
+    await db.update(
       'role',
-      where: 'name = ? AND schedule_id = ?',
-      whereArgs: [role.name, scheduleId],
+      role.toSqlite(scheduleId),
+      where: 'id = ?',
+      whereArgs: [role.id],
     );
 
-    if (existing.isEmpty) {
-      // Role doesn't exist, insert it
-      int roleId = await db.insert('role', role.toSqlite(scheduleId));
-      for (var user in role.users) {
-        if (user.id == null || user.id == -1) continue;
-        await insertMember(roleId, user.id!);
-      }
-    } else {
-      await db.update(
-        'role',
-        role.toSqlite(scheduleId),
-        where: 'id = ?',
-        whereArgs: [existing.first['id']],
-      );
-
-      // Update members
-      await db.delete(
-        'role_member',
-        where: 'role_id = ?',
-        whereArgs: [existing.first['id']],
-      );
-      for (var user in role.users) {
-        await insertMember(existing.first['id'] as int, user.id!);
-      }
+    // Delete and reinsert members
+    await db.delete('role_member', where: 'role_id = ?', whereArgs: [role.id]);
+    for (var user in role.users) {
+      await insertMember(role.id, user.id!);
     }
   }
 
