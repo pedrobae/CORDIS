@@ -267,11 +267,11 @@ class LocalVersionProvider extends ChangeNotifier {
   }) {
     debugPrint(
       'LOCAL VERSION PROVIDER - Caching - ${ //
-      versionName != null ? 'Name ' : ''}${ //
-      transposedKey != null ? 'Transposed Key ' : ''}${ //
-      songStructure != null ? 'Song Structure ' : ''}${ //
-      duration != null ? 'Duration ' : ''}${ //
-      bpm != null ? 'BPM ' : ''}',
+      versionName != null ? 'Name - $versionName' : ''}${ //
+      transposedKey != null ? 'Transposed Key - $transposedKey' : ''}${ //
+      songStructure != null ? 'Song Structure - $songStructure' : ''}${ //
+      duration != null ? 'Duration - $duration' : ''}${ //
+      bpm != null ? 'BPM - $bpm' : ''}',
     );
 
     _versions[versionId] = _versions[versionId]!.copyWith(
@@ -339,6 +339,7 @@ class LocalVersionProvider extends ChangeNotifier {
   /// Persist the cache of an ID to the database
   Future<void> saveVersion({required int versionID}) async {
     try {
+      debugPrint('LOCAL VERSION PROVIDER - updating version $versionID');
       await _repo.updateVersion(_versions[versionID]!);
     } catch (e) {
       _error = e.toString();

@@ -265,6 +265,7 @@ class _ManageSheetState extends State<ManageSheet> {
                   showSave: false,
                   initialKey: s.transposedKey,
                   originalKey: s.originalKey,
+                  versionID: widget.versionID,
                   onKeySelected: (key) {
                     localVer.cacheUpdates(widget.versionID, transposedKey: key);
                     localVer.saveVersion(versionID: widget.versionID);

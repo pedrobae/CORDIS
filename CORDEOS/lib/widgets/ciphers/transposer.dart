@@ -1,5 +1,4 @@
 import 'package:cordeos/providers/transposition_provider.dart';
-import 'package:cordeos/providers/version/local_version_provider.dart';
 import 'package:cordeos/widgets/ciphers/editor/metadata.dart/select_key_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +9,6 @@ class Transposer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final trans = context.read<TranspositionProvider>();
-    final localVer = context.read<LocalVersionProvider>();
 
     return Selector<
       TranspositionProvider,
@@ -41,12 +39,10 @@ class Transposer extends StatelessWidget {
                     return SelectKeySheet(
                       initialKey: s.transposed,
                       originalKey: s.original,
+                      versionID: s.versionID,
+                      showSave: (s.versionID < 0) ? false : true,
                       onKeySelected: (key) {
                         trans.setTransposedKey(key);
-                      },
-                      onSave: (key) async {
-                        localVer.cacheUpdates(s.versionID, transposedKey: key);
-                        await localVer.saveVersion(versionID: s.versionID);
                       },
                     );
                   },
