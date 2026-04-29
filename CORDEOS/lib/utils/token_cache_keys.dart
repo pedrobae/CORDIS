@@ -10,9 +10,7 @@ class TokenCacheKey {
   String? content;
   final int sectionKey;
   double? maxWidth;
-  double? lineSpacing;
-  double? lineBreakSpacing;
-  double? chordLyricSpacing;
+  double? heightSpacing;
   double? minChordSpacing;
   double? letterSpacing;
   bool? showChords;
@@ -25,9 +23,7 @@ class TokenCacheKey {
   TokenCacheKey({
     this.content,
     this.maxWidth,
-    this.lineSpacing,
-    this.lineBreakSpacing,
-    this.chordLyricSpacing,
+    this.heightSpacing,
     this.minChordSpacing,
     this.letterSpacing,
     this.showChords,
@@ -45,9 +41,7 @@ class TokenCacheKey {
     return other is TokenCacheKey &&
         other.content == content &&
         other.maxWidth == maxWidth &&
-        other.lineSpacing == lineSpacing &&
-        other.lineBreakSpacing == lineBreakSpacing &&
-        other.chordLyricSpacing == chordLyricSpacing &&
+        other.heightSpacing == heightSpacing &&
         other.minChordSpacing == minChordSpacing &&
         other.letterSpacing == letterSpacing &&
         other.showChords == showChords &&
@@ -61,9 +55,7 @@ class TokenCacheKey {
   int get hashCode => Object.hash(
     content,
     maxWidth,
-    lineSpacing,
-    lineBreakSpacing,
-    chordLyricSpacing,
+    heightSpacing,
     minChordSpacing,
     letterSpacing,
     showChords,
@@ -108,9 +100,7 @@ String positionCacheKey(
   return '${ //
   tokenCacheKey(k)}|w:${ //
   k.maxWidth}|ls:${ //
-  k.lineSpacing}|lbs:${ //
-  k.lineBreakSpacing}|cls:${ //
-  k.chordLyricSpacing}|mcs:${ //
+  k.heightSpacing}|hs:${ //
   k.minChordSpacing}|lts:${ //
   k.letterSpacing}|lStyle:${ //
   lyricStyle.fontFamily}|lSize:${ //

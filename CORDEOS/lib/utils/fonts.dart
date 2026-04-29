@@ -72,7 +72,7 @@ extension FontFamiliesMethods on FontFamilies {
   }
 
   /// Find FontFamily enum from font name string
-  static FontFamilies? fromKey(String? fontName) {
+  static FontFamilies? fromName(String? fontName) {
     if (fontName == null) return null;
     try {
       return FontFamilies.values.firstWhere(
@@ -89,18 +89,18 @@ final Map<String, PdfFont> _fontCache = {};
 
 /// Load a PDF font from the asset, using cache to avoid reloading
 Future<PdfFont> getPdfFont(
-  String fontName, {
+  String fontName,
+  double fontSize, {
   bool isBold = false,
   bool isItalic = false,
-  double fontSize = 12,
 }) async {
-  final fontFamily = FontFamiliesMethods.fromKey(fontName);
+  final fontFamily = FontFamiliesMethods.fromName(fontName);
   if (fontFamily == null) {
     // Fallback to default font
     return PdfStandardFont(PdfFontFamily.helvetica, fontSize);
   }
 
-  final cacheKey = '${fontFamily.key}_${isBold}_${isItalic}';
+  final cacheKey = '${fontFamily.key}_${isBold}_${isItalic}_$fontSize';
 
   // Return cached font if available
   if (_fontCache.containsKey(cacheKey)) {

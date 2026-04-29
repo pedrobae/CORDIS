@@ -59,10 +59,8 @@ class PrintingContext {
   final TextStyle headerStyle;
   final TextStyle labelStyle;
   final double chordLyricSpacing;
-  final double lineSpacing;
-  final double letterSpacing;
-  final double lineBreakSpacing;
-  final double minChordSpacing;
+  final double heightSpacing;
+  static double minChordSpacing = 4;
   final double maxWidth;
   final double contentWidth;
 
@@ -79,10 +77,7 @@ class PrintingContext {
     required this.headerStyle,
     required this.labelStyle,
     required this.chordLyricSpacing,
-    required this.lineSpacing,
-    required this.letterSpacing,
-    required this.lineBreakSpacing,
-    required this.minChordSpacing,
+    required this.heightSpacing,
     required this.maxWidth,
     required this.contentWidth,
   });
@@ -156,52 +151,43 @@ class PrintingProvider extends ChangeNotifier {
   bool showDuration = true;
 
   // Style settings
-  String lyricFontFamily = 'OpenSans';
-  double lyricFontSize = 12;
+  String fontFamily = 'OpenSans';
+  double fontSize = 12;
   Color lyricColor = Colors.black;
-  TextStyle get lyricStyle => TextStyle(
-    fontFamily: lyricFontFamily,
-    fontSize: lyricFontSize,
-    color: lyricColor,
-  );
-
-  String chordFontFamily = 'OpenSans';
-  double chordFontSize = 10;
   Color chordColor = Colors.deepOrange;
+  Color headerColor = Colors.black;
+
+  TextStyle get lyricStyle =>
+      TextStyle(fontFamily: fontFamily, fontSize: fontSize, color: lyricColor);
+
   TextStyle get chordStyle => TextStyle(
-    fontFamily: chordFontFamily,
-    fontSize: chordFontSize,
+    fontFamily: fontFamily,
+    fontSize: fontSize,
     fontWeight: FontWeight.bold,
     color: chordColor,
   );
 
-  String headerFontFamily = 'OpenSans';
-  double headerFontSize = 12;
-  Color headerColor = Colors.black;
   TextStyle get headerSyle => TextStyle(
-    fontFamily: headerFontFamily,
-    fontSize: headerFontSize,
+    fontFamily: fontFamily,
+    fontSize: fontSize * 0.8,
     color: headerColor,
   );
 
   TextStyle get labelStyle => TextStyle(
-    fontFamily: lyricFontFamily,
+    fontFamily: fontFamily,
     fontStyle: FontStyle.italic,
-    fontSize: lyricFontSize,
+    fontSize: fontSize,
     fontWeight: FontWeight.bold,
     color: lyricColor,
   );
 
   // Layout settings
-  double lineBreakSpacing = 0;
-  double chordLyricSpacing = 0;
+  double heightSpacing = 1;
   double minChordSpacing = 5;
-  double lineSpacing = 4;
   double letterSpacing = 0;
 
   // Page layout settings
-  double horizontalMargin = 24;
-  double verticalMargin = 24;
+  double margin = 24;
   double sectionSpacing = 16;
   double headerGap = 12;
   double columnGap = 16;
@@ -210,17 +196,10 @@ class PrintingProvider extends ChangeNotifier {
   /// Initialize with stored settings
   Future<void> loadSettings() async {
     // Style Settings
-    lyricFontSize = PrintCacheService.getLyricSize();
-    lyricFontFamily = PrintCacheService.getLyricFontFamily();
-    chordFontSize = PrintCacheService.getChordSize();
-    chordFontFamily = PrintCacheService.getChordFontFamily();
-    headerFontSize = PrintCacheService.getHeaderSize();
-    headerFontFamily = PrintCacheService.getHeaderFontFamily();
+    fontSize = PrintCacheService.getSize();
+    fontFamily = PrintCacheService.getFontFamily();
     // Layout settings
-    lineSpacing = PrintCacheService.getLineSpacing();
-    lineBreakSpacing = PrintCacheService.getLineBreakSpacing();
-    chordLyricSpacing = PrintCacheService.getChordLyricSpacing();
-    minChordSpacing = PrintCacheService.getMinChordSpacing();
+    heightSpacing = PrintCacheService.getHeightSpacing();
     letterSpacing = PrintCacheService.getLetterSpacing();
     showHeader = PrintCacheService.getShowHeader();
     showRepeatSections = PrintCacheService.getShowRepeatSections();
@@ -230,8 +209,7 @@ class PrintingProvider extends ChangeNotifier {
     showDuration = PrintCacheService.getShowDuration();
     showSectionLabels = PrintCacheService.getShowLabel();
     // Page layout settings
-    horizontalMargin = PrintCacheService.getHorizontalMargin();
-    verticalMargin = PrintCacheService.getVerticalMargin();
+    margin = PrintCacheService.getMargin();
     sectionSpacing = PrintCacheService.getSectionSpacing();
     headerGap = PrintCacheService.getHeaderGap();
     columnGap = PrintCacheService.getColumnGap();
@@ -306,7 +284,7 @@ class PrintingProvider extends ChangeNotifier {
         tokens: cache.tokens,
         chordStyle: chordStyle,
         lyricStyle: lyricStyle,
-        chordLyricSpacing: chordLyricSpacing,
+        chordLyricSpacing: heightSpacing,
         measurements: _tokenMeasurements,
       );
 
@@ -326,10 +304,8 @@ class PrintingProvider extends ChangeNotifier {
         chordHeight: chordHeight,
         lyricHeight: lyricHeight,
         isEditMode: false,
-        lineSpacing: lineSpacing,
+        heightSpacing: heightSpacing,
         letterSpacing: letterSpacing,
-        chordLyricSpacing: chordLyricSpacing,
-        lineBreakSpacing: lineBreakSpacing,
         minChordSpacing: minChordSpacing,
       );
     }
@@ -354,11 +330,8 @@ class PrintingProvider extends ChangeNotifier {
         chordStyle: chordStyle,
         headerStyle: headerSyle,
         labelStyle: labelStyle,
-        chordLyricSpacing: chordLyricSpacing,
-        lineSpacing: lineSpacing,
-        letterSpacing: letterSpacing,
-        lineBreakSpacing: lineBreakSpacing,
-        minChordSpacing: minChordSpacing,
+        chordLyricSpacing: heightSpacing,
+        heightSpacing: heightSpacing,
         maxWidth: maxWidth,
         contentWidth:
             (maxWidth * columnCount) + ((columnCount - 1) * columnGap),
@@ -378,7 +351,7 @@ class PrintingProvider extends ChangeNotifier {
       columnWidth: sectionWidth + columnGap,
     );
 
-    final contentHeight = pageHeight - 2 * verticalMargin;
+    final contentHeight = pageHeight - 2 * margin;
 
     final placements = <SectionPlacement>[];
 
@@ -473,65 +446,23 @@ class PrintingProvider extends ChangeNotifier {
 
   // =========== SETTERS FOR STYLE SETTINGS =============
 
-  Future<void> setLyricFontSize(double size) async {
-    lyricFontSize = size;
-    await PrintCacheService.setLyricSize(size);
+  Future<void> setFontSize(double size) async {
+    fontSize = size;
+    await PrintCacheService.setSize(size);
     notifyListeners();
   }
 
-  Future<void> setLyricFontFamily(String family) async {
-    lyricFontFamily = family;
-    await PrintCacheService.setLyricFontFamily(family);
-    notifyListeners();
-  }
-
-  Future<void> setChordFontSize(double size) async {
-    chordFontSize = size;
-    await PrintCacheService.setChordSize(size);
-    notifyListeners();
-  }
-
-  Future<void> setChordFontFamily(String family) async {
-    chordFontFamily = family;
-    await PrintCacheService.setChordFontFamily(family);
-    notifyListeners();
-  }
-
-  Future<void> setHeaderFontSize(double size) async {
-    headerFontSize = size;
-    await PrintCacheService.setHeaderSize(size);
-    notifyListeners();
-  }
-
-  Future<void> setHeaderFontFamily(String family) async {
-    headerFontFamily = family;
-    await PrintCacheService.setHeaderFontFamily(family);
+  Future<void> setFontFamily(String family) async {
+    fontFamily = family;
+    await PrintCacheService.setFontFamily(family);
     notifyListeners();
   }
 
   // =========== SETTERS FOR LAYOUT SETTINGS =============
 
-  Future<void> setLineSpacing(double spacing) async {
-    lineSpacing = spacing;
-    await PrintCacheService.setLineSpacing(spacing);
-    notifyListeners();
-  }
-
-  Future<void> setLineBreakSpacing(double spacing) async {
-    lineBreakSpacing = spacing;
-    await PrintCacheService.setLineBreakSpacing(spacing);
-    notifyListeners();
-  }
-
-  Future<void> setChordLyricSpacing(double spacing) async {
-    chordLyricSpacing = spacing;
-    await PrintCacheService.setChordLyricSpacing(spacing);
-    notifyListeners();
-  }
-
-  Future<void> setMinChordSpacing(double spacing) async {
-    minChordSpacing = spacing;
-    await PrintCacheService.setMinChordSpacing(spacing);
+  Future<void> setHeightSpacing(double spacing) async {
+    heightSpacing = spacing;
+    await PrintCacheService.setHeightSpacing(spacing);
     notifyListeners();
   }
 
@@ -587,15 +518,9 @@ class PrintingProvider extends ChangeNotifier {
 
   // =========== SETTERS FOR PAGE LAYOUT SETTINGS =============
 
-  Future<void> setHorizontalMargin(double margin) async {
-    horizontalMargin = margin;
-    await PrintCacheService.setHorizontalMargin(margin);
-    notifyListeners();
-  }
-
-  Future<void> setVerticalMargin(double margin) async {
-    verticalMargin = margin;
-    await PrintCacheService.setVerticalMargin(margin);
+  Future<void> setMargin(double margin) async {
+    this.margin = margin;
+    await PrintCacheService.setMargin(margin);
     notifyListeners();
   }
 
@@ -629,12 +554,6 @@ class PrintingProvider extends ChangeNotifier {
     double pageWidth,
   ) async {
     final document = PdfDocument();
-    final margins = {
-      'top': verticalMargin,
-      'left': horizontalMargin,
-      'right': horizontalMargin,
-      'bottom': verticalMargin,
-    };
 
     // Pre-load all fonts needed for this PDF
     final fontCache = <String, PdfFont>{};
@@ -648,12 +567,12 @@ class PrintingProvider extends ChangeNotifier {
       final ratio = contentSize.width / pageWidth;
 
       // Start drawing at top-left with margins
-      double currentY = margins['top']!;
+      double currentY = margin;
 
       // DRAW HEADER (only on first page)
       if (pageIdx == 0 && snapshot.headerBlockHeight > 0) {
         for (final instruction in snapshot.headerInstructions) {
-          final scaledX = margins['left']! + (instruction.offset.dx * ratio);
+          final scaledX = margin + (instruction.offset.dx * ratio);
           final scaledY = currentY + (instruction.offset.dy * ratio);
 
           _drawTextInstruction(
@@ -673,13 +592,9 @@ class PrintingProvider extends ChangeNotifier {
         final model = snapshot.sectionModels[placement.sectionKey]!;
 
         // Calculate section position with margins
-        final sectionX = margins['left']! + (placement.xOffset * ratio);
-        final sectionY =
-            margins['top']! +
-            (pageIdx == 0
-                ? snapshot.headerBlockHeight * ratio + headerGap * ratio
-                : 0) +
-            (placement.yOffset * ratio);
+        // Note: placement.yOffset already includes header height on first page
+        final sectionX = margin + (placement.xOffset * ratio);
+        final sectionY = margin + (placement.yOffset * ratio);
 
         // Draw section label and badge if needed
         final badge = snapshot.badgeModels[placement.sectionKey];
@@ -717,14 +632,14 @@ class PrintingProvider extends ChangeNotifier {
     PrintPreviewSnapshot snapshot,
     Map<String, PdfFont> fontCache,
   ) async {
-    final fontNamesToLoad = <String, (bool, bool)>{};
+    final fontKeys = <String>[];
 
     // Collect fonts from header
     for (final instruction in snapshot.headerInstructions) {
       final fontName = instruction.style.fontFamily ?? 'OpenSans';
       final isBold = instruction.style.fontWeight == FontWeight.bold;
       final isItalic = instruction.style.fontStyle == FontStyle.italic;
-      fontNamesToLoad['$fontName-$isBold-$isItalic'] = (isBold, isItalic);
+      fontKeys.add('${fontName}_${isBold}_${isItalic}_$fontSize');
     }
 
     // Collect fonts from sections
@@ -733,27 +648,39 @@ class PrintingProvider extends ChangeNotifier {
         final fontName = instruction.style.fontFamily ?? 'OpenSans';
         final isBold = instruction.style.fontWeight == FontWeight.bold;
         final isItalic = instruction.style.fontStyle == FontStyle.italic;
-        fontNamesToLoad['$fontName-$isBold-$isItalic'] = (isBold, isItalic);
+        fontKeys.add('${fontName}_${isBold}_${isItalic}_$fontSize');
       }
     }
 
+    for (final model in snapshot.badgeModels.values) {
+      final style = model.style;
+      final fontName = style.fontFamily ?? 'OpenSans';
+      final isBold = style.fontWeight == FontWeight.bold;
+      final isItalic = style.fontStyle == FontStyle.italic;
+      fontKeys.add('${fontName}_${isBold}_${isItalic}_$fontSize');
+    }
+
+    for (final model in snapshot.sectionLabelPainters.values) {
+      final style = model.style;
+      final fontName = style.fontFamily ?? 'OpenSans';
+      final isBold = style.fontWeight == FontWeight.bold;
+      final isItalic = style.fontStyle == FontStyle.italic;
+      fontKeys.add('${fontName}_${isBold}_${isItalic}_$fontSize');
+    }
+
     // Load all fonts
-    for (final entry in fontNamesToLoad.entries) {
-      final (fontName, (isBold, isItalic)) = (
-        entry.key.split('-')[0],
-        entry.value,
-      );
-      final fontSize = 12.0; // Default, will be scaled during drawing
+    for (final key in fontKeys) {
+      final splitKey = key.split('_');
       try {
         final font = await getPdfFont(
-          fontName,
-          isBold: isBold,
-          isItalic: isItalic,
-          fontSize: fontSize,
+          splitKey[0],
+          double.tryParse(splitKey[3]) ?? 0,
+          isBold: splitKey[1] == 'true',
+          isItalic: splitKey[2] == 'false',
         );
-        fontCache[entry.key] = font;
+        fontCache[key] = font;
       } catch (e) {
-        debugPrint('Failed to preload font $fontName: $e');
+        debugPrint('Failed to preload font ${splitKey[0]}: $e');
       }
     }
   }
@@ -768,8 +695,8 @@ class PrintingProvider extends ChangeNotifier {
     Map<String, PdfFont> fontCache,
   ) {
     final style = instruction.style;
-    final fontSize = (style.fontSize ?? 12) * ratio;
-    final fontName = style.fontFamily ?? 'OpenSans';
+    final fontSize = (style.fontSize ?? this.fontSize) * ratio;
+    final fontName = style.fontFamily ?? fontFamily;
     final isBold = style.fontWeight == FontWeight.bold;
     final isItalic = style.fontStyle == FontStyle.italic;
 
@@ -800,40 +727,87 @@ class PrintingProvider extends ChangeNotifier {
   void _drawSectionBadge(
     PdfGraphics graphics,
     BadgePaintModel badge,
-    TextPainter label,
+    LabelPaintModel label,
     double x,
     double y,
     double ratio,
     Map<String, PdfFont> fontCache,
   ) {
-    // Draw badge background (Rounded RECT)
-    final badgeWidth = (badge.textInstruction.width + 8) * ratio;
-    final badgeHeight = (badge.textInstruction.height + 4) * ratio;
-    final radius = Radius.circular(4 * ratio);
+    // Draw badge background (rounded rectangle)
+    final badgeWidth = (badge.textPainter.width + 8) * ratio;
+    final badgeHeight = (badge.textPainter.height + 4) * ratio;
+    final cornerRadius = 4 * ratio;
 
+    // Create a rounded rectangle path
     final pdfPath = PdfPath();
 
-    pdfPath.addArc(Rect.fromLTWH(x, y, badgeWidth, badgeHeight), 0, 90);
-    pdfPath.addArc(
-      Rect.fromLTWH(x + badgeWidth - radius.x, y, radius.x, radius.y),
-      90,
-      90,
+    // Start from top-left, moving right
+    pdfPath.addLine(
+      Offset(x + cornerRadius, y),
+      Offset(x + badgeWidth - cornerRadius, y),
     );
+
+    // Top-right corner
     pdfPath.addArc(
       Rect.fromLTWH(
-        x + badgeWidth - radius.x,
-        y + badgeHeight - radius.y,
-        radius.x,
-        radius.y,
+        x + badgeWidth - cornerRadius * 2,
+        y,
+        cornerRadius * 2,
+        cornerRadius * 2,
       ),
-      180,
-      90,
-    );
-    pdfPath.addArc(
-      Rect.fromLTWH(x, y + badgeHeight - radius.y, radius.x, radius.y),
       270,
       90,
     );
+
+    // Right side
+    pdfPath.addLine(
+      Offset(x + badgeWidth, y + cornerRadius),
+      Offset(x + badgeWidth, y + badgeHeight - cornerRadius),
+    );
+
+    // Bottom-right corner
+    pdfPath.addArc(
+      Rect.fromLTWH(
+        x + badgeWidth - cornerRadius * 2,
+        y + badgeHeight - cornerRadius * 2,
+        cornerRadius * 2,
+        cornerRadius * 2,
+      ),
+      0,
+      90,
+    );
+
+    // Bottom side
+    pdfPath.addLine(
+      Offset(x + cornerRadius, y + badgeHeight),
+      Offset(x + badgeWidth - cornerRadius, y + badgeHeight),
+    );
+
+    // Bottom-left corner
+    pdfPath.addArc(
+      Rect.fromLTWH(
+        x,
+        y + badgeHeight - cornerRadius * 2,
+        cornerRadius * 2,
+        cornerRadius * 2,
+      ),
+      90,
+      90,
+    );
+
+    // Left side
+    pdfPath.addLine(
+      Offset(x, y + cornerRadius),
+      Offset(x, y + badgeHeight - cornerRadius),
+    );
+
+    // Top-left corner
+    pdfPath.addArc(
+      Rect.fromLTWH(x, y, cornerRadius * 2, cornerRadius * 2),
+      180,
+      90,
+    );
+
     pdfPath.closeFigure();
 
     graphics.drawPath(
@@ -842,32 +816,43 @@ class PrintingProvider extends ChangeNotifier {
     );
 
     // Draw badge text
-    final badgeFontSize = 10 * ratio;
-    final badgeFont = fontCache.values.isNotEmpty
-        ? fontCache.values.first
-        : PdfStandardFont(PdfFontFamily.helvetica, badgeFontSize);
+    final badgeStyle = badge.style;
+    final badgeFontSize = (badgeStyle.fontSize ?? fontSize) * ratio;
+    final badgeFontName = badgeStyle.fontFamily ?? fontFamily;
+    final badgeIsBold = badgeStyle.fontWeight == FontWeight.bold;
+    final badgeIsItalic = badgeStyle.fontStyle == FontStyle.italic;
+    final badgeCacheKey = '$badgeFontName-$badgeIsBold-$badgeIsItalic';
+    final badgeFont =
+        fontCache[badgeCacheKey] ??
+        PdfStandardFont(PdfFontFamily.helvetica, badgeFontSize);
 
     graphics.drawString(
-      badge.textInstruction.plainText,
+      badge.textPainter.plainText,
       badgeFont,
       brush: PdfSolidBrush(PdfColor(255, 255, 255)), // White text on badge
       bounds: Rect.fromLTWH(
         x + (4 * ratio),
         y + (2 * ratio),
-        badgeWidth,
-        badgeHeight,
+        badgeWidth - (4 * ratio),
+        badgeHeight - (2 * ratio),
       ),
     );
 
     // Draw label text
-    final labelFontSize = 10 * ratio;
-    final labelFont = fontCache.values.isNotEmpty
-        ? fontCache.values.first
-        : PdfStandardFont(PdfFontFamily.helvetica, labelFontSize);
+    final labelStyle = label.style;
+    final labelFontSize = (labelStyle.fontSize ?? fontSize) * ratio;
+    final labelFontName = labelStyle.fontFamily ?? fontFamily;
+    final labelIsBold = labelStyle.fontWeight == FontWeight.bold;
+    final labelIsItalic = labelStyle.fontStyle == FontStyle.italic;
+    final labelCacheKey = '$labelFontName-$labelIsBold-$labelIsItalic';
+    final labelFont =
+        fontCache[labelCacheKey] ??
+        PdfStandardFont(PdfFontFamily.helvetica, labelFontSize);
 
     graphics.drawString(
-      label.plainText,
+      label.textPainter.plainText,
       labelFont,
+      brush: PdfSolidBrush(_colorToPdfColor(labelStyle.color ?? Colors.black)),
       bounds: Rect.fromLTWH(
         x + badgeWidth + (12 * ratio),
         y + (2 * ratio),
@@ -889,8 +874,8 @@ class PrintingProvider extends ChangeNotifier {
     // Draw text instructions (chords and lyrics)
     for (final instruction in model.textInstructions) {
       final style = instruction.style;
-      final fontSize = (style.fontSize ?? 12) * ratio;
-      final fontName = style.fontFamily ?? 'OpenSans';
+      final fontSize = (style.fontSize ?? this.fontSize) * ratio;
+      final fontName = style.fontFamily ?? fontFamily;
       final isBold = style.fontWeight == FontWeight.bold;
       final isItalic = style.fontStyle == FontStyle.italic;
 

@@ -11,14 +11,10 @@ class PrintLayout extends StatefulWidget {
 }
 
 class _PrintLayoutState extends State<PrintLayout> {
-  late double lineBreakSpacing;
-  late double chordLyricSpacing;
-  late double minChordSpacing;
-  late double lineSpacing;
+  late double heightSpacing;
   late double letterSpacing;
 
-  late double horizontalMargin;
-  late double verticalMargin;
+  late double margin;
   late double sectionSpacing;
   late double headerGap;
   late double columnGap;
@@ -28,17 +24,13 @@ class _PrintLayoutState extends State<PrintLayout> {
   void initState() {
     final print = context.read<PrintingProvider>();
 
-    lineBreakSpacing = print.lineBreakSpacing;
-    chordLyricSpacing = print.chordLyricSpacing;
-    minChordSpacing = print.minChordSpacing;
-    lineSpacing = print.lineSpacing;
-    letterSpacing = print.letterSpacing;
+    heightSpacing = print.heightSpacing.clamp(-5, 10);
+    letterSpacing = print.letterSpacing.clamp(-2, 2);
 
-    horizontalMargin = print.horizontalMargin;
-    verticalMargin = print.verticalMargin;
-    sectionSpacing = print.sectionSpacing;
-    headerGap = print.headerGap;
-    columnGap = print.columnGap;
+    margin = print.margin.clamp(5, 50);
+    sectionSpacing = print.sectionSpacing.clamp(5, 50);
+    headerGap = print.headerGap.clamp(5, 50);
+    columnGap = print.columnGap.clamp(5, 50);
     columnCount = print.columnCount;
 
     super.initState();
@@ -91,51 +83,21 @@ class _PrintLayoutState extends State<PrintLayout> {
                 },
               ),
               _buildSlider(
-                value: lineSpacing,
-                label: l10n.lineSpacing,
-                minValue: -5,
-                maxValue: 15,
-                onChanged: (v) => setState(() => lineSpacing = v),
-                onChangeEnd: (v) async {
-                  await print.setLineSpacing(v);
-                },
-              ),
-              _buildSlider(
-                value: lineBreakSpacing,
-                label: l10n.lineBreakSpacing,
-                minValue: -5,
-                maxValue: 15,
-                onChanged: (v) => setState(() => lineBreakSpacing = v),
-                onChangeEnd: (v) async {
-                  await print.setLineBreakSpacing(v);
-                },
-              ),
-              _buildSlider(
-                value: chordLyricSpacing,
-                label: l10n.chordLyricSpacing,
+                value: heightSpacing,
+                label: l10n.heightSpacing,
                 minValue: -5,
                 maxValue: 10,
-                onChanged: (v) => setState(() => chordLyricSpacing = v),
+                onChanged: (v) => setState(() => heightSpacing = v),
                 onChangeEnd: (v) async {
-                  await print.setChordLyricSpacing(v);
-                },
-              ),
-              _buildSlider(
-                value: minChordSpacing,
-                label: l10n.minChordSpacing,
-                minValue: 0,
-                maxValue: 15,
-                onChanged: (v) => setState(() => minChordSpacing = v),
-                onChangeEnd: (v) async {
-                  await print.setMinChordSpacing(v);
+                  await print.setHeightSpacing(v);
                 },
               ),
 
               _buildSlider(
                 value: letterSpacing,
                 label: l10n.letterSpacing,
-                minValue: -2,
-                maxValue: 5,
+                minValue: -3,
+                maxValue: 3,
                 onChanged: (v) => setState(() => letterSpacing = v),
                 onChangeEnd: (v) async {
                   await print.setLetterSpacing(v);
@@ -143,23 +105,13 @@ class _PrintLayoutState extends State<PrintLayout> {
               ),
               // PAGE LAYOUT SETTINGS
               _buildSlider(
-                value: horizontalMargin,
-                label: l10n.horizontalMargin,
+                value: margin,
+                label: l10n.margin,
                 minValue: 5,
                 maxValue: 50,
-                onChanged: (v) => setState(() => horizontalMargin = v),
+                onChanged: (v) => setState(() => margin = v),
                 onChangeEnd: (v) async {
-                  await print.setHorizontalMargin(v);
-                },
-              ),
-              _buildSlider(
-                value: verticalMargin,
-                label: l10n.verticalMargin,
-                minValue: 5,
-                maxValue: 50,
-                onChanged: (v) => setState(() => verticalMargin = v),
-                onChangeEnd: (v) async {
-                  await print.setVerticalMargin(v);
+                  await print.setMargin(v);
                 },
               ),
               _buildSlider(

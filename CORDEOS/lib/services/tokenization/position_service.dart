@@ -25,9 +25,7 @@ class PositionService {
     required TextStyle lyricStyle,
     required TextStyle chordStyle,
     required double maxWidth,
-    required double lineSpacing,
-    required double lineBreakSpacing,
-    required double chordLyricSpacing,
+    required double heightSpacing,
     required double minChordSpacing,
     required double letterSpacing,
     required double chordHeight,
@@ -41,6 +39,10 @@ class PositionService {
       chordStyle,
       isEditMode,
     );
+
+    final lineSpacing = heightSpacing * 2;
+    final lineBreakSpacing = heightSpacing;
+    final chordLyricSpacing = heightSpacing;
 
     final lineHeight = lyricHeight + chordLyricSpacing + chordHeight;
 
@@ -251,7 +253,8 @@ class PositionService {
                 ctx.lyricStyle,
               )];
 
-          if (ctx.checkOverflow && (cursor.chordX + (msr?.width ?? 0) > ctx.maxWidth)) {
+          if (ctx.checkOverflow &&
+              (cursor.chordX + (msr?.width ?? 0) > ctx.maxWidth)) {
             return _WordLayoutResult(
               wordPositions: positions,
               tokensToAdd: tokensToAdd,

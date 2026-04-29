@@ -299,13 +299,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardWidth => 'Card Width';
 
   @override
-  String get lineSpacing => 'Line Spacing';
-
-  @override
-  String get lineBreakSpacing => 'Line Break Spacing';
-
-  @override
-  String get chordLyricSpacing => 'Chord-Lyric Spacing';
+  String get heightSpacing => 'Vertical Spacing';
 
   @override
   String get minChordSpacing => 'Minimum Chord Spacing';
@@ -314,10 +308,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get letterSpacing => 'Letter Spacing';
 
   @override
-  String get horizontalMargin => 'Horizontal Margin';
-
-  @override
-  String get verticalMargin => 'Vertical Margin';
+  String get margin => 'Margin';
 
   @override
   String get sectionSpacing => 'Section Spacing';

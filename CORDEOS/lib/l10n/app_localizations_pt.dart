@@ -302,13 +302,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cardWidth => 'Largura da Seção';
 
   @override
-  String get lineSpacing => 'Espaçamento entre Linhas';
-
-  @override
-  String get lineBreakSpacing => 'Espaçamento entre Quebras de Linha';
-
-  @override
-  String get chordLyricSpacing => 'Espaçamento entre Acorde e Letra';
+  String get heightSpacing => 'Espaçamento Vertical';
 
   @override
   String get minChordSpacing => 'Espaçamento Mínimo entre Acordes';
@@ -317,10 +311,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get letterSpacing => 'Espaçamento entre Letras';
 
   @override
-  String get horizontalMargin => 'Margem Horizontal';
-
-  @override
-  String get verticalMargin => 'Margem Vertical';
+  String get margin => 'Margem';
 
   @override
   String get sectionSpacing => 'Espaço entre Seções';

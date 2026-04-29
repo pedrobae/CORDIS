@@ -15,11 +15,28 @@ class StyleSettings extends StatefulWidget {
 
 class _StyleSettingsState extends State<StyleSettings> {
   double? _cardsOnScreen;
-  double? _localLineSpacing;
-  double? _localLineBreakSpacing;
-  double? _localChordLyricSpacing;
-  double? _localMinChordSpacing;
-  double? _localLetterSpacing;
+  late double _heightSpacing;
+  late double _localMinChordSpacing;
+  late double _localLetterSpacing;
+  double? _screenWidth;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final set = context.read<LayoutSetProvider>();
+
+    _heightSpacing = set.heightSpacing.clamp(-5, 10);
+    _localMinChordSpacing = set.minChordSpacing.clamp(0, 10);
+    _localLetterSpacing = set.letterSpacing.clamp(-3, 3);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _screenWidth = MediaQuery.sizeOf(context).width;
+        _cardsOnScreen = _calcCardsOnScreen(set.cardWidthMult, _screenWidth!);
+      });
+    });
+  }
 
   /// Width mult is a value from 0.2 to 1 that determines the width of the cards.
   /// The number of cards on screen is calculated from this value, with 1 being 1 cards on screen and 0.2 being 5 cards on screen.
@@ -41,17 +58,31 @@ class _StyleSettingsState extends State<StyleSettings> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final width = MediaQuery.sizeOf(context).width;
+    final set = context.read<LayoutSetProvider>();
 
-    return Consumer<LayoutSetProvider>(
-      builder: (context, settings, child) {
-        _cardsOnScreen ??= _calcCardsOnScreen(settings.cardWidthMult, width);
-        _localLineSpacing ??= settings.lineSpacing.clamp(-5, 10);
-        _localLineBreakSpacing ??= settings.lineBreakSpacing.clamp(-5, 10);
-        _localChordLyricSpacing ??= settings.chordLyricSpacing.clamp(-5, 15);
-        _localMinChordSpacing ??= settings.minChordSpacing.clamp(0, 10);
-        _localLetterSpacing ??= settings.letterSpacing.clamp(-3, 3);
-
+    return Selector<
+      LayoutSetProvider,
+      ({
+        double cardsOnScreen,
+        Axis scrollDirection,
+        bool showSectionHeaders,
+        String fontFamily,
+        double fontSize,
+      })
+    >(
+      selector: (context, set) {
+        return (
+          cardsOnScreen: _calcCardsOnScreen(
+            set.cardWidthMult,
+            MediaQuery.sizeOf(context).width,
+          ),
+          scrollDirection: set.scrollDirection,
+          showSectionHeaders: set.showSectionHeaders,
+          fontFamily: set.fontFamily,
+          fontSize: set.fontSize,
+        );
+      },
+      builder: (context, s, child) {
         return Container(
           color: colorScheme.surface,
           child: SingleChildScrollView(
@@ -87,12 +118,12 @@ class _StyleSettingsState extends State<StyleSettings> {
                         ),
                       ),
                       Switch(
-                        value: settings.scrollDirection == Axis.vertical,
+                        value: s.scrollDirection == Axis.vertical,
                         onChanged: (_) {
-                          settings.toggleAxisDirection();
+                          set.toggleAxisDirection();
                         },
                         thumbIcon: WidgetStatePropertyAll(
-                          settings.scrollDirection == Axis.vertical
+                          s.scrollDirection == Axis.vertical
                               ? const Icon(Icons.swap_vert)
                               : const Icon(Icons.swap_horiz),
                         ),
@@ -120,8 +151,8 @@ class _StyleSettingsState extends State<StyleSettings> {
                         ),
                       ),
                       Switch(
-                        value: !settings.showSectionHeaders,
-                        onChanged: (_) => settings.toggleSectionHeaders(),
+                        value: !s.showSectionHeaders,
+                        onChanged: (_) => set.toggleSectionHeaders(),
                         thumbColor: WidgetStatePropertyAll(colorScheme.primary),
                         trackColor: WidgetStatePropertyAll(
                           colorScheme.surfaceContainerHigh,
@@ -146,7 +177,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                         ),
                       ),
                       Text(
-                        (_cardsOnScreen!).toStringAsFixed(2),
+                        (_cardsOnScreen ?? 0).toStringAsFixed(2),
                         style: textTheme.labelMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -154,7 +185,10 @@ class _StyleSettingsState extends State<StyleSettings> {
                       SizedBox(
                         width: 150,
                         child: Slider(
-                          value: ((6 - _cardsOnScreen!) / 5).clamp(0.2, 1.0),
+                          value: ((6 - (_cardsOnScreen ?? 0)) / 5).clamp(
+                            0.2,
+                            1.0,
+                          ),
                           padding: EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 16,
@@ -166,8 +200,11 @@ class _StyleSettingsState extends State<StyleSettings> {
                             setState(() => _cardsOnScreen = 6 - v * 5);
                           },
                           onChangeEnd: (v) {
-                            settings.setCardWidthMult(
-                              _calcWidthMult(_cardsOnScreen!, width),
+                            set.setCardWidthMult(
+                              _calcWidthMult(
+                                _cardsOnScreen!,
+                                _screenWidth ?? 0,
+                              ),
                             );
                           },
                         ),
@@ -183,7 +220,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                     children: [
                       Expanded(
                         child: DropdownButton<String>(
-                          value: settings.fontFamily,
+                          value: s.fontFamily,
                           isExpanded: true,
                           items: [
                             for (final fontFamily in FontFamilies.values) ...[
@@ -199,14 +236,14 @@ class _StyleSettingsState extends State<StyleSettings> {
                             ],
                           ],
                           onChanged: (v) {
-                            if (v != null) settings.setFontFamily(v);
+                            if (v != null) set.setFontFamily(v);
                           },
                           underline: Container(),
                         ),
                       ),
                       const SizedBox(width: 32),
                       DropdownButton<double>(
-                        value: settings.fontSize,
+                        value: s.fontSize,
                         items: List.generate(12, (i) {
                           final double size = 12 + i * 2;
                           return DropdownMenuItem(
@@ -215,7 +252,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                           );
                         }),
                         onChanged: (v) {
-                          if (v != null) settings.setFontSize(v);
+                          if (v != null) set.setFontSize(v);
                         },
                         underline: Container(),
                       ),
@@ -224,19 +261,19 @@ class _StyleSettingsState extends State<StyleSettings> {
                 ),
 
                 if (widget.secret) ...[
-                  // line spacing
+                  // Height spacing
                   _buildOption(
                     context,
                     child: Row(
                       children: [
                         Expanded(
                           child: Text(
-                            AppLocalizations.of(context)!.lineSpacing,
+                            AppLocalizations.of(context)!.heightSpacing,
                             style: textTheme.labelLarge,
                           ),
                         ),
                         Text(
-                          _localLineSpacing!.toStringAsFixed(1),
+                          _heightSpacing.toStringAsFixed(1),
                           style: textTheme.labelMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -248,93 +285,15 @@ class _StyleSettingsState extends State<StyleSettings> {
                               horizontal: 8,
                               vertical: 16,
                             ),
-                            value: _localLineSpacing!,
+                            value: _heightSpacing,
                             divisions: 75,
                             min: -5,
                             max: 10,
                             onChanged: (v) {
-                              setState(() => _localLineSpacing = v);
+                              setState(() => _heightSpacing = v);
                             },
                             onChangeEnd: (v) {
-                              settings.setLineSpacing(v);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // line break spacing
-                  _buildOption(
-                    context,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            AppLocalizations.of(context)!.lineBreakSpacing,
-                            style: textTheme.labelLarge,
-                          ),
-                        ),
-                        Text(
-                          _localLineBreakSpacing!.toStringAsFixed(1),
-                          style: textTheme.labelMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 150,
-                          child: Slider(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 16,
-                            ),
-                            value: _localLineBreakSpacing!,
-                            divisions: 75,
-                            min: -5,
-                            max: 10,
-                            onChanged: (v) {
-                              setState(() => _localLineBreakSpacing = v);
-                            },
-                            onChangeEnd: (v) {
-                              settings.setLineBreakSpacing(v);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // chord-lyric spacing
-                  _buildOption(
-                    context,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            AppLocalizations.of(context)!.chordLyricSpacing,
-                            style: textTheme.labelLarge,
-                          ),
-                        ),
-                        Text(
-                          _localChordLyricSpacing!.toStringAsFixed(1),
-                          style: textTheme.labelMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 150,
-                          child: Slider(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 16,
-                            ),
-                            divisions: 100,
-                            value: _localChordLyricSpacing!,
-                            min: -5,
-                            max: 15,
-                            onChanged: (v) {
-                              setState(() => _localChordLyricSpacing = v);
-                            },
-                            onChangeEnd: (v) {
-                              settings.setChordLyricSpacing(v);
+                              set.setHeightSpacing(v);
                             },
                           ),
                         ),
@@ -353,7 +312,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                           ),
                         ),
                         Text(
-                          _localMinChordSpacing!.toStringAsFixed(1),
+                          _localMinChordSpacing.toStringAsFixed(1),
                           style: textTheme.labelMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -365,7 +324,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                               horizontal: 8,
                               vertical: 16,
                             ),
-                            value: _localMinChordSpacing!,
+                            value: _localMinChordSpacing,
                             divisions: 50,
                             min: 0,
                             max: 10,
@@ -373,7 +332,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                               setState(() => _localMinChordSpacing = v);
                             },
                             onChangeEnd: (v) {
-                              settings.setMinChordSpacing(v);
+                              set.setMinChordSpacing(v);
                             },
                           ),
                         ),
@@ -391,7 +350,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                           ),
                         ),
                         Text(
-                          _localLetterSpacing!.toStringAsFixed(1),
+                          _localLetterSpacing.toStringAsFixed(1),
                           style: textTheme.labelMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -403,7 +362,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                               horizontal: 8,
                               vertical: 16,
                             ),
-                            value: _localLetterSpacing!,
+                            value: _localLetterSpacing,
                             divisions: 30,
                             min: -3,
                             max: 3,
@@ -411,7 +370,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                               setState(() => _localLetterSpacing = v);
                             },
                             onChangeEnd: (v) {
-                              settings.setLetterSpacing(v);
+                              set.setLetterSpacing(v);
                             },
                           ),
                         ),

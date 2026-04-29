@@ -19,9 +19,7 @@ class SettingsService {
   static const String _keyShowSectionHeaders = 'layout_show_section_headers';
   static const String _keyDenseCipherCard = 'layout_dense_cipher_card';
 
-  static const String _keyLineSpacing = 'layout_line_spacing';
-  static const String _keyLineBreakSpacing = 'layout_line_break_spacing';
-  static const String _keyChordLyricSpacing = 'layout_chord_lyric_spacing';
+  static const String _keyHeightSpacing = 'layout_height_spacing';
   static const String _keyMinChordSpacing = 'layout_min_chord_spacing';
   static const String _keyLetterSpacing = 'layout_letter_spacing';
 
@@ -181,28 +179,12 @@ class SettingsService {
   }
 
   // === advanced layout settings ===
-  static Future<void> setLineSpacing(double value) async {
-    await _preferences.setDouble(_keyLineSpacing, value);
+  static Future<void> setHeightSpacing(double value) async {
+    await _preferences.setDouble(_keyHeightSpacing, value);
   }
 
-  static double getLineSpacing() {
-    return _preferences.getDouble(_keyLineSpacing) ?? 0.0;
-  }
-
-  static Future<void> setLineBreakSpacing(double value) async {
-    await _preferences.setDouble(_keyLineBreakSpacing, value);
-  }
-
-  static double getLineBreakSpacing() {
-    return _preferences.getDouble(_keyLineBreakSpacing) ?? 0.0;
-  }
-
-  static Future<void> setChordLyricSpacing(double value) async {
-    await _preferences.setDouble(_keyChordLyricSpacing, value);
-  }
-
-  static double getChordLyricSpacing() {
-    return _preferences.getDouble(_keyChordLyricSpacing) ?? 0.0;
+  static double getHeightSpacing() {
+    return _preferences.getDouble(_keyHeightSpacing) ?? 0.0;
   }
 
   static Future<void> setMinChordSpacing(double value) async {

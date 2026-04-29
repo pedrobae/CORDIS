@@ -222,17 +222,17 @@ class _TokenContentCardState extends State<TokenContentCard> {
                     ({
                       TextStyle lyricStyle,
                       TextStyle chordStyle,
-                      double chordLyricSpacing,
+                      double heightSpacing,
                     })
                   >(
                     selector: (context, laySet, trans) => (
                       lyricStyle: laySet.lyricStyle,
                       chordStyle: laySet.chordStyle,
-                      chordLyricSpacing: laySet.chordLyricSpacing,
+                      heightSpacing: laySet.heightSpacing,
                     ),
                     builder: (context, measure, child) {
                       // PHASE 2: Ensure measurements are cached for this content + style
-                      _tokensKey!.chordLyricSpacing = measure.chordLyricSpacing;
+                      _tokensKey!.heightSpacing = measure.heightSpacing;
                       _tokenProv.measureTokens(
                         chordStyle: measure.chordStyle,
                         lyricStyle: measure.lyricStyle,
@@ -242,17 +242,15 @@ class _TokenContentCardState extends State<TokenContentCard> {
                       return Selector<
                         LayoutSetProvider,
                         ({
-                          double letterSpacing,
-                          double lineSpacing,
-                          double lineBreakSpacing,
+                          double heightSpacing,
                           double minChordSpacing,
+                          double letterSpacing,
                         })
                       >(
                         selector: (context, laySet) {
                           return (
                             letterSpacing: laySet.letterSpacing,
-                            lineSpacing: laySet.lineSpacing,
-                            lineBreakSpacing: laySet.lineBreakSpacing,
+                            heightSpacing: laySet.heightSpacing,
                             minChordSpacing: laySet.minChordSpacing,
                           );
                         },
@@ -264,10 +262,9 @@ class _TokenContentCardState extends State<TokenContentCard> {
                               8 - // Container padding
                               32 - // ScrollView padding
                               TokenizationConstants.chordTokenWidthPadding;
-                          _tokensKey!.letterSpacing = l.letterSpacing;
-                          _tokensKey!.lineSpacing = l.lineSpacing;
-                          _tokensKey!.lineBreakSpacing = l.lineBreakSpacing;
+                          _tokensKey!.heightSpacing = l.heightSpacing;
                           _tokensKey!.minChordSpacing = l.minChordSpacing;
+                          _tokensKey!.letterSpacing = l.letterSpacing;
                           _tokensKey!.maxWidth = width;
 
                           _tokenProv.calculatePositions(

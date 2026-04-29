@@ -14,7 +14,6 @@ import 'package:cordeos/widgets/ciphers/print/page_preview_painter.dart';
 import 'package:cordeos/widgets/ciphers/print/sheet_print_filters.dart';
 import 'package:cordeos/widgets/ciphers/print/sheet_print_layout.dart';
 import 'package:cordeos/widgets/ciphers/print/sheet_print_style.dart';
-import 'package:cordeos/widgets/common/icon_load_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -48,11 +47,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
         children: [
           _buildAppBar(),
           _buildControlBar(),
-          if (_isGenerating) ...[
-            _buildGeneratingState(),
-          ] else ...[
-            Expanded(child: _buildPreviewArea()),
-          ],
+          Expanded(child: _buildPreviewArea()),
         ],
       ),
     );
@@ -71,55 +66,47 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
         const Spacer(),
         Text(l10n.printPreview, style: textTheme.titleMedium),
         const Spacer(),
-        IconButton(
-          onPressed: () async {
-            if (snapshot != null) {
-              try {
-                setState(() {
-                  _isGenerating = true;
-                });
-                final pdfBytes = await context
-                    .read<PrintingProvider>()
-                    .generatePDF(pages, snapshot!, pageWidth);
-
-                // Save PDF to documents directory
-                final dir = await getApplicationDocumentsDirectory();
-                final fileName = '${snapshot!.filename}.pdf';
-                final file = File('${dir.path}/$fileName');
-                await file.writeAsBytes(pdfBytes);
-
-                // Open PDF with default viewer
-                await OpenFile.open(file.path);
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error generating PDF: $e')),
-                  );
-                }
-              } finally {
-                if (mounted) {
+        if (_isGenerating) ...[
+          CircularProgressIndicator(),
+        ] else ...[
+          IconButton(
+            onPressed: () async {
+              if (snapshot != null) {
+                try {
                   setState(() {
-                    _isGenerating = false;
+                    _isGenerating = true;
                   });
+                  final pdfBytes = await context
+                      .read<PrintingProvider>()
+                      .generatePDF(pages, snapshot!, pageWidth);
+
+                  // Save PDF to documents directory
+                  final dir = await getApplicationDocumentsDirectory();
+                  final fileName = '${snapshot!.filename}.pdf';
+                  final file = File('${dir.path}/$fileName');
+                  await file.writeAsBytes(pdfBytes);
+
+                  // Open PDF with default viewer
+                  await OpenFile.open(file.path);
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error generating PDF: $e')),
+                    );
+                  }
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      _isGenerating = false;
+                    });
+                  }
                 }
               }
-            }
-          },
-          icon: const Icon(Icons.print),
-        ),
+            },
+            icon: const Icon(Icons.print),
+          ),
+        ],
       ],
-    );
-  }
-
-  Widget _buildGeneratingState() {
-    final l10n = AppLocalizations.of(context)!;
-    return Expanded(
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [IconLoadIndicator(size: 30), Text(l10n.generatingPdf)],
-        ),
-      ),
     );
   }
 
@@ -234,41 +221,31 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                   double minChordSpacing,
                   double lineSpacing,
                   double letterSpacing,
-                  double horizontalMargin,
-                  double verticalMargin,
+                  double margin,
                   double columnGap,
                   double sectionSpacing,
                   double headerGap,
-                  double lyricFontSize,
-                  double chordFontSize,
-                  double headerFontSize,
-                  String lyricFontFamily,
-                  String chordFontFamily,
-                  String headerFontFamily,
+                  double fontSize,
+                  String fontFamily,
                 })
               >(
                 selector: (context, print) {
                   final sectionMaxWidth =
                       (pageWidth -
-                          (print.horizontalMargin * 2) -
+                          (print.margin * 2) -
                           ((print.columnCount - 1) * print.columnGap)) /
                       print.columnCount;
 
                   return (
                     sectionMaxWidth: sectionMaxWidth,
-                    lineBreakSpacing: print.lineBreakSpacing,
-                    chordLyricSpacing: print.chordLyricSpacing,
+                    lineBreakSpacing: print.heightSpacing * 2,
+                    chordLyricSpacing: print.heightSpacing,
                     minChordSpacing: print.minChordSpacing,
-                    lineSpacing: print.lineSpacing,
+                    lineSpacing: print.heightSpacing,
                     letterSpacing: print.letterSpacing,
-                    lyricFontSize: print.lyricFontSize,
-                    chordFontSize: print.chordFontSize,
-                    headerFontSize: print.headerFontSize,
-                    lyricFontFamily: print.lyricFontFamily,
-                    chordFontFamily: print.chordFontFamily,
-                    headerFontFamily: print.headerFontFamily,
-                    horizontalMargin: print.horizontalMargin,
-                    verticalMargin: print.verticalMargin,
+                    fontSize: print.fontSize,
+                    fontFamily: print.fontFamily,
+                    margin: print.margin,
                     columnGap: print.columnGap,
                     sectionSpacing: print.sectionSpacing,
                     headerGap: print.headerGap,
@@ -312,8 +289,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                       final pageCtx = PageContext(
                         pageWidth: pageWidth,
                         pageHeight: pageHeight,
-                        horizontalMargin: print.horizontalMargin,
-                        verticalMargin: print.verticalMargin,
+                        margin: print.margin,
                         columnGap: print.columnGap,
                         sectionSpacing: print.sectionSpacing,
                         columnCount: print.columnCount,

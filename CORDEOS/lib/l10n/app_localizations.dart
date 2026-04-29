@@ -638,23 +638,11 @@ abstract class AppLocalizations {
   /// **'Largura da Seção'**
   String get cardWidth;
 
-  /// Label for line spacing setting
+  /// Label for vertical spacing setting
   ///
   /// In pt, this message translates to:
-  /// **'Espaçamento entre Linhas'**
-  String get lineSpacing;
-
-  /// Label for line break spacing setting
-  ///
-  /// In pt, this message translates to:
-  /// **'Espaçamento entre Quebras de Linha'**
-  String get lineBreakSpacing;
-
-  /// Label for chord-lyric spacing setting
-  ///
-  /// In pt, this message translates to:
-  /// **'Espaçamento entre Acorde e Letra'**
-  String get chordLyricSpacing;
+  /// **'Espaçamento Vertical'**
+  String get heightSpacing;
 
   /// Label for minimum chord spacing setting
   ///
@@ -668,17 +656,11 @@ abstract class AppLocalizations {
   /// **'Espaçamento entre Letras'**
   String get letterSpacing;
 
-  /// Label for horizontal margin slider
-  ///
-  /// In pt, this message translates to:
-  /// **'Margem Horizontal'**
-  String get horizontalMargin;
-
   /// Label for vertical margin slider
   ///
   /// In pt, this message translates to:
-  /// **'Margem Vertical'**
-  String get verticalMargin;
+  /// **'Margem'**
+  String get margin;
 
   /// Label for Section Spacing slider
   ///

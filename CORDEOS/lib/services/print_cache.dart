@@ -2,18 +2,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PrintCacheService {
   // Style Settings Keys
-  static const String _keyLyricFontSize = 'print_lyric_font_size';
-  static const String _keyLyricFontFamily = 'print_lyric_font_family';
-  static const String _keyChordFontSize = 'chord_font_size';
-  static const String _keyChordFontFamily = 'chord_font_family';
-  static const String _keyHeaderFontSize = 'header_font_size';
-  static const String _keyHeaderFontFamily = 'header_font_family';
+  static const String _keyFontSize = 'print_font_size';
+  static const String _keyFontFamily = 'print_font_family';
 
   // Layout Settings Keys
-  static const String _keyLineSpacing = 'print_line_spacing';
-  static const String _keyLineBreakSpacing = 'print_line_break_spacing';
-  static const String _keyChordLyricSpacing = 'print_chord_lyric_spacing';
-  static const String _keyMinChordSpacing = 'print_min_chord_spacing';
+  static const String _keyHeightSpacing = 'print_height_spacing';
   static const String _keyLetterSpacing = 'print_letter_spacing';
 
   // Filter Settings Keys
@@ -28,8 +21,7 @@ class PrintCacheService {
   static const String _keyShowLabel = 'print_show_labels';
 
   // Page Layout Settings Keys
-  static const String _keyHorizontalMargin = 'print_horizontal_margin';
-  static const String _keyVertical = 'print_vertical_margin';
+  static const String _keyMargin = 'print_margin';
   static const String _keySectionSpacing = 'print_section_spacing';
   static const String _keyHeaderGap = 'print_header_gap';
   static const String _keyColumnGap = 'print_column_gap';
@@ -50,84 +42,28 @@ class PrintCacheService {
 
   // =========== LAYOUT SETTINGS =============
 
-  static Future<void> setLyricSize(double size) async {
-    await _preferences.setDouble(_keyLyricFontSize, size);
+  static Future<void> setSize(double size) async {
+    await _preferences.setDouble(_keyFontSize, size);
   }
 
-  static double getLyricSize() {
-    return _preferences.getDouble(_keyLyricFontSize) ?? 12.0;
+  static double getSize() {
+    return _preferences.getDouble(_keyFontSize) ?? 12.0;
   }
 
-  static Future<void> setLyricFontFamily(String family) async {
-    await _preferences.setString(_keyLyricFontFamily, family);
+  static Future<void> setFontFamily(String family) async {
+    await _preferences.setString(_keyFontFamily, family);
   }
 
-  static String getLyricFontFamily() {
-    return _preferences.getString(_keyLyricFontFamily) ?? 'OpenSans';
+  static String getFontFamily() {
+    return _preferences.getString(_keyFontFamily) ?? 'OpenSans';
   }
 
-  static Future<void> setChordSize(double size) async {
-    await _preferences.setDouble(_keyChordFontSize, size);
+  static Future<void> setHeightSpacing(double spacing) async {
+    await _preferences.setDouble(_keyHeightSpacing, spacing);
   }
 
-  static double getChordSize() {
-    return _preferences.getDouble(_keyChordFontSize) ?? 10.0;
-  }
-
-  static Future<void> setChordFontFamily(String family) async {
-    await _preferences.setString(_keyChordFontFamily, family);
-  }
-
-  static String getChordFontFamily() {
-    return _preferences.getString(_keyChordFontFamily) ?? 'OpenSans';
-  }
-
-  static Future<void> setHeaderSize(double size) async {
-    await _preferences.setDouble(_keyHeaderFontSize, size);
-  }
-
-  static double getHeaderSize() {
-    return _preferences.getDouble(_keyHeaderFontSize) ?? 12.0;
-  }
-
-  static Future<void> setHeaderFontFamily(String family) async {
-    await _preferences.setString(_keyHeaderFontFamily, family);
-  }
-
-  static String getHeaderFontFamily() {
-    return _preferences.getString(_keyHeaderFontFamily) ?? 'OpenSans';
-  }
-
-  static Future<void> setLineSpacing(double spacing) async {
-    await _preferences.setDouble(_keyLineSpacing, spacing);
-  }
-
-  static double getLineSpacing() {
-    return _preferences.getDouble(_keyLineSpacing) ?? 2;
-  }
-
-  static Future<void> setLineBreakSpacing(double spacing) async {
-    await _preferences.setDouble(_keyLineBreakSpacing, spacing);
-  }
-
-  static double getLineBreakSpacing() {
-    return _preferences.getDouble(_keyLineBreakSpacing) ?? 0;
-  }
-
-  static Future<void> setChordLyricSpacing(double spacing) async {
-    await _preferences.setDouble(_keyChordLyricSpacing, spacing);
-  }
-
-  static double getChordLyricSpacing() {
-    return _preferences.getDouble(_keyChordLyricSpacing) ?? 0.0;
-  }
-
-  static Future<void> setMinChordSpacing(double spacing) async {
-    await _preferences.setDouble(_keyMinChordSpacing, spacing);
-  }
-
-  static double getMinChordSpacing() {
-    return _preferences.getDouble(_keyMinChordSpacing) ?? 4.0;
+  static double getHeightSpacing() {
+    return _preferences.getDouble(_keyHeightSpacing) ?? 2;
   }
 
   static Future<void> setLetterSpacing(double spacing) async {
@@ -198,20 +134,12 @@ class PrintCacheService {
 
   // =========== PAGE LAYOUT SETTINGS =============
 
-  static Future<void> setHorizontalMargin(double margin) async {
-    await _preferences.setDouble(_keyHorizontalMargin, margin);
+  static Future<void> setMargin(double margin) async {
+    await _preferences.setDouble(_keyMargin, margin);
   }
 
-  static double getHorizontalMargin() {
-    return _preferences.getDouble(_keyHorizontalMargin) ?? 24.0;
-  }
-
-  static Future<void> setVerticalMargin(double margin) async {
-    await _preferences.setDouble(_keyVertical, margin);
-  }
-
-  static double getVerticalMargin() {
-    return _preferences.getDouble(_keyVertical) ?? 24.0;
+  static double getMargin() {
+    return _preferences.getDouble(_keyMargin) ?? 24.0;
   }
 
   static Future<void> setSectionSpacing(double spacing) async {

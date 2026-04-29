@@ -14,7 +14,7 @@ class PrintPreviewSnapshot {
   final List<int> songMap;
   final List<TextPaintInstruction> headerInstructions;
   final double headerBlockHeight;
-  final Map<int, TextPainter> sectionLabelPainters;
+  final Map<int, LabelPaintModel> sectionLabelPainters;
   final Map<int, BadgePaintModel> badgeModels;
   final Map<int, SectionPaintModel> sectionModels;
   final double sectionLabelHeight;
@@ -28,7 +28,7 @@ class PrintPreviewSnapshot {
     required this.badgeModels,
     required this.sectionModels,
     required this.sectionLabelHeight,
-required this.filename
+    required this.filename,
   });
 
   /// Builds the snapshot from a [SongPdfDto] and style overrides.
@@ -44,7 +44,7 @@ required this.filename
   }) {
     // Build per-section paint models
     final models = <int, SectionPaintModel>{};
-    final labelPainters = <int, TextPainter>{};
+    final labelPainters = <int, LabelPaintModel>{};
     final badgePainters = <int, BadgePaintModel>{};
     for (final key in sections.keys) {
       final section = sections[key]!;
@@ -72,18 +72,32 @@ required this.filename
           maxLines: 1,
         )..layout(maxWidth: ctx.contentWidth);
 
-        labelPainters[key] = labelPainter;
+        labelPainters[key] = LabelPaintModel(
+          key: key,
+          style: ctx.labelStyle,
+          textPainter: labelPainter,
+        );
 
         final badgePainter = TextPainter(
-          text: TextSpan(text: section.code, style: ctx.labelStyle),
+          text: TextSpan(
+            text: section.code,
+            style: ctx.labelStyle.copyWith(
+              fontStyle: FontStyle.normal,
+              color: Colors.white,
+            ),
+          ),
           textDirection: TextDirection.ltr,
           maxLines: 1,
         )..layout(maxWidth: ctx.contentWidth);
 
         badgePainters[key] = BadgePaintModel(
           color: section.color,
+          style: ctx.labelStyle.copyWith(
+            fontStyle: FontStyle.normal,
+            color: Colors.white,
+          ),
           key: key,
-          textInstruction: badgePainter,
+          textPainter: badgePainter,
         );
       }
     }
@@ -120,7 +134,7 @@ required this.filename
       headerBlockHeight: y,
       sectionLabelHeight: labelPainters.isEmpty
           ? 0
-          : (labelPainters.values.first.height + 4),
+          : (labelPainters.values.first.textPainter.height + 4),
     );
   }
 
@@ -160,8 +174,7 @@ required this.filename
 class PageContext {
   final double pageWidth;
   final double pageHeight;
-  final double horizontalMargin;
-  final double verticalMargin;
+  final double margin;
   final double columnGap;
   final double sectionSpacing;
   final int columnCount;
@@ -169,16 +182,14 @@ class PageContext {
   PageContext({
     required this.pageWidth,
     required this.pageHeight,
-    required this.horizontalMargin,
-    required this.verticalMargin,
+    required this.margin,
     required this.columnGap,
     required this.sectionSpacing,
     required this.columnCount,
   });
 
   double get sectionWidth =>
-      (pageWidth - horizontalMargin * 2 - columnGap * (columnCount - 1)) /
-      columnCount;
+      (pageWidth - margin * 2 - columnGap * (columnCount - 1)) / columnCount;
 }
 
 class SectionPlacement {
@@ -254,7 +265,7 @@ class PagePreviewPainter extends CustomPainter {
 
     // Translate to content area origin
     canvas.save();
-    canvas.translate(ctx.horizontalMargin, ctx.verticalMargin);
+    canvas.translate(ctx.margin, ctx.margin);
 
     if (pageIndex == 0) _paintHeader(canvas, snapshot.headerInstructions);
 
@@ -304,14 +315,14 @@ class PagePreviewPainter extends CustomPainter {
         badge.rRect.shift(Offset(placement.xOffset, placement.yOffset)),
         Paint()..color = badge.color,
       );
-      badge.textInstruction.paint(
+      badge.textPainter.paint(
         canvas,
         Offset(placement.xOffset + 4, placement.yOffset + 2),
       );
-      label.paint(
+      label.textPainter.paint(
         canvas,
         Offset(
-          placement.xOffset + badge.textInstruction.width + 12,
+          placement.xOffset + badge.textPainter.width + 12,
           placement.yOffset + 2,
         ),
       );

@@ -383,17 +383,9 @@
   "@cardWidth": {
     "description": "Label for card width setting"
   },
-  "lineSpacing": "Line Spacing",
-  "@lineSpacing": {
-    "description": "Label for line spacing setting"
-  },
-  "lineBreakSpacing": "Line Break Spacing",
-  "@lineBreakSpacing": {
-    "description": "Label for line break spacing setting"
-  },
-  "chordLyricSpacing": "Chord-Lyric Spacing",
-  "@chordLyricSpacing": {
-    "description": "Label for chord-lyric spacing setting"
+  "heightSpacing": "Vertical Spacing",
+  "@heightSpacing": {
+    "description": "Label for vertical spacing setting"
   },
   "minChordSpacing": "Minimum Chord Spacing",
   "@minChordSpacing": {
@@ -403,13 +395,9 @@
   "@letterSpacing": {
     "description": "Label for letter spacing setting"
   },
-  "horizontalMargin": "Horizontal Margin",
-  "@horizontalMargin": {
-    "description": "Label for horizontal margin slider"
-  },
-  "verticalMargin": "Vertical Margin",
-  "@verticalMargin": {
-    "description": "Label for vertical margin slider"
+  "margin": "Margin",
+  "@margin": {
+    "description": "Label for margin slider"
   },
   "sectionSpacing": "Section Spacing",
   "@sectionSpacing": {
