@@ -450,7 +450,8 @@ class PrintingProvider extends ChangeNotifier {
 
         case TokenType.preSeparator:
         case TokenType.postSeparator:
-        case TokenType.chordTarget:
+        case TokenType.preChordTarget:
+        case TokenType.postChordTarget:
           // Targets are not shown on the PDF
           break;
         case TokenType.underline:
