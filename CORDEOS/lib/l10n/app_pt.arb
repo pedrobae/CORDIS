@@ -359,6 +359,10 @@
   "@styleSettings": {
     "description": "Title for style settings section"
   },
+  "layoutSettings": "Configurações de Layout",
+  "@layoutSettings": {
+    "description": "Title for style settings section"
+  },
   "scrollDirection": "Direção de Rolagem:",
   "@scrollDirection": {
     "description": "Label for scroll direction setting"
@@ -371,6 +375,10 @@
   "@contentFilters": {
     "description": "Title for content filters settings section"
   },
+  "header": "Cabeçalho",
+  "@header": {
+    "description": "Label for header Filter setting"
+  },
   "repeatSections": "Seções Repetidas",
   "@repeatSections": {
     "description": "Label for repeat sections filter setting"
@@ -379,17 +387,9 @@
   "@cardWidth": {
     "description": "Label for card width setting"
   },
-  "lineSpacing": "Espaçamento entre Linhas",
-  "@lineSpacing": {
-    "description": "Label for line spacing setting"
-  },
-  "lineBreakSpacing": "Espaçamento entre Quebras de Linha",
-  "@lineBreakSpacing": {
-    "description": "Label for line break spacing setting"
-  },
-  "chordLyricSpacing": "Espaçamento entre Acorde e Letra",
-  "@chordLyricSpacing": {
-    "description": "Label for chord-lyric spacing setting"
+  "heightSpacing": "Espaçamento Vertical",
+  "@heightSpacing": {
+    "description": "Label for vertical spacing setting"
   },
   "minChordSpacing": "Espaçamento Mínimo entre Acordes",
   "@minChordSpacing": {
@@ -398,6 +398,22 @@
   "letterSpacing": "Espaçamento entre Letras",
   "@letterSpacing": {
     "description": "Label for letter spacing setting"
+  },
+  "margin": "Margem",
+  "@margin": {
+    "description": "Label for vertical margin slider"
+  },
+  "sectionSpacing": "Espaço entre Seções",
+  "@sectionSpacing": {
+    "description": "Label for Section Spacing slider"
+  },
+  "headerGap": "Espaço após Cabeçalho",
+  "@headerGap": {
+    "description": "Label for Header Gap slider"
+  },
+  "columnGap": "Espaço entre Colunas",
+  "@columnGap": {
+    "description": "Label for Column Gap slider"
   },
   "small": "Pequeno",
   "@small": {
@@ -909,6 +925,10 @@
   "@createLocalCopy": {
     "description": "Tooltip for creating a local copy of a cloud object"
   },
+  "export": "Exportar",
+  "@export": {
+    "description": "Export button label"
+  },
   "share": "Compartilhar",
   "@share": {
     "description": "Share button label"
@@ -1145,6 +1165,10 @@
   "processPDF": "Processar PDF",
   "@processPDF": {
     "description": "Process PDF button label"
+  },
+  "generatingPdf": "Gerando PDF...",
+  "@generatingPdf": {
+    "description": "Message displayed while generating PDF"
   },
   "howToImport": "Como Importar",
   "@howToImport": {
@@ -1609,5 +1633,17 @@
   "bugReportSuccess": "Bug report submitted successfully!",
   "@bugReportSuccess": {
     "description": "Message for succesfull bug report"
+  },
+  "printPreview": "Prévia de Impressão",
+  "@printPreview": {
+    "description": "Title for the print preview screen"
+  },
+  "printColumns": "Colunas",
+  "@printColumns": {
+    "description": "Label for column count selector in print settings"
+  },
+  "printMetadata": "Cabeçalho",
+  "@printMetadata": {
+    "description": "Label for metadata toggle in print settings"
   }
 }

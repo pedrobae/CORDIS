@@ -284,6 +284,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get styleSettings => 'Configurações de Estilo';
 
   @override
+  String get layoutSettings => 'Configurações de Layout';
+
+  @override
   String get scrollDirection => 'Direção de Rolagem:';
 
   @override
@@ -293,25 +296,34 @@ class AppLocalizationsPt extends AppLocalizations {
   String get contentFilters => 'Filtros de Conteúdo';
 
   @override
+  String get header => 'Cabeçalho';
+
+  @override
   String get repeatSections => 'Seções Repetidas';
 
   @override
   String get cardWidth => 'Largura da Seção';
 
   @override
-  String get lineSpacing => 'Espaçamento entre Linhas';
-
-  @override
-  String get lineBreakSpacing => 'Espaçamento entre Quebras de Linha';
-
-  @override
-  String get chordLyricSpacing => 'Espaçamento entre Acorde e Letra';
+  String get heightSpacing => 'Espaçamento Vertical';
 
   @override
   String get minChordSpacing => 'Espaçamento Mínimo entre Acordes';
 
   @override
   String get letterSpacing => 'Espaçamento entre Letras';
+
+  @override
+  String get margin => 'Margem';
+
+  @override
+  String get sectionSpacing => 'Espaço entre Seções';
+
+  @override
+  String get headerGap => 'Espaço após Cabeçalho';
+
+  @override
+  String get columnGap => 'Espaço entre Colunas';
 
   @override
   String get small => 'Pequeno';
@@ -702,6 +714,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get createLocalCopy => 'Criar uma Cópia Local';
 
   @override
+  String get export => 'Exportar';
+
+  @override
   String get share => 'Compartilhar';
 
   @override
@@ -889,6 +904,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get processPDF => 'Processar PDF';
+
+  @override
+  String get generatingPdf => 'Gerando PDF...';
 
   @override
   String get howToImport => 'Como Importar';
@@ -1236,4 +1254,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get bugReportSuccess => 'Bug report submitted successfully!';
+
+  @override
+  String get printPreview => 'Prévia de Impressão';
+
+  @override
+  String get printColumns => 'Colunas';
+
+  @override
+  String get printMetadata => 'Cabeçalho';
 }

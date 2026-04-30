@@ -281,6 +281,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleSettings => 'Style Settings';
 
   @override
+  String get layoutSettings => 'Layout Settings';
+
+  @override
   String get scrollDirection => 'Scroll Direction:';
 
   @override
@@ -290,25 +293,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contentFilters => 'Content Filters';
 
   @override
+  String get header => 'Header';
+
+  @override
   String get repeatSections => 'Repeat Sections';
 
   @override
   String get cardWidth => 'Card Width';
 
   @override
-  String get lineSpacing => 'Line Spacing';
-
-  @override
-  String get lineBreakSpacing => 'Line Break Spacing';
-
-  @override
-  String get chordLyricSpacing => 'Chord-Lyric Spacing';
+  String get heightSpacing => 'Vertical Spacing';
 
   @override
   String get minChordSpacing => 'Minimum Chord Spacing';
 
   @override
   String get letterSpacing => 'Letter Spacing';
+
+  @override
+  String get margin => 'Margin';
+
+  @override
+  String get sectionSpacing => 'Section Spacing';
+
+  @override
+  String get headerGap => 'Header Gap';
+
+  @override
+  String get columnGap => 'Column Gap';
 
   @override
   String get small => 'Small';
@@ -699,6 +711,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createLocalCopy => 'Create a Local Copy';
 
   @override
+  String get export => 'Export';
+
+  @override
   String get share => 'Share';
 
   @override
@@ -883,6 +898,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get processPDF => 'Process PDF';
+
+  @override
+  String get generatingPdf => 'Generating PDF...';
 
   @override
   String get howToImport => 'How to Import';
@@ -1225,4 +1243,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bugReportSuccess => 'Bug report submitted successfully!';
+
+  @override
+  String get printPreview => 'Print Preview';
+
+  @override
+  String get printColumns => 'Columns';
+
+  @override
+  String get printMetadata => 'Metadata';
 }

@@ -43,12 +43,13 @@ class TokenizationBuilder {
   }
 
   SectionPaintModel buildPaintModel({
+    required int sectionKey,
     required Map<String, Measurements> measurements,
     required TokenPositionMap positions,
     required TextStyle chordStyle,
     required TextStyle lyricStyle,
-    required Color lyricColor,
-    required Color chordColor,
+    Color? lyricColor,
+    Color? chordColor,
   }) {
     final texts = <TextPaintInstruction>[];
     final underlines = <UnderLinePaintInstruction>[];
@@ -69,6 +70,7 @@ class TokenizationBuilder {
 
           texts.add(
             TextPaintInstruction(
+              style: chordStyle.copyWith(color: chordColor),
               painter: painter,
               offset: Offset(offset.dx, offset.dy),
             ),
@@ -94,6 +96,7 @@ class TokenizationBuilder {
                 offset.dx,
                 offset.dy + positions.lineHeight - msr.height,
               ),
+              style: lyricStyle.copyWith(color: lyricColor),
             ),
           );
           break;
@@ -118,10 +121,11 @@ class TokenizationBuilder {
     }
 
     return SectionPaintModel(
+      key: sectionKey,
       textInstructions: texts,
       underlines: underlines,
       size: Size(positions.contentWidth, positions.contentHeight!),
-      underlineColor: lyricColor,
+      underlineColor: lyricColor ?? Colors.black,
     );
   }
 

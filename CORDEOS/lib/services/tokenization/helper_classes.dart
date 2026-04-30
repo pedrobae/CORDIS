@@ -13,37 +13,6 @@ class TokenizationConstants {
   static const double dragFeedbackCutoutPadding = 4.0;
 }
 
-/// Context object to hold common color, spacing, and layout parameters
-/// for widget positioning, reducing parameter clutter.
-class PositioningContext {
-  /// COLOR PARAMETERS
-  final Color underLineColor;
-
-  /// SPACING PARAMETERS
-  final double lineSpacing;
-  final double lineBreakSpacing;
-  final double chordLyricSpacing;
-  final double minChordSpacing;
-  final double letterSpacing;
-
-  /// MODE PARAMETERS
-  final bool isEditMode;
-
-  /// LAYOUT PARAMETERS
-  final double maxWidth;
-
-  const PositioningContext({
-    required this.underLineColor,
-    required this.maxWidth,
-    required this.lineSpacing,
-    required this.lineBreakSpacing,
-    required this.chordLyricSpacing,
-    required this.minChordSpacing,
-    required this.letterSpacing,
-    required this.isEditMode,
-  });
-}
-
 /// Context object to hold common styling and behavior parameters
 /// for widget building, reducing parameter clutter.
 class TokenBuildContext {
@@ -243,7 +212,10 @@ class TokenPositionMap {
   double contentWidth;
   double lineHeight;
 
-  TokenPositionMap({required this.lineHeight, required this.contentWidth});
+  TokenPositionMap({
+    required this.lineHeight,
+    required this.contentWidth,
+  });
 
   /// Records the position of a token
   void setPosition(ContentToken token, double x, double y) {
@@ -278,26 +250,62 @@ class TokenPositionMap {
 }
 
 class SectionPaintModel {
+  final int key;
   final List<TextPaintInstruction> textInstructions;
   final List<UnderLinePaintInstruction> underlines;
   final Size size;
   final Color underlineColor;
 
   SectionPaintModel({
+    required this.key,
     required this.textInstructions,
     required this.underlines,
     required this.size,
     required this.underlineColor,
+  });
+}
 
+class BadgePaintModel {
+  final int key;
+  final TextPainter textPainter;
+  final TextStyle style;
+  final Color color;
+
+  BadgePaintModel({
+    required this.key,
+    required this.color,
+    required this.style,
+    required this.textPainter,
+  });
+
+  RRect get rRect {
+    return RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, textPainter.width + 8, textPainter.height + 4),
+      const Radius.circular(4),
+    );
+  }
+}
+
+class LabelPaintModel {
+  final int key;
+  final TextPainter textPainter;
+  final TextStyle style;
+
+  LabelPaintModel({
+    required this.key,
+    required this.style,
+    required this.textPainter,
   });
 }
 
 class TextPaintInstruction {
   final Offset offset;
+  final TextStyle style;
   final TextPainter painter;
 
   TextPaintInstruction({
     required this.offset,
+    required this.style,
     required this.painter,
   });
 }
@@ -306,9 +314,5 @@ class UnderLinePaintInstruction {
   final Offset offset;
   final double width;
 
-  UnderLinePaintInstruction({
-    required this.offset,
-    required this.width,
-  });
+  UnderLinePaintInstruction({required this.offset, required this.width});
 }
-

@@ -25,15 +25,14 @@ class PositionService {
     required TextStyle lyricStyle,
     required TextStyle chordStyle,
     required double maxWidth,
-    required double lineSpacing,
-    required double lineBreakSpacing,
-    required double chordLyricSpacing,
+    required double heightSpacing,
     required double minChordSpacing,
     required double letterSpacing,
     required double chordHeight,
     required double lyricHeight,
     required bool isEditMode,
     required bool showChords,
+    required bool showLyrics,
   }) {
     final precedingOffset = _calculatePrecedingChordOffset(
       organizedTokens,
@@ -43,17 +42,16 @@ class PositionService {
       isEditMode,
     );
 
-    final lineHeight =
-        lyricHeight + (showChords ? (chordLyricSpacing + chordHeight) : 0);
+    final lineHeight = lyricHeight + heightSpacing + chordHeight;
 
     final ctx = _LayoutCtx(
       chordHeight: chordHeight,
       precedingOffset: precedingOffset,
       measurements: measurements,
       maxWidth: maxWidth,
-      lineSpacing: lineSpacing,
-      lineBreakSpacing: lineBreakSpacing,
-      chordLyricSpacing: chordLyricSpacing,
+      lineSpacing: heightSpacing * 4,
+      lineBreakSpacing: heightSpacing * 2,
+      chordLyricSpacing: heightSpacing,
       minChordSpacing: minChordSpacing,
       letterSpacing: letterSpacing,
       lineHeight: lineHeight,
@@ -252,9 +250,10 @@ class PositionService {
                 token.text,
                 ctx.chordStyle,
                 ctx.lyricStyle,
-              )]!;
+              )];
 
-          if (ctx.checkOverflow && (cursor.chordX + msr.width > ctx.maxWidth)) {
+          if (ctx.checkOverflow &&
+              (cursor.chordX + (msr?.width ?? 0) > ctx.maxWidth)) {
             return _WordLayoutResult(
               wordPositions: positions,
               tokensToAdd: tokensToAdd,

@@ -64,17 +64,17 @@ class SectionCard extends StatelessWidget {
           ({
             TextStyle lyricStyle,
             TextStyle chordStyle,
-            double chordLyricSpacing,
+            double heightSpacing,
           })
         >(
           selector: (context, laySet) => (
             lyricStyle: laySet.lyricStyle,
             chordStyle: laySet.chordStyle,
-            chordLyricSpacing: laySet.chordLyricSpacing,
+            heightSpacing: laySet.heightSpacing,
           ),
           builder: (context, measure, child) {
             // PHASE 2: Ensure measurements are cached for this content + style
-            layoutKey.chordLyricSpacing = measure.chordLyricSpacing;
+            layoutKey.heightSpacing = measure.heightSpacing;
 
             tokenProv.measureTokens(
               chordStyle: measure.chordStyle,
@@ -87,8 +87,7 @@ class SectionCard extends StatelessWidget {
               ({
                 double cardWidthMult,
                 double letterSpacing,
-                double lineSpacing,
-                double lineBreakSpacing,
+                double heightSpacing,
                 double minChordSpacing,
               })
             >(
@@ -96,16 +95,14 @@ class SectionCard extends StatelessWidget {
                 return (
                   cardWidthMult: laySet.cardWidthMult,
                   letterSpacing: laySet.letterSpacing,
-                  lineSpacing: laySet.lineSpacing,
-                  lineBreakSpacing: laySet.lineBreakSpacing,
+                  heightSpacing: laySet.heightSpacing,
                   minChordSpacing: laySet.minChordSpacing,
                 );
               },
               builder: (context, l, child) {
                 // PHASE 3: Calculate and cache widget positions based on width constraints
                 layoutKey.letterSpacing = l.letterSpacing;
-                layoutKey.lineSpacing = l.lineSpacing;
-                layoutKey.lineBreakSpacing = l.lineBreakSpacing;
+                layoutKey.heightSpacing = l.heightSpacing;
                 layoutKey.minChordSpacing = l.minChordSpacing;
                 layoutKey.maxWidth =
                     width * l.cardWidthMult - 16; // 16 for padding

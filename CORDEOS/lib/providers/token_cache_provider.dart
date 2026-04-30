@@ -156,7 +156,7 @@ class TokenProvider extends ChangeNotifier {
           );
           _measurementCache[msrKey] = Measurements(
             width: TokenizationConstants.targetWidth,
-            height: msr.height + chordMsr.height + key.chordLyricSpacing!,
+            height: msr.height + chordMsr.height + key.heightSpacing!,
             baseline: msr.baseline,
             size: msr.size + chordMsr.size,
           );
@@ -242,9 +242,7 @@ class TokenProvider extends ChangeNotifier {
       organizedTokens: getOrganized(key)!,
       measurements: _measurementCache,
       maxWidth: key.maxWidth!,
-      lineSpacing: key.lineSpacing!,
-      lineBreakSpacing: key.lineBreakSpacing!,
-      chordLyricSpacing: key.chordLyricSpacing!,
+      heightSpacing: key.heightSpacing!,
       minChordSpacing: key.minChordSpacing!,
       letterSpacing: key.letterSpacing!,
       isEditMode: key.isEditMode,
@@ -253,6 +251,7 @@ class TokenProvider extends ChangeNotifier {
       lyricHeight: lyricHeight,
       chordHeight: chordHeight,
       showChords: key.showChords ?? true,
+      showLyrics: key.showLyrics ?? true,
     );
 
     // Cache results
@@ -306,7 +305,7 @@ class TokenProvider extends ChangeNotifier {
       isEnabled: isEnabled,
       onAddChord: onAddChord,
       onRemoveChord: onRemoveChord,
-      lineHeight: lyricHeight + key.chordLyricSpacing! + chordHeight,
+      lineHeight: lyricHeight + key.heightSpacing! + chordHeight,
       chordHeight: chordHeight,
       toggleDrag: _toggleDragging(),
     );
@@ -331,6 +330,7 @@ class TokenProvider extends ChangeNotifier {
     }
 
     final model = _builder.buildPaintModel(
+      sectionKey: key.sectionKey,
       measurements: _measurementCache,
       positions: getPositions(key, chordStyle, lyricStyle)!,
       chordStyle: chordStyle,

@@ -602,6 +602,12 @@ abstract class AppLocalizations {
   /// **'Configurações de Estilo'**
   String get styleSettings;
 
+  /// Title for style settings section
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurações de Layout'**
+  String get layoutSettings;
+
   /// Label for scroll direction setting
   ///
   /// In pt, this message translates to:
@@ -620,6 +626,12 @@ abstract class AppLocalizations {
   /// **'Filtros de Conteúdo'**
   String get contentFilters;
 
+  /// Label for header Filter setting
+  ///
+  /// In pt, this message translates to:
+  /// **'Cabeçalho'**
+  String get header;
+
   /// Label for repeat sections filter setting
   ///
   /// In pt, this message translates to:
@@ -632,23 +644,11 @@ abstract class AppLocalizations {
   /// **'Largura da Seção'**
   String get cardWidth;
 
-  /// Label for line spacing setting
+  /// Label for vertical spacing setting
   ///
   /// In pt, this message translates to:
-  /// **'Espaçamento entre Linhas'**
-  String get lineSpacing;
-
-  /// Label for line break spacing setting
-  ///
-  /// In pt, this message translates to:
-  /// **'Espaçamento entre Quebras de Linha'**
-  String get lineBreakSpacing;
-
-  /// Label for chord-lyric spacing setting
-  ///
-  /// In pt, this message translates to:
-  /// **'Espaçamento entre Acorde e Letra'**
-  String get chordLyricSpacing;
+  /// **'Espaçamento Vertical'**
+  String get heightSpacing;
 
   /// Label for minimum chord spacing setting
   ///
@@ -661,6 +661,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Espaçamento entre Letras'**
   String get letterSpacing;
+
+  /// Label for vertical margin slider
+  ///
+  /// In pt, this message translates to:
+  /// **'Margem'**
+  String get margin;
+
+  /// Label for Section Spacing slider
+  ///
+  /// In pt, this message translates to:
+  /// **'Espaço entre Seções'**
+  String get sectionSpacing;
+
+  /// Label for Header Gap slider
+  ///
+  /// In pt, this message translates to:
+  /// **'Espaço após Cabeçalho'**
+  String get headerGap;
+
+  /// Label for Column Gap slider
+  ///
+  /// In pt, this message translates to:
+  /// **'Espaço entre Colunas'**
+  String get columnGap;
 
   /// Label for small card width
   ///
@@ -1346,6 +1370,12 @@ abstract class AppLocalizations {
   /// **'Criar uma Cópia Local'**
   String get createLocalCopy;
 
+  /// Export button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar'**
+  String get export;
+
   /// Share button label
   ///
   /// In pt, this message translates to:
@@ -1687,6 +1717,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Processar PDF'**
   String get processPDF;
+
+  /// Message displayed while generating PDF
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerando PDF...'**
+  String get generatingPdf;
 
   /// How to import instructions title
   ///
@@ -2281,6 +2317,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Bug report submitted successfully!'**
   String get bugReportSuccess;
+
+  /// Title for the print preview screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Prévia de Impressão'**
+  String get printPreview;
+
+  /// Label for column count selector in print settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Colunas'**
+  String get printColumns;
+
+  /// Label for metadata toggle in print settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Cabeçalho'**
+  String get printMetadata;
 }
 
 class _AppLocalizationsDelegate
