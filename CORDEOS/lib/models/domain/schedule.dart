@@ -65,7 +65,7 @@ class Schedule {
       roomVenue: map['room_venue'] as String?,
       playlistId: map['playlist_id'] as int,
       roles: Map.fromEntries(roles.map((r) => MapEntry(r.id, r))),
-      collaborators: (map['collaborators'] is String?)
+      collaborators: (map['collaborators'] is String)
           ? (map['collaborators'] as String).split(',')
           : [],
       annotations: map['annotations'] as String?,
