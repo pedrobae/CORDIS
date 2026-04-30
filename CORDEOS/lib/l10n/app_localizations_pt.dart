@@ -284,6 +284,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get styleSettings => 'Configurações de Estilo';
 
   @override
+  String get layoutSettings => 'Configurações de Layout';
+
+  @override
   String get scrollDirection => 'Direção de Rolagem:';
 
   @override

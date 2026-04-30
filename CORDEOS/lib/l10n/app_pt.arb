@@ -359,6 +359,10 @@
   "@styleSettings": {
     "description": "Title for style settings section"
   },
+  "layoutSettings": "Configurações de Layout",
+  "@layoutSettings": {
+    "description": "Title for style settings section"
+  },
   "scrollDirection": "Direção de Rolagem:",
   "@scrollDirection": {
     "description": "Label for scroll direction setting"

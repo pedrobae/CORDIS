@@ -20,6 +20,9 @@ class PrintCacheService {
 
   static const String _keyShowLabel = 'print_show_labels';
 
+  static const String _keyShowChords = 'print_show_chords';
+  static const String _keyShowLyrics = 'print_show_lyrics';
+
   // Page Layout Settings Keys
   static const String _keyMargin = 'print_margin';
   static const String _keySectionSpacing = 'print_section_spacing';
@@ -106,6 +109,22 @@ class PrintCacheService {
 
   static bool getShowDuration() {
     return _preferences.getBool(_keyShowDuration) ?? true;
+  }
+
+  static Future<void> setShowChords(bool show) async {
+    await _preferences.setBool(_keyShowChords, show);
+  }
+
+  static bool getShowChords() {
+    return _preferences.getBool(_keyShowChords) ?? true;
+  }
+
+  static Future<void> setShowLyrics(bool show) async {
+    await _preferences.setBool(_keyShowLyrics, show);
+  }
+
+  static bool getShowLyrics() {
+    return _preferences.getBool(_keyShowLyrics) ?? true;
   }
 
   static Future<void> setShowAnnotations(bool show) async {

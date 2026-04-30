@@ -211,7 +211,10 @@ class TokenPositionMap {
   double contentWidth;
   double lineHeight;
 
-  TokenPositionMap({required this.lineHeight, required this.contentWidth});
+  TokenPositionMap({
+    required this.lineHeight,
+    required this.contentWidth,
+  });
 
   /// Records the position of a token
   void setPosition(ContentToken token, double x, double y) {

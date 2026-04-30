@@ -281,6 +281,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleSettings => 'Style Settings';
 
   @override
+  String get layoutSettings => 'Layout Settings';
+
+  @override
   String get scrollDirection => 'Scroll Direction:';
 
   @override

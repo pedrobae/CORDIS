@@ -37,7 +37,7 @@ class _PrintStyleState extends State<PrintStyle> {
                 Row(
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.contentFilters,
+                      AppLocalizations.of(context)!.styleSettings,
                       style: textTheme.titleMedium,
                     ),
                     Spacer(),
@@ -78,8 +78,8 @@ class _PrintStyleState extends State<PrintStyle> {
                       const SizedBox(width: 32),
                       DropdownButton<double>(
                         value: s.fontSize,
-                        items: List.generate(12, (i) {
-                          final double size = 10 + i * 2;
+                        items: List.generate(10, (i) {
+                          final double size = 6 + i * 2;
                           return DropdownMenuItem(
                             value: size,
                             child: Text(size.toString()),

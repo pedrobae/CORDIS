@@ -228,6 +228,8 @@ class TokenProvider extends ChangeNotifier {
       chordStyle: chordStyle,
       lyricHeight: lyricHeight,
       chordHeight: chordHeight,
+      showChords: key.showChords ?? true,
+      showLyrics: key.showLyrics ?? true,
     );
 
     // Cache results
@@ -341,12 +343,8 @@ class TokenProvider extends ChangeNotifier {
   }
 
   void clearSectionKey(TokenCacheKey key) {
-    debugPrint(
-      "TOKEN PROVIDER - clearing cache of section ${key.sectionKey}",
-    );
-    _tokenCache.removeWhere(
-      (k, v) => k.startsWith(key.sectionKey.toString()),
-    );
+    debugPrint("TOKEN PROVIDER - clearing cache of section ${key.sectionKey}");
+    _tokenCache.removeWhere((k, v) => k.startsWith(key.sectionKey.toString()));
     _organizedCache.removeWhere(
       (k, v) => k.startsWith(key.sectionKey.toString()),
     );
@@ -356,9 +354,7 @@ class TokenProvider extends ChangeNotifier {
     _positionCache.removeWhere(
       (k, v) => k.startsWith(key.sectionKey.toString()),
     );
-    _paintCache.removeWhere(
-      (k, v) => k.startsWith(key.sectionKey.toString()),
-    );
+    _paintCache.removeWhere((k, v) => k.startsWith(key.sectionKey.toString()));
   }
 
   void invalidatePaintCache(TokenCacheKey key) {

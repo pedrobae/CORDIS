@@ -31,6 +31,8 @@ class PositionService {
     required double chordHeight,
     required double lyricHeight,
     required bool isEditMode,
+    required bool showChords,
+    required bool showLyrics,
   }) {
     final precedingOffset = _calculatePrecedingChordOffset(
       organizedTokens,
@@ -40,20 +42,19 @@ class PositionService {
       isEditMode,
     );
 
-    final lineSpacing = heightSpacing * 2;
-    final lineBreakSpacing = heightSpacing;
-    final chordLyricSpacing = heightSpacing;
-
-    final lineHeight = lyricHeight + chordLyricSpacing + chordHeight;
+    final lineHeight =
+        (showLyrics ? lyricHeight : 0.0) +
+        (showChords ? chordHeight : 0.0) +
+        (showLyrics && showChords ? minChordSpacing : 0.0);
 
     final ctx = _LayoutCtx(
       chordHeight: chordHeight,
       precedingOffset: precedingOffset,
       measurements: measurements,
       maxWidth: maxWidth,
-      lineSpacing: lineSpacing,
-      lineBreakSpacing: lineBreakSpacing,
-      chordLyricSpacing: chordLyricSpacing,
+      lineSpacing: heightSpacing * 4,
+      lineBreakSpacing: heightSpacing * 2,
+      chordLyricSpacing: heightSpacing,
       minChordSpacing: minChordSpacing,
       letterSpacing: letterSpacing,
       lineHeight: lineHeight,

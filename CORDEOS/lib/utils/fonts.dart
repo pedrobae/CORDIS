@@ -84,7 +84,6 @@ extension FontFamiliesMethods on FontFamilies {
   }
 }
 
-/// Cache for loaded font instances to avoid reloading
 final Map<String, PdfFont> _fontCache = {};
 
 /// Load a PDF font from the asset, using cache to avoid reloading

@@ -602,6 +602,12 @@ abstract class AppLocalizations {
   /// **'Configurações de Estilo'**
   String get styleSettings;
 
+  /// Title for style settings section
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurações de Layout'**
+  String get layoutSettings;
+
   /// Label for scroll direction setting
   ///
   /// In pt, this message translates to:

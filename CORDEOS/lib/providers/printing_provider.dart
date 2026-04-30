@@ -54,6 +54,8 @@ class PrintingContext {
   final bool showSectionLabels;
   final bool showBpm;
   final bool showDuration;
+  final bool showChords;
+  final bool showLyrics;
   final TextStyle lyricStyle;
   final TextStyle chordStyle;
   final TextStyle headerStyle;
@@ -72,6 +74,8 @@ class PrintingContext {
     required this.showSectionLabels,
     required this.showBpm,
     required this.showDuration,
+    required this.showChords,
+    required this.showLyrics,
     required this.lyricStyle,
     required this.chordStyle,
     required this.headerStyle,
@@ -149,6 +153,8 @@ class PrintingProvider extends ChangeNotifier {
   bool showSectionLabels = true;
   bool showBpm = true;
   bool showDuration = true;
+  bool showChords = true;
+  bool showLyrics = true;
 
   // Style settings
   String fontFamily = 'OpenSans';
@@ -157,19 +163,25 @@ class PrintingProvider extends ChangeNotifier {
   Color chordColor = Colors.deepOrange;
   Color headerColor = Colors.black;
 
-  TextStyle get lyricStyle =>
-      TextStyle(fontFamily: fontFamily, fontSize: fontSize, color: lyricColor);
+  TextStyle get lyricStyle => TextStyle(
+    fontFamily: fontFamily,
+    fontSize: fontSize,
+    color: lyricColor,
+    height: 1,
+  );
 
   TextStyle get chordStyle => TextStyle(
     fontFamily: fontFamily,
     fontSize: fontSize,
     fontWeight: FontWeight.bold,
+    height: 1,
     color: chordColor,
   );
 
   TextStyle get headerSyle => TextStyle(
     fontFamily: fontFamily,
     fontSize: fontSize * 0.8,
+    height: 1,
     color: headerColor,
   );
 
@@ -178,6 +190,7 @@ class PrintingProvider extends ChangeNotifier {
     fontStyle: FontStyle.italic,
     fontSize: fontSize,
     fontWeight: FontWeight.bold,
+    height: 1,
     color: lyricColor,
   );
 
@@ -208,6 +221,8 @@ class PrintingProvider extends ChangeNotifier {
     showBpm = PrintCacheService.getShowBpm();
     showDuration = PrintCacheService.getShowDuration();
     showSectionLabels = PrintCacheService.getShowLabel();
+    showChords = PrintCacheService.getShowChords();
+    showLyrics = PrintCacheService.getShowLyrics();
     // Page layout settings
     margin = PrintCacheService.getMargin();
     sectionSpacing = PrintCacheService.getSectionSpacing();
@@ -256,8 +271,8 @@ class PrintingProvider extends ChangeNotifier {
 
       final tokens = _tokenizer.tokenize(
         section.contentText,
-        showLyrics: true,
-        showChords: true,
+        showLyrics: showLyrics,
+        showChords: showChords,
         transposeChord: transposeChord,
       );
 
@@ -284,7 +299,6 @@ class PrintingProvider extends ChangeNotifier {
         tokens: cache.tokens,
         chordStyle: chordStyle,
         lyricStyle: lyricStyle,
-        chordLyricSpacing: heightSpacing,
         measurements: _tokenMeasurements,
       );
 
@@ -307,6 +321,8 @@ class PrintingProvider extends ChangeNotifier {
         heightSpacing: heightSpacing,
         letterSpacing: letterSpacing,
         minChordSpacing: minChordSpacing,
+        showChords: showChords,
+        showLyrics: showLyrics,
       );
     }
   }
@@ -326,6 +342,8 @@ class PrintingProvider extends ChangeNotifier {
         showSectionLabels: showSectionLabels,
         showBpm: showBpm,
         showDuration: showDuration,
+        showChords: showChords,
+        showLyrics: showLyrics,
         lyricStyle: lyricStyle,
         chordStyle: chordStyle,
         headerStyle: headerSyle,
@@ -409,7 +427,6 @@ class PrintingProvider extends ChangeNotifier {
     required List<ContentToken> tokens,
     required TextStyle chordStyle,
     required TextStyle lyricStyle,
-    required double chordLyricSpacing,
     required Map<String, Measurements> measurements,
   }) {
     for (final token in tokens) {
@@ -516,6 +533,18 @@ class PrintingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> toggleChords() async {
+    showChords = !showChords;
+    await PrintCacheService.setShowChords(showChords);
+    notifyListeners();
+  }
+
+  Future<void> toggleLyrics() async {
+    showLyrics = !showLyrics;
+    await PrintCacheService.setShowLyrics(showChords);
+    notifyListeners();
+  }
+
   // =========== SETTERS FOR PAGE LAYOUT SETTINGS =============
 
   Future<void> setMargin(double margin) async {
@@ -555,27 +584,29 @@ class PrintingProvider extends ChangeNotifier {
   ) async {
     final document = PdfDocument();
 
+    final standardPageSize = PdfPageSettings().width; // or use document default
+    final ratio = standardPageSize / pageWidth;
+
+    document.pageSettings.margins = (PdfMargins()..all = margin * ratio);
+
     // Pre-load all fonts needed for this PDF
     final fontCache = <String, PdfFont>{};
-    await _preloadFonts(snapshot, fontCache);
+    await _preloadFonts(snapshot, fontCache, ratio);
 
     for (int pageIdx = 0; pageIdx < pages.length; pageIdx++) {
       final pageLayout = pages[pageIdx];
       final page = document.pages.add();
-      final contentSize = page.getClientSize();
-
-      final ratio = contentSize.width / pageWidth;
 
       // Start drawing at top-left with margins
-      double currentY = margin;
+      double currentY = 0;
 
       // DRAW HEADER (only on first page)
       if (pageIdx == 0 && snapshot.headerBlockHeight > 0) {
         for (final instruction in snapshot.headerInstructions) {
-          final scaledX = margin + (instruction.offset.dx * ratio);
+          final scaledX = instruction.offset.dx * ratio;
           final scaledY = currentY + (instruction.offset.dy * ratio);
 
-          _drawTextInstruction(
+          _drawHeaderLine(
             page.graphics,
             instruction,
             scaledX,
@@ -593,8 +624,8 @@ class PrintingProvider extends ChangeNotifier {
 
         // Calculate section position with margins
         // Note: placement.yOffset already includes header height on first page
-        final sectionX = margin + (placement.xOffset * ratio);
-        final sectionY = margin + (placement.yOffset * ratio);
+        final sectionX = placement.xOffset * ratio;
+        final sectionY = placement.yOffset * ratio;
 
         // Draw section label and badge if needed
         final badge = snapshot.badgeModels[placement.sectionKey];
@@ -631,15 +662,17 @@ class PrintingProvider extends ChangeNotifier {
   Future<void> _preloadFonts(
     PrintPreviewSnapshot snapshot,
     Map<String, PdfFont> fontCache,
+    double ratio,
   ) async {
-    final fontKeys = <String>[];
+    final fontKeys = <String>{};
 
     // Collect fonts from header
     for (final instruction in snapshot.headerInstructions) {
       final fontName = instruction.style.fontFamily ?? 'OpenSans';
       final isBold = instruction.style.fontWeight == FontWeight.bold;
       final isItalic = instruction.style.fontStyle == FontStyle.italic;
-      fontKeys.add('${fontName}_${isBold}_${isItalic}_$fontSize');
+      final size = instruction.style.fontSize! * ratio;
+      fontKeys.add('${fontName}_${isBold}_${isItalic}_${size}');
     }
 
     // Collect fonts from sections
@@ -648,7 +681,8 @@ class PrintingProvider extends ChangeNotifier {
         final fontName = instruction.style.fontFamily ?? 'OpenSans';
         final isBold = instruction.style.fontWeight == FontWeight.bold;
         final isItalic = instruction.style.fontStyle == FontStyle.italic;
-        fontKeys.add('${fontName}_${isBold}_${isItalic}_$fontSize');
+        final size = instruction.style.fontSize! * ratio;
+        fontKeys.add('${fontName}_${isBold}_${isItalic}_$size');
       }
     }
 
@@ -657,7 +691,8 @@ class PrintingProvider extends ChangeNotifier {
       final fontName = style.fontFamily ?? 'OpenSans';
       final isBold = style.fontWeight == FontWeight.bold;
       final isItalic = style.fontStyle == FontStyle.italic;
-      fontKeys.add('${fontName}_${isBold}_${isItalic}_$fontSize');
+      final size = style.fontSize! * ratio;
+      fontKeys.add('${fontName}_${isBold}_${isItalic}_$size');
     }
 
     for (final model in snapshot.sectionLabelPainters.values) {
@@ -665,7 +700,8 @@ class PrintingProvider extends ChangeNotifier {
       final fontName = style.fontFamily ?? 'OpenSans';
       final isBold = style.fontWeight == FontWeight.bold;
       final isItalic = style.fontStyle == FontStyle.italic;
-      fontKeys.add('${fontName}_${isBold}_${isItalic}_$fontSize');
+      final size = style.fontSize! * ratio;
+      fontKeys.add('${fontName}_${isBold}_${isItalic}_$size');
     }
 
     // Load all fonts
@@ -676,7 +712,7 @@ class PrintingProvider extends ChangeNotifier {
           splitKey[0],
           double.tryParse(splitKey[3]) ?? 0,
           isBold: splitKey[1] == 'true',
-          isItalic: splitKey[2] == 'false',
+          isItalic: splitKey[2] == 'true',
         );
         fontCache[key] = font;
       } catch (e) {
@@ -686,41 +722,32 @@ class PrintingProvider extends ChangeNotifier {
   }
 
   /// Draw a single text instruction with proper styling
-  void _drawTextInstruction(
+  void _drawHeaderLine(
     PdfGraphics graphics,
-    TextPaintInstruction instruction,
+    TextPaintInstruction i,
     double x,
     double y,
     double ratio,
     Map<String, PdfFont> fontCache,
   ) {
-    final style = instruction.style;
-    final fontSize = (style.fontSize ?? this.fontSize) * ratio;
-    final fontName = style.fontFamily ?? fontFamily;
-    final isBold = style.fontWeight == FontWeight.bold;
-    final isItalic = style.fontStyle == FontStyle.italic;
+    final ratioedSize = i.style.fontSize! * ratio;
+    final fontName = i.style.fontFamily;
+    final isBold = i.style.fontWeight == FontWeight.bold;
+    final isItalic = i.style.fontStyle == FontStyle.italic;
 
     // Get font from cache
-    final cacheKey = '$fontName-$isBold-$isItalic';
-    final pdfFont =
-        fontCache[cacheKey] ??
-        PdfStandardFont(PdfFontFamily.helvetica, fontSize);
+    final cacheKey = '${fontName}_${isBold}_${isItalic}_$ratioedSize';
+    final pdfFont = fontCache[cacheKey];
 
-    // Set text color if specified
-    if (style.color != null) {
-      graphics.drawString(
-        instruction.painter.plainText,
-        pdfFont,
-        brush: PdfSolidBrush(_colorToPdfColor(style.color!)),
-        bounds: Rect.fromLTWH(x, y, double.maxFinite, fontSize * 2),
-      );
-    } else {
-      graphics.drawString(
-        instruction.painter.plainText,
-        pdfFont,
-        bounds: Rect.fromLTWH(x, y, double.maxFinite, fontSize * 2),
-      );
-    }
+    if (pdfFont == null) throw Exception("Couldnt find header font on cache");
+
+    // Set text color if specified, default to black if not
+    graphics.drawString(
+      i.painter.plainText,
+      pdfFont,
+      brush: PdfSolidBrush(_colorToPdfColor(i.style.color ?? Colors.black)),
+      bounds: Rect.fromLTWH(x, y, double.maxFinite, ratioedSize * 2),
+    );
   }
 
   /// Draw section badge with label
@@ -740,14 +767,10 @@ class PrintingProvider extends ChangeNotifier {
 
     // Create a rounded rectangle path
     final pdfPath = PdfPath();
-
-    // Start from top-left, moving right
     pdfPath.addLine(
       Offset(x + cornerRadius, y),
       Offset(x + badgeWidth - cornerRadius, y),
     );
-
-    // Top-right corner
     pdfPath.addArc(
       Rect.fromLTWH(
         x + badgeWidth - cornerRadius * 2,
@@ -758,14 +781,10 @@ class PrintingProvider extends ChangeNotifier {
       270,
       90,
     );
-
-    // Right side
     pdfPath.addLine(
       Offset(x + badgeWidth, y + cornerRadius),
       Offset(x + badgeWidth, y + badgeHeight - cornerRadius),
     );
-
-    // Bottom-right corner
     pdfPath.addArc(
       Rect.fromLTWH(
         x + badgeWidth - cornerRadius * 2,
@@ -776,14 +795,10 @@ class PrintingProvider extends ChangeNotifier {
       0,
       90,
     );
-
-    // Bottom side
     pdfPath.addLine(
       Offset(x + cornerRadius, y + badgeHeight),
       Offset(x + badgeWidth - cornerRadius, y + badgeHeight),
     );
-
-    // Bottom-left corner
     pdfPath.addArc(
       Rect.fromLTWH(
         x,
@@ -794,20 +809,15 @@ class PrintingProvider extends ChangeNotifier {
       90,
       90,
     );
-
-    // Left side
     pdfPath.addLine(
       Offset(x, y + cornerRadius),
       Offset(x, y + badgeHeight - cornerRadius),
     );
-
-    // Top-left corner
     pdfPath.addArc(
       Rect.fromLTWH(x, y, cornerRadius * 2, cornerRadius * 2),
       180,
       90,
     );
-
     pdfPath.closeFigure();
 
     graphics.drawPath(
@@ -816,43 +826,39 @@ class PrintingProvider extends ChangeNotifier {
     );
 
     // Draw badge text
-    final badgeStyle = badge.style;
-    final badgeFontSize = (badgeStyle.fontSize ?? fontSize) * ratio;
-    final badgeFontName = badgeStyle.fontFamily ?? fontFamily;
-    final badgeIsBold = badgeStyle.fontWeight == FontWeight.bold;
-    final badgeIsItalic = badgeStyle.fontStyle == FontStyle.italic;
-    final badgeCacheKey = '$badgeFontName-$badgeIsBold-$badgeIsItalic';
-    final badgeFont =
-        fontCache[badgeCacheKey] ??
-        PdfStandardFont(PdfFontFamily.helvetica, badgeFontSize);
+    final badgeFontSize = (badge.style.fontSize ?? fontSize) * ratio;
+    final badgeFontName = badge.style.fontFamily ?? fontFamily;
+    final badgeIsBold = badge.style.fontWeight == FontWeight.bold;
+    final badgeIsItalic = badge.style.fontStyle == FontStyle.italic;
+    final badgeCacheKey =
+        '${badgeFontName}_${badgeIsBold}_${badgeIsItalic}_$badgeFontSize';
+    final badgeFont = fontCache[badgeCacheKey];
+
+    if (badgeFont == null) throw Exception("Couldnt find badge font in cache");
 
     graphics.drawString(
       badge.textPainter.plainText,
       badgeFont,
-      brush: PdfSolidBrush(PdfColor(255, 255, 255)), // White text on badge
-      bounds: Rect.fromLTWH(
-        x + (4 * ratio),
-        y + (2 * ratio),
-        badgeWidth - (4 * ratio),
-        badgeHeight - (2 * ratio),
-      ),
+      brush: PdfSolidBrush(PdfColor(255, 255, 255)),
+      bounds: Rect.fromLTWH(x + (4 * ratio), y, badgeWidth, badgeFontSize * 2),
     );
 
     // Draw label text
-    final labelStyle = label.style;
-    final labelFontSize = (labelStyle.fontSize ?? fontSize) * ratio;
-    final labelFontName = labelStyle.fontFamily ?? fontFamily;
-    final labelIsBold = labelStyle.fontWeight == FontWeight.bold;
-    final labelIsItalic = labelStyle.fontStyle == FontStyle.italic;
-    final labelCacheKey = '$labelFontName-$labelIsBold-$labelIsItalic';
-    final labelFont =
-        fontCache[labelCacheKey] ??
-        PdfStandardFont(PdfFontFamily.helvetica, labelFontSize);
+    final style = label.style;
+    final labelFontSize = style.fontSize! * ratio;
+    final fontName = style.fontFamily!;
+    final isBold = style.fontWeight == FontWeight.bold;
+    final isItalic = style.fontStyle == FontStyle.italic;
+
+    final cacheKey = '${fontName}_${isBold}_${isItalic}_$labelFontSize';
+    final labelFont = fontCache[cacheKey];
+
+    if (labelFont == null) throw Exception("Couldnt find label font in cache");
 
     graphics.drawString(
       label.textPainter.plainText,
       labelFont,
-      brush: PdfSolidBrush(_colorToPdfColor(labelStyle.color ?? Colors.black)),
+      brush: PdfSolidBrush(_colorToPdfColor(style.color ?? Colors.black)),
       bounds: Rect.fromLTWH(
         x + badgeWidth + (12 * ratio),
         y + (2 * ratio),
@@ -872,36 +878,28 @@ class PrintingProvider extends ChangeNotifier {
     Map<String, PdfFont> fontCache,
   ) {
     // Draw text instructions (chords and lyrics)
-    for (final instruction in model.textInstructions) {
-      final style = instruction.style;
-      final fontSize = (style.fontSize ?? this.fontSize) * ratio;
-      final fontName = style.fontFamily ?? fontFamily;
-      final isBold = style.fontWeight == FontWeight.bold;
-      final isItalic = style.fontStyle == FontStyle.italic;
+    for (final i in model.textInstructions) {
+      final ratioedSize = i.style.fontSize! * ratio;
+      final fontName = i.style.fontFamily;
+      final isBold = i.style.fontWeight == FontWeight.bold;
+      final isItalic = i.style.fontStyle == FontStyle.italic;
 
       // Get font from cache
-      final cacheKey = '$fontName-$isBold-$isItalic';
-      final pdfFont =
-          fontCache[cacheKey] ??
-          PdfStandardFont(PdfFontFamily.helvetica, fontSize);
+      final cacheKey = '${fontName}_${isBold}_${isItalic}_$ratioedSize';
+      final pdfFont = fontCache[cacheKey];
 
-      final textX = baseX + (instruction.offset.dx * ratio);
-      final textY = baseY + (instruction.offset.dy * ratio);
+      if (pdfFont == null)
+        throw Exception("Couldn't find content font in cache");
 
-      if (style.color != null) {
-        graphics.drawString(
-          instruction.painter.plainText,
-          pdfFont,
-          brush: PdfSolidBrush(_colorToPdfColor(style.color!)),
-          bounds: Rect.fromLTWH(textX, textY, double.maxFinite, fontSize * 2),
-        );
-      } else {
-        graphics.drawString(
-          instruction.painter.plainText,
-          pdfFont,
-          bounds: Rect.fromLTWH(textX, textY, double.maxFinite, fontSize * 2),
-        );
-      }
+      final textX = baseX + (i.offset.dx * ratio);
+      final textY = baseY + (i.offset.dy * ratio);
+
+      graphics.drawString(
+        i.painter.plainText,
+        pdfFont,
+        brush: PdfSolidBrush(_colorToPdfColor(i.style.color ?? Colors.black)),
+        bounds: Rect.fromLTWH(textX, textY, double.maxFinite, ratioedSize * 2),
+      );
     }
 
     // Draw underlines
